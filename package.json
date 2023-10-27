@@ -48,9 +48,5 @@
   },
   "ct3aMetadata": {
     "initVersion": "7.22.0"
-  },
-  "browser": {
-    "crypto": false,
-    "stream": false
   }
 }
