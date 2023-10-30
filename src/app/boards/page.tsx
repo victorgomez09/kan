@@ -1,5 +1,30 @@
-"use client";
+import { HiOutlinePlusSmall } from "react-icons/hi2";
+import { Boards } from "./boards";
 
 export default function BoardsPage() {
-  return <div></div>;
+  return (
+    <div>
+      <div className="mb-8 flex w-full justify-between">
+        <h1 className="font-medium tracking-tight text-dark-1000 sm:text-[1.2rem]">
+          Boards
+        </h1>
+        <div>
+          <button
+            type="button"
+            className="inline-flex items-center gap-x-1.5 rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold text-dark-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            <HiOutlinePlusSmall
+              className="-mr-0.5 h-5 w-5"
+              aria-hidden="true"
+            />
+            New
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-row">
+        <Boards />
+      </div>
+    </div>
+  );
 }

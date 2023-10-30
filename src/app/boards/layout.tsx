@@ -20,7 +20,7 @@ const NavButton: React.FC<{
   <Link
     href={href}
     className={classNames(
-      current ? "bg-dark-400 text-white" : "bg-dark-400 text-white",
+      current ? "bg-dark-200 text-white" : "bg-dark-200 text-white",
       "group flex items-center gap-x-3 rounded-md p-1.5 text-sm font-normal leading-6 text-dark-1000",
     )}
   >
@@ -44,20 +44,7 @@ export default async function Layout(props: { children: React.ReactNode }) {
       </div>
 
       <div className="flex h-full w-full">
-        <nav className="w-64 border-r border-dark-600 px-5 py-5">
-          <button className="flex items-center">
-            {session?.user.image ? (
-              <Image
-                src={session?.user.image ?? ""}
-                className="h-8 w-8 rounded-full bg-gray-50"
-                width={30}
-                height={30}
-                alt=""
-              />
-            ) : null}
-            <p className="ml-2 text-sm text-dark-1000">{session?.user.name}</p>
-          </button>
-
+        <nav className="flex w-64 flex-col justify-between border-r border-dark-600 px-5 py-5">
           <div>
             <ul role="list" className="-mx-2 my-6 space-y-1">
               {navigation.map((item) => (
@@ -71,6 +58,21 @@ export default async function Layout(props: { children: React.ReactNode }) {
               ))}
             </ul>
           </div>
+
+          <button className="flex items-center">
+            {session?.user.image ? (
+              <Image
+                src={session?.user.image ?? ""}
+                className="h-8 w-8 rounded-full bg-gray-50"
+                width={30}
+                height={30}
+                alt=""
+              />
+            ) : null}
+            <p className="ml-2 truncate text-sm text-dark-1000">
+              {session?.user.email}
+            </p>
+          </button>
         </nav>
         <div className="w-full p-8">{props.children}</div>
       </div>

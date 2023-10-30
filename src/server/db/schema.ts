@@ -17,12 +17,12 @@ import { type AdapterAccount } from "next-auth/adapters";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const mysqlTable = mysqlTableCreator((name) => `kan_${name}`);
+export const mysqlTable = mysqlTableCreator((name) => `kan.${name}`);
 
 export const boards = mysqlTable(
   "board",
   {
-    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    id: varchar("id", { length: 12 }).notNull().primaryKey(),
     name: varchar("name", { length: 255 }),
     createdBy: varchar("createdBy", { length: 255 }).notNull(),
     createdAt: timestamp("created_at")
