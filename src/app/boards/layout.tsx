@@ -21,7 +21,7 @@ const NavButton: React.FC<{
     href={href}
     className={classNames(
       current ? "bg-dark-400 text-white" : "bg-dark-400 text-white",
-      "text-dark-1000 group flex items-center gap-x-3 rounded-md p-1.5 text-sm font-normal leading-6",
+      "group flex items-center gap-x-3 rounded-md p-1.5 text-sm font-normal leading-6 text-dark-1000",
     )}
   >
     {name}
@@ -34,26 +34,28 @@ export default async function Layout(props: { children: React.ReactNode }) {
   if (!session?.user) redirect("api/auth/signin");
 
   return (
-    <main className="bg-dark-50 flex h-screen flex-col items-center">
-      <div className="border-dark-600 m-auto flex h-16 w-full justify-between border-b px-5 py-2 align-middle">
+    <main className="flex h-screen flex-col items-center bg-dark-50">
+      <div className="m-auto flex h-16 w-full justify-between border-b border-dark-600 px-5 py-2 align-middle">
         <div className="my-auto flex">
-          <h1 className="text-dark-1000 text-lg font-normal tracking-tight">
+          <h1 className="text-lg font-normal tracking-tight text-dark-1000">
             貫 kan
           </h1>
         </div>
       </div>
 
       <div className="flex h-full w-full">
-        <nav className="border-dark-600 w-64 border-r px-5 py-5">
+        <nav className="w-64 border-r border-dark-600 px-5 py-5">
           <button className="flex items-center">
-            <Image
-              src={session?.user.image}
-              className="h-8 w-8 rounded-full bg-gray-50"
-              width={30}
-              height={30}
-              alt=""
-            />
-            <p className="text-dark-1000 ml-2 text-sm">{session?.user.name}</p>
+            {session?.user.image ? (
+              <Image
+                src={session?.user.image ?? ""}
+                className="h-8 w-8 rounded-full bg-gray-50"
+                width={30}
+                height={30}
+                alt=""
+              />
+            ) : null}
+            <p className="ml-2 text-sm text-dark-1000">{session?.user.name}</p>
           </button>
 
           <div>

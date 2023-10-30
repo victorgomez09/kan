@@ -45,16 +45,42 @@ export const authOptions: NextAuthOptions = {
     }),
   },
   adapter: DrizzleAdapter(db, mysqlTable),
+  pages: {
+    signIn: "/auth/login",
+    // signOut: "/auth/signout",
+    // error: "/auth/error",
+    verifyRequest: "/auth/verify",
+  },
   providers: [
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
+    {
+      id: 'email',
+      type: 'email',
+      from: process.env.EMAIL_FROM ?? '',
+      server: {},
+      maxAge: 24 * 60 * 60,
+      name: 'Email',
+      options: {},
+      async sendVerificationRequest({ identifier: email, url }) {
+        await fetch(process.env.EMAIL_URL ?? '', {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.EMAIL_TOKEN}`,
+          },
+          body: JSON.stringify({
+            from: process.env.EMAIL_FROM,
+            to: [email],
+            subject: 'Login via email',
+            html: `<strong>${url}</strong>`,
+          }),
+        })
+
+        // if (!response.ok) {
+        //   const { errors } = await response.json()
+        //   throw new Error(JSON.stringify(errors))
+        // }
+      },
+    }
   ],
 };
 
