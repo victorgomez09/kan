@@ -44,7 +44,7 @@ export default async function Layout(props: { children: React.ReactNode }) {
       </div>
 
       <div className="flex h-full w-full">
-        <nav className="flex w-64 flex-col justify-between border-r border-dark-600 px-5 py-5">
+        <nav className="flex w-72 flex-col justify-between border-r border-dark-600 px-5 py-5">
           <div>
             <ul role="list" className="-mx-2 my-6 space-y-1">
               {navigation.map((item) => (

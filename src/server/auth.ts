@@ -6,7 +6,7 @@ import {
 } from "next-auth";
 
 import { db } from "~/server/db";
-import { mysqlTable } from "~/server/db/schema";
+import { mySqlTable } from "~/server/db/schema";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -44,7 +44,7 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   },
-  adapter: DrizzleAdapter(db, mysqlTable),
+  adapter: DrizzleAdapter(db, mySqlTable),
   pages: {
     signIn: "/auth/login",
     // signOut: "/auth/signout",

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { eq } from "drizzle-orm";
 
 import { boards } from "~/server/db/schema";
 import { generateUID } from "~/utils/generateUID";
@@ -18,6 +19,20 @@ export const boardRouter = createTRPCRouter({
 
     return boards.map((board) => ({ ...board, id: board.publicId }))
   }),
+  byId: publicProcedure
+    .input(z.object({ id: z.string().min(12) }))
+    .query(({ ctx, input }) => 
+      ctx.db.query.boards.findFirst({
+        where: eq(boards.publicId, input.id),
+        with: {
+          lists: {
+            with: {
+              cards: true,
+            },
+          },
+        },
+      })
+    ),
   create: publicProcedure
     .input(
       z.object({

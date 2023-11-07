@@ -17,13 +17,13 @@ import { type AdapterAccount } from "next-auth/adapters";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const mysqlTable = mysqlTableCreator((name) => `kan.${name}`);
+export const mySqlTable = mysqlTableCreator((name) => `kan.${name}`);
 
-export const boards = mysqlTable(
+export const boards = mySqlTable(
   "board",
   {
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-    publicId: varchar("publicId", { length: 12 }).notNull(),
+    publicId: varchar("publicId", { length: 12 }).notNull().unique(),
     name: varchar("name", { length: 255 }),
     createdBy: varchar("createdBy", { length: 255 }).notNull(),
     createdAt: timestamp("createdAt")
@@ -33,10 +33,72 @@ export const boards = mysqlTable(
   },
 );
 
-export const users = mysqlTable("user", {
+export const boardsRelations = relations(boards, ({ one, many }) => ({
+	createdBy: one(users, {
+		fields: [boards.createdBy],
+		references: [users.id],
+	}),
+  lists: many(lists),
+}));
+
+export const lists = mySqlTable(
+  "list",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    publicId: varchar("publicId", { length: 12 }).notNull().unique(),
+    name: varchar("name", { length: 256 }).notNull(),
+    createdBy: varchar("createdBy", { length: 256 }).notNull(),
+    createdAt: timestamp("createdAt")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+    boardId: varchar("boardId", { length: 256 }).notNull(),
+  }
+);
+
+export const listsRelations = relations(lists, ({ one, many }) => ({
+	createdBy: one(users, {
+		fields: [lists.createdBy],
+		references: [users.id],
+	}),
+  board: one(boards, {
+		fields: [lists.boardId],
+		references: [boards.id],
+	}),
+  cards: many(cards)
+}));
+
+export const cards = mySqlTable(
+  "card",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    publicId: varchar("publicId", { length: 12 }).notNull().unique(),
+    title: varchar("title", { length: 256 }).notNull(),
+    description: varchar("description", { length: 256 }),
+    createdBy: varchar("createdBy", { length: 256 }).notNull(),
+    createdAt: timestamp("createdAt")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+    listId: varchar("listId", { length: 256 }).notNull(),
+  }
+);
+
+export const cardsRelations = relations(cards, ({ one }) => ({
+	createdBy: one(users, {
+		fields: [cards.createdBy],
+		references: [users.id],
+	}),
+  list: one(lists, {
+		fields: [cards.listId],
+		references: [lists.id],
+	}),
+}));
+
+export const users = mySqlTable("user", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
   name: varchar("name", { length: 255 }),
-  email: varchar("email", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
   emailVerified: timestamp("emailVerified", {
     mode: "date",
     fsp: 3,
@@ -46,9 +108,12 @@ export const users = mysqlTable("user", {
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
+  boards: many(boards),
+  cards: many(cards),
+  lists: many(lists),
 }));
 
-export const accounts = mysqlTable(
+export const accounts = mySqlTable(
   "account",
   {
     userId: varchar("userId", { length: 255 }).notNull(),
@@ -75,7 +140,7 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
   user: one(users, { fields: [accounts.userId], references: [users.id] }),
 }));
 
-export const sessions = mysqlTable(
+export const sessions = mySqlTable(
   "session",
   {
     sessionToken: varchar("sessionToken", { length: 255 })
@@ -93,7 +158,7 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, { fields: [sessions.userId], references: [users.id] }),
 }));
 
-export const verificationTokens = mysqlTable(
+export const verificationTokens = mySqlTable(
   "verificationToken",
   {
     identifier: varchar("identifier", { length: 255 }).notNull(),
