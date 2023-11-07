@@ -22,10 +22,11 @@ export const mysqlTable = mysqlTableCreator((name) => `kan.${name}`);
 export const boards = mysqlTable(
   "board",
   {
-    id: varchar("id", { length: 12 }).notNull().primaryKey(),
+    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    publicId: varchar("publicId", { length: 12 }).notNull(),
     name: varchar("name", { length: 255 }),
     createdBy: varchar("createdBy", { length: 255 }).notNull(),
-    createdAt: timestamp("created_at")
+    createdAt: timestamp("createdAt")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     updatedAt: timestamp("updatedAt").onUpdateNow(),
