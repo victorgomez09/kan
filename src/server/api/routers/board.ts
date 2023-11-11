@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 
-import { boards } from "~/server/db/schema";
+import { boards, cards, lists } from "~/server/db/schema";
 import { generateUID } from "~/utils/generateUID";
 
 import {
@@ -10,24 +10,47 @@ import {
 } from "~/server/api/trpc";
 
 export const boardRouter = createTRPCRouter({
-  all: publicProcedure.query(async ({ ctx }) => {
+  all: publicProcedure.query(({ ctx }) => {
     const userId = ctx.session?.user.id;
 
     if (!userId) return;
 
-    const boards = await ctx.db.query.boards.findMany();
-
-    return boards.map((board) => ({ ...board, id: board.publicId }))
+    return ctx.db.query.boards.findMany({
+      columns: {
+        publicId: true,
+        name: true,
+      },
+    });
   }),
   byId: publicProcedure
     .input(z.object({ id: z.string().min(12) }))
     .query(({ ctx, input }) => 
       ctx.db.query.boards.findFirst({
         where: eq(boards.publicId, input.id),
+        columns: {
+          publicId: true,
+          name: true,
+        },
         with: {
           lists: {
+            orderBy: [asc(lists.index)],
+            columns: {
+              publicId: true,
+              name: true,
+              boardId: true,
+              index: true,
+            },
             with: {
-              cards: true,
+              cards: {
+                orderBy: [asc(cards.index)],
+                columns: {
+                  publicId: true,
+                  title: true,
+                  description: true,
+                  listId: true,
+                  index: true,
+                }
+              }
             },
           },
         },

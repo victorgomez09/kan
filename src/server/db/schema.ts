@@ -7,6 +7,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   varchar,
 } from "drizzle-orm/mysql-core";
 import { type AdapterAccount } from "next-auth/adapters";
@@ -17,7 +18,7 @@ import { type AdapterAccount } from "next-auth/adapters";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const mySqlTable = mysqlTableCreator((name) => `kan.${name}`);
+export const mySqlTable = mysqlTableCreator((name) => `${name}`);
 
 export const boards = mySqlTable(
   "board",
@@ -53,7 +54,10 @@ export const lists = mySqlTable(
       .notNull(),
     updatedAt: timestamp("updatedAt").onUpdateNow(),
     boardId: varchar("boardId", { length: 256 }).notNull(),
-  }
+    index: int("index").notNull()
+  }, (t) => ({
+    unq: unique().on(t.boardId, t.index),
+  })
 );
 
 export const listsRelations = relations(lists, ({ one, many }) => ({
@@ -81,7 +85,10 @@ export const cards = mySqlTable(
       .notNull(),
     updatedAt: timestamp("updatedAt").onUpdateNow(),
     listId: varchar("listId", { length: 256 }).notNull(),
-  }
+    index: int("index").notNull()
+  }, (t) => ({
+    unq: unique().on(t.listId, t.index),
+  })
 );
 
 export const cardsRelations = relations(cards, ({ one }) => ({
