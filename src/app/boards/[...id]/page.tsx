@@ -2,7 +2,12 @@
 
 import { useParams } from "next/navigation";
 import { HiOutlinePlusSmall } from "react-icons/hi2";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import {
+  DragDropContext,
+  Droppable,
+  type DropResult,
+  Draggable,
+} from "react-beautiful-dnd";
 
 import { api } from "~/trpc/react";
 
@@ -19,6 +24,7 @@ interface Card {
 
 export default function BoardPage() {
   const params = useParams();
+  const utils = api.useUtils();
 
   const boardId = params?.id?.length && params.id[0];
 
@@ -26,7 +32,35 @@ export default function BoardPage() {
 
   const { data } = api.board.byId.useQuery({ id: boardId });
 
-  const onDragEnd = () => null;
+  const refetchBoard = () => utils.board.byId.refetch({ id: boardId });
+
+  const updateCard = api.card.update.useMutation({
+    onSuccess: async () => {
+      try {
+        await refetchBoard();
+      } catch (e) {
+        console.log(e);
+      }
+    },
+  });
+
+  const onDragEnd = ({
+    source,
+    destination,
+    draggableId,
+  }: DropResult): void => {
+    if (!destination) {
+      return;
+    }
+
+    updateCard.mutate({
+      cardId: draggableId,
+      currentListId: source.droppableId,
+      newListId: destination.droppableId,
+      currentIndex: source.index,
+      newIndex: destination.index,
+    });
+  };
 
   return (
     <div>
