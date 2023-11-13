@@ -53,7 +53,7 @@ export const lists = mySqlTable(
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     updatedAt: timestamp("updatedAt").onUpdateNow(),
-    boardId: varchar("boardId", { length: 256 }).notNull(),
+    boardId: bigint("boardId", { mode: "number" }).notNull(),
     index: int("index").notNull()
   }, (t) => ({
     unq: unique().on(t.boardId, t.index),
@@ -84,7 +84,7 @@ export const cards = mySqlTable(
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     updatedAt: timestamp("updatedAt").onUpdateNow(),
-    listId: varchar("listId", { length: 256 }).notNull(),
+    listId: bigint("listId", { mode: "number" }).notNull(),
     index: int("index").notNull()
   }, (t) => ({
     unq: unique().on(t.listId, t.index),
