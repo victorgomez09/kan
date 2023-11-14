@@ -55,9 +55,7 @@ export const lists = mySqlTable(
     updatedAt: timestamp("updatedAt").onUpdateNow(),
     boardId: bigint("boardId", { mode: "number" }).notNull(),
     index: int("index").notNull()
-  }, (t) => ({
-    unq: unique().on(t.boardId, t.index),
-  })
+  }
 );
 
 export const listsRelations = relations(lists, ({ one, many }) => ({
@@ -86,9 +84,7 @@ export const cards = mySqlTable(
     updatedAt: timestamp("updatedAt").onUpdateNow(),
     listId: bigint("listId", { mode: "number" }).notNull(),
     index: int("index").notNull()
-  }, (t) => ({
-    unq: unique().on(t.listId, t.index),
-  })
+  }
 );
 
 export const cardsRelations = relations(cards, ({ one }) => ({
