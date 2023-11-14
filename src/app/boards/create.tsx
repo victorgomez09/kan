@@ -4,7 +4,7 @@ import { api } from "~/trpc/react";
 
 import { HiXMark } from "react-icons/hi2";
 
-import { useModal } from "~/app/providers";
+import { useModal } from "~/app/providers/modal";
 
 import { Formik, Form, Field } from "formik";
 

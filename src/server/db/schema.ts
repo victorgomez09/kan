@@ -25,7 +25,7 @@ export const boards = mySqlTable(
   {
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
     publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-    name: varchar("name", { length: 255 }),
+    name: varchar("name", { length: 255 }).notNull(),
     createdBy: varchar("createdBy", { length: 255 }).notNull(),
     createdAt: timestamp("createdAt")
       .default(sql`CURRENT_TIMESTAMP`)

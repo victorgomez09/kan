@@ -10,6 +10,7 @@ import {
 } from "react-beautiful-dnd";
 
 import { api } from "~/trpc/react";
+import { useBoard } from "~/app/providers/board";
 
 interface List {
   publicId: string;
@@ -24,35 +25,20 @@ interface Card {
 
 export default function BoardPage() {
   const params = useParams();
-  const utils = api.useUtils();
+  const { boardData, setBoardData, updateCard, updateList } = useBoard();
 
   const boardId = params?.id?.length && params.id[0];
 
   if (!boardId) return <></>;
 
-  const { data } = api.board.byId.useQuery({ id: boardId });
-
-  const refetchBoard = () => utils.board.byId.refetch({ id: boardId });
-
-  const updateCard = api.card.update.useMutation({
-    onSuccess: async () => {
-      try {
-        await refetchBoard();
-      } catch (e) {
-        console.log(e);
-      }
+  api.board.byId.useQuery(
+    { id: boardId },
+    {
+      onSuccess: (data) => {
+        if (data) setBoardData(data);
+      },
     },
-  });
-
-  const updateList = api.list.update.useMutation({
-    onSuccess: async () => {
-      try {
-        await refetchBoard();
-      } catch (e) {
-        console.log(e);
-      }
-    },
-  });
+  );
 
   const onDragEnd = ({
     source,
@@ -65,7 +51,16 @@ export default function BoardPage() {
     }
 
     if (type === "LIST") {
-      updateList.mutate({
+      const updatedLists = Array.from(boardData.lists);
+      const removedList = updatedLists.splice(source.index, 1)[0];
+
+      if (removedList) {
+        updatedLists.splice(destination.index, 0, removedList);
+
+        setBoardData({ ...boardData, lists: updatedLists });
+      }
+
+      updateList({
         boardId,
         listId: draggableId,
         currentIndex: source.index,
@@ -74,7 +69,22 @@ export default function BoardPage() {
     }
 
     if (type === "CARD") {
-      updateCard.mutate({
+      const updatedLists = Array.from(boardData.lists);
+      const sourceList = updatedLists.find(
+        (list) => list.publicId === source.droppableId,
+      );
+      const destinationList = updatedLists.find(
+        (list) => list.publicId === destination.droppableId,
+      );
+      const removedCard = sourceList?.cards.splice(source.index, 1)[0];
+
+      if (sourceList && destinationList && removedCard) {
+        destinationList.cards.splice(destination.index, 0, removedCard);
+
+        setBoardData({ ...boardData, lists: updatedLists });
+      }
+
+      updateCard({
         cardId: draggableId,
         currentListId: source.droppableId,
         newListId: destination.droppableId,
@@ -88,7 +98,7 @@ export default function BoardPage() {
     <div>
       <div className="mb-8 flex w-full justify-between">
         <h1 className="font-medium tracking-tight text-dark-1000 sm:text-[1.2rem]">
-          {data?.name}
+          {boardData?.name}
         </h1>
         <div>
           <button
@@ -112,7 +122,7 @@ export default function BoardPage() {
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
-              {data?.lists.map((list: List, index) => (
+              {boardData?.lists?.map((list: List, index) => (
                 <Draggable
                   key={list.publicId}
                   draggableId={list.publicId}

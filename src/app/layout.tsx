@@ -4,7 +4,8 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { headers } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
-import { ModalProvider } from "~/app/providers";
+import { ModalProvider } from "~/app/providers/modal";
+import { BoardProvider } from "~/app/providers/board";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -26,7 +27,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans ${jakarta.className}}`}>
         <TRPCReactProvider headers={headers()}>
-          <ModalProvider>{children}</ModalProvider>
+          <ModalProvider>
+            <BoardProvider>{children}</BoardProvider>
+          </ModalProvider>
         </TRPCReactProvider>
       </body>
     </html>

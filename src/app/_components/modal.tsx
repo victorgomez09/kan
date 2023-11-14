@@ -3,7 +3,7 @@
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 
-import { useModal } from "~/app/providers";
+import { useModal } from "~/app/providers/modal";
 
 interface Props {
   children: React.ReactNode;
