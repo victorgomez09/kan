@@ -1,5 +1,6 @@
 import { boardRouter } from "~/server/api/routers/board";
 import { cardRouter } from "~/server/api/routers/card";
+import { listRouter } from "~/server/api/routers/list";
 import { createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -9,7 +10,8 @@ import { createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   board: boardRouter,
-  card: cardRouter
+  card: cardRouter,
+  list: listRouter,
 });
 
 // export type definition of API

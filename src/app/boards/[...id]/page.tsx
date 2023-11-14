@@ -44,22 +44,44 @@ export default function BoardPage() {
     },
   });
 
+  const updateList = api.list.update.useMutation({
+    onSuccess: async () => {
+      try {
+        await refetchBoard();
+      } catch (e) {
+        console.log(e);
+      }
+    },
+  });
+
   const onDragEnd = ({
     source,
     destination,
     draggableId,
+    type,
   }: DropResult): void => {
     if (!destination) {
       return;
     }
 
-    updateCard.mutate({
-      cardId: draggableId,
-      currentListId: source.droppableId,
-      newListId: destination.droppableId,
-      currentIndex: source.index,
-      newIndex: destination.index,
-    });
+    if (type === "LIST") {
+      updateList.mutate({
+        boardId,
+        listId: draggableId,
+        currentIndex: source.index,
+        newIndex: destination.index,
+      });
+    }
+
+    if (type === "CARD") {
+      updateCard.mutate({
+        cardId: draggableId,
+        currentListId: source.droppableId,
+        newListId: destination.droppableId,
+        currentIndex: source.index,
+        newIndex: destination.index,
+      });
+    }
   };
 
   return (
@@ -83,44 +105,70 @@ export default function BoardPage() {
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex">
-          {data?.lists.map((list: List) => (
-            <Droppable key={list.publicId} droppableId={`${list.publicId}`}>
-              {(provided) => (
-                <div
+        <Droppable droppableId="all-lists" direction="horizontal" type="LIST">
+          {(provided) => (
+            <div
+              className="flex"
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
+              {data?.lists.map((list: List, index) => (
+                <Draggable
                   key={list.publicId}
-                  className="mr-5 w-72 rounded-md border border-dark-400 bg-dark-200 px-2 py-4"
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
+                  draggableId={list.publicId}
+                  index={index}
                 >
-                  <p className="mb-4 px-4 text-sm font-medium text-dark-1000">
-                    {list.name}
-                  </p>
-
-                  {list.cards?.map((card, index) => (
-                    <Draggable
-                      key={card.publicId}
-                      draggableId={card.publicId}
-                      index={index}
+                  {(provided) => (
+                    <div
+                      key={list.publicId}
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      className="mr-5 w-72 rounded-md border border-dark-400 bg-dark-200 px-2 py-4"
                     >
-                      {(provided) => (
-                        <div
-                          key={card.publicId}
-                          className="mb-2 rounded-md border border-dark-200 bg-dark-500 px-3 py-2"
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          <p className="text-sm text-dark-1000">{card.title}</p>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                </div>
-              )}
-            </Droppable>
-          ))}
-        </div>
+                      <Droppable droppableId={`${list.publicId}`} type="CARD">
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                          >
+                            <p className="mb-4 px-4 text-sm font-medium text-dark-1000">
+                              {list.name}
+                            </p>
+
+                            {list.cards?.map((card, index) => (
+                              <Draggable
+                                key={card.publicId}
+                                draggableId={card.publicId}
+                                index={index}
+                              >
+                                {(provided) => (
+                                  <div
+                                    key={card.publicId}
+                                    className="mb-2 rounded-md border border-dark-200 bg-dark-500 px-3 py-2"
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                  >
+                                    <p className="text-sm text-dark-1000">
+                                      {card.title}
+                                    </p>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
       </DragDropContext>
     </div>
   );

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, eq, gte, or} from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import { cards, lists } from "~/server/db/schema";
 
@@ -24,20 +24,33 @@ export const cardRouter = createTRPCRouter({
     if (!userId) return;
 
     return ctx.db.transaction(async (tx) => {
-      const [currentList, newList] = await tx.select({ id: lists.id }).from(lists).where(or(eq(lists.publicId, input.currentListId), eq(lists.publicId, input.newListId)))
-
+      const [currentList] = await tx.select({ id: lists.id }).from(lists).where(eq(lists.publicId, input.currentListId))
+      const [newList] = await tx.select({ id: lists.id }).from(lists).where(eq(lists.publicId, input.newListId))
 
       if (!currentList?.id || !newList?.id) return;
-      
-      await tx
-        .update(cards)
-        .set({ index: input.newIndex + 1 })
-        .where(and(eq(cards.listId, newList.id), gte(cards.index, input.newIndex)))
 
-      await tx
-        .update(cards)
-        .set({ listId: newList.id, index: input.newIndex })
-        .where(eq(cards.publicId, input.cardId))
+      if (currentList.id === newList.id) {
+        await tx.execute(sql`
+          UPDATE ${cards}
+          SET ${cards.index} =
+            CASE
+              WHEN ${cards.index} = ${input.currentIndex} THEN ${input.newIndex}
+              WHEN ${input.currentIndex} < ${input.newIndex} AND ${cards.index} > ${input.currentIndex} AND ${cards.index} <= ${input.newIndex} THEN ${cards.index} - 1
+              WHEN ${input.currentIndex} > ${input.newIndex} AND ${cards.index} >= ${input.newIndex} AND ${cards.index} < ${input.currentIndex} THEN ${cards.index} + 1
+              ELSE ${cards.index}
+            END
+          WHERE ${cards.listId} = ${currentList.id};
+        `);
+      } else {
+        await tx.execute(sql`UPDATE ${cards} SET ${cards.index} = ${cards.index} + 1 WHERE ${cards.listId} = ${newList.id} AND ${cards.index} >= ${input.newIndex};`)
+
+        await tx.execute(sql`UPDATE ${cards} SET ${cards.index} = ${cards.index} - 1 WHERE ${cards.listId} = ${currentList.id} AND ${cards.index} >= ${input.currentIndex};`)
+
+        await tx
+          .update(cards)
+          .set({ listId: newList.id, index: input.newIndex })
+          .where(eq(cards.publicId, input.cardId));
+      }
     })
-  }),
+  })
 });
