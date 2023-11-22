@@ -1,32 +1,15 @@
-import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import { getServerAuthSession } from "~/server/auth";
 
+import boardsIcon from "~/app/assets/boards.json";
+
+import ReactiveButton from "~/app/components/ReactiveButton";
+
 const navigation = [
-  { name: "Boards", href: "/boards", icon: null, current: true },
+  { name: "Boards", href: "/boards", icon: boardsIcon, current: true },
 ];
-
-function classNames(...classes: string[]): string {
-  return classes.filter(Boolean).join(" ");
-}
-
-const NavButton: React.FC<{
-  href: string;
-  current: boolean;
-  name: string;
-}> = ({ href, current, name }) => (
-  <Link
-    href={href}
-    className={classNames(
-      current ? "bg-dark-200 text-white" : "bg-dark-200 text-white",
-      "group flex items-center gap-x-3 rounded-md p-1.5 text-sm font-normal leading-6 text-dark-1000",
-    )}
-  >
-    {name}
-  </Link>
-);
 
 export default async function Layout(props: { children: React.ReactNode }) {
   const session = await getServerAuthSession();
@@ -49,10 +32,11 @@ export default async function Layout(props: { children: React.ReactNode }) {
             <ul role="list" className="-mx-2 my-6 space-y-1">
               {navigation.map((item) => (
                 <li key={item.name}>
-                  <NavButton
+                  <ReactiveButton
                     href={item.href}
                     current={item.current}
                     name={item.name}
+                    json={item.icon}
                   />
                 </li>
               ))}
