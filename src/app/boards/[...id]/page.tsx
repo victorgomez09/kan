@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { useParams } from "next/navigation";
 import { HiOutlinePlusSmall } from "react-icons/hi2";
 import {
@@ -11,6 +13,10 @@ import {
 
 import { api } from "~/trpc/react";
 import { useBoard } from "~/app/providers/board";
+import { useModal } from "~/app/providers/modal";
+
+import Modal from "~/app/_components/modal";
+import { NewCardForm } from "~/app/boards/[...id]/create";
 
 interface List {
   publicId: string;
@@ -23,9 +29,14 @@ interface Card {
   title: string;
 }
 
+type PublicListId = string;
+
 export default function BoardPage() {
   const params = useParams();
   const { boardData, setBoardData, updateCard, updateList } = useBoard();
+  const { openModal } = useModal();
+  const [selectedPublicListId, setSelectedPublicListId] =
+    useState<PublicListId>("");
 
   const boardId = params?.id?.length && params.id[0];
 
@@ -39,6 +50,11 @@ export default function BoardPage() {
       },
     },
   );
+
+  const openNewCardForm = (publicListId: PublicListId) => {
+    openModal();
+    setSelectedPublicListId(publicListId);
+  };
 
   const onDragEnd = ({
     source,
@@ -134,18 +150,29 @@ export default function BoardPage() {
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
-                      className="mr-5 w-72 rounded-md border border-dark-400 bg-dark-200 px-2 py-4"
+                      className="mr-5 w-72 rounded-md border border-dark-400 bg-dark-200 px-2 py-2"
                     >
+                      <div className="flex justify-between">
+                        <p className="mb-4 px-4 pt-1 text-sm font-medium text-dark-1000">
+                          {list.name}
+                        </p>
+                        <button
+                          className="mx-1 inline-flex h-fit items-center rounded-md p-1 px-1 text-sm font-semibold text-dark-50 hover:bg-dark-400"
+                          onClick={() => openNewCardForm(list.publicId)}
+                        >
+                          <HiOutlinePlusSmall
+                            className="h-5 w-5 text-dark-900"
+                            aria-hidden="true"
+                          />
+                        </button>
+                      </div>
                       <Droppable droppableId={`${list.publicId}`} type="CARD">
                         {(provided) => (
                           <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
+                            className="h-full"
                           >
-                            <p className="mb-4 px-4 text-sm font-medium text-dark-1000">
-                              {list.name}
-                            </p>
-
                             {list.cards?.map((card, index) => (
                               <Draggable
                                 key={card.publicId}
@@ -180,6 +207,9 @@ export default function BoardPage() {
           )}
         </Droppable>
       </DragDropContext>
+      <Modal>
+        <NewCardForm listPublicId={selectedPublicListId} />
+      </Modal>
     </div>
   );
 }
