@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { HiOutlinePlusSmall } from "react-icons/hi2";
 import {
@@ -180,17 +180,16 @@ export default function BoardPage() {
                                 index={index}
                               >
                                 {(provided) => (
-                                  <div
+                                  <Link
                                     key={card.publicId}
-                                    className="mb-2 rounded-md border border-dark-200 bg-dark-500 px-3 py-2"
+                                    href={`/cards/${card.publicId}`}
+                                    className="mb-2 flex !cursor-pointer rounded-md border border-dark-200 bg-dark-500 px-3 py-2 text-sm text-dark-1000"
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
                                   >
-                                    <p className="text-sm text-dark-1000">
-                                      {card.title}
-                                    </p>
-                                  </div>
+                                    {card.title}
+                                  </Link>
                                 )}
                               </Draggable>
                             ))}

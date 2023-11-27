@@ -7,7 +7,6 @@ import {
   primaryKey,
   text,
   timestamp,
-  unique,
   varchar,
 } from "drizzle-orm/mysql-core";
 import { type AdapterAccount } from "next-auth/adapters";
@@ -76,7 +75,7 @@ export const cards = mySqlTable(
     id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
     publicId: varchar("publicId", { length: 12 }).notNull().unique(),
     title: varchar("title", { length: 256 }).notNull(),
-    description: varchar("description", { length: 256 }),
+    description: text("description"),
     createdBy: varchar("createdBy", { length: 256 }).notNull(),
     createdAt: timestamp("createdAt")
       .default(sql`CURRENT_TIMESTAMP`)
