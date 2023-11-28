@@ -74,4 +74,17 @@ export const boardRouter = createTRPCRouter({
         createdBy: userId,
       });
     }),
+    update: publicProcedure
+      .input(
+        z.object({ 
+          boardId: z.string().min(12),
+          name: z.string().min(1),
+        }))
+      .mutation(({ ctx, input }) => {
+        const userId = ctx.session?.user.id;
+
+        if (!userId) return;
+
+        return ctx.db.update(boards).set({ name: input.name }).where(eq(boards.publicId, input.boardId));
+      }),
 });

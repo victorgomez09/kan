@@ -10,6 +10,7 @@ import {
   type DropResult,
   Draggable,
 } from "react-beautiful-dnd";
+import { useFormik } from "formik";
 
 import { api } from "~/trpc/react";
 import { useBoard } from "~/app/providers/board";
@@ -29,6 +30,11 @@ interface Card {
   title: string;
 }
 
+interface FormValues {
+  boardId: string;
+  name: string;
+}
+
 type PublicListId = string;
 
 export default function BoardPage() {
@@ -38,7 +44,23 @@ export default function BoardPage() {
   const [selectedPublicListId, setSelectedPublicListId] =
     useState<PublicListId>("");
 
-  const boardId = params?.id?.length && params.id[0];
+  const boardId = params?.id?.length ? params.id[0] : null;
+
+  const updateBoard = api.board.update.useMutation();
+
+  const formik = useFormik({
+    initialValues: {
+      boardId: boardId ?? "",
+      name: boardData?.name ? boardData.name : "",
+    },
+    onSubmit: (values: FormValues) => {
+      updateBoard.mutate({
+        boardId: values.boardId,
+        name: values.name,
+      });
+    },
+    enableReinitialize: true,
+  });
 
   if (!boardId) return <></>;
 
@@ -113,9 +135,20 @@ export default function BoardPage() {
   return (
     <div>
       <div className="mb-8 flex w-full justify-between">
-        <h1 className="font-medium tracking-tight text-dark-1000 sm:text-[1.2rem]">
-          {boardData?.name}
-        </h1>
+        <form
+          onSubmit={formik.handleSubmit}
+          className="focus-visible:outline-none"
+        >
+          <input
+            type="name"
+            id="name"
+            name="name"
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            onBlur={formik.submitForm}
+            className="block border-0 bg-transparent p-0 py-1.5 font-medium tracking-tight text-dark-1000 focus:ring-0 focus-visible:outline-none sm:text-[1.2rem] sm:leading-6"
+          />
+        </form>
         <div>
           <button
             type="button"

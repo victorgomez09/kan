@@ -52,26 +52,26 @@ export const cardRouter = createTRPCRouter({
       })
     }),
     byId: publicProcedure
-    .input(z.object({ id: z.string().min(12) }))
-    .query(({ ctx, input }) => 
-      ctx.db.query.cards.findFirst({
-        where: eq(cards.publicId, input.id),
-      })
-    ),
+      .input(z.object({ id: z.string().min(12) }))
+      .query(({ ctx, input }) => 
+        ctx.db.query.cards.findFirst({
+          where: eq(cards.publicId, input.id),
+        })
+      ),
     update: publicProcedure
-    .input(
-      z.object({ 
-        cardId: z.string().min(12),
-        title: z.string().min(1),
-        description: z.string(),
-      }))
-    .mutation(({ ctx, input }) => {
-      const userId = ctx.session?.user.id;
+      .input(
+        z.object({ 
+          cardId: z.string().min(12),
+          title: z.string().min(1),
+          description: z.string(),
+        }))
+      .mutation(({ ctx, input }) => {
+        const userId = ctx.session?.user.id;
 
-      if (!userId) return;
+        if (!userId) return;
 
-      return ctx.db.update(cards).set({ title: input.title, description: input.description }).where(eq(cards.publicId, input.cardId));
-    }),
+        return ctx.db.update(cards).set({ title: input.title, description: input.description }).where(eq(cards.publicId, input.cardId));
+      }),
     reorder: publicProcedure
       .input(
         z.object({ 
