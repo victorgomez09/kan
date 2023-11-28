@@ -67,7 +67,7 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
   const refetchBoard = () =>
     utils.board.byId.refetch({ id: boardData.publicId });
 
-  const updateCardMutation = api.card.update.useMutation({
+  const updateCardMutation = api.card.reorder.useMutation({
     onSuccess: async () => {
       try {
         await refetchBoard();

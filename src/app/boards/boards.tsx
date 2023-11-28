@@ -8,7 +8,7 @@ export function Boards() {
   if (data?.length === 0) return <></>;
 
   return (
-    <div>
+    <>
       {data?.map((board) => {
         return (
           <Link key={board.publicId} href={`boards/${board.publicId}`}>
@@ -20,6 +20,6 @@ export function Boards() {
           </Link>
         );
       })}
-    </div>
+    </>
   );
 }

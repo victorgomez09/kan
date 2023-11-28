@@ -16,6 +16,7 @@ export const boardRouter = createTRPCRouter({
     if (!userId) return;
 
     return ctx.db.query.boards.findMany({
+      where: eq(boards.createdBy, userId),
       columns: {
         publicId: true,
         name: true,

@@ -58,10 +58,11 @@ export const cardRouter = createTRPCRouter({
         where: eq(cards.publicId, input.id),
       })
     ),
-    updateDescription: publicProcedure
+    update: publicProcedure
     .input(
       z.object({ 
-        cardId: z.string(),
+        cardId: z.string().min(12),
+        title: z.string().min(1),
         description: z.string(),
       }))
     .mutation(({ ctx, input }) => {
@@ -69,9 +70,9 @@ export const cardRouter = createTRPCRouter({
 
       if (!userId) return;
 
-      return ctx.db.update(cards).set({ description: input.description}).where(eq(cards.publicId, input.cardId));
+      return ctx.db.update(cards).set({ title: input.title, description: input.description }).where(eq(cards.publicId, input.cardId));
     }),
-    update: publicProcedure
+    reorder: publicProcedure
       .input(
         z.object({ 
           cardId: z.string().min(12),

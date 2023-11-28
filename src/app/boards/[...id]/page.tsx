@@ -125,7 +125,7 @@ export default function BoardPage() {
               className="-mr-0.5 h-5 w-5"
               aria-hidden="true"
             />
-            New
+            New list
           </button>
         </div>
       </div>
