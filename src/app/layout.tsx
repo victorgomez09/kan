@@ -9,7 +9,8 @@ import { BoardProvider } from "~/app/providers/board";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-sans",
+  display: "swap",
+  variable: "--font-plus-jakarta-sans",
 });
 
 export const metadata = {
@@ -24,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`font-sans ${jakarta.className}}`}>
+    <html lang="en" className={`${jakarta.variable}`}>
+      <body>
         <TRPCReactProvider headers={headers()}>
           <ModalProvider>
             <BoardProvider>{children}</BoardProvider>
