@@ -4,8 +4,9 @@ import { createContext, useContext, useState } from "react";
 
 type ModalContextType = {
   isOpen: boolean;
-  openModal: () => void;
+  openModal: (contentType: string) => void;
   closeModal: () => void;
+  modalContentType: string;
 };
 
 interface Props {
@@ -16,17 +17,22 @@ const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
 export const ModalProvider: React.FC<Props> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [modalContentType, setModalContentType] = useState("");
 
-  const openModal = () => {
+  const openModal = (contentType: string) => {
     setIsOpen(true);
+    setModalContentType(contentType);
   };
 
   const closeModal = () => {
     setIsOpen(false);
+    setModalContentType("");
   };
 
   return (
-    <ModalContext.Provider value={{ isOpen, openModal, closeModal }}>
+    <ModalContext.Provider
+      value={{ isOpen, openModal, closeModal, modalContentType }}
+    >
       {children}
     </ModalContext.Provider>
   );

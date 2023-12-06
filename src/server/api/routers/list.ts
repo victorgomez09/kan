@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 
-import { lists } from "~/server/db/schema";
+import { boards, lists } from "~/server/db/schema";
+import { generateUID } from "~/utils/generateUID";
 
 import {
   createTRPCRouter,
@@ -9,6 +10,45 @@ import {
 } from "~/server/api/trpc";
 
 export const listRouter = createTRPCRouter({
+  create: publicProcedure
+    .input(
+      z.object({
+        name: z.string().min(1),
+        boardPublicId: z.string().min(12)
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      const userId = ctx.session?.user.id;
+
+      if (!userId) return;
+
+      return ctx.db.transaction(async (tx) => {
+        const board = await tx.query.boards.findFirst({
+          where: eq(boards.publicId, input.boardPublicId),
+          columns: {
+            id: true
+          }
+        });
+
+        if (!board) return;
+
+        const latestList = await tx.query.lists.findFirst({
+          where: eq(lists.boardId, board.id),
+          columns: {
+            index: true
+          },
+          orderBy: desc(lists.index)
+        });
+
+        return tx.insert(lists).values({
+          publicId: generateUID(),
+          name: input.name,
+          createdBy: userId,
+          boardId: board.id,
+          index: latestList ? latestList.index + 1 : 0
+        });
+      })
+    }),
   update: publicProcedure
     .input(
       z.object({ 

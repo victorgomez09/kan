@@ -22,8 +22,6 @@ export const cardRouter = createTRPCRouter({
 
       if (!userId) return;
 
-      
-
       return ctx.db.transaction(async (tx) => {
         const list = await tx.query.lists.findFirst({
           where: eq(lists.publicId, input.listPublicId),
