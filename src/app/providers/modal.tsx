@@ -26,7 +26,6 @@ export const ModalProvider: React.FC<Props> = ({ children }) => {
 
   const closeModal = () => {
     setIsOpen(false);
-    setModalContentType("");
   };
 
   return (

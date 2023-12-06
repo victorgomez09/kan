@@ -141,7 +141,7 @@ export default function BoardPage() {
 
   return (
     <div>
-      <div className="mb-8 flex w-full justify-between">
+      <div className="mb-8 flex w-full justify-between pr-8">
         <form
           onSubmit={formik.handleSubmit}
           className="focus-visible:outline-none"
@@ -171,82 +171,85 @@ export default function BoardPage() {
         </div>
       </div>
 
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="all-lists" direction="horizontal" type="LIST">
-          {(provided) => (
-            <div
-              className="flex"
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-            >
-              {boardData?.lists?.map((list: List, index) => (
-                <Draggable
-                  key={list.publicId}
-                  draggableId={list.publicId}
-                  index={index}
-                >
-                  {(provided) => (
-                    <div
-                      key={list.publicId}
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className="mr-5 w-72 rounded-md border border-dark-400 bg-dark-200 px-2 py-2"
-                    >
-                      <div className="flex justify-between">
-                        <p className="mb-4 px-4 pt-1 text-sm font-medium text-dark-1000">
-                          {list.name}
-                        </p>
-                        <button
-                          className="mx-1 inline-flex h-fit items-center rounded-md p-1 px-1 text-sm font-semibold text-dark-50 hover:bg-dark-400"
-                          onClick={() => openNewCardForm(list.publicId)}
-                        >
-                          <HiOutlinePlusSmall
-                            className="h-5 w-5 text-dark-900"
-                            aria-hidden="true"
-                          />
-                        </button>
-                      </div>
-                      <Droppable droppableId={`${list.publicId}`} type="CARD">
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className="h-full"
+      <div className="overflow-x-scroll overscroll-contain">
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="all-lists" direction="horizontal" type="LIST">
+            {(provided) => (
+              <div
+                className="flex"
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+              >
+                {boardData?.lists?.map((list: List, index) => (
+                  <Draggable
+                    key={list.publicId}
+                    draggableId={list.publicId}
+                    index={index}
+                  >
+                    {(provided) => (
+                      <div
+                        key={list.publicId}
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        className="mr-5 min-w-[17rem] rounded-md border border-dark-400 bg-dark-200 px-2 py-2"
+                      >
+                        <div className="flex justify-between">
+                          <p className="mb-4 px-4 pt-1 text-sm font-medium text-dark-1000">
+                            {list.name}
+                          </p>
+                          <button
+                            className="mx-1 inline-flex h-fit items-center rounded-md p-1 px-1 text-sm font-semibold text-dark-50 hover:bg-dark-400"
+                            onClick={() => openNewCardForm(list.publicId)}
                           >
-                            {list.cards?.map((card, index) => (
-                              <Draggable
-                                key={card.publicId}
-                                draggableId={card.publicId}
-                                index={index}
-                              >
-                                {(provided) => (
-                                  <Link
-                                    key={card.publicId}
-                                    href={`/cards/${card.publicId}`}
-                                    className="mb-2 flex !cursor-pointer rounded-md border border-dark-200 bg-dark-500 px-3 py-2 text-sm text-dark-1000"
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                  >
-                                    {card.title}
-                                  </Link>
-                                )}
-                              </Draggable>
-                            ))}
-                            {provided.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+                            <HiOutlinePlusSmall
+                              className="h-5 w-5 text-dark-900"
+                              aria-hidden="true"
+                            />
+                          </button>
+                        </div>
+                        <Droppable droppableId={`${list.publicId}`} type="CARD">
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              className="h-full"
+                            >
+                              {list.cards?.map((card, index) => (
+                                <Draggable
+                                  key={card.publicId}
+                                  draggableId={card.publicId}
+                                  index={index}
+                                >
+                                  {(provided) => (
+                                    <Link
+                                      key={card.publicId}
+                                      href={`/cards/${card.publicId}`}
+                                      className="mb-2 flex !cursor-pointer rounded-md border border-dark-200 bg-dark-500 px-3 py-2 text-sm text-dark-1000"
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                    >
+                                      {card.title}
+                                    </Link>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                <div className="min-w-[0.75rem]"></div>
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      </div>
       <Modal>
         {modalContentType === "NEW_CARD" && (
           <NewCardForm listPublicId={selectedPublicListId} />

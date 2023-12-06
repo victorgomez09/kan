@@ -12,7 +12,7 @@ export default function BoardsPage() {
   const { openModal } = useModal();
 
   return (
-    <div>
+    <div className="pr-8">
       <div className="mb-8 flex w-full justify-between">
         <h1 className="font-medium tracking-tight text-dark-1000 sm:text-[1.2rem]">
           Boards
