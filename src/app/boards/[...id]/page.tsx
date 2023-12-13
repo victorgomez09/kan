@@ -140,8 +140,8 @@ export default function BoardPage() {
   };
 
   return (
-    <div>
-      <div className="mb-8 flex w-full justify-between pr-8">
+    <div className="flex h-full flex-col">
+      <div className="flex w-full justify-between p-8">
         <form
           onSubmit={formik.handleSubmit}
           className="focus-visible:outline-none"
@@ -171,7 +171,7 @@ export default function BoardPage() {
         </div>
       </div>
 
-      <div className="overflow-x-scroll overscroll-contain">
+      <div className="scrollbar-thumb-rounded-[4px] scrollbar-track-rounded-[4px] scrollbar-w-none scrollbar-h-[8px] scrollbar scrollbar-thumb-dark-300 scrollbar-track-dark-100 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain pb-5">
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="all-lists" direction="horizontal" type="LIST">
             {(provided) => (
@@ -180,6 +180,7 @@ export default function BoardPage() {
                 ref={provided.innerRef}
                 {...provided.droppableProps}
               >
+                <div className="min-w-[2rem]" />
                 {boardData?.lists?.map((list: List, index) => (
                   <Draggable
                     key={list.publicId}
@@ -192,7 +193,7 @@ export default function BoardPage() {
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
-                        className="mr-5 min-w-[17rem] rounded-md border border-dark-400 bg-dark-200 px-2 py-2"
+                        className="mr-5 min-w-[17rem] max-w-[17rem] rounded-md border border-dark-400 bg-dark-200 px-2 py-2"
                       >
                         <div className="flex justify-between">
                           <p className="mb-4 px-4 pt-1 text-sm font-medium text-dark-1000">
@@ -243,7 +244,7 @@ export default function BoardPage() {
                     )}
                   </Draggable>
                 ))}
-                <div className="min-w-[0.75rem]"></div>
+                <div className="min-w-[0.75rem]" />
                 {provided.placeholder}
               </div>
             )}

@@ -40,7 +40,7 @@ export default function CardPage() {
   if (!cardId) return <></>;
 
   return (
-    <div>
+    <div className="p-8">
       <div className="mb-8 flex w-full justify-between">
         <form onSubmit={formik.handleSubmit} className="w-full space-y-6">
           <div className="mt-2">

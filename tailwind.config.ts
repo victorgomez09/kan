@@ -26,5 +26,6 @@ export default {
       },
     },
   },
-  plugins: [require("@tailwindcss/forms")],
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
+  plugins: [require("@tailwindcss/forms"), require('tailwind-scrollbar')({ nocompatible: true })],
 } satisfies Config;

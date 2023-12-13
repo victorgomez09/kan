@@ -58,7 +58,7 @@ export default async function Layout(props: { children: React.ReactNode }) {
             </p>
           </button>
         </nav>
-        <div className="w-full overflow-hidden py-8 pl-8">{props.children}</div>
+        <div className="w-full overflow-hidden">{props.children}</div>
       </div>
     </main>
   );
