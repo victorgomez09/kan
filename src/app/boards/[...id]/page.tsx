@@ -193,7 +193,7 @@ export default function BoardPage() {
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
-                        className="mr-5 min-w-[17rem] max-w-[17rem] rounded-md border border-dark-400 bg-dark-200 px-2 py-2"
+                        className="mr-5 h-fit min-w-[18rem] max-w-[18rem] rounded-md border border-dark-400 bg-dark-200 py-2 pl-2 pr-1"
                       >
                         <div className="flex justify-between">
                           <p className="mb-4 px-4 pt-1 text-sm font-medium text-dark-1000">
@@ -214,7 +214,7 @@ export default function BoardPage() {
                             <div
                               ref={provided.innerRef}
                               {...provided.droppableProps}
-                              className="h-full"
+                              className="scrollbar-thumb-rounded-[4px] scrollbar-track-rounded-[4px] scrollbar-w-[8px] scrollbar scrollbar-thumb-dark-600 scrollbar-track-dark-100 h-full max-h-[calc(100vh-250px)] overflow-y-auto pr-1"
                             >
                               {list.cards?.map((card, index) => (
                                 <Draggable
