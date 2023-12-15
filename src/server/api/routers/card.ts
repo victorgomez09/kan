@@ -121,8 +121,8 @@ export const cardRouter = createTRPCRouter({
         if (!userId) return;
 
         return ctx.db.transaction(async (tx) => {
-          const [currentList] = await tx.select({ id: lists.id }).from(lists).where(and(eq(lists.publicId, input.currentListId), isNull(cards.deletedAt)))
-          const [newList] = await tx.select({ id: lists.id }).from(lists).where(and(eq(lists.publicId, input.newListId), isNull(cards.deletedAt)))
+          const [currentList] = await tx.select({ id: lists.id }).from(lists).where(and(eq(lists.publicId, input.currentListId)))
+          const [newList] = await tx.select({ id: lists.id }).from(lists).where(and(eq(lists.publicId, input.newListId)))
 
           if (!currentList?.id || !newList?.id) return;
 
