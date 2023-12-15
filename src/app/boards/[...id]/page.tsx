@@ -214,7 +214,7 @@ export default function BoardPage() {
                             <div
                               ref={provided.innerRef}
                               {...provided.droppableProps}
-                              className="scrollbar-thumb-rounded-[4px] scrollbar-track-rounded-[4px] scrollbar-w-[8px] scrollbar scrollbar-thumb-dark-600 scrollbar-track-dark-100 h-full max-h-[calc(100vh-250px)] overflow-y-auto pr-1"
+                              className="scrollbar-thumb-rounded-[4px] scrollbar-track-rounded-[4px] scrollbar-w-[8px] scrollbar scrollbar-thumb-dark-600 scrollbar-track-dark-100 h-full max-h-[calc(100vh-250px)] min-h-[2rem] overflow-y-auto pr-1"
                             >
                               {list.cards?.map((card, index) => (
                                 <Draggable

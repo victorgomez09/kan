@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, isNull } from "drizzle-orm";
 
 import { boards, cards, lists } from "~/server/db/schema";
 import { generateUID } from "~/utils/generateUID";
@@ -43,6 +43,7 @@ export const boardRouter = createTRPCRouter({
             },
             with: {
               cards: {
+                where: isNull(cards.deletedAt),
                 orderBy: [asc(cards.index)],
                 columns: {
                   publicId: true,

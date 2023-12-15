@@ -4,8 +4,13 @@ import { useParams } from "next/navigation";
 import { useFormik } from "formik";
 import ContentEditable from "react-contenteditable";
 
-import { api } from "~/trpc/react";
+import Dropdown from "./components/Dropdown";
+import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
 
+import Modal from "~/app/_components/modal";
+import { useModal } from "~/app/providers/modal";
+
+import { api } from "~/trpc/react";
 interface FormValues {
   cardId: string;
   title: string;
@@ -14,10 +19,13 @@ interface FormValues {
 
 export default function CardPage() {
   const params = useParams();
+  const { modalContentType } = useModal();
 
   const cardId = params?.id?.length ? params.id[0] : null;
 
   const { data } = api.card.byId.useQuery({ id: cardId ?? "" });
+
+  const boardId = data?.list?.board?.publicId;
 
   const updateCard = api.card.update.useMutation();
 
@@ -43,7 +51,7 @@ export default function CardPage() {
     <div className="p-8">
       <div className="mb-8 flex w-full justify-between">
         <form onSubmit={formik.handleSubmit} className="w-full space-y-6">
-          <div className="mt-2">
+          <div>
             <input
               type="text"
               id="title"
@@ -55,6 +63,9 @@ export default function CardPage() {
             />
           </div>
         </form>
+        <div className="flex">
+          <Dropdown />
+        </div>
       </div>
       <div className="mb-8 flex w-full max-w-2xl justify-between">
         <form onSubmit={formik.handleSubmit} className="w-full space-y-6">
@@ -71,6 +82,14 @@ export default function CardPage() {
           </div>
         </form>
       </div>
+      <Modal>
+        {modalContentType === "DELETE_CARD" && (
+          <DeleteCardConfirmation
+            boardPublicId={boardId ?? ""}
+            cardPublicId={cardId}
+          />
+        )}
+      </Modal>
     </div>
   );
 }
