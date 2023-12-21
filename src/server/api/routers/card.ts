@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 
-import { cards, lists } from "~/server/db/schema";
+import { cards, cardsToLabels, labels, lists } from "~/server/db/schema";
 import { generateUID } from "~/utils/generateUID";
 
 import {
@@ -49,11 +49,63 @@ export const cardRouter = createTRPCRouter({
         });
       })
     }),
+    addOrRemoveLabel: publicProcedure
+      .input(
+        z.object({
+          cardPublicId: z.string().min(12),
+          labelPublicId: z.string().min(12),
+        }),
+      )
+      .mutation(({ ctx, input }) => {
+        const userId = ctx.session?.user.id;
+
+        if (!userId) return;
+
+        return ctx.db.transaction(async (tx) => {
+          const card = await tx.query.cards.findFirst({
+            where: and(eq(cards.publicId, input.cardPublicId), isNull(cards.deletedAt)),
+          });
+
+          const label = await tx.query.labels.findFirst({
+            where: eq(labels.publicId, input.labelPublicId),
+          });
+          
+          if (!card || !label) return;
+
+          const labelExists = await tx.query.cardsToLabels.findFirst({
+            where: and(eq(cardsToLabels.cardId, card.id), eq(cardsToLabels.labelId, label.id)),
+          });
+
+          if (labelExists) {
+            return tx.delete(cardsToLabels).where(and(eq(cardsToLabels.cardId, card.id), eq(cardsToLabels.labelId, label.id)),);
+          }
+
+          return tx.insert(cardsToLabels).values({
+            cardId: card.id,
+            labelId: label.id,
+          });
+        })
+      }),
     byId: publicProcedure
       .input(z.object({ id: z.string().min(12) }))
       .query(({ ctx, input }) => 
         ctx.db.query.cards.findFirst({
           with: {
+            labels: {
+              columns: {
+                labelId: false,
+                cardId: false,
+              },
+              with: {
+                label: {
+                  columns: {
+                    publicId: true,
+                    name: true,
+                    colourCode: true,
+                  }
+                }
+              }
+            },
             list: {
               columns: {
                 publicId: true,
@@ -63,6 +115,15 @@ export const cardRouter = createTRPCRouter({
                   columns: {
                     publicId: true,
                   },
+                  with: {
+                    labels: {
+                      columns: {
+                        publicId: true,
+                        colourCode: true,
+                        name: true,
+                      }
+                    }
+                  }
                 }
               }
             },

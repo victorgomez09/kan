@@ -51,6 +51,23 @@ export const boardRouter = createTRPCRouter({
                   description: true,
                   listId: true,
                   index: true,
+                },
+                with: {
+                  labels: {
+                    columns: {
+                      labelId: false,
+                      cardId: false,
+                    },
+                    with: {
+                      label: {
+                        columns: {
+                          publicId: true,
+                          name: true,
+                          colourCode: true,
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },

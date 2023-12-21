@@ -30,6 +30,17 @@ interface List {
 interface Card {
   publicId: string;
   title: string;
+  labels?: Label[];
+}
+
+interface Label {
+  label: LabelData;
+}
+
+interface LabelData {
+  publicId: string;
+  name: string;
+  colourCode: string;
 }
 
 interface FormValues {
@@ -226,12 +237,32 @@ export default function BoardPage() {
                                     <Link
                                       key={card.publicId}
                                       href={`/cards/${card.publicId}`}
-                                      className="mb-2 flex !cursor-pointer rounded-md border border-dark-200 bg-dark-500 px-3 py-2 text-sm text-dark-1000"
+                                      className="mb-2 flex !cursor-pointer flex-col rounded-md border border-dark-200 bg-dark-500 px-3 py-2 text-sm text-dark-1000"
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
                                     >
-                                      {card.title}
+                                      <div>{card.title}</div>
+                                      {card.labels?.length ? (
+                                        <div className="mt-2 flex justify-end space-x-1">
+                                          {card.labels.map(({ label }) => (
+                                            <span
+                                              key={label.publicId}
+                                              className="inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[10px] font-medium text-dark-1000 ring-1 ring-inset ring-dark-800"
+                                            >
+                                              <svg
+                                                fill={label.colourCode}
+                                                className="h-2 w-2"
+                                                viewBox="0 0 6 6"
+                                                aria-hidden="true"
+                                              >
+                                                <circle cx={3} cy={3} r={3} />
+                                              </svg>
+                                              <div>{label.name}</div>
+                                            </span>
+                                          ))}
+                                        </div>
+                                      ) : null}
                                     </Link>
                                   )}
                                 </Draggable>

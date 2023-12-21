@@ -10,7 +10,7 @@ export default function Dropdown() {
     <Menu as="div" className="relative inline-block text-left">
       <div>
         <Menu.Button className="flex h-8 w-8 items-center justify-center rounded-[5px] hover:bg-dark-200">
-          <HiEllipsisHorizontal size={25} color="white" />
+          <HiEllipsisHorizontal size={25} className="text-dark-900" />
         </Menu.Button>
       </div>
 

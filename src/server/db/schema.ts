@@ -39,6 +39,56 @@ export const boardsRelations = relations(boards, ({ one, many }) => ({
 		references: [users.id],
 	}),
   lists: many(lists),
+  labels: many(labels)
+}));
+
+export const labels = mySqlTable(
+  "label",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    publicId: varchar("publicId", { length: 12 }).notNull().unique(),
+    name: varchar("name", { length: 256 }).notNull(),
+    colourCode: varchar("colourCode", { length: 12 }),
+    createdBy: varchar("createdBy", { length: 256 }).notNull(),
+    createdAt: timestamp("createdAt")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+    boardId: bigint("boardId", { mode: "number" }).notNull(),
+  }
+);
+
+export const labelsRelations = relations(labels, ({ one, many }) => ({
+	createdBy: one(users, {
+		fields: [labels.createdBy],
+		references: [users.id],
+	}),
+  board: one(boards, {
+		fields: [labels.boardId],
+		references: [boards.id],
+	}),
+  cards: many(cardsToLabels)
+}));
+
+export const cardsToLabels = mySqlTable(
+  "card_label",
+  {
+    cardId: bigint("cardId", { mode: "number" }).notNull().references(() => cards.id),
+    labelId: bigint("labelId", { mode: "number" }).notNull().references(() => labels.id),
+  }, (t) => ({
+    pk: primaryKey(t.cardId, t.labelId),
+  }),
+);
+
+export const cardOnLabelsRelations = relations(cardsToLabels, ({ one }) => ({
+	card: one(cards, {
+		fields: [cardsToLabels.cardId],
+		references: [cards.id],
+	}),
+  label: one(labels, {
+		fields: [cardsToLabels.labelId],
+		references: [labels.id],
+	}),
 }));
 
 export const lists = mySqlTable(
@@ -88,7 +138,7 @@ export const cards = mySqlTable(
   }
 );
 
-export const cardsRelations = relations(cards, ({ one }) => ({
+export const cardsRelations = relations(cards, ({ one, many }) => ({
 	createdBy: one(users, {
 		fields: [cards.createdBy],
 		references: [users.id],
@@ -101,6 +151,8 @@ export const cardsRelations = relations(cards, ({ one }) => ({
 		fields: [cards.deletedBy],
 		references: [users.id],
 	}),
+
+  labels: many(cardsToLabels)
 }));
 
 export const users = mySqlTable("user", {
