@@ -7,6 +7,7 @@ import ContentEditable from "react-contenteditable";
 import Dropdown from "./components/Dropdown";
 import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
 import LabelSelector from "./components/LabelSelector";
+import { NewLabelForm } from "./components/NewLabelForm";
 
 import Modal from "~/app/_components/modal";
 import { useModal } from "~/app/providers/modal";
@@ -109,6 +110,9 @@ export default function CardPage() {
       </div>
 
       <Modal>
+        {modalContentType === "NEW_LABEL" && (
+          <NewLabelForm cardPublicId={cardId} />
+        )}
         {modalContentType === "DELETE_CARD" && (
           <DeleteCardConfirmation
             boardPublicId={boardId ?? ""}

@@ -4,6 +4,8 @@ import { Menu, Transition } from "@headlessui/react";
 import { HiMiniPlus } from "react-icons/hi2";
 import { useFormik } from "formik";
 
+import { useModal } from "~/app/providers/modal";
+
 interface LabelSelectorProps {
   cardPublicId: string;
   labels: {
@@ -18,6 +20,7 @@ export default function LabelSelector({
   cardPublicId,
   labels,
 }: LabelSelectorProps) {
+  const { openModal } = useModal();
   const utils = api.useUtils();
 
   const refetchCard = () => utils.card.byId.refetch({ id: cardPublicId });
@@ -122,7 +125,7 @@ export default function LabelSelector({
                         />
                         <label
                           htmlFor={label.publicId}
-                          className="ml-3 text-sm text-gray-500"
+                          className="ml-3 text-sm"
                         >
                           {label.name}
                         </label>
@@ -130,6 +133,13 @@ export default function LabelSelector({
                     )}
                   </Menu.Item>
                 ))}
+                <button
+                  onClick={() => openModal("NEW_LABEL")}
+                  className="flex w-full items-center rounded-[5px] p-1.5 px-2 text-sm hover:bg-dark-300"
+                >
+                  <HiMiniPlus size={22} className="pr-2" />
+                  Create new label
+                </button>
               </form>
             </div>
           </Menu.Items>

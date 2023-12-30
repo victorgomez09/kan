@@ -79,7 +79,5 @@ export const listRouter = createTRPCRouter({
           WHERE ${lists.boardId} = ${list.boardId};
         `);
       })
-
-      
     })
 });
