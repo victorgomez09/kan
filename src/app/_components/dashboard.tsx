@@ -29,7 +29,7 @@ export default async function Layout(props: { children: React.ReactNode }) {
       <div className="flex h-full w-full">
         <nav className="flex w-72 flex-col justify-between border-r border-dark-600 px-5 py-5">
           <div>
-            <ul role="list" className="-mx-2 my-6 space-y-1">
+            <ul role="list" className="-mx-2 my-3 space-y-1">
               {navigation.map((item) => (
                 <li key={item.name}>
                   <ReactiveButton
@@ -42,7 +42,6 @@ export default async function Layout(props: { children: React.ReactNode }) {
               ))}
             </ul>
           </div>
-
           <button className="flex items-center">
             {session?.user.image ? (
               <Image
@@ -52,12 +51,23 @@ export default async function Layout(props: { children: React.ReactNode }) {
                 height={30}
                 alt=""
               />
-            ) : null}
-            <p className="ml-2 truncate text-sm text-dark-1000">
+            ) : (
+              <span className="inline-block h-6 w-6 overflow-hidden rounded-full bg-dark-400">
+                <svg
+                  className="h-full w-full text-dark-700"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </span>
+            )}
+            <p className="ml-2 truncate text-sm text-dark-900">
               {session?.user.email}
             </p>
           </button>
         </nav>
+
         <div className="w-full overflow-hidden">{props.children}</div>
       </div>
     </main>

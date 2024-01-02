@@ -103,7 +103,9 @@ export const lists = mySqlTable(
       .notNull(),
     updatedAt: timestamp("updatedAt").onUpdateNow(),
     boardId: bigint("boardId", { mode: "number" }).notNull(),
-    index: int("index").notNull()
+    index: int("index").notNull(),
+    deletedAt: timestamp("deletedAt"),
+    deletedBy: varchar("deletedBy", { length: 256 })
   }
 );
 
@@ -116,7 +118,11 @@ export const listsRelations = relations(lists, ({ one, many }) => ({
 		fields: [lists.boardId],
 		references: [boards.id],
 	}),
-  cards: many(cards)
+  cards: many(cards),
+  deletedBy: one(users, {
+		fields: [lists.deletedBy],
+		references: [users.id],
+	}),
 }));
 
 export const cards = mySqlTable(
@@ -151,7 +157,6 @@ export const cardsRelations = relations(cards, ({ one, many }) => ({
 		fields: [cards.deletedBy],
 		references: [users.id],
 	}),
-
   labels: many(cardsToLabels)
 }));
 

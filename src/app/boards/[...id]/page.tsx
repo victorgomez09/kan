@@ -18,6 +18,8 @@ import { useModal } from "~/app/providers/modal";
 
 import Modal from "~/app/_components/modal";
 
+import { DeleteListConfirmation } from "./DeleteListConfirmation";
+import ListDropdown from "./ListDropdown";
 import { NewCardForm } from "./NewCardForm";
 import { NewListForm } from "./NewListForm";
 
@@ -210,15 +212,22 @@ export default function BoardPage() {
                           <p className="mb-4 px-4 pt-1 text-sm font-medium text-dark-1000">
                             {list.name}
                           </p>
-                          <button
-                            className="mx-1 inline-flex h-fit items-center rounded-md p-1 px-1 text-sm font-semibold text-dark-50 hover:bg-dark-400"
-                            onClick={() => openNewCardForm(list.publicId)}
-                          >
-                            <HiOutlinePlusSmall
-                              className="h-5 w-5 text-dark-900"
-                              aria-hidden="true"
+                          <div>
+                            <button
+                              className="mx-1 inline-flex h-fit items-center rounded-md p-1 px-1 text-sm font-semibold text-dark-50 hover:bg-dark-400"
+                              onClick={() => openNewCardForm(list.publicId)}
+                            >
+                              <HiOutlinePlusSmall
+                                className="h-5 w-5 text-dark-900"
+                                aria-hidden="true"
+                              />
+                            </button>
+                            <ListDropdown
+                              setSelectedPublicListId={() =>
+                                setSelectedPublicListId(list.publicId)
+                              }
                             />
-                          </button>
+                          </div>
                         </div>
                         <Droppable droppableId={`${list.publicId}`} type="CARD">
                           {(provided) => (
@@ -283,6 +292,9 @@ export default function BoardPage() {
         </DragDropContext>
       </div>
       <Modal>
+        {modalContentType === "DELETE_LIST" && (
+          <DeleteListConfirmation listPublicId={selectedPublicListId} />
+        )}
         {modalContentType === "NEW_CARD" && (
           <NewCardForm listPublicId={selectedPublicListId} />
         )}
