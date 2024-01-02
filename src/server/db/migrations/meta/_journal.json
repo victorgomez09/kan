@@ -43,6 +43,13 @@
       "when": 1704193352729,
       "tag": "0005_hard_colossus",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1704196792662,
+      "tag": "0006_lame_pepper_potts",
+      "breakpoints": true
     }
   ]
 }

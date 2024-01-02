@@ -13,11 +13,15 @@ interface FormValues {
 }
 
 export function NewBoardForm() {
+  const utils = api.useUtils();
   const { closeModal } = useModal();
 
+  const refetchBoards = () => utils.board.all.refetch();
+
   const createBoard = api.board.create.useMutation({
-    onSuccess() {
+    onSuccess: async () => {
       closeModal();
+      await refetchBoards();
     },
   });
 

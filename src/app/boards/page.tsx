@@ -1,12 +1,12 @@
 "use client";
 
 import { HiOutlinePlusSmall } from "react-icons/hi2";
-import { Boards } from "./boards";
+import { BoardsList } from "./components/BoardsList";
 
 import { useModal } from "~/app/providers/modal";
 import Modal from "~/app/_components/modal";
 
-import { NewBoardForm } from "~/app/boards/create";
+import { NewBoardForm } from "~/app/boards/components/NewBoardForm";
 
 export default function BoardsPage() {
   const { openModal } = useModal();
@@ -37,7 +37,7 @@ export default function BoardsPage() {
       </Modal>
 
       <div className="flex flex-row">
-        <Boards />
+        <BoardsList />
       </div>
     </div>
   );

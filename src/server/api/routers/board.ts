@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { eq, asc, isNull } from "drizzle-orm";
+import { and, eq, asc, isNull, inArray } from "drizzle-orm";
 
 import { boards, cards, lists } from "~/server/db/schema";
 import { generateUID } from "~/utils/generateUID";
@@ -16,7 +16,7 @@ export const boardRouter = createTRPCRouter({
     if (!userId) return;
 
     return ctx.db.query.boards.findMany({
-      where: eq(boards.createdBy, userId),
+      where: and(eq(boards.createdBy, userId), isNull(boards.deletedAt)),
       columns: {
         publicId: true,
         name: true,
@@ -27,7 +27,7 @@ export const boardRouter = createTRPCRouter({
     .input(z.object({ id: z.string().min(12) }))
     .query(({ ctx, input }) => 
       ctx.db.query.boards.findFirst({
-        where: eq(boards.publicId, input.id),
+        where: and(eq(boards.publicId, input.id), isNull(boards.deletedAt)),
         columns: {
           publicId: true,
           name: true,
@@ -105,5 +105,35 @@ export const boardRouter = createTRPCRouter({
         if (!userId) return;
 
         return ctx.db.update(boards).set({ name: input.name }).where(eq(boards.publicId, input.boardId));
+      }),
+    delete: publicProcedure
+      .input(
+        z.object({ 
+          boardPublicId: z.string().min(12),
+        }))
+      .mutation(({ ctx, input }) => {
+        const userId = ctx.session?.user.id;
+  
+        if (!userId) return;
+  
+        return ctx.db.transaction(async (tx) => {
+          const board = await tx.query.boards.findFirst({
+            where: eq(boards.publicId, input.boardPublicId),
+            with: {
+              lists: true,
+            }
+          })
+  
+          if (!board) return;
+
+          const listIds = board.lists.map((list) => list.id)
+  
+          await tx.update(boards).set({ deletedAt: new Date(), deletedBy: userId }).where(eq(boards.id, board.id));
+
+          if (listIds.length) {
+            await tx.update(lists).set({ deletedAt: new Date(), deletedBy: userId }).where(eq(lists.boardId, board.id));
+            await tx.update(cards).set({ deletedAt: new Date(), deletedBy: userId }).where(inArray(cards.listId, listIds));
+          }
+        })
       }),
 });

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { api } from "~/trpc/react";
 
-export function Boards() {
+export function BoardsList() {
   const { data } = api.board.all.useQuery();
 
   if (data?.length === 0) return <></>;

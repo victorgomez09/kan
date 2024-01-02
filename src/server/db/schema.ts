@@ -30,6 +30,8 @@ export const boards = mySqlTable(
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     updatedAt: timestamp("updatedAt").onUpdateNow(),
+    deletedAt: timestamp("deletedAt"),
+    deletedBy: varchar("deletedBy", { length: 256 })
   },
 );
 
@@ -39,7 +41,11 @@ export const boardsRelations = relations(boards, ({ one, many }) => ({
 		references: [users.id],
 	}),
   lists: many(lists),
-  labels: many(labels)
+  labels: many(labels),
+  deletedBy: one(users, {
+		fields: [boards.deletedBy],
+		references: [users.id],
+	}),
 }));
 
 export const labels = mySqlTable(

@@ -18,10 +18,12 @@ import { useModal } from "~/app/providers/modal";
 
 import Modal from "~/app/_components/modal";
 
-import { DeleteListConfirmation } from "./DeleteListConfirmation";
-import ListDropdown from "./ListDropdown";
-import { NewCardForm } from "./NewCardForm";
-import { NewListForm } from "./NewListForm";
+import BoardDropdown from "./components/BoardDropdown";
+import { DeleteBoardConfirmation } from "./components/DeleteBoardConfirmation";
+import { DeleteListConfirmation } from "./components/DeleteListConfirmation";
+import ListDropdown from "./components/ListDropdown";
+import { NewCardForm } from "./components/NewCardForm";
+import { NewListForm } from "./components/NewListForm";
 
 interface List {
   publicId: string;
@@ -169,10 +171,10 @@ export default function BoardPage() {
             className="block border-0 bg-transparent p-0 py-1.5 font-medium tracking-tight text-dark-1000 focus:ring-0 focus-visible:outline-none sm:text-[1.2rem] sm:leading-6"
           />
         </form>
-        <div>
+        <div className="flex items-center">
           <button
             type="button"
-            className="inline-flex items-center gap-x-1.5 rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold text-dark-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="mr-2 inline-flex items-center gap-x-1.5 rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold text-dark-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             onClick={() => openNewListForm(boardId)}
           >
             <HiOutlinePlusSmall
@@ -181,6 +183,7 @@ export default function BoardPage() {
             />
             New list
           </button>
+          <BoardDropdown />
         </div>
       </div>
 
@@ -292,6 +295,7 @@ export default function BoardPage() {
         </DragDropContext>
       </div>
       <Modal>
+        {modalContentType === "DELETE_BOARD" && <DeleteBoardConfirmation />}
         {modalContentType === "DELETE_LIST" && (
           <DeleteListConfirmation listPublicId={selectedPublicListId} />
         )}
