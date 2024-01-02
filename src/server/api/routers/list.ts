@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql, isNull } from "drizzle-orm";
 
 import { boards, cards, lists } from "~/server/db/schema";
 import { generateUID } from "~/utils/generateUID";
@@ -49,7 +49,7 @@ export const listRouter = createTRPCRouter({
         });
       })
     }),
-  update: publicProcedure
+  reorder: publicProcedure
     .input(
       z.object({ 
         boardId: z.string().min(12),
@@ -103,5 +103,18 @@ export const listRouter = createTRPCRouter({
 
         await tx.execute(sql`UPDATE ${lists} SET ${lists.index} = ${lists.index} - 1 WHERE ${lists.boardId} = ${list.boardId} AND ${lists.index} > ${list.index} AND ${lists.deletedAt} IS NULL;`);
       })
+    }),
+  update: publicProcedure
+    .input(
+      z.object({ 
+        listPublicId: z.string().min(12),
+        name: z.string().min(1),
+      }))
+    .mutation(({ ctx, input }) => {
+      const userId = ctx.session?.user.id;
+
+      if (!userId) return;
+
+      return ctx.db.update(lists).set({ name: input.name }).where(and(eq(lists.publicId, input.listPublicId), isNull(lists.deletedAt)));
     }),
 });

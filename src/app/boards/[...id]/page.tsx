@@ -21,7 +21,7 @@ import Modal from "~/app/_components/modal";
 import BoardDropdown from "./components/BoardDropdown";
 import { DeleteBoardConfirmation } from "./components/DeleteBoardConfirmation";
 import { DeleteListConfirmation } from "./components/DeleteListConfirmation";
-import ListDropdown from "./components/ListDropdown";
+import List from "./components/List";
 import { NewCardForm } from "./components/NewCardForm";
 import { NewListForm } from "./components/NewListForm";
 
@@ -93,11 +93,6 @@ export default function BoardPage() {
   const openNewListForm = (publicBoardId: string) => {
     openModal("NEW_LIST");
     setSelectedPublicListId(publicBoardId);
-  };
-
-  const openNewCardForm = (publicListId: PublicListId) => {
-    openModal("NEW_CARD");
-    setSelectedPublicListId(publicListId);
   };
 
   const onDragEnd = ({
@@ -198,94 +193,66 @@ export default function BoardPage() {
               >
                 <div className="min-w-[2rem]" />
                 {boardData?.lists?.map((list: List, index) => (
-                  <Draggable
-                    key={list.publicId}
-                    draggableId={list.publicId}
+                  <List
                     index={index}
+                    key={index}
+                    list={list}
+                    setSelectedPublicListId={(publicListId) =>
+                      setSelectedPublicListId(publicListId)
+                    }
                   >
-                    {(provided) => (
-                      <div
-                        key={list.publicId}
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className="mr-5 h-fit min-w-[18rem] max-w-[18rem] rounded-md border border-dark-400 bg-dark-200 py-2 pl-2 pr-1"
-                      >
-                        <div className="flex justify-between">
-                          <p className="mb-4 px-4 pt-1 text-sm font-medium text-dark-1000">
-                            {list.name}
-                          </p>
-                          <div>
-                            <button
-                              className="mx-1 inline-flex h-fit items-center rounded-md p-1 px-1 text-sm font-semibold text-dark-50 hover:bg-dark-400"
-                              onClick={() => openNewCardForm(list.publicId)}
+                    <Droppable droppableId={`${list.publicId}`} type="CARD">
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className="scrollbar-thumb-rounded-[4px] scrollbar-track-rounded-[4px] scrollbar-w-[8px] scrollbar scrollbar-thumb-dark-600 scrollbar-track-dark-100 h-full max-h-[calc(100vh-250px)] min-h-[2rem] overflow-y-auto pr-1"
+                        >
+                          {list.cards?.map((card, index) => (
+                            <Draggable
+                              key={card.publicId}
+                              draggableId={card.publicId}
+                              index={index}
                             >
-                              <HiOutlinePlusSmall
-                                className="h-5 w-5 text-dark-900"
-                                aria-hidden="true"
-                              />
-                            </button>
-                            <ListDropdown
-                              setSelectedPublicListId={() =>
-                                setSelectedPublicListId(list.publicId)
-                              }
-                            />
-                          </div>
-                        </div>
-                        <Droppable droppableId={`${list.publicId}`} type="CARD">
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.droppableProps}
-                              className="scrollbar-thumb-rounded-[4px] scrollbar-track-rounded-[4px] scrollbar-w-[8px] scrollbar scrollbar-thumb-dark-600 scrollbar-track-dark-100 h-full max-h-[calc(100vh-250px)] min-h-[2rem] overflow-y-auto pr-1"
-                            >
-                              {list.cards?.map((card, index) => (
-                                <Draggable
+                              {(provided) => (
+                                <Link
                                   key={card.publicId}
-                                  draggableId={card.publicId}
-                                  index={index}
+                                  href={`/cards/${card.publicId}`}
+                                  className="mb-2 flex !cursor-pointer flex-col rounded-md border border-dark-200 bg-dark-500 px-3 py-2 text-sm text-dark-1000"
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
                                 >
-                                  {(provided) => (
-                                    <Link
-                                      key={card.publicId}
-                                      href={`/cards/${card.publicId}`}
-                                      className="mb-2 flex !cursor-pointer flex-col rounded-md border border-dark-200 bg-dark-500 px-3 py-2 text-sm text-dark-1000"
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                    >
-                                      <div>{card.title}</div>
-                                      {card.labels?.length ? (
-                                        <div className="mt-2 flex justify-end space-x-1">
-                                          {card.labels.map(({ label }) => (
-                                            <span
-                                              key={label.publicId}
-                                              className="inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[10px] font-medium text-dark-1000 ring-1 ring-inset ring-dark-800"
-                                            >
-                                              <svg
-                                                fill={label.colourCode}
-                                                className="h-2 w-2"
-                                                viewBox="0 0 6 6"
-                                                aria-hidden="true"
-                                              >
-                                                <circle cx={3} cy={3} r={3} />
-                                              </svg>
-                                              <div>{label.name}</div>
-                                            </span>
-                                          ))}
-                                        </div>
-                                      ) : null}
-                                    </Link>
-                                  )}
-                                </Draggable>
-                              ))}
-                              {provided.placeholder}
-                            </div>
-                          )}
-                        </Droppable>
-                      </div>
-                    )}
-                  </Draggable>
+                                  <div>{card.title}</div>
+                                  {card.labels?.length ? (
+                                    <div className="mt-2 flex justify-end space-x-1">
+                                      {card.labels.map(({ label }) => (
+                                        <span
+                                          key={label.publicId}
+                                          className="inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[10px] font-medium text-dark-1000 ring-1 ring-inset ring-dark-800"
+                                        >
+                                          <svg
+                                            fill={label.colourCode}
+                                            className="h-2 w-2"
+                                            viewBox="0 0 6 6"
+                                            aria-hidden="true"
+                                          >
+                                            <circle cx={3} cy={3} r={3} />
+                                          </svg>
+                                          <div>{label.name}</div>
+                                        </span>
+                                      ))}
+                                    </div>
+                                  ) : null}
+                                </Link>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </List>
                 ))}
                 <div className="min-w-[0.75rem]" />
                 {provided.placeholder}

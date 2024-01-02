@@ -77,7 +77,7 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
     },
   });
 
-  const updateListMutation = api.list.update.useMutation({
+  const updateListMutation = api.list.reorder.useMutation({
     onSuccess: async () => {
       try {
         await refetchBoard();
