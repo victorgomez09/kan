@@ -10,6 +10,8 @@ import {
   varchar,
 } from "drizzle-orm/mysql-core";
 
+import { type AdapterAccount } from "@auth/core/adapters";
+
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
  * database instance for multiple projects.
@@ -188,7 +190,7 @@ export const accounts = mySqlTable(
   {
     userId: varchar("userId", { length: 255 }).notNull(),
     type: varchar("type", { length: 255 })
-      .$type<"oauth" | "oidc" | "email">()
+      .$type<AdapterAccount["type"]>()
       .notNull(),
     provider: varchar("provider", { length: 255 }).notNull(),
     providerAccountId: varchar("providerAccountId", { length: 255 }).notNull(),
