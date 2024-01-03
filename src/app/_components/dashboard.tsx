@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
-import { getServerAuthSession } from "~/server/auth";
+import { auth } from "~/server/auth";
 
 import boardsIcon from "~/app/assets/boards.json";
 
@@ -12,7 +12,7 @@ const navigation = [
 ];
 
 export default async function Layout(props: { children: React.ReactNode }) {
-  const session = await getServerAuthSession();
+  const session = await auth();
 
   if (!session?.user) redirect("api/auth/signin");
 

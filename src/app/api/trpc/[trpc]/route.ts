@@ -23,6 +23,6 @@ const handler = (req: NextRequest) =>
 
 export { handler as GET, handler as POST };
 
-// export const runtime = "edge";
-// export const preferredRegion = 'lhr1';
-// export const dynamic = 'force-dynamic'
+export const runtime = "edge";
+export const preferredRegion = 'lhr1';
+export const dynamic = 'force-dynamic'
