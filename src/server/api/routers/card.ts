@@ -214,9 +214,10 @@ export const cardRouter = createTRPCRouter({
 
           if (!newList) return;
 
-          if (!newIndex) {
-            const lastCardIndex = newList.cards[0]?.index;
-            newIndex = lastCardIndex ? lastCardIndex + 1 : 0;
+          if (newIndex === undefined) {
+            const lastCardIndex = newList.cards.length ? newList.cards[0]?.index : undefined;
+
+            newIndex = lastCardIndex !== undefined ? lastCardIndex + 1 : 0;
           }
 
           if (!currentList?.id || !newList?.id) return;
