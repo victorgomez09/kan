@@ -1,12 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useFormik } from "formik";
 import ContentEditable from "react-contenteditable";
+import { IoChevronForwardSharp } from "react-icons/io5";
 
 import Dropdown from "./components/Dropdown";
 import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
 import LabelSelector from "./components/LabelSelector";
+import ListSelector from "./components/ListSelector";
 import { NewLabelForm } from "./components/NewLabelForm";
 
 import Modal from "~/app/_components/modal";
@@ -30,6 +33,7 @@ export default function CardPage() {
 
   const boardId = data?.list?.board?.publicId;
   const labels = data?.list?.board?.labels;
+  const board = data?.list?.board;
   const selectedLabels = data?.labels;
 
   const formattedLabels =
@@ -44,6 +48,12 @@ export default function CardPage() {
         colourCode: label.colourCode ?? "",
       };
     }) ?? [];
+
+  const formattedLists =
+    board?.lists.map((list) => ({
+      ...list,
+      selected: list.publicId === data?.list.publicId,
+    })) ?? [];
 
   const updateCard = api.card.update.useMutation();
 
@@ -68,7 +78,14 @@ export default function CardPage() {
   return (
     <div className="flex h-full flex-1 flex-row">
       <div className="w-full p-8">
-        <div className="mb-8 flex w-full justify-between">
+        <div className="mb-8 flex w-full items-center justify-between">
+          <Link
+            className="font-medium leading-[2.3rem] tracking-tight text-dark-900 sm:text-[1.2rem]"
+            href={`/boards/${board?.publicId}`}
+          >
+            {board?.name}
+          </Link>
+          <IoChevronForwardSharp size={18} className="mx-2 text-dark-900" />
           <form onSubmit={formik.handleSubmit} className="w-full space-y-6">
             <div>
               <input
@@ -78,7 +95,7 @@ export default function CardPage() {
                 value={formik.values.title}
                 onChange={formik.handleChange}
                 onBlur={formik.submitForm}
-                className="block w-full border-0 bg-transparent p-0 py-0 font-medium tracking-tight text-dark-1000 focus:ring-0 sm:text-[1.2rem] sm:leading-6"
+                className="block w-full border-0 bg-transparent p-0 py-0 font-medium tracking-tight text-dark-1000 focus:ring-0 sm:text-[1.2rem]"
               />
             </div>
           </form>
@@ -103,8 +120,12 @@ export default function CardPage() {
         </div>
       </div>
       <div className="min-w-[325px] border-l-[1px] border-dark-400 bg-dark-100 p-8 text-dark-900">
+        <div className="mb-4 flex w-full">
+          <p className="my-2 w-[100px] text-sm">List</p>
+          <ListSelector cardPublicId={cardId} lists={formattedLists} />
+        </div>
         <div className="flex w-full">
-          <p className="my-2 pr-8 text-sm">Labels</p>
+          <p className="my-2 w-[100px] text-sm">Labels</p>
           <LabelSelector cardPublicId={cardId} labels={formattedLabels} />
         </div>
       </div>

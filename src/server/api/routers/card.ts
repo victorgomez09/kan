@@ -114,6 +114,7 @@ export const cardRouter = createTRPCRouter({
                 board: {
                   columns: {
                     publicId: true,
+                    name: true,
                   },
                   with: {
                     labels: {
@@ -122,6 +123,13 @@ export const cardRouter = createTRPCRouter({
                         colourCode: true,
                         name: true,
                       }
+                    },
+                    lists: {
+                      columns: {
+                        publicId: true,
+                        name: true,
+                      },
+                      where: isNull(lists.deletedAt)
                     }
                   }
                 }
@@ -171,10 +179,8 @@ export const cardRouter = createTRPCRouter({
       .input(
         z.object({ 
           cardId: z.string().min(12),
-          currentListId: z.string().min(12),
           newListId: z.string().min(12),
-          currentIndex: z.number(),
-          newIndex: z.number()
+          newIndex: z.number().optional(),
         }))
       .mutation(({ ctx, input }) => {
         const userId = ctx.session?.user.id;
@@ -182,8 +188,36 @@ export const cardRouter = createTRPCRouter({
         if (!userId) return;
 
         return ctx.db.transaction(async (tx) => {
-          const [currentList] = await tx.select({ id: lists.id }).from(lists).where(and(eq(lists.publicId, input.currentListId)))
-          const [newList] = await tx.select({ id: lists.id }).from(lists).where(and(eq(lists.publicId, input.newListId)))
+          const card = await tx.query.cards.findFirst({
+            with: {
+              list: true,
+            },
+            where: and(eq(cards.publicId, input.cardId), isNull(cards.deletedAt)),
+          });
+
+          if (!card) return;
+
+          const currentList = card.list;
+          const currentIndex = card.index;
+          
+          let newIndex = input.newIndex;
+
+          const newList = await tx.query.lists.findFirst({
+            with: {
+              cards: {
+                orderBy: [desc(cards.index)],
+                limit: 1,
+              },
+            },
+            where: and(eq(lists.publicId, input.newListId), isNull(cards.deletedAt)),
+          });
+
+          if (!newList) return;
+
+          if (!newIndex) {
+            const lastCardIndex = newList.cards[0]?.index;
+            newIndex = lastCardIndex ? lastCardIndex + 1 : 0;
+          }
 
           if (!currentList?.id || !newList?.id) return;
 
@@ -192,21 +226,21 @@ export const cardRouter = createTRPCRouter({
               UPDATE ${cards}
               SET ${cards.index} =
                 CASE
-                  WHEN ${cards.index} = ${input.currentIndex} THEN ${input.newIndex}
-                  WHEN ${input.currentIndex} < ${input.newIndex} AND ${cards.index} > ${input.currentIndex} AND ${cards.index} <= ${input.newIndex} THEN ${cards.index} - 1
-                  WHEN ${input.currentIndex} > ${input.newIndex} AND ${cards.index} >= ${input.newIndex} AND ${cards.index} < ${input.currentIndex} THEN ${cards.index} + 1
+                  WHEN ${cards.index} = ${currentIndex} THEN ${newIndex}
+                  WHEN ${currentIndex} < ${newIndex} AND ${cards.index} > ${currentIndex} AND ${cards.index} <= ${newIndex} THEN ${cards.index} - 1
+                  WHEN ${currentIndex} > ${newIndex} AND ${cards.index} >= ${newIndex} AND ${cards.index} < ${currentIndex} THEN ${cards.index} + 1
                   ELSE ${cards.index}
                 END
               WHERE ${cards.listId} = ${currentList.id} AND ${cards.deletedAt} IS NULL;
             `);
           } else {
-            await tx.execute(sql`UPDATE ${cards} SET ${cards.index} = ${cards.index} + 1 WHERE ${cards.listId} = ${newList.id} AND ${cards.index} >= ${input.newIndex} AND ${cards.deletedAt} IS NULL;`)
+            await tx.execute(sql`UPDATE ${cards} SET ${cards.index} = ${cards.index} + 1 WHERE ${cards.listId} = ${newList.id} AND ${cards.index} >= ${newIndex} AND ${cards.deletedAt} IS NULL;`)
 
-            await tx.execute(sql`UPDATE ${cards} SET ${cards.index} = ${cards.index} - 1 WHERE ${cards.listId} = ${currentList.id} AND ${cards.index} >= ${input.currentIndex} AND ${cards.deletedAt} IS NULL;`)
+            await tx.execute(sql`UPDATE ${cards} SET ${cards.index} = ${cards.index} - 1 WHERE ${cards.listId} = ${currentList.id} AND ${cards.index} >= ${currentIndex} AND ${cards.deletedAt} IS NULL;`)
 
             await tx
               .update(cards)
-              .set({ listId: newList.id, index: input.newIndex })
+              .set({ listId: newList.id, index: newIndex })
               .where(and(eq(cards.publicId, input.cardId), isNull(cards.deletedAt)));
           }
         })

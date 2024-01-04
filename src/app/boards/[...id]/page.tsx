@@ -141,9 +141,7 @@ export default function BoardPage() {
 
       updateCard({
         cardId: draggableId,
-        currentListId: source.droppableId,
         newListId: destination.droppableId,
-        currentIndex: source.index,
         newIndex: destination.index,
       });
     }
@@ -163,7 +161,7 @@ export default function BoardPage() {
             value={formik.values.name}
             onChange={formik.handleChange}
             onBlur={formik.submitForm}
-            className="block border-0 bg-transparent p-0 py-1.5 font-medium tracking-tight text-dark-1000 focus:ring-0 focus-visible:outline-none sm:text-[1.2rem] sm:leading-6"
+            className="block border-0 bg-transparent p-0 py-0 font-medium leading-[2.3rem] tracking-tight text-dark-1000 focus:ring-0 focus-visible:outline-none sm:text-[1.2rem]"
           />
         </form>
         <div className="flex items-center">
@@ -182,7 +180,7 @@ export default function BoardPage() {
         </div>
       </div>
 
-      <div className="scrollbar-thumb-rounded-[4px] scrollbar-track-rounded-[4px] scrollbar-w-none scrollbar-h-[8px] scrollbar scrollbar-thumb-dark-300 scrollbar-track-dark-100 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain pb-5">
+      <div className="scrollbar-w-none flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain pb-5 scrollbar scrollbar-track-dark-100 scrollbar-thumb-dark-300 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px]">
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="all-lists" direction="horizontal" type="LIST">
             {(provided) => (
@@ -206,7 +204,7 @@ export default function BoardPage() {
                         <div
                           ref={provided.innerRef}
                           {...provided.droppableProps}
-                          className="scrollbar-thumb-rounded-[4px] scrollbar-track-rounded-[4px] scrollbar-w-[8px] scrollbar scrollbar-thumb-dark-600 scrollbar-track-dark-100 h-full max-h-[calc(100vh-250px)] min-h-[2rem] overflow-y-auto pr-1"
+                          className="h-full max-h-[calc(100vh-250px)] min-h-[2rem] overflow-y-auto pr-1 scrollbar scrollbar-track-dark-100 scrollbar-thumb-dark-600 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-w-[8px]"
                         >
                           {list.cards?.map((card, index) => (
                             <Draggable

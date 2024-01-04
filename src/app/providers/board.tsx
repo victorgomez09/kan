@@ -44,9 +44,7 @@ interface UpdateListParams {
 
 interface UpdateCardParams {
   cardId: string;
-  currentListId: string;
   newListId: string;
-  currentIndex: number;
   newIndex: number;
 }
 
@@ -101,18 +99,10 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
     });
   };
 
-  const updateCard = ({
-    cardId,
-    currentListId,
-    newListId,
-    currentIndex,
-    newIndex,
-  }: UpdateCardParams) => {
+  const updateCard = ({ cardId, newListId, newIndex }: UpdateCardParams) => {
     updateCardMutation.mutate({
       cardId,
-      currentListId,
       newListId,
-      currentIndex,
       newIndex,
     });
   };
