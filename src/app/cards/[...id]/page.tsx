@@ -12,7 +12,7 @@ import LabelSelector from "./components/LabelSelector";
 import ListSelector from "./components/ListSelector";
 import { NewLabelForm } from "./components/NewLabelForm";
 
-import Modal from "~/app/_components/modal";
+import Modal from "~/app/components/modal";
 import { useModal } from "~/app/providers/modal";
 
 import { api } from "~/trpc/react";

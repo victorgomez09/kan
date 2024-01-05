@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import { auth } from "~/server/auth";
@@ -6,6 +5,7 @@ import { auth } from "~/server/auth";
 import boardsIcon from "~/app/assets/boards.json";
 
 import ReactiveButton from "~/app/components/ReactiveButton";
+import UserMenu from "~/app/components/UserMenu";
 
 const navigation = [
   { name: "Boards", href: "/boards", icon: boardsIcon, current: true },
@@ -14,7 +14,9 @@ const navigation = [
 export default async function Layout(props: { children: React.ReactNode }) {
   const session = await auth();
 
-  if (!session?.user) redirect("api/auth/signin");
+  if (!session?.user) {
+    redirect("/api/auth/signin");
+  }
 
   return (
     <main className="flex h-screen flex-col items-center bg-dark-50">
@@ -42,32 +44,11 @@ export default async function Layout(props: { children: React.ReactNode }) {
               ))}
             </ul>
           </div>
-          <button className="flex items-center">
-            {session?.user.image ? (
-              <Image
-                src={session?.user.image ?? ""}
-                className="h-8 w-8 rounded-full bg-gray-50"
-                width={30}
-                height={30}
-                alt=""
-              />
-            ) : (
-              <span className="inline-block h-6 w-6 overflow-hidden rounded-full bg-dark-400">
-                <svg
-                  className="h-full w-full text-dark-700"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              </span>
-            )}
-            <p className="ml-2 truncate text-sm text-dark-900">
-              {session?.user.email}
-            </p>
-          </button>
+          <UserMenu
+            email={session?.user.email ?? ""}
+            imageUrl={session?.user.image ?? undefined}
+          />
         </nav>
-
         <div className="w-full overflow-hidden">{props.children}</div>
       </div>
     </main>

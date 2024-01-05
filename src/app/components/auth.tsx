@@ -14,14 +14,17 @@ export function Login() {
         email: "",
       }}
       onSubmit={async (values: FormValues) => {
-        await signIn("email", { email: values.email });
+        await signIn("email", {
+          email: values.email,
+          callbackUrl: "/boards",
+        });
       }}
     >
       <Form className="space-y-6">
         <div>
           <label
             htmlFor="email"
-            className="text-dark-1000 block text-sm font-normal leading-6"
+            className="block text-sm font-normal leading-6 text-dark-1000"
           >
             Email address
           </label>
@@ -33,7 +36,7 @@ export function Login() {
               placeholder="you@example.com"
               autoComplete="email"
               required
-              className="bg-dark-500 focus:ring-dark-900 ring-dark-900 text-dark-1000 block w-full rounded-md border-0 bg-white/5 py-1.5 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
+              className="block w-full rounded-md border-0 bg-dark-500 bg-white/5 py-1.5 text-dark-1000 shadow-sm ring-1 ring-inset ring-dark-900 focus:ring-2 focus:ring-inset focus:ring-dark-900 sm:text-sm sm:leading-6"
             />
           </div>
         </div>
@@ -41,7 +44,7 @@ export function Login() {
         <div className="pt-2">
           <button
             type="submit"
-            className="bg-dark-1000 text-dark-50 focus-visible:outline-offset- flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold leading-6 shadow-sm focus-visible:outline focus-visible:outline-2"
+            className="focus-visible:outline-offset- flex w-full justify-center rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold leading-6 text-dark-50 shadow-sm focus-visible:outline focus-visible:outline-2"
           >
             Sign up
           </button>

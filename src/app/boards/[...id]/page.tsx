@@ -16,7 +16,7 @@ import { api } from "~/trpc/react";
 import { useBoard } from "~/app/providers/board";
 import { useModal } from "~/app/providers/modal";
 
-import Modal from "~/app/_components/modal";
+import Modal from "~/app/components/modal";
 
 import BoardDropdown from "./components/BoardDropdown";
 import { DeleteBoardConfirmation } from "./components/DeleteBoardConfirmation";

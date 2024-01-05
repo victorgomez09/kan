@@ -4,7 +4,7 @@ import { HiOutlinePlusSmall } from "react-icons/hi2";
 import { BoardsList } from "./components/BoardsList";
 
 import { useModal } from "~/app/providers/modal";
-import Modal from "~/app/_components/modal";
+import Modal from "~/app/components/modal";
 
 import { NewBoardForm } from "~/app/boards/components/NewBoardForm";
 
