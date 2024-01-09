@@ -1,3 +1,6 @@
+import { render } from '@react-email/render';
+import { MagicLinkEmail } from "~/email/emails/magic-link";
+
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import NextAuth, { type DefaultSession } from "next-auth";
 
@@ -24,6 +27,8 @@ declare module "next-auth" {
   //   // role: UserRole;
   // }
 }
+
+
 
 export const {
   handlers: { GET, POST },
@@ -57,6 +62,7 @@ export const {
       name: 'Email',
       options: {},
       async sendVerificationRequest({ identifier: email, url }) {
+        const magicLinkEmail = MagicLinkEmail({ loginUrl: url });
         await fetch(process.env.EMAIL_URL ?? '', {
           method: "POST",
           headers: {
@@ -67,7 +73,7 @@ export const {
             from: process.env.EMAIL_FROM,
             to: [email],
             subject: 'Login via email',
-            html: `<strong>${url}</strong>`,
+            html: render(magicLinkEmail),
           }),
         })
 
