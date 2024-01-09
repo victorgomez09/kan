@@ -12,6 +12,10 @@
     "lint": "next lint",
     "start": "next start"
   },
+  "workspaces": [
+    "*",
+    "src/email/*"
+  ],
   "dependencies": {
     "@auth/drizzle-adapter": "^0.3.12",
     "@headlessui/react": "^1.7.17",
