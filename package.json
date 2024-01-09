@@ -13,8 +13,7 @@
     "start": "next start"
   },
   "workspaces": [
-    "*",
-    "src/email/*"
+    "src/email"
   ],
   "dependencies": {
     "@auth/drizzle-adapter": "^0.3.12",
