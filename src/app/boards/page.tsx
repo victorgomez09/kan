@@ -1,15 +1,16 @@
 "use client";
 
-import { HiOutlinePlusSmall } from "react-icons/hi2";
+import { HiArrowDownTray, HiOutlinePlusSmall } from "react-icons/hi2";
 import { BoardsList } from "./components/BoardsList";
 
 import { useModal } from "~/app/providers/modal";
 import Modal from "~/app/components/modal";
 
+import { ImportBoardsForm } from "~/app/boards/components/ImportBoardsForm";
 import { NewBoardForm } from "~/app/boards/components/NewBoardForm";
 
 export default function BoardsPage() {
-  const { openModal } = useModal();
+  const { openModal, modalContentType } = useModal();
 
   return (
     <div className="p-8">
@@ -20,20 +21,33 @@ export default function BoardsPage() {
         <div>
           <button
             type="button"
+            className="bg-dark-3000 mr-2 inline-flex items-center gap-x-1.5 rounded-md border-[1px] border-dark-600 px-3 py-2 text-sm text-dark-1000 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            onClick={() => openModal("IMPORT_BOARDS")}
+          >
+            <div className="flex h-5 w-5 items-center">
+              <HiArrowDownTray className="-mr-0.5 h-4 w-4" aria-hidden="true" />
+            </div>
+            Import
+          </button>
+          <button
+            type="button"
             className="inline-flex items-center gap-x-1.5 rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold text-dark-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             onClick={() => openModal("NEW_BOARD")}
           >
-            <HiOutlinePlusSmall
-              className="-mr-0.5 h-5 w-5"
-              aria-hidden="true"
-            />
+            <div className="h-5 w-5 items-center">
+              <HiOutlinePlusSmall
+                className="-mr-0.5 h-5 w-5"
+                aria-hidden="true"
+              />
+            </div>
             New
           </button>
         </div>
       </div>
 
       <Modal>
-        <NewBoardForm />
+        {modalContentType === "NEW_BOARD" && <NewBoardForm />}
+        {modalContentType === "IMPORT_BOARDS" && <ImportBoardsForm />}
       </Modal>
 
       <div className="flex flex-row">
