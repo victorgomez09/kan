@@ -18,10 +18,10 @@ export default function BoardsPage() {
         <h1 className="font-medium tracking-tight text-dark-1000 sm:text-[1.2rem]">
           Boards
         </h1>
-        <div>
+        <div className="flex">
           <button
             type="button"
-            className="bg-dark-3000 mr-2 inline-flex items-center gap-x-1.5 rounded-md border-[1px] border-dark-600 px-3 py-2 text-sm text-dark-1000 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="bg-dark-3000 mr-2 flex items-center gap-x-1.5 rounded-md border-[1px] border-dark-600 px-3 py-2 text-sm text-dark-1000 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             onClick={() => openModal("IMPORT_BOARDS")}
           >
             <div className="flex h-5 w-5 items-center">
@@ -31,7 +31,7 @@ export default function BoardsPage() {
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-x-1.5 rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold text-dark-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="flex items-center gap-x-1.5 rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold text-dark-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             onClick={() => openModal("NEW_BOARD")}
           >
             <div className="h-5 w-5 items-center">

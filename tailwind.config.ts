@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-plus-jakarta-sans)']
+        sans: ['Plus Jakarta Sans']
       },
       fontSize: {
         sm: "0.8rem",

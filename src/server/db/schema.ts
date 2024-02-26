@@ -3,6 +3,7 @@ import {
   bigint,
   index,
   int,
+  mysqlEnum,
   mysqlTableCreator,
   primaryKey,
   text,
@@ -32,7 +33,8 @@ export const boards = mySqlTable(
       .notNull(),
     updatedAt: timestamp("updatedAt").onUpdateNow(),
     deletedAt: timestamp("deletedAt"),
-    deletedBy: varchar("deletedBy", { length: 256 })
+    deletedBy: varchar("deletedBy", { length: 256 }),
+    importId: varchar("importId", { length: 255 }),
   },
 );
 
@@ -47,6 +49,35 @@ export const boardsRelations = relations(boards, ({ one, many }) => ({
 		fields: [boards.deletedBy],
 		references: [users.id],
 	}),
+  import: one(imports, {
+		fields: [boards.importId],
+		references: [imports.id],
+	}),
+}));
+
+export const imports = mySqlTable(
+  "import",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    publicId: varchar("publicId", { length: 12 }).notNull().unique(),
+    source: mysqlEnum('source', ['trello']).notNull(),
+    createdBy: varchar("createdBy", { length: 255 }).notNull(),
+    createdAt: timestamp("createdAt")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    status: mysqlEnum('status', ['started', 'success', 'failed']).notNull(),
+  },
+);
+
+export const importsRelations = relations(imports, ({ one, many }) => ({
+	createdBy: one(users, {
+		fields: [imports.createdBy],
+		references: [users.id],
+	}),
+  boards: many(boards),
+  cards: many(cards),
+  lists: many(lists),
+  labels: many(labels)
 }));
 
 export const labels = mySqlTable(
@@ -62,6 +93,7 @@ export const labels = mySqlTable(
       .notNull(),
     updatedAt: timestamp("updatedAt").onUpdateNow(),
     boardId: bigint("boardId", { mode: "number" }).notNull(),
+    importId: varchar("importId", { length: 255 }),
   }
 );
 
@@ -74,7 +106,11 @@ export const labelsRelations = relations(labels, ({ one, many }) => ({
 		fields: [labels.boardId],
 		references: [boards.id],
 	}),
-  cards: many(cardsToLabels)
+  cards: many(cardsToLabels),
+  import: one(imports, {
+		fields: [labels.importId],
+		references: [imports.id],
+	}),
 }));
 
 export const cardsToLabels = mySqlTable(
@@ -112,7 +148,8 @@ export const lists = mySqlTable(
     boardId: bigint("boardId", { mode: "number" }).notNull(),
     index: int("index").notNull(),
     deletedAt: timestamp("deletedAt"),
-    deletedBy: varchar("deletedBy", { length: 256 })
+    deletedBy: varchar("deletedBy", { length: 256 }),
+    importId: varchar("importId", { length: 255 }),
   }
 );
 
@@ -129,6 +166,10 @@ export const listsRelations = relations(lists, ({ one, many }) => ({
   deletedBy: one(users, {
 		fields: [lists.deletedBy],
 		references: [users.id],
+	}),
+  import: one(imports, {
+		fields: [lists.importId],
+		references: [imports.id],
 	}),
 }));
 
@@ -147,7 +188,8 @@ export const cards = mySqlTable(
     listId: bigint("listId", { mode: "number" }).notNull(),
     index: int("index").notNull(),
     deletedAt: timestamp("deletedAt"),
-    deletedBy: varchar("deletedBy", { length: 256 })
+    deletedBy: varchar("deletedBy", { length: 256 }),
+    importId: varchar("importId", { length: 255 }),
   }
 );
 
@@ -164,7 +206,11 @@ export const cardsRelations = relations(cards, ({ one, many }) => ({
 		fields: [cards.deletedBy],
 		references: [users.id],
 	}),
-  labels: many(cardsToLabels)
+  labels: many(cardsToLabels),
+  import: one(imports, {
+		fields: [cards.importId],
+		references: [imports.id],
+	}),
 }));
 
 export const users = mySqlTable("user", {
@@ -182,6 +228,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   boards: many(boards),
   cards: many(cards),
+  imports: many(imports),
   lists: many(lists),
 }));
 

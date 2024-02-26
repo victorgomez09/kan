@@ -97,13 +97,37 @@ const SelectSource = ({ handleNextStep }: { handleNextStep: () => void }) => {
   );
 };
 
-interface ImportTrelloProps {
-  handleSetAuthDetails: (apiKey: string, token: string) => void;
-}
+const ImportTrello: React.FC = () => {
+  const utils = api.useUtils();
+  const [apiKey, setApiKey] = useState("");
+  const [token, setToken] = useState("");
+  const { closeModal } = useModal();
 
-const ImportTrello: React.FC<ImportTrelloProps> = ({
-  handleSetAuthDetails,
-}) => {
+  const refetchBoards = () => utils.board.all.refetch();
+
+  const boards = api.import.trello.getBoards.useQuery(
+    { apiKey, token },
+    {
+      enabled: apiKey && token ? true : false,
+    },
+  );
+
+  const handleSetAuthDetails = (apiKey: string, token: string) => {
+    setApiKey(apiKey);
+    setToken(token);
+  };
+
+  const importBoards = api.import.trello.importBoards.useMutation({
+    onSuccess: async () => {
+      try {
+        await refetchBoards();
+        closeModal();
+      } catch (e) {
+        console.log(e);
+      }
+    },
+  });
+
   const formik = useFormik({
     initialValues: {
       apiKey: "",
@@ -113,6 +137,72 @@ const ImportTrello: React.FC<ImportTrelloProps> = ({
       handleSetAuthDetails(values.apiKey, values.token);
     },
   });
+
+  const boardsFormik = useFormik({
+    initialValues: {
+      ...Object.fromEntries(
+        boards?.data?.map((board) => [board.id, true]) ?? [],
+      ),
+    },
+    onSubmit: () => {
+      const boardIds = Object.keys(boardsFormik.values).filter(
+        (key) => boardsFormik.values[key] === true,
+      );
+
+      importBoards.mutate({
+        boardIds,
+        apiKey: formik.values.apiKey,
+        token: formik.values.token,
+      });
+    },
+    enableReinitialize: true,
+  });
+
+  if (boards?.data?.length)
+    return (
+      <form onSubmit={boardsFormik.handleSubmit}>
+        <div className="h-[105px] overflow-scroll">
+          {boards.data.map((board) => (
+            <div key={board.id}>
+              <div
+                className="flex items-center rounded-[5px] p-2 hover:bg-dark-300"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  await boardsFormik.setFieldValue(
+                    board.id,
+                    !boardsFormik.values[board.id],
+                  );
+                }}
+              >
+                <input
+                  id={board.id}
+                  name={board.id}
+                  type="checkbox"
+                  className="h-[14px] w-[14px] rounded bg-transparent"
+                  onClick={(event) => event.stopPropagation()}
+                  checked={boardsFormik.values[board.id]}
+                />
+                <label
+                  htmlFor={board.id}
+                  className="ml-3 text-sm text-dark-1000"
+                >
+                  {board.name}
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-5 sm:mt-6">
+          <button
+            type="submit"
+            className="inline-flex w-full justify-center rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold text-dark-50 shadow-sm focus-visible:outline-none"
+          >
+            Import selected
+          </button>
+        </div>
+      </form>
+    );
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -155,25 +245,8 @@ const ImportTrello: React.FC<ImportTrelloProps> = ({
 };
 
 export function ImportBoardsForm() {
-  // const utils = api.useUtils();
   const { closeModal } = useModal();
   const [step, setStep] = useState(1);
-  const [apiKey, setApiKey] = useState("");
-  const [token, setToken] = useState("");
-
-  const boards = api.import.trello.getBoards.useQuery(
-    { apiKey, token },
-    {
-      enabled: apiKey && token ? true : false,
-    },
-  );
-
-  const handleSetAuthDetails = (apiKey: string, token: string) => {
-    setApiKey(apiKey);
-    setToken(token);
-  };
-
-  // const refetchBoards = () => utils.board.all.refetch();
 
   return (
     <>
@@ -188,9 +261,7 @@ export function ImportBoardsForm() {
       </div>
 
       {step === 1 && <SelectSource handleNextStep={() => setStep(step + 1)} />}
-      {step === 2 && (
-        <ImportTrello handleSetAuthDetails={handleSetAuthDetails} />
-      )}
+      {step === 2 && <ImportTrello />}
     </>
   );
 }
