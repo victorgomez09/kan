@@ -28,7 +28,9 @@ const Button: React.FC<{
       href={href}
       onMouseEnter={handleMouseEnter}
       className={classNames(
-        current ? "bg-dark-200 text-white" : "bg-dark-200 text-white",
+        current
+          ? "bg-dark-200 text-white"
+          : "bg-dark-50 text-white hover:bg-dark-200",
         "group flex items-center gap-x-3 rounded-md p-1.5 text-sm font-normal leading-6 text-dark-1000",
       )}
     >

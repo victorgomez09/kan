@@ -3,6 +3,7 @@ import { cardRouter } from "~/server/api/routers/card";
 import { labelRouter } from "~/server/api/routers/label";
 import { listRouter } from "~/server/api/routers/list";
 import { importRouter } from "~/server/api/routers/import";
+import { workspaceRouter } from "~/server/api/routers/workspace";
 import { createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
   label: labelRouter,
   list: listRouter,
   import: importRouter,
+  workspace: workspaceRouter,
 });
 
 // export type definition of API

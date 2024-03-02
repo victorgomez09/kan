@@ -2,14 +2,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "~/server/auth";
 
-import boardsIcon from "~/app/assets/boards.json";
-
-import ReactiveButton from "~/app/components/ReactiveButton";
-import UserMenu from "~/app/components/UserMenu";
-
-const navigation = [
-  { name: "Boards", href: "/boards", icon: boardsIcon, current: true },
-];
+import SideNavigation from "./SideNavigation";
 
 export default async function Layout(props: { children: React.ReactNode }) {
   const session = await auth();
@@ -29,26 +22,7 @@ export default async function Layout(props: { children: React.ReactNode }) {
       </div>
 
       <div className="flex h-full w-full">
-        <nav className="flex w-72 flex-col justify-between border-r border-dark-600 px-5 py-5">
-          <div>
-            <ul role="list" className="-mx-2 my-3 space-y-1">
-              {navigation.map((item) => (
-                <li key={item.name}>
-                  <ReactiveButton
-                    href={item.href}
-                    current={item.current}
-                    name={item.name}
-                    json={item.icon}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-          <UserMenu
-            email={session?.user.email ?? ""}
-            imageUrl={session?.user.image ?? undefined}
-          />
-        </nav>
+        <SideNavigation user={session.user} />
         <div className="w-full overflow-hidden">{props.children}</div>
       </div>
     </main>

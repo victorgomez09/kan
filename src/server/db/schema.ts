@@ -34,7 +34,8 @@ export const boards = mySqlTable(
     updatedAt: timestamp("updatedAt").onUpdateNow(),
     deletedAt: timestamp("deletedAt"),
     deletedBy: varchar("deletedBy", { length: 256 }),
-    importId: varchar("importId", { length: 255 }),
+    importId: varchar("importId", { length: 256 }),
+    workspaceId: varchar("workspaceId", { length: 256 }),
   },
 );
 
@@ -52,6 +53,10 @@ export const boardsRelations = relations(boards, ({ one, many }) => ({
   import: one(imports, {
 		fields: [boards.importId],
 		references: [imports.id],
+	}),
+  workspace: one(workspaces, {
+		fields: [boards.workspaceId],
+		references: [workspaces.id],
 	}),
 }));
 
@@ -230,6 +235,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   cards: many(cards),
   imports: many(imports),
   lists: many(lists),
+  workspaces: many(workspaces),
 }));
 
 export const accounts = mySqlTable(
@@ -288,3 +294,24 @@ export const verificationTokens = mySqlTable(
     compoundKey: primaryKey(vt.identifier, vt.token),
   })
 );
+
+export const workspaces = mySqlTable(
+  "workspace",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    publicId: varchar("publicId", { length: 12 }).notNull().unique(),
+    name: varchar("name", { length: 256 }).notNull(),
+    slug: varchar("slug", { length: 256 }).notNull().unique(),  
+    createdBy: varchar("createdBy", { length: 256 }).notNull(),
+    createdAt: timestamp("createdAt")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+    deletedAt: timestamp("deletedAt"),
+    deletedBy: varchar("deletedBy", { length: 256 }),
+  }
+);
+
+export const workspaceRelations = relations(workspaces, ({ one }) => ({
+  user: one(users, { fields: [workspaces.createdBy], references: [users.id] }),
+}));

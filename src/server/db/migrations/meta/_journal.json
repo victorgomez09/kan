@@ -57,6 +57,20 @@
       "when": 1708882995081,
       "tag": "0007_open_nuke",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1709314036638,
+      "tag": "0008_modern_night_thrasher",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1709314236852,
+      "tag": "0009_massive_peter_parker",
+      "breakpoints": true
     }
   ]
 }

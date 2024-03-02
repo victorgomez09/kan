@@ -1,3 +1,5 @@
+"use client";
+
 import { Fragment } from "react";
 import { api } from "~/trpc/react";
 import { Menu, Transition } from "@headlessui/react";
