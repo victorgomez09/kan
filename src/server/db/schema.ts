@@ -35,7 +35,7 @@ export const boards = mySqlTable(
     deletedAt: timestamp("deletedAt"),
     deletedBy: varchar("deletedBy", { length: 256 }),
     importId: varchar("importId", { length: 256 }),
-    workspaceId: varchar("workspaceId", { length: 256 }),
+    workspaceId: bigint("workspaceId", { mode: "number" }).notNull(),
   },
 );
 

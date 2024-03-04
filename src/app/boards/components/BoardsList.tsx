@@ -3,9 +3,15 @@
 import Link from "next/link";
 
 import { api } from "~/trpc/react";
+import { useWorkspace } from "~/app/providers/workspace";
 
 export function BoardsList() {
-  const { data } = api.board.all.useQuery();
+  const { workspace } = useWorkspace();
+
+  const { data } = api.board.all.useQuery(
+    { workspacePublicId: workspace?.publicId },
+    { enabled: workspace?.publicId ? true : false },
+  );
 
   if (data?.length === 0) return <></>;
 

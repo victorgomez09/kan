@@ -2,8 +2,6 @@
 
 import { usePathname } from "next/navigation";
 
-import { api } from "~/trpc/react";
-
 import boardsIcon from "~/app/assets/boards.json";
 import membersIcon from "~/app/assets/members.json";
 import settingsIcon from "~/app/assets/settings.json";

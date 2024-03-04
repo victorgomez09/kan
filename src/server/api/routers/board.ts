@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { and, eq, asc, isNull, inArray } from "drizzle-orm";
 
-import { boards, cards, lists } from "~/server/db/schema";
+import { boards, cards, lists, workspaces } from "~/server/db/schema";
 import { generateUID } from "~/utils/generateUID";
 
 import {
@@ -10,19 +10,29 @@ import {
 } from "~/server/api/trpc";
 
 export const boardRouter = createTRPCRouter({
-  all: publicProcedure.query(({ ctx }) => {
-    const userId = ctx.session?.user.id;
+  all: publicProcedure
+    .input(z.object({ workspacePublicId: z.string().min(12) }))
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session?.user.id;
 
-    if (!userId) return;
+      // @todo: validate user has access to workspace
 
-    return ctx.db.query.boards.findMany({
-      where: and(eq(boards.createdBy, userId), isNull(boards.deletedAt)),
-      columns: {
-        publicId: true,
-        name: true,
-      },
-    });
-  }),
+      if (!userId) return;
+
+      const workspace = await ctx.db.query.workspaces.findFirst({
+        where: eq(workspaces.publicId, input.workspacePublicId),
+      })
+
+      if (!workspace) return;
+
+      return ctx.db.query.boards.findMany({
+        where: and(eq(boards.workspaceId, workspace.id), isNull(boards.deletedAt)),
+        columns: {
+          publicId: true,
+          name: true,
+        },
+      });
+    }),
   byId: publicProcedure
     .input(z.object({ id: z.string().min(12) }))
     .query(({ ctx, input }) => 
