@@ -26,7 +26,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${jakarta.variable}`}>
-      <body className="h-screen overflow-hidden">
+      <body className="h-screen overflow-hidden font-sans">
         <TRPCReactProvider headers={headers()}>
           <ModalProvider>
             <BoardProvider>{children}</BoardProvider>
