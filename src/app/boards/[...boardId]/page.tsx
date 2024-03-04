@@ -61,7 +61,7 @@ export default function BoardPage() {
   const [selectedPublicListId, setSelectedPublicListId] =
     useState<PublicListId>("");
 
-  const boardId = params?.id?.length ? params.id[0] : null;
+  const boardId = params?.boardId?.length ? params.boardId[0] : null;
 
   const updateBoard = api.board.update.useMutation();
 

@@ -1,6 +1,6 @@
 import { and, eq, isNull } from "drizzle-orm";
 
-import { workspaces } from "~/server/db/schema";
+import { workspaceMembers } from "~/server/db/schema";
 
 import {
   createTRPCRouter,
@@ -13,12 +13,19 @@ export const workspaceRouter = createTRPCRouter({
 
     if (!userId) return;
 
-    return ctx.db.query.workspaces.findMany({
-      where: and(eq(workspaces.createdBy, userId), isNull(workspaces.deletedAt)),
+    return ctx.db.query.workspaceMembers.findMany({
+      where: and(eq(workspaceMembers.userId, userId), isNull(workspaceMembers.deletedAt)),
       columns: {
-        publicId: true,
-        name: true,
+        role: true,
       },
+      with: {
+        workspace: {
+          columns: {
+            publicId: true,
+            name: true
+          }
+        }
+      }
     });
   }),
 });

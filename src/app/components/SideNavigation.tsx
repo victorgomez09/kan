@@ -11,11 +11,7 @@ import settingsIcon from "~/app/assets/settings.json";
 import ReactiveButton from "~/app/components/ReactiveButton";
 import UserMenu from "~/app/components/UserMenu";
 
-const navigation = [
-  { name: "Boards", href: "/boards", icon: boardsIcon },
-  { name: "Members", href: "/members", icon: membersIcon },
-  { name: "Settings", href: "/settings", icon: settingsIcon },
-];
+import { useWorkspace } from "~/app/providers/workspace";
 
 interface SideNavigationProps {
   user: UserType;
@@ -28,10 +24,17 @@ interface UserType {
 
 export default function SideNavigation({ user }: SideNavigationProps) {
   const pathname = usePathname();
+  const { workspace } = useWorkspace();
 
-  const { data } = api.workspace.all.useQuery();
-
-  const workspace = data?.[0];
+  const navigation = [
+    { name: "Boards", href: "/boards", icon: boardsIcon },
+    {
+      name: "Members",
+      href: "/members",
+      icon: membersIcon,
+    },
+    { name: "Settings", href: "/settings", icon: settingsIcon },
+  ];
 
   return (
     <nav className="flex w-72 flex-col justify-between border-r border-dark-600 px-5 py-5">

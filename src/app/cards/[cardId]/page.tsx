@@ -27,7 +27,9 @@ export default function CardPage() {
   const params = useParams();
   const { modalContentType } = useModal();
 
-  const cardId = params?.id?.length ? params.id[0] : null;
+  const cardId = Array.isArray(params?.cardId)
+    ? params.cardId[0]
+    : params?.cardId;
 
   const { data } = api.card.byId.useQuery({ id: cardId ?? "" });
 

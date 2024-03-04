@@ -63,7 +63,7 @@ export const {
       options: {},
       async sendVerificationRequest({ identifier: email, url }) {
         const magicLinkEmail = MagicLinkEmail({ loginUrl: url });
-        await fetch(process.env.EMAIL_URL ?? '', {
+        const response = await fetch(process.env.EMAIL_URL ?? '', {
           method: "POST",
           headers: {
             'Content-Type': 'application/json',
@@ -77,10 +77,9 @@ export const {
           }),
         })
 
-        // if (!response.ok) {
-        //   const { errors } = await response.json()
-        //   throw new Error(JSON.stringify(errors))
-        // }
+        if (response.status !== 200) {
+          throw new Error('Error sending magic login')
+        }
       },
     }
   ],

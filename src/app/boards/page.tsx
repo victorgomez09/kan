@@ -6,8 +6,8 @@ import { BoardsList } from "./components/BoardsList";
 import { useModal } from "~/app/providers/modal";
 import Modal from "~/app/components/modal";
 
-import { ImportBoardsForm } from "~/app/boards/components/ImportBoardsForm";
-import { NewBoardForm } from "~/app/boards/components/NewBoardForm";
+import { ImportBoardsForm } from "./components/ImportBoardsForm";
+import { NewBoardForm } from "./components/NewBoardForm";
 
 export default function BoardsPage() {
   const { openModal, modalContentType } = useModal();

@@ -128,7 +128,7 @@ export const cardsToLabels = mySqlTable(
   }),
 );
 
-export const cardOnLabelsRelations = relations(cardsToLabels, ({ one }) => ({
+export const cardToLabelsRelations = relations(cardsToLabels, ({ one }) => ({
 	card: one(cards, {
 		fields: [cardsToLabels.cardId],
 		references: [cards.id],
@@ -315,3 +315,36 @@ export const workspaces = mySqlTable(
 export const workspaceRelations = relations(workspaces, ({ one }) => ({
   user: one(users, { fields: [workspaces.createdBy], references: [users.id] }),
 }));
+
+export const workspaceMembers = mySqlTable(
+  "workspace_members",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    publicId: varchar("publicId", { length: 12 }).notNull().unique(),
+    userId: varchar("userId", { length: 256 }).notNull().references(() => users.id),
+    workspaceId: bigint("workspaceId", { mode: "number" }).notNull().references(() => workspaces.id),
+    createdBy: varchar("createdBy", { length: 256 }).notNull(),
+    createdAt: timestamp("createdAt")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+    deletedAt: timestamp("deletedAt"),
+    role: mysqlEnum('role', ['admin', 'member', 'guest']).notNull(),
+  }, (t) => ({
+    pk: primaryKey(t.userId, t.workspaceId),
+  }),
+);
+
+export const usersToWorkspacesRelations = relations(workspaceMembers, ({ one }) => ({
+  addedBy: one(users, { fields: [workspaceMembers.createdBy], references: [users.id] }),
+	user: one(users, {
+		fields: [workspaceMembers.userId],
+		references: [users.id],
+	}),
+  workspace: one(workspaces, {
+		fields: [workspaceMembers.workspaceId],
+		references: [workspaces.id],
+	}),
+}));
+
+
