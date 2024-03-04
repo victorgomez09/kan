@@ -90,17 +90,27 @@ export const boardRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(1),
+        workspacePublicId: z.string().min(12)
       }),
     )
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const userId = ctx.session?.user.id;
 
       if (!userId) return;
+
+      const workspace = await ctx.db.query.workspaces.findFirst({
+        where: eq(workspaces.publicId, input.workspacePublicId),
+      })
+
+      console.log({ workspace })
+
+      if (!workspace) return;
 
       return ctx.db.insert(boards).values({
         publicId: generateUID(),
         name: input.name,
         createdBy: userId,
+        workspaceId: workspace.id
       });
     }),
     update: publicProcedure

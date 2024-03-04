@@ -5,6 +5,7 @@ import { api } from "~/trpc/react";
 import { HiXMark } from "react-icons/hi2";
 
 import { useModal } from "~/app/providers/modal";
+import { useWorkspace } from "~/app/providers/workspace";
 
 import { Formik, Form, Field } from "formik";
 
@@ -15,6 +16,7 @@ interface FormValues {
 export function NewBoardForm() {
   const utils = api.useUtils();
   const { closeModal } = useModal();
+  const { workspace } = useWorkspace();
 
   const refetchBoards = () => utils.board.all.refetch();
 
@@ -44,6 +46,7 @@ export function NewBoardForm() {
         onSubmit={(values: FormValues) => {
           createBoard.mutate({
             name: values.name,
+            workspacePublicId: workspace?.publicId,
           });
         }}
       >

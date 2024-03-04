@@ -8,6 +8,7 @@ import { FaTrello } from "react-icons/fa";
 import { HiChevronUpDown, HiXMark } from "react-icons/hi2";
 
 import { useModal } from "~/app/providers/modal";
+import { useWorkspace } from "~/app/providers/workspace";
 
 import { useFormik } from "formik";
 
@@ -102,6 +103,7 @@ const ImportTrello: React.FC = () => {
   const [apiKey, setApiKey] = useState("");
   const [token, setToken] = useState("");
   const { closeModal } = useModal();
+  const { workspace } = useWorkspace();
 
   const refetchBoards = () => utils.board.all.refetch();
 
@@ -153,6 +155,7 @@ const ImportTrello: React.FC = () => {
         boardIds,
         apiKey: formik.values.apiKey,
         token: formik.values.token,
+        workspacePublicId: workspace?.publicId,
       });
     },
     enableReinitialize: true,

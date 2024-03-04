@@ -6,7 +6,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 
-import { boards, cards, imports,  lists } from "~/server/db/schema";
+import { boards, cards, imports,  lists, workspaces } from "~/server/db/schema";
 import { generateUID } from "~/utils/generateUID";
 
 const TRELLO_API_URL = 'https://api.trello.com/1';
@@ -81,6 +81,7 @@ export const importRouter = createTRPCRouter({
           boardIds: z.array(z.string()),
           apiKey: z.string().length(32),
           token: z.string().length(76),
+          workspacePublicId: z.string().min(12)
         }),
       )
       .mutation(async ({ ctx, input }) => {
@@ -114,12 +115,19 @@ export const importRouter = createTRPCRouter({
             }))
           }
 
+          const workspace = await ctx.db.query.workspaces.findFirst({
+            where: eq(workspaces.publicId, input.workspacePublicId),
+          })
+
+          if (!workspace) return;
+
           await ctx.db.transaction(async (tx) => {
             const newBoard = await tx.insert(boards).values({
               publicId: generateUID(),
               name: data.name,
               createdBy: userId,
-              importId: newImport.insertId
+              importId: newImport.insertId,
+              workspaceId: workspace.id
             });
 
             if (!newBoard?.insertId) return;
