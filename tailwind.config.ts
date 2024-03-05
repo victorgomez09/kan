@@ -24,6 +24,9 @@ export default {
         "dark-950": "#bbb",
         "dark-1000": "#ededed",
       },
+      screens: {
+        xxl: '1600px'
+      }
     },
   },
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
