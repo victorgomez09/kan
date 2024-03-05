@@ -35,6 +35,7 @@ interface Card {
   publicId: string;
   title: string;
   labels?: Label[];
+  members?: Member[];
 }
 
 interface Label {
@@ -45,6 +46,19 @@ interface LabelData {
   publicId: string;
   name: string;
   colourCode: string;
+}
+
+interface Member {
+  member: MemberData;
+}
+
+interface MemberData {
+  publicId: string;
+  user: User;
+}
+
+interface User {
+  name: string;
 }
 
 interface FormValues {
@@ -222,9 +236,10 @@ export default function BoardPage() {
                                   {...provided.dragHandleProps}
                                 >
                                   <div>{card.title}</div>
-                                  {card.labels?.length ? (
+                                  {(card.labels?.length ?? 0) ||
+                                  (card.members?.length ?? 0) ? (
                                     <div className="mt-2 flex justify-end space-x-1">
-                                      {card.labels.map(({ label }) => (
+                                      {card.labels?.map(({ label }) => (
                                         <span
                                           key={label.publicId}
                                           className="inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[10px] font-medium text-dark-1000 ring-1 ring-inset ring-dark-800"
@@ -238,6 +253,23 @@ export default function BoardPage() {
                                             <circle cx={3} cy={3} r={3} />
                                           </svg>
                                           <div>{label.name}</div>
+                                        </span>
+                                      ))}
+                                      {card.members?.map(({ member }) => (
+                                        <span
+                                          key={member.publicId}
+                                          className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-500"
+                                        >
+                                          <span className="text-[10px] font-medium leading-none text-white">
+                                            {member.user.name
+                                              .split(" ")
+                                              .map((namePart) =>
+                                                namePart
+                                                  .charAt(0)
+                                                  .toUpperCase(),
+                                              )
+                                              .join("")}
+                                          </span>
                                         </span>
                                       ))}
                                     </div>

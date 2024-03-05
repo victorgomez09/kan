@@ -78,6 +78,26 @@ export const boardRouter = createTRPCRouter({
                         }
                       }
                     }
+                  },
+                  members: {
+                    columns: {
+                      workspaceMemberId: false,
+                      cardId: false,
+                    },
+                    with: {
+                      member: {
+                        columns: {
+                          publicId: true,
+                        },
+                        with: {
+                          user: {
+                            columns: {
+                              name: true
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }

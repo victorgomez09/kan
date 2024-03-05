@@ -139,6 +139,27 @@ export const cardToLabelsRelations = relations(cardsToLabels, ({ one }) => ({
 	}),
 }));
 
+export const cardToWorkspaceMembers = mySqlTable(
+  "card_workspace_members",
+  {
+    cardId: bigint("cardId", { mode: "number" }).notNull().references(() => cards.id),
+    workspaceMemberId: bigint("workspaceMemberId", { mode: "number" }).notNull().references(() => workspaceMembers.id),
+  }, (t) => ({
+    pk: primaryKey(t.cardId, t.workspaceMemberId),
+  }),
+);
+
+export const cardToWorkspaceMembersRelations = relations(cardToWorkspaceMembers, ({ one }) => ({
+	card: one(cards, {
+		fields: [cardToWorkspaceMembers.cardId],
+		references: [cards.id],
+	}),
+  member: one(workspaceMembers, {
+		fields: [cardToWorkspaceMembers.workspaceMemberId],
+		references: [workspaceMembers.id],
+	}),
+}));
+
 export const lists = mySqlTable(
   "list",
   {
@@ -212,6 +233,7 @@ export const cardsRelations = relations(cards, ({ one, many }) => ({
 		references: [users.id],
 	}),
   labels: many(cardsToLabels),
+  members: many(cardToWorkspaceMembers),
   import: one(imports, {
 		fields: [cards.importId],
 		references: [imports.id],
