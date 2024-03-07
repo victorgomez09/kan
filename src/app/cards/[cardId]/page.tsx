@@ -10,6 +10,7 @@ import Dropdown from "./components/Dropdown";
 import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
 import LabelSelector from "./components/LabelSelector";
 import ListSelector from "./components/ListSelector";
+import MemberSelector from "./components/MemberSelector";
 import { NewLabelForm } from "./components/NewLabelForm";
 
 import Modal from "~/app/components/modal";
@@ -35,8 +36,10 @@ export default function CardPage() {
 
   const boardId = data?.list?.board?.publicId;
   const labels = data?.list?.board?.labels;
+  const workspaceMembers = data?.list?.board?.workspace?.members;
   const board = data?.list?.board;
   const selectedLabels = data?.labels;
+  const selectedMembers = data?.members;
 
   const formattedLabels =
     labels?.map((label) => {
@@ -56,6 +59,18 @@ export default function CardPage() {
       ...list,
       selected: list.publicId === data?.list.publicId,
     })) ?? [];
+
+  const formattedMembers =
+    workspaceMembers?.map((member) => {
+      const isSelected = selectedMembers?.some(
+        (assignedMember) => assignedMember.member.publicId === member.publicId,
+      );
+
+      return {
+        ...member,
+        selected: isSelected ?? false,
+      };
+    }) ?? [];
 
   const updateCard = api.card.update.useMutation();
 
@@ -126,9 +141,13 @@ export default function CardPage() {
           <p className="my-2 w-[100px] text-sm">List</p>
           <ListSelector cardPublicId={cardId} lists={formattedLists} />
         </div>
-        <div className="flex w-full">
+        <div className="mb-4 flex w-full">
           <p className="my-2 w-[100px] text-sm">Labels</p>
           <LabelSelector cardPublicId={cardId} labels={formattedLabels} />
+        </div>
+        <div className="flex w-full">
+          <p className="my-2 w-[100px] text-sm">Members</p>
+          <MemberSelector cardPublicId={cardId} members={formattedMembers} />
         </div>
       </div>
 

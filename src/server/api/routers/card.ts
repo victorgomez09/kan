@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 
-import { cards, cardsToLabels, labels, lists } from "~/server/db/schema";
+import { cards, cardsToLabels, cardToWorkspaceMembers, labels, lists, workspaceMembers } from "~/server/db/schema";
 import { generateUID } from "~/utils/generateUID";
 
 import {
@@ -86,6 +86,45 @@ export const cardRouter = createTRPCRouter({
           });
         })
       }),
+    addOrRemoveMember: publicProcedure
+      .input(
+        z.object({
+          cardPublicId: z.string().min(12),
+          workspaceMemberPublicId: z.string().min(12),
+        }),
+      )
+      .mutation(({ ctx, input }) => {
+        const userId = ctx.session?.user.id;
+
+        if (!userId) return;
+
+        return ctx.db.transaction(async (tx) => {
+          const card = await tx.query.cards.findFirst({
+            where: and(eq(cards.publicId, input.cardPublicId), isNull(cards.deletedAt)),
+          });
+
+          const member = await tx.query.workspaceMembers.findFirst({
+            where: eq(workspaceMembers.publicId, input.workspaceMemberPublicId),
+          });
+          
+          if (!card || !member) return;
+
+          console.log({ member })
+
+          const memberExists = await tx.query.cardToWorkspaceMembers.findFirst({
+            where: and(eq(cardToWorkspaceMembers.cardId, card.id), eq(cardToWorkspaceMembers.workspaceMemberId, member.id)),
+          });
+
+          if (memberExists) {
+            return tx.delete(cardToWorkspaceMembers).where(and(eq(cardToWorkspaceMembers.cardId, card.id), eq(cardToWorkspaceMembers.workspaceMemberId, member.id)),);
+          }
+
+          return tx.insert(cardToWorkspaceMembers).values({
+            cardId: card.id,
+            workspaceMemberId: member.id,
+          });
+        })
+      }),
     byId: publicProcedure
       .input(z.object({ id: z.string().min(12) }))
       .query(({ ctx, input }) => 
@@ -103,7 +142,7 @@ export const cardRouter = createTRPCRouter({
                     name: true,
                     colourCode: true,
                   }
-                }
+                },
               }
             },
             list: {
@@ -130,9 +169,50 @@ export const cardRouter = createTRPCRouter({
                         name: true,
                       },
                       where: isNull(lists.deletedAt)
+                    },
+                    workspace: {
+                      columns: {
+                        publicId: true,
+                      },
+                      with: {
+                        members: {
+                          columns: {
+                            publicId: true,
+                          },
+                          with: {
+                            user: {
+                              columns: {
+                                id: true,
+                                name: true,
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                }
+              }
+            },
+            members: {
+              columns: {
+                workspaceMemberId: false,
+                cardId: false,
+              },
+              with: {
+                member: {
+                  columns: {
+                    publicId: true,
+                  },
+                  with: {
+                    user: {
+                      columns: {
+                        id: true,
+                        name: true,
+                      }
                     }
                   }
-                }
+                },
               }
             },
           },

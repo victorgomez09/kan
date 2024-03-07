@@ -334,8 +334,9 @@ export const workspaces = mySqlTable(
   }
 );
 
-export const workspaceRelations = relations(workspaces, ({ one }) => ({
+export const workspaceRelations = relations(workspaces, ({ one, many }) => ({
   user: one(users, { fields: [workspaces.createdBy], references: [users.id] }),
+  members: many(workspaceMembers)
 }));
 
 export const workspaceMembers = mySqlTable(

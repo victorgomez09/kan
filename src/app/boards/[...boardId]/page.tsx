@@ -255,23 +255,25 @@ export default function BoardPage() {
                                           <div>{label.name}</div>
                                         </span>
                                       ))}
-                                      {card.members?.map(({ member }) => (
-                                        <span
-                                          key={member.publicId}
-                                          className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-500"
-                                        >
-                                          <span className="text-[10px] font-medium leading-none text-white">
-                                            {member.user.name
-                                              .split(" ")
-                                              .map((namePart) =>
-                                                namePart
-                                                  .charAt(0)
-                                                  .toUpperCase(),
-                                              )
-                                              .join("")}
+                                      <div className="isolate flex -space-x-1 overflow-hidden">
+                                        {card.members?.map(({ member }) => (
+                                          <span
+                                            key={member.publicId}
+                                            className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-500 ring-2 ring-dark-500"
+                                          >
+                                            <span className="text-[10px] font-medium leading-none text-white">
+                                              {member.user.name
+                                                .split(" ")
+                                                .map((namePart) =>
+                                                  namePart
+                                                    .charAt(0)
+                                                    .toUpperCase(),
+                                                )
+                                                .join("")}
+                                            </span>
                                           </span>
-                                        </span>
-                                      ))}
+                                        ))}
+                                      </div>
                                     </div>
                                   ) : null}
                                 </Link>
