@@ -62,7 +62,7 @@ export const MagicLinkEmail = ({ loginUrl }: MagicLinkEmailProps) => (
       <Body className="bg-white">
         <Container className="font-body m-auto px-3">
           <Heading className="my-10 text-[24px] font-bold text-dark-200">
-            貫 kan
+            kan.bn
           </Heading>
           <Heading className="text-[24px] font-bold text-dark-200">
             Login to your Kan account

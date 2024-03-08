@@ -13,7 +13,7 @@ interface UserMenuProps {
 
 export default function UserMenu({ imageUrl, email }: UserMenuProps) {
   return (
-    <Menu as="div" className="relative inline-block text-left">
+    <Menu as="div" className="relative inline-block w-full text-left">
       <div>
         <Menu.Button className="-mx-2 flex items-center rounded-md p-1.5 text-dark-900 hover:bg-dark-200 hover:text-dark-1000">
           {imageUrl ? (
