@@ -1,6 +1,7 @@
+import { z } from "zod";
 import { and, eq, isNull } from "drizzle-orm";
 
-import { workspaceMembers } from "~/server/db/schema";
+import { workspaces, workspaceMembers } from "~/server/db/schema";
 
 import {
   createTRPCRouter,
@@ -24,6 +25,37 @@ export const workspaceRouter = createTRPCRouter({
             columns: {
               publicId: true,
               name: true
+            }
+          }
+        }
+      });
+    }),
+  byId: publicProcedure
+    .input(z.object({ publicId: z.string().min(12) }))
+    .query(({ ctx, input }) => {
+      const userId = ctx.session?.user.id;
+
+      if (!userId) return;
+
+      return ctx.db.query.workspaces.findFirst({
+        where: and(eq(workspaces.publicId, input.publicId), isNull(workspaces.deletedAt)),
+        columns: {
+          publicId: true,
+        },
+        with: {
+          members: {
+            columns: {
+              publicId: true,
+              role: true,
+            },
+            with: {
+              user: {
+                columns: {
+                  id: true,
+                  name: true,
+                  email: true,
+                }
+              }
             }
           }
         }
