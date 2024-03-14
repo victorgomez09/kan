@@ -8,6 +8,8 @@ import Modal from "~/app/components/modal";
 import { ImportBoardsForm } from "~/app/boards/components/ImportBoardsForm";
 import { NewBoardForm } from "~/app/boards/components/NewBoardForm";
 
+import MemberDropdown from "./components/MemberDropdown";
+
 import { api } from "~/trpc/react";
 
 export default function MembersPage() {
@@ -68,12 +70,13 @@ export default function MembersPage() {
                     {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
                   </span>
                 </div>
-                <span className="absolute inset-0" aria-hidden="true" />
-
                 <p className="truncate text-sm text-dark-900">
                   {member.user.email}
                 </p>
               </div>
+            </div>
+            <div className="flex-shrink-0">
+              <MemberDropdown />
             </div>
           </div>
         ))}
