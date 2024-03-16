@@ -10,9 +10,12 @@ import React, {
 
 import { api } from "~/trpc/react";
 
+import { useRouter } from "next/navigation";
+
 interface WorkspaceContextProps {
   workspace: Workspace;
-  setWorkspace: React.Dispatch<React.SetStateAction<Workspace>>;
+  switchWorkspace: (_workspace: Workspace) => void;
+  availableWorkspaces: Workspace[];
 }
 
 interface Workspace {
@@ -20,10 +23,12 @@ interface Workspace {
   publicId: string;
 }
 
-const initialBoardData: Workspace = {
+const initialWorkspace: Workspace = {
   name: "",
   publicId: "",
 };
+
+const initialAvailableWorkspaces: Workspace[] = [];
 
 const WorkspaceContext = createContext<WorkspaceContextProps | undefined>(
   undefined,
@@ -32,17 +37,43 @@ const WorkspaceContext = createContext<WorkspaceContextProps | undefined>(
 export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [workspace, setWorkspace] = useState<Workspace>(initialBoardData);
+  const router = useRouter();
+  const [workspace, setWorkspace] = useState<Workspace>(initialWorkspace);
+  const [availableWorkspaces, setAvailableWorkspaces] = useState<Workspace[]>(
+    initialAvailableWorkspaces,
+  );
 
   const { data } = api.workspace.all.useQuery();
 
+  console.log({ data });
+
+  const switchWorkspace = (_workspace: Workspace) => {
+    localStorage.setItem("workspacePublicId", _workspace.publicId);
+
+    setWorkspace(_workspace);
+
+    router.push(`/boards`);
+  };
+
   useEffect(() => {
+    if (!data) return;
+
     const storedWorkspaceId: string | null =
       localStorage.getItem("workspacePublicId");
 
+    if (data?.length) {
+      const workspaces = data.map(({ workspace }) => ({
+        publicId: workspace.publicId,
+        name: workspace.name,
+      }));
+
+      setAvailableWorkspaces(workspaces);
+    }
+
     if (storedWorkspaceId !== null) {
-      const selectedWorkspace = data?.find(
-        ({ workspace }) => (workspace.publicId = storedWorkspaceId),
+      const newData = data;
+      const selectedWorkspace = newData?.find(
+        ({ workspace }) => workspace.publicId === storedWorkspaceId,
       );
 
       if (!selectedWorkspace) return;
@@ -53,11 +84,8 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
       });
     } else {
       const primaryWorkspace = data?.[0]?.workspace;
-
       if (!primaryWorkspace) return;
-
       localStorage.setItem("workspacePublicId", primaryWorkspace?.publicId);
-
       setWorkspace({
         publicId: primaryWorkspace?.publicId,
         name: primaryWorkspace?.name,
@@ -66,7 +94,9 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
   }, [data]);
 
   return (
-    <WorkspaceContext.Provider value={{ workspace, setWorkspace }}>
+    <WorkspaceContext.Provider
+      value={{ workspace, availableWorkspaces, switchWorkspace }}
+    >
       {children}
     </WorkspaceContext.Provider>
   );

@@ -15,7 +15,7 @@ export default function UserMenu({ imageUrl, email }: UserMenuProps) {
   return (
     <Menu as="div" className="relative inline-block w-full text-left">
       <div>
-        <Menu.Button className="-mx-2 flex items-center rounded-md p-1.5 text-dark-900 hover:bg-dark-200 hover:text-dark-1000">
+        <Menu.Button className="flex w-full items-center rounded-md p-1.5 text-dark-900 hover:bg-dark-200 hover:text-dark-1000">
           {imageUrl ? (
             <Image
               src={imageUrl ?? ""}
@@ -48,13 +48,13 @@ export default function UserMenu({ imageUrl, email }: UserMenuProps) {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute bottom-[50px] right-[-10px] z-10 mt-2 w-[225px] origin-bottom-right rounded-md border border-dark-400 bg-dark-300 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="flex">
+        <Menu.Items className="absolute bottom-[40px] left-0 z-10 mt-2 w-full origin-top-left rounded-md border border-dark-500 bg-dark-300 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div className="flex w-full">
             <Menu.Item>
               {() => (
                 <button
                   onClick={() => signOut({ callbackUrl: "/boards" })}
-                  className="m-1 flex w-full items-center rounded-[5px] px-3 py-2 text-left text-sm text-dark-1000 hover:bg-dark-400"
+                  className="m-1 flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs text-dark-1000 hover:bg-dark-400"
                 >
                   <HiOutlineLogout size={18} className="mr-2" />
                   Logout
