@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 
 import { HiXMark } from "react-icons/hi2";
@@ -43,12 +43,18 @@ export function NewCardForm({ listPublicId }: listPublicId) {
     },
   });
 
+  useEffect(() => {
+    const titleElement: HTMLElement | null =
+      document?.querySelector<HTMLElement>("#title");
+    if (titleElement) titleElement.focus();
+  }, []);
+
   return (
     <>
       <div className="flex w-full justify-between pb-4">
-        <h2 className="text-sm font-medium text-dark-1000">New card</h2>
+        <h2 className="text-sm font-bold text-dark-1000">New card</h2>
         <button
-          className="rounded p-1 hover:bg-dark-300"
+          className="rounded p-1 hover:bg-dark-300 focus:outline-none"
           onClick={() => closeModal()}
         >
           <HiXMark size={18} className="text-dark-900" />

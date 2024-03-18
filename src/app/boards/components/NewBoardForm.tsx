@@ -30,9 +30,9 @@ export function NewBoardForm() {
   return (
     <>
       <div className="flex w-full justify-between pb-4">
-        <h2 className="text-sm font-medium text-dark-1000">New board</h2>
+        <h2 className="text-sm font-bold text-dark-1000">New board</h2>
         <button
-          className="rounded p-1 hover:bg-dark-300"
+          className="rounded p-1 hover:bg-dark-300 focus:outline-none"
           onClick={() => closeModal()}
         >
           <HiXMark size={18} className="text-dark-900" />

@@ -5,7 +5,7 @@ import { auth } from "~/server/auth";
 import SideNavigation from "./SideNavigation";
 import FeedbackButton from "./FeedbackButton";
 
-export default async function Layout(props: { children: React.ReactNode }) {
+export default async function Dashboard(props: { children: React.ReactNode }) {
   const session = await auth();
 
   if (!session?.user) {
