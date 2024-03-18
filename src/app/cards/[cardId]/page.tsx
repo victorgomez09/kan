@@ -12,6 +12,7 @@ import LabelSelector from "./components/LabelSelector";
 import ListSelector from "./components/ListSelector";
 import MemberSelector from "./components/MemberSelector";
 import { NewLabelForm } from "./components/NewLabelForm";
+import { NewWorkspaceForm } from "~/app/components/NewWorkspaceForm";
 
 import Modal from "~/app/components/modal";
 import { useModal } from "~/app/providers/modal";
@@ -162,6 +163,7 @@ export default function CardPage() {
             cardPublicId={cardId}
           />
         )}
+        {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
       </Modal>
     </div>
   );

@@ -3,6 +3,8 @@ import { and, eq, isNull } from "drizzle-orm";
 
 import { workspaces, workspaceMembers } from "~/server/db/schema";
 
+import { generateUID } from "~/utils/generateUID";
+
 import {
   createTRPCRouter,
   publicProcedure,
@@ -59,6 +61,40 @@ export const workspaceRouter = createTRPCRouter({
             }
           }
         }
+      });
+    }),
+  create: publicProcedure
+    .input(
+      z.object({
+        name: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session?.user.id;
+
+      if (!userId) return;
+
+      const workspace = await ctx.db.insert(workspaces).values({
+        publicId: generateUID(),
+        name: input.name,
+        slug: input.name.toLowerCase(),
+        createdBy: userId,
+      });
+
+      await ctx.db.insert(workspaceMembers).values({
+        publicId: generateUID(),
+        userId,
+        workspaceId: Number(workspace.insertId),
+        createdBy: userId,
+        role: 'admin'
+      })
+
+      return ctx.db.query.workspaces.findFirst({
+        where: eq(workspaces.id, Number(workspace.insertId)),
+        columns: {
+          publicId: true,
+          name: true,
+        },
       });
     }),
 });

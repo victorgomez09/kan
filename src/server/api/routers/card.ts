@@ -109,8 +109,6 @@ export const cardRouter = createTRPCRouter({
           
           if (!card || !member) return;
 
-          console.log({ member })
-
           const memberExists = await tx.query.cardToWorkspaceMembers.findFirst({
             where: and(eq(cardToWorkspaceMembers.cardId, card.id), eq(cardToWorkspaceMembers.workspaceMemberId, member.id)),
           });

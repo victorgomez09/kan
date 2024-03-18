@@ -45,8 +45,6 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
 
   const { data } = api.workspace.all.useQuery();
 
-  console.log({ data });
-
   const switchWorkspace = (_workspace: Workspace) => {
     localStorage.setItem("workspacePublicId", _workspace.publicId);
 

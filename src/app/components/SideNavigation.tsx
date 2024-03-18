@@ -33,23 +33,28 @@ export default function SideNavigation({ user }: SideNavigationProps) {
   ];
 
   return (
-    <nav className="flex w-72 flex-col justify-between border-r border-dark-600 px-3 pb-3 pt-5">
-      <div>
-        <WorkspaceMenu />
-        <ul role="list" className="space-y-1">
-          {navigation.map((item) => (
-            <li key={item.name}>
-              <ReactiveButton
-                href={item.href}
-                current={pathname.includes(item.href)}
-                name={item.name}
-                json={item.icon}
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
-      <UserMenu email={user?.email ?? ""} imageUrl={user?.image ?? undefined} />
-    </nav>
+    <>
+      <nav className="flex w-72 flex-col justify-between border-r border-dark-600 px-3 pb-3 pt-5">
+        <div>
+          <WorkspaceMenu />
+          <ul role="list" className="space-y-1">
+            {navigation.map((item) => (
+              <li key={item.name}>
+                <ReactiveButton
+                  href={item.href}
+                  current={pathname.includes(item.href)}
+                  name={item.name}
+                  json={item.icon}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+        <UserMenu
+          email={user?.email ?? ""}
+          imageUrl={user?.image ?? undefined}
+        />
+      </nav>
+    </>
   );
 }

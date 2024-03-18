@@ -7,6 +7,7 @@ import Modal from "~/app/components/modal";
 
 import { ImportBoardsForm } from "~/app/boards/components/ImportBoardsForm";
 import { NewBoardForm } from "~/app/boards/components/NewBoardForm";
+import { NewWorkspaceForm } from "~/app/components/NewWorkspaceForm";
 
 import MemberDropdown from "./components/MemberDropdown";
 
@@ -85,6 +86,7 @@ export default function MembersPage() {
       <Modal>
         {modalContentType === "NEW_BOARD" && <NewBoardForm />}
         {modalContentType === "IMPORT_BOARDS" && <ImportBoardsForm />}
+        {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
       </Modal>
     </div>
   );

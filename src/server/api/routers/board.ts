@@ -122,8 +122,6 @@ export const boardRouter = createTRPCRouter({
         where: eq(workspaces.publicId, input.workspacePublicId),
       })
 
-      console.log({ workspace })
-
       if (!workspace) return;
 
       return ctx.db.insert(boards).values({

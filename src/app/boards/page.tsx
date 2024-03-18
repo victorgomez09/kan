@@ -8,6 +8,7 @@ import Modal from "~/app/components/modal";
 
 import { ImportBoardsForm } from "./components/ImportBoardsForm";
 import { NewBoardForm } from "./components/NewBoardForm";
+import { NewWorkspaceForm } from "~/app/components/NewWorkspaceForm";
 
 export default function BoardsPage() {
   const { openModal, modalContentType } = useModal();
@@ -48,6 +49,7 @@ export default function BoardsPage() {
       <Modal>
         {modalContentType === "NEW_BOARD" && <NewBoardForm />}
         {modalContentType === "IMPORT_BOARDS" && <ImportBoardsForm />}
+        {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
       </Modal>
 
       <div className="flex flex-row">

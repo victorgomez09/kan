@@ -22,6 +22,7 @@ import BoardDropdown from "./components/BoardDropdown";
 import { DeleteBoardConfirmation } from "./components/DeleteBoardConfirmation";
 import { DeleteListConfirmation } from "./components/DeleteListConfirmation";
 import List from "./components/List";
+import { NewWorkspaceForm } from "~/app/components/NewWorkspaceForm";
 import { NewCardForm } from "./components/NewCardForm";
 import { NewListForm } from "./components/NewListForm";
 
@@ -304,6 +305,7 @@ export default function BoardPage() {
         {modalContentType === "NEW_LIST" && (
           <NewListForm boardPublicId={boardId} />
         )}
+        {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
       </Modal>
     </div>
   );
