@@ -124,7 +124,8 @@ export default function CardPage() {
           <form onSubmit={formik.handleSubmit} className="w-full space-y-6">
             <div className="mt-2">
               <ContentEditable
-                html={formik.values.description || "Add description..."}
+                placeholder="Add description..."
+                html={formik.values.description}
                 disabled={false}
                 onChange={(e) =>
                   formik.setFieldValue("description", e.target.value)
