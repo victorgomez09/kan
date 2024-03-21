@@ -4,7 +4,7 @@ import Dashboard from "~/app/components/dashboard";
 export default function Layout(props: { children: React.ReactNode }) {
   return (
     <WorkspaceProvider>
-      <Dashboard>{props.children}</Dashboard>;
+      <Dashboard>{props.children}</Dashboard>
     </WorkspaceProvider>
   );
 }
