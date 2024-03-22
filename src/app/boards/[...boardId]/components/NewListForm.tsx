@@ -1,8 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 
 import { HiXMark } from "react-icons/hi2";
+import { Switch } from "@headlessui/react";
 
 import { useBoard } from "~/app/providers/board";
 import { useModal } from "~/app/providers/modal";
@@ -17,10 +19,15 @@ interface boardPublicId {
   boardPublicId: string;
 }
 
+function classNames(...classes: string[]): string {
+  return classes.filter(Boolean).join(" ");
+}
+
 export function NewListForm({ boardPublicId }: boardPublicId) {
   const utils = api.useUtils();
   const { boardData } = useBoard();
   const { closeModal } = useModal();
+  const [isCreateAnotherEnabled, setIsCreateAnotherEnabled] = useState(false);
 
   const refetchBoard = () =>
     utils.board.byId.refetch({ id: boardData.publicId });
@@ -29,12 +36,18 @@ export function NewListForm({ boardPublicId }: boardPublicId) {
     onSuccess: async () => {
       try {
         await refetchBoard();
-        closeModal();
+        if (!isCreateAnotherEnabled) closeModal();
       } catch (e) {
         console.log(e);
       }
     },
   });
+
+  useEffect(() => {
+    const nameElement: HTMLElement | null =
+      document?.querySelector<HTMLElement>("#list-name");
+    if (nameElement) nameElement.focus();
+  }, []);
 
   return (
     <>
@@ -52,25 +65,46 @@ export function NewListForm({ boardPublicId }: boardPublicId) {
         initialValues={{
           name: "",
         }}
-        onSubmit={(values: FormValues) => {
+        onSubmit={(values: FormValues, { resetForm }) => {
           createList.mutate({
             name: values.name,
             boardPublicId,
           });
+          resetForm();
         }}
       >
         <Form>
           <label
-            htmlFor="name"
+            htmlFor="list-name"
             className="block pb-2 text-sm font-normal leading-6 text-dark-1000"
           >
             Name
           </label>
           <Field
-            id="name"
+            id="list-name"
             name="name"
             className="block w-full rounded-md border-0 bg-dark-300 bg-white/5 py-1.5 text-dark-1000 shadow-sm ring-1 ring-inset ring-dark-700 focus:ring-2 focus:ring-inset focus:ring-dark-700 sm:text-sm sm:leading-6"
           />
+          <div className="mt-3 flex items-center justify-end">
+            <span className="mr-2 text-xs text-dark-900">Create more</span>
+            <Switch
+              checked={isCreateAnotherEnabled}
+              onChange={setIsCreateAnotherEnabled}
+              className={classNames(
+                isCreateAnotherEnabled ? "bg-indigo-600" : "bg-dark-800",
+                "relative inline-flex h-4 w-6 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+              )}
+            >
+              <span className="sr-only">Use setting</span>
+              <span
+                aria-hidden="true"
+                className={classNames(
+                  isCreateAnotherEnabled ? "translate-x-2" : "translate-x-0",
+                  "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                )}
+              />
+            </Switch>
+          </div>
           <div className="mt-5 sm:mt-6">
             <button
               type="submit"
