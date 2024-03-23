@@ -1,21 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { api } from "~/trpc/react";
 
 import { HiXMark } from "react-icons/hi2";
 import { Switch } from "@headlessui/react";
 
+import CheckboxDropdown from "~/app/components/CheckboxDropdown";
 import { useBoard } from "~/app/providers/board";
 import { useModal } from "~/app/providers/modal";
 
-import { Formik, Form, Field } from "formik";
-
-interface FormValues {
+interface FormData {
   title: string;
+  listPublicId: string;
 }
 
-interface listPublicId {
+interface NewCardFormProps {
   listPublicId: string;
 }
 
@@ -23,11 +24,18 @@ function classNames(...classes: string[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
-export function NewCardForm({ listPublicId }: listPublicId) {
+export function NewCardForm({ listPublicId }: NewCardFormProps) {
   const utils = api.useUtils();
   const { boardData } = useBoard();
   const { closeModal } = useModal();
   const [isCreateAnotherEnabled, setIsCreateAnotherEnabled] = useState(false);
+
+  const { register, handleSubmit, reset, setValue, watch } = useForm<FormData>({
+    defaultValues: {
+      title: "",
+      listPublicId,
+    },
+  });
 
   const refetchBoard = () =>
     utils.board.byId.refetch({ id: boardData.publicId });
@@ -49,6 +57,27 @@ export function NewCardForm({ listPublicId }: listPublicId) {
     if (titleElement) titleElement.focus();
   }, []);
 
+  const formattedLists =
+    boardData?.lists.map((list) => ({
+      key: list.publicId,
+      value: list.name,
+      selected: list.publicId === watch("listPublicId"),
+    })) ?? [];
+
+  const onSubmit = (data: FormData) => {
+    createCard.mutate({
+      title: data.title,
+      listPublicId: data.listPublicId,
+    });
+    reset();
+  };
+
+  const handleSelectList = (listPublicId: string): void => {
+    setValue("listPublicId", listPublicId);
+  };
+
+  const selectedList = formattedLists.find((item) => item.selected);
+
   return (
     <>
       <div className="flex w-full justify-between pb-4">
@@ -61,61 +90,61 @@ export function NewCardForm({ listPublicId }: listPublicId) {
         </button>
       </div>
 
-      <Formik
-        initialValues={{
-          title: "",
-        }}
-        onSubmit={(values: FormValues, { resetForm }) => {
-          createCard.mutate({
-            title: values.title,
-            listPublicId,
-          });
-          resetForm();
-        }}
-      >
-        <Form>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div>
           <label
             htmlFor="title"
             className="block pb-2 text-sm font-normal leading-6 text-dark-1000"
           >
             Title
           </label>
-          <Field
+          <input
             id="title"
-            name="title"
+            type="text"
+            {...register("title")}
             className="block w-full rounded-md border-0 bg-dark-300 bg-white/5 py-1.5 text-dark-1000 shadow-sm ring-1 ring-inset ring-dark-700 focus:ring-2 focus:ring-inset focus:ring-dark-700 sm:text-sm sm:leading-6"
           />
-          <div className="mt-3 flex items-center justify-end">
-            <span className="mr-2 text-xs text-dark-900">Create more</span>
-            <Switch
-              checked={isCreateAnotherEnabled}
-              onChange={setIsCreateAnotherEnabled}
+        </div>
+        <div className="mt-2 w-fit">
+          <CheckboxDropdown
+            items={formattedLists}
+            handleSelect={(list: { key: string }) => handleSelectList(list.key)}
+          >
+            <div className="flex h-full w-full items-center rounded-[5px] border-[1px] border-dark-600 bg-dark-400 px-2 py-1.5 text-left text-xs text-dark-1000 hover:bg-dark-500">
+              {selectedList?.value}
+            </div>
+          </CheckboxDropdown>
+        </div>
+        <div className="mt-3 flex items-center justify-end">
+          <span className="mr-2 text-xs text-dark-900">Create more</span>
+          <Switch
+            checked={isCreateAnotherEnabled}
+            onChange={setIsCreateAnotherEnabled}
+            className={classNames(
+              isCreateAnotherEnabled ? "bg-indigo-600" : "bg-dark-800",
+              "relative inline-flex h-4 w-6 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+            )}
+          >
+            <span className="sr-only">Use setting</span>
+            <span
+              aria-hidden="true"
               className={classNames(
-                isCreateAnotherEnabled ? "bg-indigo-600" : "bg-dark-800",
-                "relative inline-flex h-4 w-6 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                isCreateAnotherEnabled ? "translate-x-2" : "translate-x-0",
+                "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
               )}
-            >
-              <span className="sr-only">Use setting</span>
-              <span
-                aria-hidden="true"
-                className={classNames(
-                  isCreateAnotherEnabled ? "translate-x-2" : "translate-x-0",
-                  "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                )}
-              />
-            </Switch>
-          </div>
+            />
+          </Switch>
+        </div>
 
-          <div className="mt-5 sm:mt-6">
-            <button
-              type="submit"
-              className="inline-flex w-full justify-center rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold text-dark-50 shadow-sm focus-visible:outline-none"
-            >
-              Create card
-            </button>
-          </div>
-        </Form>
-      </Formik>
+        <div className="mt-5 sm:mt-6">
+          <button
+            type="submit"
+            className="inline-flex w-full justify-center rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold text-dark-50 shadow-sm focus-visible:outline-none"
+          >
+            Create card
+          </button>
+        </div>
+      </form>
     </>
   );
 }
