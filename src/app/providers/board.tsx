@@ -29,7 +29,7 @@ interface BoardData {
 interface Label {
   publicId: string;
   name: string;
-  colourCode: string;
+  colourCode: string | null;
 }
 
 interface List {
@@ -43,7 +43,7 @@ interface List {
 interface Members {
   publicId: string;
   user: {
-    name: string;
+    name: string | null;
   };
 }
 
