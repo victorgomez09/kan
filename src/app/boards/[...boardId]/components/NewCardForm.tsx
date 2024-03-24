@@ -14,7 +14,9 @@ import { useModal } from "~/app/providers/modal";
 interface FormData {
   title: string;
   listPublicId: string;
+  labelPublicIds: string[];
   memberPublicIds: string[];
+  isCreateAnotherEnabled: boolean;
 }
 
 interface NewCardFormProps {
@@ -29,17 +31,20 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
   const utils = api.useUtils();
   const { boardData } = useBoard();
   const { closeModal } = useModal();
-  const [isCreateAnotherEnabled, setIsCreateAnotherEnabled] = useState(false);
 
   const { register, handleSubmit, reset, setValue, watch } = useForm<FormData>({
     defaultValues: {
       title: "",
       listPublicId,
+      labelPublicIds: [],
       memberPublicIds: [],
+      isCreateAnotherEnabled: false,
     },
   });
 
+  const labelPublicIds = watch("labelPublicIds") || [];
   const memberPublicIds = watch("memberPublicIds") || [];
+  const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
 
   const refetchBoard = () =>
     utils.board.byId.refetch({ id: boardData.publicId });
@@ -49,6 +54,13 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
       try {
         await refetchBoard();
         if (!isCreateAnotherEnabled) closeModal();
+        reset({
+          title: "",
+          listPublicId: watch("listPublicId"),
+          labelPublicIds: [],
+          memberPublicIds: [],
+          isCreateAnotherEnabled: watch("isCreateAnotherEnabled"),
+        });
       } catch (e) {
         console.log(e);
       }
@@ -60,6 +72,13 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
       document?.querySelector<HTMLElement>("#title");
     if (titleElement) titleElement.focus();
   }, []);
+
+  const formattedLabels =
+    boardData?.labels.map((label) => ({
+      key: label.publicId,
+      value: label.name,
+      selected: labelPublicIds.includes(label.publicId),
+    })) ?? [];
 
   const formattedLists =
     boardData?.lists.map((list) => ({
@@ -79,9 +98,13 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
     createCard.mutate({
       title: data.title,
       listPublicId: data.listPublicId,
+      labelsPublicIds: data.labelPublicIds,
       memberPublicIds: data.memberPublicIds,
     });
-    reset();
+  };
+
+  const handleToggleCreateAnother = (): void => {
+    setValue("isCreateAnotherEnabled", !isCreateAnotherEnabled);
   };
 
   const handleSelectList = (listPublicId: string): void => {
@@ -96,6 +119,17 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
       const newMemberPublicIds = [...memberPublicIds];
       newMemberPublicIds.splice(currentIndex, 1);
       setValue("memberPublicIds", newMemberPublicIds);
+    }
+  };
+
+  const handleSelectLabels = (labelPublicId: string): void => {
+    const currentIndex = labelPublicIds.indexOf(labelPublicId);
+    if (currentIndex === -1) {
+      setValue("labelPublicIds", [...labelPublicIds, labelPublicId]);
+    } else {
+      const newLabelPublicIds = [...labelPublicIds];
+      newLabelPublicIds.splice(currentIndex, 1);
+      setValue("labelPublicIds", newLabelPublicIds);
     }
   };
 
@@ -152,7 +186,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
                 {!memberPublicIds.length ? (
                   "Members"
                 ) : (
-                  <>
+                  <div className="flex -space-x-1 overflow-hidden">
                     {memberPublicIds.map((memberPublicId) => {
                       const member = formattedMembers.find(
                         (member) => member.key === memberPublicId,
@@ -174,6 +208,55 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
                         </span>
                       );
                     })}
+                  </div>
+                )}
+              </div>
+            </CheckboxDropdown>
+          </div>
+          <div className="w-fit">
+            <CheckboxDropdown
+              items={formattedLabels}
+              handleSelect={(list: { key: string }) =>
+                handleSelectLabels(list.key)
+              }
+            >
+              <div className="flex h-full w-full items-center rounded-[5px] border-[1px] border-dark-600 bg-dark-400 px-2 py-1 text-left text-xs text-dark-1000 hover:bg-dark-500">
+                {!labelPublicIds.length ? (
+                  "Labels"
+                ) : (
+                  <>
+                    <div
+                      className={
+                        labelPublicIds.length > 1
+                          ? "flex -space-x-[2px] overflow-hidden"
+                          : "flex items-center"
+                      }
+                    >
+                      {labelPublicIds.map((labelPublicId) => {
+                        const label = boardData?.labels.find(
+                          (label) => label.publicId === labelPublicId,
+                        );
+
+                        return (
+                          <>
+                            <svg
+                              fill={label?.colourCode}
+                              className="h-2 w-2"
+                              viewBox="0 0 6 6"
+                              aria-hidden="true"
+                            >
+                              <circle cx={3} cy={3} r={3} />
+                            </svg>
+                            {labelPublicIds.length === 1 && (
+                              <div className="ml-1">{label?.name}</div>
+                            )}
+                          </>
+                        );
+                      })}
+                    </div>
+                    {labelPublicIds.length > 1 && (
+                      <div className="ml-1">{`${labelPublicIds.length} labels`}</div>
+                    )}
                   </>
                 )}
               </div>
@@ -185,7 +268,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
           <span className="mr-2 text-xs text-dark-900">Create more</span>
           <Switch
             checked={isCreateAnotherEnabled}
-            onChange={setIsCreateAnotherEnabled}
+            onChange={handleToggleCreateAnother}
             className={classNames(
               isCreateAnotherEnabled ? "bg-indigo-600" : "bg-dark-800",
               "relative inline-flex h-4 w-6 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",

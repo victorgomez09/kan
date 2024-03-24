@@ -15,6 +15,7 @@ export const cardRouter = createTRPCRouter({
       z.object({
         title: z.string().min(1),
         listPublicId: z.string().min(12),
+        labelsPublicIds: z.array(z.string().min(12)),
         memberPublicIds: z.array(z.string().min(12))
       }),
     )
@@ -48,6 +49,18 @@ export const cardRouter = createTRPCRouter({
           listId: list.id,
           index: latestCard ? latestCard.index + 1 : 0
         });
+
+        if (newCard.insertId && input.labelsPublicIds.length) {
+          const labels = await tx.query.labels.findMany({
+            where: inArray(cards.publicId, input.labelsPublicIds),
+          });
+
+          if (!labels.length) return;
+
+          const labelsInsert = labels.map((label) => ({ cardId: Number(newCard.insertId), labelId: label.id }))
+
+          await tx.insert(cardsToLabels).values(labelsInsert);
+        }
 
         if (newCard.insertId && input.memberPublicIds.length) {
           const members = await tx.query.workspaceMembers.findMany({

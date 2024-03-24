@@ -62,6 +62,13 @@ export const boardRouter = createTRPCRouter({
               }
             }
           },
+          labels: {
+            columns: {
+              publicId: true,
+              colourCode: true,
+              name: true,
+            }
+          },
           lists: {
             orderBy: [asc(lists.index)],
             where: isNull(cards.deletedAt),

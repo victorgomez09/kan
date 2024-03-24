@@ -19,10 +19,17 @@ interface BoardContextProps {
 interface BoardData {
   name: string;
   publicId: string;
+  labels: Label[];
   lists: List[];
   workspace: {
     members: Members[];
   };
+}
+
+interface Label {
+  publicId: string;
+  name: string;
+  colourCode: string;
 }
 
 interface List {
@@ -62,6 +69,7 @@ const initialBoardData: BoardData = {
   name: "",
   publicId: "",
   lists: [],
+  labels: [],
   workspace: {
     members: [],
   },
