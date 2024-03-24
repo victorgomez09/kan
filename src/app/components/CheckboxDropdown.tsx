@@ -7,7 +7,7 @@ interface CheckboxDropdownProps {
   children: React.ReactNode;
   items: {
     key: string;
-    value: string;
+    value: string | null;
     selected: boolean;
   }[];
   handleSelect: (item: { key: string }) => void;

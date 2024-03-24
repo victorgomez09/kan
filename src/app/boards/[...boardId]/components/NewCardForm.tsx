@@ -199,7 +199,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
                         >
                           <span className="text-[8px] font-medium leading-none text-white">
                             {member?.value
-                              .split(" ")
+                              ?.split(" ")
                               .map((namePart) =>
                                 namePart.charAt(0).toUpperCase(),
                               )
@@ -240,7 +240,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
                         return (
                           <>
                             <svg
-                              fill={label?.colourCode}
+                              fill={label?.colourCode ?? "#3730a3"}
                               className="h-2 w-2"
                               viewBox="0 0 6 6"
                               aria-hidden="true"
