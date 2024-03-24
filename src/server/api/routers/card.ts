@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, inArray, sql } from "drizzle-orm";
 
 import { cards, cardsToLabels, cardToWorkspaceMembers, labels, lists, workspaceMembers } from "~/server/db/schema";
 import { generateUID } from "~/utils/generateUID";
@@ -15,6 +15,7 @@ export const cardRouter = createTRPCRouter({
       z.object({
         title: z.string().min(1),
         listPublicId: z.string().min(12),
+        memberPublicIds: z.array(z.string().min(12))
       }),
     )
     .mutation(({ ctx, input }) => {
@@ -40,13 +41,27 @@ export const cardRouter = createTRPCRouter({
           orderBy: desc(cards.index)
         });
 
-        return tx.insert(cards).values({
+        const newCard = await tx.insert(cards).values({
           publicId: generateUID(),
           title: input.title,
           createdBy: userId,
           listId: list.id,
           index: latestCard ? latestCard.index + 1 : 0
         });
+
+        if (newCard.insertId && input.memberPublicIds.length) {
+          const members = await tx.query.workspaceMembers.findMany({
+            where: inArray(workspaceMembers.publicId, input.memberPublicIds),
+          });
+
+          if (!members.length) return;
+
+          const membersInsert = members.map((member) => ({ cardId: Number(newCard.insertId), workspaceMemberId: member.id}))
+
+          await tx.insert(cardToWorkspaceMembers).values(membersInsert);
+        }
+
+        return newCard;
       })
     }),
     addOrRemoveLabel: publicProcedure

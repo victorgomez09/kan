@@ -43,6 +43,25 @@ export const boardRouter = createTRPCRouter({
           name: true,
         },
         with: {
+          workspace: {
+            columns: {
+              publicId: true,
+            },
+            with: {
+              members: {
+                columns: {
+                  publicId: true,
+                },
+                with: {
+                  user: {
+                    columns: {
+                      name: true
+                    }
+                  }
+                }
+              }
+            }
+          },
           lists: {
             orderBy: [asc(lists.index)],
             where: isNull(cards.deletedAt),

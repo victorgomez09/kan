@@ -20,6 +20,9 @@ interface BoardData {
   name: string;
   publicId: string;
   lists: List[];
+  workspace: {
+    members: Members[];
+  };
 }
 
 interface List {
@@ -28,6 +31,13 @@ interface List {
   boardId: number;
   index: number;
   cards: Card[];
+}
+
+interface Members {
+  publicId: string;
+  user: {
+    name: string;
+  };
 }
 
 interface Card {
@@ -52,6 +62,9 @@ const initialBoardData: BoardData = {
   name: "",
   publicId: "",
   lists: [],
+  workspace: {
+    members: [],
+  },
 };
 
 const BoardContext = createContext<BoardContextProps | undefined>(undefined);
