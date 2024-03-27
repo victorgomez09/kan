@@ -5,7 +5,7 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import NextAuth, { type DefaultSession } from "next-auth";
 
 import { db } from "~/server/db";
-import { mySqlTable } from "~/server/db/schema";
+import { pgTable} from "drizzle-orm/pg-core";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -45,7 +45,7 @@ export const {
       },
     }),
   },
-  adapter: DrizzleAdapter(db, mySqlTable),
+  adapter: DrizzleAdapter(db, pgTable),
   pages: {
     signIn: "/auth/login",
     // signOut: "/auth/signout",

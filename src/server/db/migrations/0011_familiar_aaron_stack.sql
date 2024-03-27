@@ -1,1 +1,0 @@
-ALTER TABLE `board` MODIFY COLUMN `workspaceId` bigint NOT NULL;

@@ -1,1 +1,0 @@
-ALTER TABLE `card_label` ADD PRIMARY KEY(`cardId`,`labelId`);

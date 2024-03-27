@@ -1,1 +1,0 @@
-ALTER TABLE `workspace` ADD CONSTRAINT `workspace_slug_unique` UNIQUE(`slug`);

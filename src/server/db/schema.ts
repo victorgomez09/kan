@@ -1,41 +1,36 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
-  bigint,
-  index,
-  int,
-  mysqlEnum,
-  mysqlTableCreator,
+  integer,
+  bigserial,
+  uuid,
+  pgEnum,
+  pgTable,
   primaryKey,
   text,
   timestamp,
   varchar,
-} from "drizzle-orm/mysql-core";
+  bigint,
+} from "drizzle-orm/pg-core";
 
 import { type AdapterAccount } from "@auth/core/adapters";
 
-/**
- * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
- * database instance for multiple projects.
- *
- * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
- */
-export const mySqlTable = mysqlTableCreator((name) => `${name}`);
+export const importSourceEnum = pgEnum('source', ['trello']);
+export const importStatusEnum = pgEnum('status', ['started', 'success', 'failed']);
+export const memberRoleEnum = pgEnum('role', ['admin', 'member', 'guest']);
 
-export const boards = mySqlTable(
+export const boards = pgTable(
   "board",
   {
-    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     publicId: varchar("publicId", { length: 12 }).notNull().unique(),
     name: varchar("name", { length: 255 }).notNull(),
-    createdBy: varchar("createdBy", { length: 255 }).notNull(),
-    createdAt: timestamp("createdAt")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
-    deletedAt: timestamp("deletedAt"),
-    deletedBy: varchar("deletedBy", { length: 256 }),
-    importId: varchar("importId", { length: 256 }),
-    workspaceId: bigint("workspaceId", { mode: "number" }).notNull(),
+    createdBy: uuid("createdBy").notNull().references(() => users.id),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt"),
+    deletedAt: timestamp("deletedAt").defaultNow(),
+    deletedBy: uuid("deletedBy").references(() => users.id),
+    importId: bigint("importId", { mode: "number" }).references(() => imports.id),
+    workspaceId: bigint("workspaceId", { mode: "number" }).notNull().references(() => workspaces.id),
   },
 );
 
@@ -60,17 +55,15 @@ export const boardsRelations = relations(boards, ({ one, many }) => ({
 	}),
 }));
 
-export const imports = mySqlTable(
+export const imports = pgTable(
   "import",
   {
-    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-    source: mysqlEnum('source', ['trello']).notNull(),
-    createdBy: varchar("createdBy", { length: 255 }).notNull(),
-    createdAt: timestamp("createdAt")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    status: mysqlEnum('status', ['started', 'success', 'failed']).notNull(),
+    source: importSourceEnum('source').notNull(),
+    status: importStatusEnum('status').notNull(),
+    createdBy: uuid("createdBy").notNull().references(() => users.id),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
 );
 
@@ -85,20 +78,18 @@ export const importsRelations = relations(imports, ({ one, many }) => ({
   labels: many(labels)
 }));
 
-export const labels = mySqlTable(
+export const labels = pgTable(
   "label",
   {
-    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-    name: varchar("name", { length: 256 }).notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
     colourCode: varchar("colourCode", { length: 12 }),
-    createdBy: varchar("createdBy", { length: 256 }).notNull(),
-    createdAt: timestamp("createdAt")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
-    boardId: bigint("boardId", { mode: "number" }).notNull(),
-    importId: varchar("importId", { length: 255 }),
+    createdBy: uuid("createdBy").notNull().references(() => users.id),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt"),
+    boardId: bigint("boardId", { mode: "number" }).notNull().references(() => boards.id),
+    importId: bigint("importId", { mode: "number" }).references(() => imports.id),
   }
 );
 
@@ -118,8 +109,8 @@ export const labelsRelations = relations(labels, ({ one, many }) => ({
 	}),
 }));
 
-export const cardsToLabels = mySqlTable(
-  "card_label",
+export const cardsToLabels = pgTable(
+  "_card_labels",
   {
     cardId: bigint("cardId", { mode: "number" }).notNull().references(() => cards.id),
     labelId: bigint("labelId", { mode: "number" }).notNull().references(() => labels.id),
@@ -139,8 +130,8 @@ export const cardToLabelsRelations = relations(cardsToLabels, ({ one }) => ({
 	}),
 }));
 
-export const cardToWorkspaceMembers = mySqlTable(
-  "card_workspace_members",
+export const cardToWorkspaceMembers = pgTable(
+  "_card_workspace_members",
   {
     cardId: bigint("cardId", { mode: "number" }).notNull().references(() => cards.id),
     workspaceMemberId: bigint("workspaceMemberId", { mode: "number" }).notNull().references(() => workspaceMembers.id),
@@ -160,22 +151,20 @@ export const cardToWorkspaceMembersRelations = relations(cardToWorkspaceMembers,
 	}),
 }));
 
-export const lists = mySqlTable(
+export const lists = pgTable(
   "list",
   {
-    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-    name: varchar("name", { length: 256 }).notNull(),
-    createdBy: varchar("createdBy", { length: 256 }).notNull(),
-    createdAt: timestamp("createdAt")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
-    boardId: bigint("boardId", { mode: "number" }).notNull(),
-    index: int("index").notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    index: integer("index").notNull(),
+    createdBy: uuid("createdBy").notNull().references(() => users.id),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt"),
     deletedAt: timestamp("deletedAt"),
-    deletedBy: varchar("deletedBy", { length: 256 }),
-    importId: varchar("importId", { length: 255 }),
+    deletedBy: uuid("deletedBy").references(() => users.id),
+    boardId: bigint("boardId", { mode: "number" }).notNull().references(() => boards.id),
+    importId: bigint("importId", { mode: "number" }).references(() => imports.id),
   }
 );
 
@@ -199,23 +188,21 @@ export const listsRelations = relations(lists, ({ one, many }) => ({
 	}),
 }));
 
-export const cards = mySqlTable(
+export const cards = pgTable(
   "card",
   {
-    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-    title: varchar("title", { length: 256 }).notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
     description: text("description"),
-    createdBy: varchar("createdBy", { length: 256 }).notNull(),
-    createdAt: timestamp("createdAt")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
-    listId: bigint("listId", { mode: "number" }).notNull(),
-    index: int("index").notNull(),
+    index: integer("index").notNull(),
+    createdBy: uuid("createdBy").notNull().references(() => users.id),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt"),
     deletedAt: timestamp("deletedAt"),
-    deletedBy: varchar("deletedBy", { length: 256 }),
-    importId: varchar("importId", { length: 255 }),
+    deletedBy: uuid("deletedBy").references(() => users.id),
+    listId: bigint("listId", { mode: "number" }).notNull().references(() => lists.id),
+    importId: bigint("importId", { mode: "number" }).references(() => imports.id),
   }
 );
 
@@ -240,14 +227,11 @@ export const cardsRelations = relations(cards, ({ one, many }) => ({
 	}),
 }));
 
-export const users = mySqlTable("user", {
-  id: varchar("id", { length: 255 }).notNull().primaryKey(),
+export const users = pgTable("user", {
+  id: uuid("id").notNull().primaryKey(),
   name: varchar("name", { length: 255 }),
   email: varchar("email", { length: 255 }).notNull().unique(),
-  emailVerified: timestamp("emailVerified", {
-    mode: "date",
-    fsp: 3,
-  }).default(sql`CURRENT_TIMESTAMP(3)`),
+  emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: varchar("image", { length: 255 }),
 });
 
@@ -260,10 +244,12 @@ export const usersRelations = relations(users, ({ many }) => ({
   workspaces: many(workspaces),
 }));
 
-export const accounts = mySqlTable(
+export const accounts = pgTable(
   "account",
   {
-    userId: varchar("userId", { length: 255 }).notNull(),
+    userId: uuid("userId")
+    .notNull()
+    .references(() => users.id),
     type: varchar("type", { length: 255 })
       .$type<AdapterAccount["type"]>()
       .notNull(),
@@ -271,7 +257,7 @@ export const accounts = mySqlTable(
     providerAccountId: varchar("providerAccountId", { length: 255 }).notNull(),
     refresh_token: text("refresh_token"),
     access_token: text("access_token"),
-    expires_at: int("expires_at"),
+    expires_at: integer("expires_at"),
     token_type: varchar("token_type", { length: 255 }),
     scope: varchar("scope", { length: 255 }),
     id_token: text("id_token"),
@@ -279,7 +265,6 @@ export const accounts = mySqlTable(
   },
   (account) => ({
     compoundKey: primaryKey(account.provider, account.providerAccountId),
-    userIdIdx: index("userId_idx").on(account.userId),
   })
 );
 
@@ -287,25 +272,22 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
   user: one(users, { fields: [accounts.userId], references: [users.id] }),
 }));
 
-export const sessions = mySqlTable(
+export const sessions = pgTable(
   "session",
   {
     sessionToken: varchar("sessionToken", { length: 255 })
       .notNull()
       .primaryKey(),
-    userId: varchar("userId", { length: 255 }).notNull(),
+    userId: uuid("userId").notNull().references(() => users.id),
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
-  (session) => ({
-    userIdIdx: index("userId_idx").on(session.userId),
-  })
 );
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, { fields: [sessions.userId], references: [users.id] }),
 }));
 
-export const verificationTokens = mySqlTable(
+export const verificationTokens = pgTable(
   "verificationToken",
   {
     identifier: varchar("identifier", { length: 255 }).notNull(),
@@ -317,20 +299,18 @@ export const verificationTokens = mySqlTable(
   })
 );
 
-export const workspaces = mySqlTable(
+export const workspaces = pgTable(
   "workspace",
   {
-    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-    name: varchar("name", { length: 256 }).notNull(),
-    slug: varchar("slug", { length: 256 }).notNull().unique(),  
-    createdBy: varchar("createdBy", { length: 256 }).notNull(),
-    createdAt: timestamp("createdAt")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
+    name: varchar("name", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull().unique(),  
+    createdBy: uuid("createdBy").notNull().references(() => users.id),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt"),
     deletedAt: timestamp("deletedAt"),
-    deletedBy: varchar("deletedBy", { length: 256 }),
+    deletedBy: uuid("deletedBy").references(() => users.id),
   }
 );
 
@@ -339,23 +319,19 @@ export const workspaceRelations = relations(workspaces, ({ one, many }) => ({
   members: many(workspaceMembers)
 }));
 
-export const workspaceMembers = mySqlTable(
+export const workspaceMembers = pgTable(
   "workspace_members",
   {
-    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-    userId: varchar("userId", { length: 256 }).notNull().references(() => users.id),
+    userId: uuid("userId").notNull().references(() => users.id),
     workspaceId: bigint("workspaceId", { mode: "number" }).notNull().references(() => workspaces.id),
-    createdBy: varchar("createdBy", { length: 256 }).notNull(),
-    createdAt: timestamp("createdAt")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
+    createdBy: uuid("createdBy").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt"),
     deletedAt: timestamp("deletedAt"),
-    role: mysqlEnum('role', ['admin', 'member', 'guest']).notNull(),
-  }, (t) => ({
-    pk: primaryKey(t.userId, t.workspaceId),
-  }),
+    role: memberRoleEnum('role').notNull(),
+  },
 );
 
 export const usersToWorkspacesRelations = relations(workspaceMembers, ({ one }) => ({
