@@ -43,11 +43,15 @@ export const labelRouter = createTRPCRouter({
           colourCode: input.colourCode,
           createdBy: userId,
           boardId: card.list.boardId,
-        });
+        }).returning({ id: labels.id });
+
+        const newLabelId = newLabel[0]?.id
+
+        if (!newLabelId) return;
 
         return tx.insert(cardsToLabels).values({
           cardId: card.id,
-          labelId: Number(newLabel.insertId),
+          labelId: newLabelId,
         });
       })
     }),

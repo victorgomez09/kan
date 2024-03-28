@@ -94,7 +94,9 @@ export const importRouter = createTRPCRouter({
           source: 'trello',
           createdBy: userId,
           status: 'started'
-        })
+        }).returning({ id: imports.id });
+
+        const newImportId = newImport[0]?.id;
 
         let boardsCreated = 0;
 
@@ -126,11 +128,13 @@ export const importRouter = createTRPCRouter({
               publicId: generateUID(),
               name: data.name,
               createdBy: userId,
-              importId: newImport.insertId,
+              importId: newImportId,
               workspaceId: workspace.id
-            });
+            }).returning({ id: boards.id });
 
-            if (!newBoard?.insertId) return;
+            const newBoardId = newBoard[0]?.id
+
+            if (!newBoardId) return;
 
             let listIndex = 0;
 
@@ -139,20 +143,22 @@ export const importRouter = createTRPCRouter({
                 publicId: generateUID(),
                 name: list.name,
                 createdBy: userId,
-                boardId: Number(newBoard.insertId),
+                boardId: newBoardId,
                 index: listIndex,
-                importId: newImport.insertId
-              });
+                importId: newImportId
+              }).returning({ id: lists.id });
 
-              if (list.cards.length) {
+              const newListId = newList[0]?.id
+
+              if (list.cards.length && newListId) {
                 const cardsInsert = list.cards.map((card, index) => ({ 
                   publicId: generateUID(),
                   title: card.name,
                   description: card.description,
                   createdBy: userId,
-                  listId: Number(newList.insertId),
+                  listId: newListId,
                   index,
-                  importId: newImport.insertId
+                  importId: newImportId
                 }))
 
                 await tx.insert(cards).values(cardsInsert);
@@ -165,10 +171,10 @@ export const importRouter = createTRPCRouter({
           boardsCreated ++
         }
 
-        if (boardsCreated > 0) {
+        if (boardsCreated > 0 && newImportId) {
           await ctx.db.update(imports)
             .set({ status: 'success' })
-            .where(eq(imports.id, Number(newImport.insertId)))
+            .where(eq(imports.id, newImportId))
         }
 
         return { boardsCreated }

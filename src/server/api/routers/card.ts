@@ -48,28 +48,30 @@ export const cardRouter = createTRPCRouter({
           createdBy: userId,
           listId: list.id,
           index: latestCard ? latestCard.index + 1 : 0
-        });
+        }).returning({ id: cards.id });
 
-        if (newCard.insertId && input.labelsPublicIds.length) {
+        const newCardId = newCard[0]?.id;
+
+        if (newCardId && input.labelsPublicIds.length) {
           const labels = await tx.query.labels.findMany({
             where: inArray(cards.publicId, input.labelsPublicIds),
           });
 
           if (!labels.length) return;
 
-          const labelsInsert = labels.map((label) => ({ cardId: Number(newCard.insertId), labelId: label.id }))
+          const labelsInsert = labels.map((label) => ({ cardId: newCardId, labelId: label.id }))
 
           await tx.insert(cardsToLabels).values(labelsInsert);
         }
 
-        if (newCard.insertId && input.memberPublicIds.length) {
+        if (newCardId && input.memberPublicIds.length) {
           const members = await tx.query.workspaceMembers.findMany({
             where: inArray(workspaceMembers.publicId, input.memberPublicIds),
           });
 
           if (!members.length) return;
 
-          const membersInsert = members.map((member) => ({ cardId: Number(newCard.insertId), workspaceMemberId: member.id}))
+          const membersInsert = members.map((member) => ({ cardId: newCardId, workspaceMemberId: member.id}))
 
           await tx.insert(cardToWorkspaceMembers).values(membersInsert);
         }

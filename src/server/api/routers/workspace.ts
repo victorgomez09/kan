@@ -79,18 +79,22 @@ export const workspaceRouter = createTRPCRouter({
         name: input.name,
         slug: input.name.toLowerCase(),
         createdBy: userId,
-      });
+      }).returning({ id: workspaces.id });
+
+      const workspaceId = workspace[0]?.id;
+
+      if (!workspaceId) return;
 
       await ctx.db.insert(workspaceMembers).values({
         publicId: generateUID(),
         userId,
-        workspaceId: Number(workspace.insertId),
+        workspaceId: workspaceId,
         createdBy: userId,
         role: 'admin'
       })
 
       return ctx.db.query.workspaces.findFirst({
-        where: eq(workspaces.id, Number(workspace.insertId)),
+        where: eq(workspaces.id, workspaceId),
         columns: {
           publicId: true,
           name: true,
