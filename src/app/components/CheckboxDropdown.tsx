@@ -36,7 +36,7 @@ export default function CheckboxDropdown({
           leaveTo="transform opacity-0 scale-95"
         >
           <Menu.Items className="absolute left-0 top-[26px] z-10 mt-2 w-56 origin-top-left rounded-md border-[1px] border-dark-500 bg-dark-200 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-            <div className="p-2">
+            <div className="p-1">
               {items?.map((item) => (
                 <Menu.Item key={item.key}>
                   <div
