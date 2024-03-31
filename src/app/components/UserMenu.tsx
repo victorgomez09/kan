@@ -5,13 +5,20 @@ import Image from "next/image";
 import { signOut } from "next-auth/react";
 import { Menu, Transition } from "@headlessui/react";
 import { HiOutlineLogout } from "react-icons/hi";
+import { useTheme } from "~/app/providers/theme";
 
 interface UserMenuProps {
   imageUrl: string | undefined;
   email: string;
 }
 
+function classNames(...classes: string[]): string {
+  return classes.filter(Boolean).join(" ");
+}
+
 export default function UserMenu({ imageUrl, email }: UserMenuProps) {
+  const { theme, switchTheme } = useTheme();
+
   return (
     <Menu as="div" className="relative inline-block w-full text-left">
       <div>
@@ -49,18 +56,64 @@ export default function UserMenu({ imageUrl, email }: UserMenuProps) {
         leaveTo="transform opacity-0 scale-95"
       >
         <Menu.Items className="absolute bottom-[40px] left-0 z-10 mt-2 w-full origin-top-left rounded-md border border-dark-500 bg-dark-300 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="flex w-full">
-            <Menu.Item>
-              {() => (
+          <div className="flex flex-col">
+            <div className="p-1">
+              <div className="flex w-full items-center px-3 py-2 text-left text-xs text-dark-1000">
+                <span>Theme</span>
+              </div>
+              <Menu.Item>
+                <button
+                  onClick={() => switchTheme("system")}
+                  className="flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs text-dark-1000 hover:bg-dark-400"
+                >
+                  <span
+                    className={classNames(
+                      theme === "system" ? "visible" : "invisible",
+                      "mr-4 h-[6px] w-[6px] rounded-full bg-dark-900",
+                    )}
+                  />
+                  System
+                </button>
+              </Menu.Item>
+              <Menu.Item>
+                <button
+                  onClick={() => switchTheme("dark")}
+                  className="flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs text-dark-1000 hover:bg-dark-400"
+                >
+                  <span
+                    className={classNames(
+                      theme === "dark" ? "visible" : "invisible",
+                      "mr-4 h-[6px] w-[6px] rounded-full bg-dark-900",
+                    )}
+                  />
+                  Dark
+                </button>
+              </Menu.Item>
+              <Menu.Item>
+                <button
+                  onClick={() => switchTheme("light")}
+                  className="flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs text-dark-1000 hover:bg-dark-400"
+                >
+                  <span
+                    className={classNames(
+                      theme === "light" ? "visible" : "invisible",
+                      "mr-4 h-[6px] w-[6px] rounded-full bg-dark-900",
+                    )}
+                  />
+                  Light
+                </button>
+              </Menu.Item>
+            </div>
+            <div className="border-t-[1px] border-dark-500 p-1">
+              <Menu.Item>
                 <button
                   onClick={() => signOut({ callbackUrl: "/boards" })}
-                  className="m-1 flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs text-dark-1000 hover:bg-dark-400"
+                  className=" flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs text-dark-1000 hover:bg-dark-400"
                 >
-                  <HiOutlineLogout size={18} className="mr-2" />
                   Logout
                 </button>
-              )}
-            </Menu.Item>
+              </Menu.Item>
+            </div>
           </div>
         </Menu.Items>
       </Transition>

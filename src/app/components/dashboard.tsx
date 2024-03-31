@@ -13,7 +13,7 @@ export default async function Dashboard(props: { children: React.ReactNode }) {
   }
 
   return (
-    <main className="flex h-screen flex-col items-center bg-dark-50">
+    <main className="bg-light-50 flex h-screen flex-col items-center dark:bg-dark-50">
       <div className="m-auto flex h-16 w-full justify-between border-b border-dark-600 px-5 py-2 align-middle">
         <div className="my-auto flex w-full items-center justify-between">
           <h1 className="text-lg font-bold tracking-tight text-dark-1000">

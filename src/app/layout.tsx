@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { TRPCReactProvider } from "~/trpc/react";
 import { ModalProvider } from "~/app/providers/modal";
 import { BoardProvider } from "~/app/providers/board";
+import { ThemeProvider } from "./providers/theme";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -27,11 +28,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${jakarta.variable}`}>
       <body className="h-screen overflow-hidden font-sans">
-        <TRPCReactProvider headers={headers()}>
-          <ModalProvider>
-            <BoardProvider>{children}</BoardProvider>
-          </ModalProvider>
-        </TRPCReactProvider>
+        <ThemeProvider>
+          <TRPCReactProvider headers={headers()}>
+            <ModalProvider>
+              <BoardProvider>{children}</BoardProvider>
+            </ModalProvider>
+          </TRPCReactProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
