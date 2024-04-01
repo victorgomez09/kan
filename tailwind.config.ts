@@ -12,7 +12,8 @@ export default {
         sm: "0.8rem",
       },
       boxShadow: {
-        '3xl': '0px 16px 70px rgba(0, 0, 0, 0.5)',
+        '3xl-dark': '0px 16px 70px rgba(0, 0, 0, 0.5)',
+        '3xl-light': 'rgba(0, 0, 0, 0.12) 0px 4px 30px, rgba(0, 0, 0, 0.04) 0px 3px 17px, rgba(0, 0, 0, 0.04) 0px 2px 8px, rgba(0, 0, 0, 0.04) 0px 1px 1px'
       },
       colors: {
         "dark-50": "#161616",

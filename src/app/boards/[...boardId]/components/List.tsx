@@ -66,7 +66,7 @@ export default function List({
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className="mr-5 h-fit min-w-[18rem] max-w-[18rem] rounded-md border border-dark-400 bg-dark-200 py-2 pl-2 pr-1"
+          className="bg-light-300 border-light-400 dark-text-dark-1000 mr-5 h-fit min-w-[18rem] max-w-[18rem] rounded-md border py-2 pl-2 pr-1 text-neutral-900 dark:border-dark-400 dark:bg-dark-200"
         >
           <div className="flex justify-between">
             <form
@@ -80,12 +80,12 @@ export default function List({
                 value={formik.values.name}
                 onChange={formik.handleChange}
                 onBlur={formik.submitForm}
-                className="mb-4 block border-0 bg-transparent px-4 pt-1 text-sm font-medium text-dark-1000 focus:ring-0 focus-visible:outline-none"
+                className="font-mediumfocus:ring-0 mb-4 block border-0 bg-transparent px-4 pt-1 text-sm focus-visible:outline-none"
               />
             </form>
             <div>
               <button
-                className="mx-1 inline-flex h-fit items-center rounded-md p-1 px-1 text-sm font-semibold text-dark-50 hover:bg-dark-400"
+                className="hover:bg-light-400 mx-1 inline-flex h-fit items-center rounded-md p-1 px-1 text-sm font-semibold text-dark-50 dark:hover:bg-dark-400"
                 onClick={() => openNewCardForm(list.publicId)}
               >
                 <HiOutlinePlusSmall

@@ -21,7 +21,7 @@ export default function UserMenu({ imageUrl, email }: UserMenuProps) {
   return (
     <Menu as="div" className="relative inline-block w-full text-left">
       <div>
-        <Menu.Button className="flex w-full items-center rounded-md p-1.5 text-dark-900 hover:bg-dark-200 hover:text-dark-1000">
+        <Menu.Button className="hover:bg-light-200 flex w-full items-center rounded-md p-1.5 text-neutral-900 dark:text-dark-900 dark:hover:bg-dark-200 dark:hover:text-dark-1000">
           {imageUrl ? (
             <Image
               src={imageUrl ?? ""}
@@ -31,7 +31,7 @@ export default function UserMenu({ imageUrl, email }: UserMenuProps) {
               alt=""
             />
           ) : (
-            <span className="inline-block h-6 w-6 overflow-hidden rounded-full bg-dark-400">
+            <span className="bg-light-400 inline-block h-6 w-6 overflow-hidden rounded-full dark:bg-dark-400">
               <svg
                 className="h-full w-full text-dark-700"
                 fill="currentColor"
@@ -54,21 +54,21 @@ export default function UserMenu({ imageUrl, email }: UserMenuProps) {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute bottom-[40px] left-0 z-10 mt-2 w-full origin-top-left rounded-md border border-dark-500 bg-dark-300 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="flex flex-col">
+        <Menu.Items className="border-light-600 bg-light-50 absolute bottom-[40px] left-0 z-10 mt-2 w-full origin-top-left rounded-md border shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border-dark-600 dark:bg-dark-300">
+          <div className="flex flex-col text-neutral-900 dark:text-dark-1000">
             <div className="p-1">
-              <div className="flex w-full items-center px-3 py-2 text-left text-xs text-dark-1000">
+              <div className="flex w-full items-center px-3 py-2 text-left text-xs">
                 <span>Theme</span>
               </div>
               <Menu.Item>
                 <button
                   onClick={() => switchTheme("system")}
-                  className="flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs text-dark-1000 hover:bg-dark-400"
+                  className="hover:bg-light-200 flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs dark:hover:bg-dark-400"
                 >
                   <span
                     className={classNames(
                       theme === "system" ? "visible" : "invisible",
-                      "mr-4 h-[6px] w-[6px] rounded-full bg-dark-900",
+                      "bg-light-900 mr-4 h-[6px] w-[6px] rounded-full dark:bg-dark-900",
                     )}
                   />
                   System
@@ -77,12 +77,12 @@ export default function UserMenu({ imageUrl, email }: UserMenuProps) {
               <Menu.Item>
                 <button
                   onClick={() => switchTheme("dark")}
-                  className="flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs text-dark-1000 hover:bg-dark-400"
+                  className="hover:bg-light-200 flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs dark:hover:bg-dark-400"
                 >
                   <span
                     className={classNames(
                       theme === "dark" ? "visible" : "invisible",
-                      "mr-4 h-[6px] w-[6px] rounded-full bg-dark-900",
+                      "bg-light-900 mr-4 h-[6px] w-[6px] rounded-full dark:bg-dark-900",
                     )}
                   />
                   Dark
@@ -91,23 +91,23 @@ export default function UserMenu({ imageUrl, email }: UserMenuProps) {
               <Menu.Item>
                 <button
                   onClick={() => switchTheme("light")}
-                  className="flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs text-dark-1000 hover:bg-dark-400"
+                  className="hover:bg-light-200 flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs dark:hover:bg-dark-400"
                 >
                   <span
                     className={classNames(
                       theme === "light" ? "visible" : "invisible",
-                      "mr-4 h-[6px] w-[6px] rounded-full bg-dark-900",
+                      "bg-light-900 mr-4 h-[6px] w-[6px] rounded-full dark:bg-dark-900",
                     )}
                   />
                   Light
                 </button>
               </Menu.Item>
             </div>
-            <div className="border-t-[1px] border-dark-500 p-1">
+            <div className="light-border-600 border-t-[1px] p-1 dark:border-dark-600">
               <Menu.Item>
                 <button
                   onClick={() => signOut({ callbackUrl: "/boards" })}
-                  className=" flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs text-dark-1000 hover:bg-dark-400"
+                  className=" hover:bg-light-200 flex w-full items-center rounded-[5px] px-3 py-2 text-left text-xs dark:hover:bg-dark-400"
                 >
                   Logout
                 </button>

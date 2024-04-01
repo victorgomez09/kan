@@ -33,7 +33,7 @@ const SelectSource = ({ handleNextStep }: { handleNextStep: () => void }) => {
     <form onSubmit={formik.handleSubmit}>
       <label
         htmlFor="name"
-        className="block pb-2 text-sm font-normal leading-6 text-dark-1000"
+        className="block pb-2 text-sm font-normal leading-6 text-neutral-900 dark:text-dark-1000"
       >
         Source
       </label>
@@ -41,7 +41,7 @@ const SelectSource = ({ handleNextStep }: { handleNextStep: () => void }) => {
         {({ open }) => (
           <>
             <div className="relative">
-              <Listbox.Button className="block w-full rounded-md border-0 bg-dark-300 bg-white/5 px-4 py-1.5 text-dark-1000 shadow-sm ring-1 ring-inset ring-dark-700 focus:ring-2 focus:ring-inset focus:ring-dark-700 sm:text-sm sm:leading-6">
+              <Listbox.Button className="ring-light-600 focus-ring-light-700 block w-full rounded-md border-0 bg-dark-300 bg-white/5 px-4 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6">
                 <span className="flex items-center">
                   <FaTrello />
                   <span className="ml-2 block truncate">
@@ -63,21 +63,19 @@ const SelectSource = ({ handleNextStep }: { handleNextStep: () => void }) => {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-dark-300 py-2 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                <Listbox.Options className="bg-light-50 ring-light-600 absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md py-1 text-base text-neutral-900 shadow-lg ring-1 ring-opacity-5 focus:outline-none dark:bg-dark-300 dark:text-dark-1000 sm:text-sm">
                   {sources.map(({ source }, index) => (
                     <Listbox.Option
                       key={`source_${index}`}
-                      className="relative cursor-default select-none px-2 text-dark-1000 "
+                      className="relative cursor-default select-none px-1"
                       value={source}
                     >
-                      {() => (
-                        <div className="flex items-center rounded-[5px] p-2 hover:bg-dark-400">
-                          <FaTrello />
-                          <span className="ml-2 block truncate font-normal">
-                            {source}
-                          </span>
-                        </div>
-                      )}
+                      <div className="hover:bg-light-200 flex items-center rounded-[5px] p-1 dark:hover:bg-dark-400">
+                        <FaTrello className="ml-1" />
+                        <span className="ml-2 block truncate font-normal">
+                          {source}
+                        </span>
+                      </div>
                     </Listbox.Option>
                   ))}
                 </Listbox.Options>
@@ -89,7 +87,7 @@ const SelectSource = ({ handleNextStep }: { handleNextStep: () => void }) => {
       <div className="mt-5 sm:mt-6">
         <button
           type="submit"
-          className="inline-flex w-full justify-center rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold text-dark-50 shadow-sm focus-visible:outline-none"
+          className="bg-light-1000 text-light-50 inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
         >
           Select source
         </button>
@@ -208,37 +206,40 @@ const ImportTrello: React.FC = () => {
     );
 
   return (
-    <form onSubmit={formik.handleSubmit}>
+    <form
+      onSubmit={formik.handleSubmit}
+      className="text-neutral-900 dark:text-dark-1000"
+    >
       <label
         htmlFor="apiKey"
-        className="block pb-2 text-sm font-normal leading-6 text-dark-1000"
+        className="block pb-2 text-sm font-normal leading-6"
       >
         API Key
       </label>
       <input
         id="apiKey"
         name="apiKey"
-        className="mb-2 block w-full rounded-md border-0 bg-dark-300 bg-white/5 py-1.5 text-dark-1000 shadow-sm ring-1 ring-inset ring-dark-700 focus:ring-2 focus:ring-inset focus:ring-dark-700 sm:text-sm sm:leading-6"
+        className="ring-light-600 focus:ring-light-700 mb-2 block w-full rounded-md border-0 bg-dark-300 bg-white/5 py-1.5 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6"
         value={formik.values.apiKey}
         onChange={formik.handleChange}
       />
       <label
         htmlFor="token"
-        className="block pb-2 text-sm font-normal leading-6 text-dark-1000"
+        className="block pb-2 text-sm font-normal leading-6"
       >
         Token
       </label>
       <input
         id="token"
         name="token"
-        className="block w-full rounded-md border-0 bg-dark-300 bg-white/5 py-1.5 text-dark-1000 shadow-sm ring-1 ring-inset ring-dark-700 focus:ring-2 focus:ring-inset focus:ring-dark-700 sm:text-sm sm:leading-6"
+        className="ring-light-600 focus:ring-light-700 mb-2 block w-full rounded-md border-0 bg-dark-300 bg-white/5 py-1.5 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6"
         value={formik.values.token}
         onChange={formik.handleChange}
       />
       <div className="mt-5 sm:mt-6">
         <button
           type="submit"
-          className="inline-flex w-full justify-center rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold text-dark-50 shadow-sm focus-visible:outline-none"
+          className="bg-light-1000 text-light-50 inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
         >
           Fetch boards
         </button>
@@ -254,7 +255,9 @@ export function ImportBoardsForm() {
   return (
     <>
       <div className="flex w-full justify-between pb-4">
-        <h2 className="text-sm font-medium text-dark-1000">New import</h2>
+        <h2 className="text-sm font-medium text-neutral-900 dark:text-dark-1000">
+          New import
+        </h2>
         <button
           className="rounded p-1 hover:bg-dark-300"
           onClick={() => closeModal()}
