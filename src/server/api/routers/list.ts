@@ -69,7 +69,7 @@ export const listRouter = createTRPCRouter({
 
         await tx.execute(sql`
           UPDATE ${lists}
-          SET ${lists.index} =
+          SET index =
             CASE
               WHEN ${lists.index} = ${input.currentIndex} AND ${lists.id} = ${list.id} THEN ${input.newIndex}
               WHEN ${input.currentIndex} < ${input.newIndex} AND ${lists.index} > ${input.currentIndex} AND ${lists.index} <= ${input.newIndex} THEN ${lists.index} - 1

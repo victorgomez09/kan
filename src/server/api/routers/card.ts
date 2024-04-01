@@ -330,10 +330,11 @@ export const cardRouter = createTRPCRouter({
 
           if (!currentList?.id || !newList?.id) return;
 
+
           if (currentList.id === newList.id) {
             await tx.execute(sql`
               UPDATE ${cards}
-              SET ${cards.index} =
+              SET index =
                 CASE
                   WHEN ${cards.index} = ${currentIndex} THEN ${newIndex}
                   WHEN ${currentIndex} < ${newIndex} AND ${cards.index} > ${currentIndex} AND ${cards.index} <= ${newIndex} THEN ${cards.index} - 1
@@ -343,9 +344,9 @@ export const cardRouter = createTRPCRouter({
               WHERE ${cards.listId} = ${currentList.id} AND ${cards.deletedAt} IS NULL;
             `);
           } else {
-            await tx.execute(sql`UPDATE ${cards} SET ${cards.index} = ${cards.index} + 1 WHERE ${cards.listId} = ${newList.id} AND ${cards.index} >= ${newIndex} AND ${cards.deletedAt} IS NULL;`)
+            await tx.execute(sql`UPDATE ${cards} SET index = index + 1 WHERE ${cards.listId} = ${newList.id} AND ${cards.index} >= ${newIndex} AND ${cards.deletedAt} IS NULL;`)
 
-            await tx.execute(sql`UPDATE ${cards} SET ${cards.index} = ${cards.index} - 1 WHERE ${cards.listId} = ${currentList.id} AND ${cards.index} >= ${currentIndex} AND ${cards.deletedAt} IS NULL;`)
+            await tx.execute(sql`UPDATE ${cards} SET index = index - 1 WHERE ${cards.listId} = ${currentList.id} AND ${cards.index} >= ${currentIndex} AND ${cards.deletedAt} IS NULL;`)
 
             await tx
               .update(cards)
