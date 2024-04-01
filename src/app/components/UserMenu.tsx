@@ -4,7 +4,6 @@ import { Fragment } from "react";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
 import { Menu, Transition } from "@headlessui/react";
-import { HiOutlineLogout } from "react-icons/hi";
 import { useTheme } from "~/app/providers/theme";
 
 interface UserMenuProps {

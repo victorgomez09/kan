@@ -33,11 +33,12 @@ export default {
         "light-300": "hsl(0deg 0% 92.9%)",
         "light-400": "hsl(0deg 0% 91%)",
         "light-500": "hsl(0deg 0% 88.6%)",
-        "light-700": "hsl(0deg 0% 85.9%)",
-        "light-800": "hsl(0deg 0% 78%)",
-        "light-900": "hsl(0deg 0% 56.1%)",
-        "light-950": "hsl(0deg 0% 52.2%)",
-        "light-1000": "hsl(0deg 0% 43.5%)",
+        "light-600": "hsl(0deg 0% 85.9%)",
+        "light-700": "hsl(0deg 0% 78%)",
+        "light-800": "hsl(0deg 0% 56.1%)",
+        "light-900": "hsl(0deg 0% 52.2%)",
+        "light-950": "hsl(0deg 0% 43.5%)",
+        "light-1000": "hsl(0deg 0% 9%)"
       },
       screens: {
         xxl: '1600px'

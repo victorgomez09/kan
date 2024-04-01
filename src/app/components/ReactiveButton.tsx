@@ -28,10 +28,8 @@ const Button: React.FC<{
       href={href}
       onMouseEnter={handleMouseEnter}
       className={classNames(
-        current
-          ? "bg-dark-200 text-white"
-          : "bg-dark-50 text-white hover:bg-dark-200",
-        "group flex items-center gap-x-3 rounded-md p-1.5 text-sm font-normal leading-6 text-dark-1000",
+        current ? "bg-light-200  dark:bg-dark-200" : " dark:bg-dark-50",
+        "hover:bg-light-200 group flex items-center gap-x-3 rounded-md p-1.5 text-sm font-normal leading-6 text-neutral-900 dark:text-dark-1000 dark:hover:bg-dark-200",
       )}
     >
       <LottieIcon index={index} json={json} isPlaying={isHovered} />

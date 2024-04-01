@@ -18,7 +18,7 @@ const FeedbackButton: React.FC = () => {
     <button
       type="button"
       onMouseEnter={handleMouseEnter}
-      className="flex items-center rounded-md border-[1px] border-dark-600 bg-dark-50 px-2.5 py-1.5 text-sm font-normal text-dark-1000 shadow-sm"
+      className="bg-light-50 border-light-600 flex items-center rounded-md border-[1px] px-2.5 py-1.5 text-sm font-normal text-neutral-900 shadow-sm dark:border-dark-600 dark:bg-dark-50 dark:text-dark-1000"
     >
       <LottieIcon index={index} json={chatIcon} isPlaying={isHovered} />
       <span className="ml-1">Feedback</span>

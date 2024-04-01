@@ -15,13 +15,13 @@ export default function WorkspaceMenu() {
   return (
     <Menu as="div" className="relative inline-block w-full pb-3 text-left">
       <div>
-        <Menu.Button className="mb-1 flex w-full items-center rounded-[5px] p-1.5 hover:bg-dark-200">
+        <Menu.Button className="hover:bg-light-200 mb-1 flex w-full items-center rounded-[5px] p-1.5 dark:hover:bg-dark-200">
           <span className="inline-flex h-6 w-6 items-center justify-center rounded-[5px] bg-indigo-700">
             <span className="text-xs font-bold leading-none text-white">
               {workspace?.name.charAt(0).toUpperCase()}
             </span>
           </span>
-          <span className="ml-2 text-sm font-bold text-dark-1000">
+          <span className="ml-2 text-sm font-bold text-neutral-900 dark:text-dark-1000">
             {workspace?.name}
           </span>
         </Menu.Button>
@@ -36,14 +36,14 @@ export default function WorkspaceMenu() {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute left-0 z-10 w-full origin-top-left rounded-md border border-dark-500 bg-dark-300 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <Menu.Items className="bg-light-50 border-light-600 absolute left-0 z-10 w-full origin-top-left rounded-md border shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border-dark-600 dark:bg-dark-300">
           <div className="p-1">
             {availableWorkspaces.map((availableWorkspace) => (
               <div key={availableWorkspace.publicId} className="flex">
                 <Menu.Item>
                   <button
                     onClick={() => switchWorkspace(availableWorkspace)}
-                    className="flex w-full items-center justify-between rounded-[5px] px-3 py-2 text-left text-sm text-dark-1000 hover:bg-dark-400"
+                    className="hover:bg-light-200 flex w-full items-center justify-between rounded-[5px] px-3 py-2 text-left text-sm text-neutral-900 dark:text-dark-1000 dark:hover:bg-dark-400"
                   >
                     <div>
                       <span className="inline-flex h-5 w-5 items-center justify-center rounded-[5px] bg-indigo-700">
@@ -51,7 +51,7 @@ export default function WorkspaceMenu() {
                           {availableWorkspace?.name.charAt(0).toUpperCase()}
                         </span>
                       </span>
-                      <span className="ml-2 text-xs font-medium text-dark-1000">
+                      <span className="ml-2 text-xs font-medium">
                         {availableWorkspace?.name}
                       </span>
                     </div>
@@ -65,11 +65,11 @@ export default function WorkspaceMenu() {
               </div>
             ))}
           </div>
-          <div className="border-t-[1px] border-dark-500 p-1">
+          <div className="border-light-600 border-t-[1px] p-1 dark:border-dark-500">
             <Menu.Item>
               <button
                 onClick={() => openModal("NEW_WORKSPACE")}
-                className="flex w-full items-center justify-between rounded-[5px] px-3 py-2 text-left text-xs text-dark-1000 hover:bg-dark-400"
+                className="hover:bg-light-200 flex w-full items-center justify-between rounded-[5px] px-3 py-2 text-left text-xs text-neutral-900 dark:text-dark-1000 dark:hover:bg-dark-400"
               >
                 Create workspace
               </button>
