@@ -2,9 +2,14 @@
 
 import { usePathname } from "next/navigation";
 
-import boardsIcon from "~/app/assets/boards.json";
-import membersIcon from "~/app/assets/members.json";
-import settingsIcon from "~/app/assets/settings.json";
+import { useTheme } from "~/app/providers/theme";
+
+import boardsIconDark from "~/app/assets/boards-dark.json";
+import boardsIconLight from "~/app/assets/boards-light.json";
+import membersIconDark from "~/app/assets/members-dark.json";
+import membersIconLight from "~/app/assets/members-light.json";
+import settingsIconDark from "~/app/assets/settings-dark.json";
+import settingsIconLight from "~/app/assets/settings-light.json";
 
 import ReactiveButton from "~/app/components/ReactiveButton";
 import UserMenu from "~/app/components/UserMenu";
@@ -21,15 +26,24 @@ interface UserType {
 
 export default function SideNavigation({ user }: SideNavigationProps) {
   const pathname = usePathname();
+  const { theme } = useTheme();
 
   const navigation = [
-    { name: "Boards", href: "/boards", icon: boardsIcon },
+    {
+      name: "Boards",
+      href: "/boards",
+      icon: theme === "dark" ? boardsIconDark : boardsIconLight,
+    },
     {
       name: "Members",
       href: "/members",
-      icon: membersIcon,
+      icon: theme === "dark" ? membersIconDark : membersIconLight,
     },
-    { name: "Settings", href: "/settings", icon: settingsIcon },
+    {
+      name: "Settings",
+      href: "/settings",
+      icon: theme === "dark" ? settingsIconDark : settingsIconLight,
+    },
   ];
 
   return (
