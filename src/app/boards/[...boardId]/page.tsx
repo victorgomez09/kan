@@ -213,7 +213,7 @@ export default function BoardPage() {
             value={formik.values.name}
             onChange={formik.handleChange}
             onBlur={formik.submitForm}
-            className="dark-text-dark-1000 block border-0 bg-transparent p-0 py-0 font-medium leading-[2.3rem] tracking-tight text-neutral-900 focus:ring-0 focus-visible:outline-none sm:text-[1.2rem]"
+            className="block border-0 bg-transparent p-0 py-0 font-medium leading-[2.3rem] tracking-tight text-neutral-900 focus:ring-0 focus-visible:outline-none dark:text-dark-1000 sm:text-[1.2rem]"
           />
         </form>
         <div className="flex items-center">

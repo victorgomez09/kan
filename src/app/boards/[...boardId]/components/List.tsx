@@ -80,7 +80,7 @@ export default function List({
                 value={formik.values.name}
                 onChange={formik.handleChange}
                 onBlur={formik.submitForm}
-                className="font-mediumfocus:ring-0 mb-4 block border-0 bg-transparent px-4 pt-1 text-sm focus-visible:outline-none"
+                className="font-mediumfocus:ring-0 mb-4 block border-0 bg-transparent px-4 pt-1 text-sm text-neutral-900 focus-visible:outline-none dark:text-dark-1000"
               />
             </form>
             <div>
