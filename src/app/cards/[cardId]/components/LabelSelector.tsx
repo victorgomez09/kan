@@ -58,7 +58,7 @@ export default function LabelSelector({
             {selectedLabels.map((label) => (
               <Menu.Button
                 key={label.publicId}
-                className="my-1 mr-2 inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[12px] font-medium text-dark-1000 ring-1 ring-inset ring-dark-800"
+                className="text-light-800 ring-light-600 my-1 mr-2 inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[12px] font-medium ring-1 ring-inset dark:text-dark-1000 dark:ring-dark-800"
               >
                 <svg
                   fill={label.colourCode}
@@ -71,13 +71,13 @@ export default function LabelSelector({
                 <div>{label.name}</div>
               </Menu.Button>
             ))}
-            <Menu.Button className="my-1 inline-flex w-fit items-center gap-x-1.5 rounded-full py-1 pl-2 pr-4 text-[12px] font-medium text-dark-800 ring-inset ring-dark-800 hover:bg-dark-200">
+            <Menu.Button className="hover:bg-light-400 my-1 inline-flex w-fit items-center gap-x-1.5 rounded-full py-1 pl-2 pr-4 text-[12px] font-medium text-dark-800 ring-inset ring-dark-800 dark:hover:bg-dark-200">
               <HiMiniPlus size={16} />
               Add label
             </Menu.Button>
           </>
         ) : (
-          <Menu.Button className="flex h-full w-full items-center rounded-[5px] border-[1px] border-dark-100 pl-2 text-left text-sm hover:border-dark-300 hover:bg-dark-200">
+          <Menu.Button className="border-light-200 hover:bg-light-300 flex h-full w-full items-center rounded-[5px] border-[1px] pl-2 text-left text-sm text-neutral-900 dark:border-dark-100 dark:text-dark-1000 dark:hover:border-dark-300 dark:hover:bg-dark-200">
             <HiMiniPlus size={22} className="pr-2" />
             Add label
           </Menu.Button>
@@ -92,7 +92,7 @@ export default function LabelSelector({
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute right-[200px] top-[30px] z-10 mt-2 w-56 origin-top-right rounded-md border-[1px] border-dark-500 bg-dark-200 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <Menu.Items className="bg-light-50 border-light-600 absolute right-[200px] top-[30px] z-10 mt-2 w-56 origin-top-right rounded-md border-[1px] shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border-dark-500 dark:bg-dark-200">
             <div className="p-2">
               <form onSubmit={formik.handleSubmit}>
                 {labels?.map((label) => (
@@ -100,7 +100,7 @@ export default function LabelSelector({
                     {() => (
                       <div
                         key={label.publicId}
-                        className="flex items-center rounded-[5px] p-2 hover:bg-dark-300"
+                        className="hover:bg-light-200 flex items-center rounded-[5px] p-2 dark:hover:bg-dark-300"
                         onClick={async (e) => {
                           e.preventDefault();
                           await formik.setFieldValue(
@@ -137,7 +137,7 @@ export default function LabelSelector({
                 ))}
                 <button
                   onClick={() => openModal("NEW_LABEL")}
-                  className="flex w-full items-center rounded-[5px] p-1.5 px-2 text-sm hover:bg-dark-300"
+                  className="hover:bg-light-200 flex w-full items-center rounded-[5px] p-1.5 px-2 text-sm dark:hover:bg-dark-300"
                 >
                   <HiMiniPlus size={22} className="pr-2" />
                   Create new label

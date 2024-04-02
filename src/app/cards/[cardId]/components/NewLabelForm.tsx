@@ -55,13 +55,13 @@ export function NewLabelForm({ cardPublicId }: cardPublicId) {
 
   return (
     <>
-      <div className="flex w-full justify-between pb-4">
-        <h2 className="text-sm font-medium text-dark-1000">New label</h2>
+      <div className="flex w-full items-center justify-between pb-4 text-neutral-900 dark:text-dark-1000">
+        <h2 className="text-sm font-medium">New label</h2>
         <button
-          className="rounded p-1 hover:bg-dark-300"
+          className="hover:bg-light-300 rounded p-1 focus:outline-none dark:hover:bg-dark-300"
           onClick={() => closeModal()}
         >
-          <HiXMark size={18} className="text-dark-900" />
+          <HiXMark size={18} className="text-light-900 dark:text-dark-900" />
         </button>
       </div>
 
@@ -83,20 +83,20 @@ export function NewLabelForm({ cardPublicId }: cardPublicId) {
         <Form>
           <label
             htmlFor="name"
-            className="block pb-2 text-sm font-normal leading-6 text-dark-1000"
+            className="block pb-2 text-sm font-normal leading-6 text-neutral-900 dark:text-dark-1000"
           >
             Name
           </label>
           <Field
             id="name"
             name="name"
-            className="block w-full rounded-md border-0 bg-dark-300 bg-white/5 py-1.5 text-dark-1000 shadow-sm ring-1 ring-inset ring-dark-700 focus:ring-2 focus:ring-inset focus:ring-dark-700 sm:text-sm sm:leading-6"
+            className="ring-light-600 focus:ring-light-600 block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset dark:bg-dark-300 dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6"
           />
           <Listbox value={selected} onChange={setSelected}>
             {({ open }) => (
               <>
                 <div className="relative mt-4">
-                  <Listbox.Button className="block w-full rounded-md border-0 bg-dark-300 bg-white/5 px-4 py-1.5 text-dark-1000 shadow-sm ring-1 ring-inset ring-dark-700 focus:ring-2 focus:ring-inset focus:ring-dark-700 sm:text-sm sm:leading-6">
+                  <Listbox.Button className="ring-light-600 focus:ring-light-600 block w-full rounded-md border-0 bg-white/5 px-4 py-1.5 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset dark:bg-dark-300 dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6">
                     <span className="flex items-center">
                       <span
                         style={{ backgroundColor: selected?.code }}
@@ -121,16 +121,16 @@ export function NewLabelForm({ cardPublicId }: cardPublicId) {
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                   >
-                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-dark-300 py-2 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    <Listbox.Options className="bg-light-50 absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md py-2 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-dark-300 sm:text-sm">
                       {colours.map((colour, index) => (
                         <Listbox.Option
                           key={`colours_${index}`}
-                          className="relative cursor-default select-none px-2 text-dark-1000 "
+                          className="relative cursor-default select-none px-2 text-neutral-900 dark:text-dark-1000 "
                           value={colour}
                         >
                           {() => (
                             <>
-                              <div className="flex items-center rounded-[5px] p-2 hover:bg-dark-400">
+                              <div className="hover:bg-light-200 flex items-center rounded-[5px] p-2 dark:hover:bg-dark-400">
                                 <span
                                   style={{ backgroundColor: colour?.code }}
                                   className="ml-2 inline-block h-2 w-2 flex-shrink-0 rounded-full"
@@ -153,7 +153,7 @@ export function NewLabelForm({ cardPublicId }: cardPublicId) {
           <div className="mt-5 sm:mt-6">
             <button
               type="submit"
-              className="inline-flex w-full justify-center rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold text-dark-50 shadow-sm focus-visible:outline-none"
+              className="bg-light-1000 text-light-50 inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
             >
               Create label
             </button>

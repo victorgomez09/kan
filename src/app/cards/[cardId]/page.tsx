@@ -98,12 +98,15 @@ export default function CardPage() {
       <div className="w-full p-8">
         <div className="mb-8 flex w-full items-center justify-between">
           <Link
-            className="font-medium leading-[2.3rem] tracking-tight text-dark-900 sm:text-[1.2rem]"
+            className="text-light-900 font-medium leading-[2.3rem] tracking-tight dark:text-dark-900 sm:text-[1.2rem]"
             href={`/boards/${board?.publicId}`}
           >
             {board?.name}
           </Link>
-          <IoChevronForwardSharp size={18} className="mx-2 text-dark-900" />
+          <IoChevronForwardSharp
+            size={18}
+            className="text-light-900 mx-2 dark:text-dark-900"
+          />
           <form onSubmit={formik.handleSubmit} className="w-full space-y-6">
             <div>
               <input
@@ -113,7 +116,7 @@ export default function CardPage() {
                 value={formik.values.title}
                 onChange={formik.handleChange}
                 onBlur={formik.submitForm}
-                className="block w-full border-0 bg-transparent p-0 py-0 font-medium tracking-tight text-dark-1000 focus:ring-0 sm:text-[1.2rem]"
+                className="block w-full border-0 bg-transparent p-0 py-0 font-medium tracking-tight text-neutral-900 focus:ring-0 dark:text-dark-1000 sm:text-[1.2rem]"
               />
             </div>
           </form>
@@ -132,13 +135,13 @@ export default function CardPage() {
                   formik.setFieldValue("description", e.target.value)
                 }
                 onBlur={formik.submitForm}
-                className="block w-full border-0 bg-transparent py-1.5 text-dark-1000 focus-visible:outline-none sm:text-sm sm:leading-6"
+                className="text-light-900 block w-full border-0 bg-transparent py-1.5 focus-visible:outline-none dark:text-dark-1000 sm:text-sm sm:leading-6"
               />
             </div>
           </form>
         </div>
       </div>
-      <div className="min-w-[325px] border-l-[1px] border-dark-400 bg-dark-100 p-8 text-dark-900">
+      <div className="bg-light-200 border-light-600 text-light-900 min-w-[325px] border-l-[1px] p-8 dark:border-dark-400 dark:bg-dark-100 dark:text-dark-900">
         <div className="mb-4 flex w-full">
           <p className="my-2 w-[100px] text-sm">List</p>
           <ListSelector cardPublicId={cardId} lists={formattedLists} />

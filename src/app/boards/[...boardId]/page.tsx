@@ -201,7 +201,7 @@ export default function BoardPage() {
         </svg>
       </div>
 
-      <div className="z-10 flex w-full justify-between p-8 ">
+      <div className="z-20 flex w-full justify-between p-8 ">
         <form
           onSubmit={formik.handleSubmit}
           className="focus-visible:outline-none"
@@ -232,7 +232,7 @@ export default function BoardPage() {
         </div>
       </div>
 
-      <div className="scrollbar-w-none z-10 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain pb-5 scrollbar scrollbar-track-dark-100 scrollbar-thumb-dark-300 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px]">
+      <div className="scrollbar-w-none scrollbar-track-light-200 scrollbar-thumb-light-400 z-10 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain pb-5 scrollbar scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300">
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="all-lists" direction="horizontal" type="LIST">
             {(provided) => (
