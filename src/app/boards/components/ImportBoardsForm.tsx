@@ -259,7 +259,7 @@ export function ImportBoardsForm() {
           New import
         </h2>
         <button
-          className="rounded p-1 hover:bg-dark-300"
+          className="hover:bg-light-200 rounded p-1 dark:hover:bg-dark-300"
           onClick={() => closeModal()}
         >
           <HiXMark size={18} className="text-dark-900" />

@@ -98,7 +98,7 @@ export default function CardPage() {
       <div className="w-full p-8">
         <div className="mb-8 flex w-full items-center justify-between">
           <Link
-            className="text-light-900 font-medium leading-[2.3rem] tracking-tight dark:text-dark-900 sm:text-[1.2rem]"
+            className="text-light-900 whitespace-nowrap font-medium leading-[2.3rem] tracking-tight dark:text-dark-900 sm:text-[1.2rem]"
             href={`/boards/${board?.publicId}`}
           >
             {board?.name}
