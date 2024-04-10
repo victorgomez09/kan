@@ -219,7 +219,7 @@ export default function BoardPage() {
         <div className="flex items-center">
           <button
             type="button"
-            className="bg-light-1000 text-light-50 mr-2 inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-dark-1000 dark:text-dark-50"
+            className="mr-2 inline-flex items-center gap-x-1.5 rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-dark-1000 dark:text-dark-50"
             onClick={() => openNewListForm(boardId)}
           >
             <HiOutlinePlusSmall
@@ -232,7 +232,7 @@ export default function BoardPage() {
         </div>
       </div>
 
-      <div className="scrollbar-w-none scrollbar-track-light-200 scrollbar-thumb-light-400 z-10 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain pb-5 scrollbar scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300">
+      <div className="scrollbar-w-none z-10 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain pb-5 scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300">
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="all-lists" direction="horizontal" type="LIST">
             {(provided) => (
@@ -268,7 +268,7 @@ export default function BoardPage() {
                                 <Link
                                   key={card.publicId}
                                   href={`/cards/${card.publicId}`}
-                                  className="bg-light-50 border-light-200 mb-2 flex !cursor-pointer flex-col rounded-md border px-3 py-2 text-sm text-neutral-900 dark:border-dark-200 dark:bg-dark-500 dark:text-dark-1000"
+                                  className="mb-2 flex !cursor-pointer flex-col rounded-md border border-light-200 bg-light-50 px-3 py-2 text-sm text-neutral-900 dark:border-dark-200 dark:bg-dark-500 dark:text-dark-1000"
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
@@ -280,7 +280,7 @@ export default function BoardPage() {
                                       {card.labels?.map(({ label }) => (
                                         <span
                                           key={label.publicId}
-                                          className="ring-light-600 inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[10px] font-medium text-neutral-600 ring-1 ring-inset dark:text-dark-1000 dark:ring-dark-800"
+                                          className="inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[10px] font-medium text-neutral-600 ring-1 ring-inset ring-light-600 dark:text-dark-1000 dark:ring-dark-800"
                                         >
                                           <svg
                                             fill={label.colourCode}
@@ -297,7 +297,7 @@ export default function BoardPage() {
                                         {card.members?.map(({ member }) => (
                                           <span
                                             key={member.publicId}
-                                            className="ring-light-50 bg-light-900 inline-flex h-6 w-6 items-center justify-center rounded-full ring-2 dark:bg-gray-500 dark:ring-dark-500"
+                                            className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-light-900 ring-2 ring-light-50 dark:bg-gray-500 dark:ring-dark-500"
                                           >
                                             <span className="text-[10px] font-medium leading-none text-white">
                                               {member.user.name
