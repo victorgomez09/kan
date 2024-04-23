@@ -1,104 +1,95 @@
 import { z } from "zod";
-import { and, eq, isNull } from "drizzle-orm";
-
-import { workspaces, workspaceMembers } from "~/server/db/schema";
-
 import { generateUID } from "~/utils/generateUID";
 
-import {
-  createTRPCRouter,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const workspaceRouter = createTRPCRouter({
-  all: publicProcedure
-    .query(({ ctx }) => {
-      const userId = ctx.session?.user.id;
+  all: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.user?.id;
 
-      if (!userId) return;
+    if (!userId) return;
 
-      return ctx.db.query.workspaceMembers.findMany({
-        where: and(eq(workspaceMembers.userId, userId), isNull(workspaceMembers.deletedAt)),
-        columns: {
-          role: true,
-        },
-        with: {
-          workspace: {
-            columns: {
-              publicId: true,
-              name: true
-            }
-          }
-        }
-      });
-    }),
-  byId: publicProcedure
+    const { data } = await ctx.db
+      .from("workspace_members")
+      .select(
+        `
+          role,
+          workspace (
+            publicId,
+            name
+          )
+        `,
+      )
+      .eq("userId", userId)
+      .is("deletedAt", null);
+
+    return data;
+  }),
+  byId: protectedProcedure
     .input(z.object({ publicId: z.string().min(12) }))
-    .query(({ ctx, input }) => {
-      const userId = ctx.session?.user.id;
+    .query(async ({ ctx, input }) => {
+      const { data } = await ctx.db
+        .from("workspace")
+        .select(
+          `
+            publicId,
+            members: workspace_members (
+              publicId,
+              role,
+              user (
+                id,
+                name,
+                email
+              )
+            )
+          `,
+        )
+        .eq("publicId", input.publicId)
+        .is("deletedAt", null)
+        .limit(1)
+        .single();
 
-      if (!userId) return;
-
-      return ctx.db.query.workspaces.findFirst({
-        where: and(eq(workspaces.publicId, input.publicId), isNull(workspaces.deletedAt)),
-        columns: {
-          publicId: true,
-        },
-        with: {
-          members: {
-            columns: {
-              publicId: true,
-              role: true,
-            },
-            with: {
-              user: {
-                columns: {
-                  id: true,
-                  name: true,
-                  email: true,
-                }
-              }
-            }
-          }
-        }
-      });
+      return data;
     }),
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session?.user.id;
+      const userId = ctx.user?.id;
 
       if (!userId) return;
 
-      const workspace = await ctx.db.insert(workspaces).values({
-        publicId: generateUID(),
-        name: input.name,
-        slug: input.name.toLowerCase(),
-        createdBy: userId,
-      }).returning({ id: workspaces.id });
+      const workspace = await ctx.db
+        .from("workspace")
+        .insert({
+          publicId: generateUID(),
+          name: input.name,
+          slug: input.name.toLowerCase(),
+          createdBy: userId,
+        })
+        .select(`id, publicId, name`)
+        .limit(1)
+        .single();
 
-      const workspaceId = workspace[0]?.id;
+      const newWorkspaceId = workspace.data?.id;
 
-      if (!workspaceId) return;
+      if (!newWorkspaceId) return;
 
-      await ctx.db.insert(workspaceMembers).values({
+      await ctx.db.from("workspace_members").insert({
         publicId: generateUID(),
         userId,
-        workspaceId: workspaceId,
+        workspaceId: newWorkspaceId,
         createdBy: userId,
-        role: 'admin'
-      })
-
-      return ctx.db.query.workspaces.findFirst({
-        where: eq(workspaces.id, workspaceId),
-        columns: {
-          publicId: true,
-          name: true,
-        },
+        role: "admin",
       });
+
+      const newWorkspace = { ...workspace.data };
+
+      delete newWorkspace.id;
+
+      return newWorkspace;
     }),
 });

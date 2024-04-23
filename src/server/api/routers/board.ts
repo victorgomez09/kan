@@ -1,203 +1,177 @@
 import { z } from "zod";
-import { and, eq, asc, isNull, inArray } from "drizzle-orm";
-
-import { boards, cards, lists, workspaces } from "~/server/db/schema";
 import { generateUID } from "~/utils/generateUID";
 
-import {
-  createTRPCRouter,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const boardRouter = createTRPCRouter({
-  all: publicProcedure
+  all: protectedProcedure
     .input(z.object({ workspacePublicId: z.string().min(12) }))
     .query(async ({ ctx, input }) => {
-      const userId = ctx.session?.user.id;
+      const workspace = await ctx.db
+        .from("workspace")
+        .select(`id`)
+        .eq("publicId", input.workspacePublicId)
+        .limit(1)
+        .single();
 
-      // @todo: validate user has access to workspace
+      if (!workspace.data) return;
 
-      if (!userId) return;
+      const { data } = await ctx.db
+        .from("board")
+        .select(`publicId, name`)
+        .is("deletedAt", null)
+        .eq("workspaceId", workspace.data.id);
 
-      const workspace = await ctx.db.query.workspaces.findFirst({
-        where: eq(workspaces.publicId, input.workspacePublicId),
-      })
-
-      if (!workspace) return;
-
-      return ctx.db.query.boards.findMany({
-        where: and(eq(boards.workspaceId, workspace.id), isNull(boards.deletedAt)),
-        columns: {
-          publicId: true,
-          name: true,
-        },
-      });
+      return data;
     }),
-  byId: publicProcedure
+  byId: protectedProcedure
     .input(z.object({ id: z.string().min(12) }))
-    .query(({ ctx, input }) => 
-      ctx.db.query.boards.findFirst({
-        where: and(eq(boards.publicId, input.id), isNull(boards.deletedAt)),
-        columns: {
-          publicId: true,
-          name: true,
-        },
-        with: {
-          workspace: {
-            columns: {
-              publicId: true,
-            },
-            with: {
-              members: {
-                columns: {
-                  publicId: true,
-                },
-                with: {
-                  user: {
-                    columns: {
-                      name: true
-                    }
-                  }
-                }
-              }
-            }
-          },
-          labels: {
-            columns: {
-              publicId: true,
-              colourCode: true,
-              name: true,
-            }
-          },
-          lists: {
-            orderBy: [asc(lists.index)],
-            where: isNull(cards.deletedAt),
-            columns: {
-              publicId: true,
-              name: true,
-              boardId: true,
-              index: true,
-            },
-            with: {
-              cards: {
-                where: isNull(cards.deletedAt),
-                orderBy: [asc(cards.index)],
-                columns: {
-                  publicId: true,
-                  title: true,
-                  description: true,
-                  listId: true,
-                  index: true,
-                },
-                with: {
-                  labels: {
-                    columns: {
-                      labelId: false,
-                      cardId: false,
-                    },
-                    with: {
-                      label: {
-                        columns: {
-                          publicId: true,
-                          name: true,
-                          colourCode: true,
-                        }
-                      }
-                    }
-                  },
-                  members: {
-                    columns: {
-                      workspaceMemberId: false,
-                      cardId: false,
-                    },
-                    with: {
-                      member: {
-                        columns: {
-                          publicId: true,
-                        },
-                        with: {
-                          user: {
-                            columns: {
-                              name: true
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-          },
-        },
-      })
-    ),
-  create: publicProcedure
+    .query(async ({ ctx, input }) => {
+      const { data } = await ctx.db
+        .from("board")
+        .select(
+          `
+            publicId,
+            name,
+            workspace (
+              publicId,
+              members:workspace_members (
+                publicId,
+                user (
+                  name
+                )
+              )
+            ),
+            labels:label (
+              publicId,
+              name,
+              colourCode
+            ),
+            lists:list (
+              publicId,
+              name,
+              boardId,
+              index,
+              cards:card (
+                publicId,
+                title,
+                description,
+                listId,
+                index,
+                labels:label (
+                  publicId,
+                  name,
+                  colourCode
+                ),
+                members:workspace_members (
+                  publicId,
+                  user (
+                    name
+                  )
+                )
+              )
+            )
+          `,
+        )
+        .eq("publicId", input.id)
+        .is("deletedAt", null)
+        .is("lists.deletedAt", null)
+        .is("lists.cards.deletedAt", null)
+        .order("index", { foreignTable: "list", ascending: true })
+        .order("index", { foreignTable: "list.card", ascending: true })
+        .limit(1)
+        .single();
+
+      return data;
+    }),
+  create: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1),
-        workspacePublicId: z.string().min(12)
+        workspacePublicId: z.string().min(12),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session?.user.id;
+      const userId = ctx.user?.id;
 
       if (!userId) return;
 
-      const workspace = await ctx.db.query.workspaces.findFirst({
-        where: eq(workspaces.publicId, input.workspacePublicId),
-      })
+      const workspace = await ctx.db
+        .from("workspace")
+        .select(`id`)
+        .eq("publicId", input.workspacePublicId)
+        .limit(1)
+        .single();
 
-      if (!workspace) return;
+      if (!workspace.data) return;
 
-      return ctx.db.insert(boards).values({
-        publicId: generateUID(),
-        name: input.name,
-        createdBy: userId,
-        workspaceId: workspace.id
-      });
-    }),
-    update: publicProcedure
-      .input(
-        z.object({ 
-          boardId: z.string().min(12),
-          name: z.string().min(1),
-        }))
-      .mutation(({ ctx, input }) => {
-        const userId = ctx.session?.user.id;
-
-        if (!userId) return;
-
-        return ctx.db.update(boards).set({ name: input.name }).where(eq(boards.publicId, input.boardId));
-      }),
-    delete: publicProcedure
-      .input(
-        z.object({ 
-          boardPublicId: z.string().min(12),
-        }))
-      .mutation(({ ctx, input }) => {
-        const userId = ctx.session?.user.id;
-  
-        if (!userId) return;
-  
-        return ctx.db.transaction(async (tx) => {
-          const board = await tx.query.boards.findFirst({
-            where: eq(boards.publicId, input.boardPublicId),
-            with: {
-              lists: true,
-            }
-          })
-  
-          if (!board) return;
-
-          const listIds = board.lists.map((list) => list.id)
-  
-          await tx.update(boards).set({ deletedAt: new Date(), deletedBy: userId }).where(eq(boards.id, board.id));
-
-          if (listIds.length) {
-            await tx.update(lists).set({ deletedAt: new Date(), deletedBy: userId }).where(eq(lists.boardId, board.id));
-            await tx.update(cards).set({ deletedAt: new Date(), deletedBy: userId }).where(inArray(cards.listId, listIds));
-          }
+      const { data } = await ctx.db
+        .from("board")
+        .insert({
+          publicId: generateUID(),
+          name: input.name,
+          createdBy: userId,
+          workspaceId: workspace.data.id,
         })
+        .select(`publicId, name`);
+
+      return data;
+    }),
+  update: protectedProcedure
+    .input(
+      z.object({
+        boardId: z.string().min(12),
+        name: z.string().min(1),
       }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { data } = await ctx.db
+        .from("board")
+        .update({ name: input.name })
+        .eq("publicId", input.boardId);
+
+      return data;
+    }),
+  delete: protectedProcedure
+    .input(
+      z.object({
+        boardPublicId: z.string().min(12),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      const board = await ctx.db
+        .from("board")
+        .select(`id, lists:list (id)`)
+        .eq("publicId", input.boardPublicId)
+        .limit(1)
+        .single();
+
+      if (!board.data) return;
+
+      const listIds = board.data.lists.map((list) => list.id);
+
+      const deletedAt = new Date().toISOString();
+
+      await ctx.db
+        .from("board")
+        .update({ deletedAt, deletedBy: userId })
+        .eq("id", board.data.id)
+        .is("deletedAt", null);
+
+      if (listIds.length) {
+        await ctx.db
+          .from("list")
+          .update({ deletedAt, deletedBy: userId })
+          .eq("boardId", board.data.id)
+          .is("deletedAt", null);
+
+        await ctx.db
+          .from("card")
+          .update({ deletedAt, deletedBy: userId })
+          .in("listId", listIds)
+          .is("deletedAt", null);
+      }
+    }),
 });

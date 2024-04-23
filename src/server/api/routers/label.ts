@@ -1,16 +1,10 @@
 import { z } from "zod";
-import { and, eq, isNull } from "drizzle-orm";
-
-import { cards, cardsToLabels, labels } from "~/server/db/schema";
 import { generateUID } from "~/utils/generateUID";
 
-import {
-  createTRPCRouter,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const labelRouter = createTRPCRouter({
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
         name: z.string().min(1).max(36),
@@ -18,41 +12,41 @@ export const labelRouter = createTRPCRouter({
         colourCode: z.string().length(7),
       }),
     )
-    .mutation(({ ctx, input }) => {
-      const userId = ctx.session?.user.id;
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
 
       if (!userId) return;
 
-      return ctx.db.transaction(async (tx) => {
-        const card = await tx.query.cards.findFirst({
-          where: and(eq(cards.publicId, input.cardPublicId), isNull(cards.deletedAt)),
-          with: {
-            list: {
-              with: {
-                board: true
-              }
-            }
-          }
-        });
+      const card = await ctx.db
+        .from("card")
+        .select(`id, list (boardId)`)
+        .eq("publicId", input.cardPublicId)
+        .is("deletedAt", null)
+        .limit(1)
+        .single();
 
-        if (!card) return;
+      if (!card.data?.list) return;
 
-        const newLabel = await tx.insert(labels).values({
+      const newLabel = await ctx.db
+        .from("label")
+        .insert({
           publicId: generateUID(),
           name: input.name,
           colourCode: input.colourCode,
           createdBy: userId,
-          boardId: card.list.boardId,
-        }).returning({ id: labels.id });
+          boardId: card.data.list.boardId,
+        })
+        .select(`id`)
+        .limit(1)
+        .single();
 
-        const newLabelId = newLabel[0]?.id
+      if (!newLabel.data) return;
 
-        if (!newLabelId) return;
+      await ctx.db.from("_card_labels").insert({
+        cardId: card.data.id,
+        labelId: newLabel.data.id,
+      });
 
-        return tx.insert(cardsToLabels).values({
-          cardId: card.id,
-          labelId: newLabelId,
-        });
-      })
+      return newLabel.data;
     }),
 });

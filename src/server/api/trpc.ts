@@ -6,14 +6,14 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-
 import { initTRPC, TRPCError } from "@trpc/server";
-import { type NextRequest } from "next/server";
+import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import { auth } from "~/server/auth";
-import { db } from "~/server/db";
+import createClient from "~/utils/supabase/api";
+import { type Database } from "~/types/database.types";
+import { type SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * 1. CONTEXT
@@ -23,8 +23,13 @@ import { db } from "~/server/db";
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
 
+type User = {
+  id: string;
+};
+
 interface CreateContextOptions {
-  headers: Headers;
+  user: User | null;
+  db: SupabaseClient<Database>;
 }
 
 /**
@@ -37,13 +42,11 @@ interface CreateContextOptions {
  *
  * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
  */
-export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
-  const session = await auth();
 
+export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
-    session,
-    headers: opts.headers,
-    db,
+    user: opts.user,
+    db: opts.db,
   };
 };
 
@@ -53,12 +56,14 @@ export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = async (opts: { req: NextRequest }) => {
-  // Fetch stuff that depends on the request
+export const createTRPCContext = async (_opts: CreateNextContextOptions) => {
+  const db = createClient(_opts.req, _opts.res);
 
-  return await createInnerTRPCContext({
-    headers: opts.req.headers,
-  });
+  const {
+    data: { user },
+  } = await db.auth.getUser();
+
+  return createInnerTRPCContext({ db, user });
 };
 
 /**
@@ -84,6 +89,13 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 });
 
 /**
+ * Create a server-side caller.
+ *
+ * @see https://trpc.io/docs/server/server-side-calls
+ */
+// export const createCallerFactory = t.createCallerFactory;
+
+/**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
  *
  * These are the pieces you use to build your tRPC API. You should import these a lot in the
@@ -107,15 +119,13 @@ export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.user) {
+const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+
   return next({
-    ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
-    },
+    ctx,
   });
 });
 
