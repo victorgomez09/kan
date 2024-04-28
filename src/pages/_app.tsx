@@ -26,9 +26,11 @@ const MyApp: AppType = ({ Component, pageProps }) => {
       <style jsx global>{`
         html {
           font-family: ${jakarta.style.fontFamily};
+          height: 100vh;
+          overflow: hidden;
         }
       `}</style>
-      <main className="h-screen overflow-hidden font-sans">
+      <main className="font-sans">
         <ThemeProvider>
           <ModalProvider>
             <BoardProvider>
