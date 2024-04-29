@@ -23,11 +23,29 @@ export default async function handler(
   let next = "/error";
 
   if (token_hash && type) {
-    const supabase = createNextClient(req, res);
-    const { error } = await supabase.auth.verifyOtp({
+    const db = createNextClient(req, res);
+    const { error, data } = await db.auth.verifyOtp({
       type: type as EmailOtpType,
       token_hash,
     });
+
+    console.log({ error });
+
+    if (data.user?.id) {
+      const user = await db
+        .from("user")
+        .select()
+        .eq("id", data.user.id)
+        .limit(1)
+        .maybeSingle();
+
+      if (!user.data) {
+        await db
+          .from("user")
+          .insert({ id: data.user.id, email: data.user.email ?? "" });
+      }
+    }
+
     if (error) {
       console.error(error);
     } else {

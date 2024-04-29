@@ -1,7 +1,10 @@
+import { api } from "~/utils/api";
 import SideNavigation from "./SideNavigation";
 import FeedbackButton from "./FeedbackButton";
 
 export default function Dashboard(props: { children: React.ReactNode }) {
+  const { data } = api.auth.getUser.useQuery();
+
   return (
     <div className="flex h-screen flex-col items-center bg-light-100 dark:bg-dark-50">
       <div className="m-auto flex h-16 w-full justify-between border-b border-light-600 px-5 py-2 align-middle dark:border-dark-600">
@@ -14,7 +17,7 @@ export default function Dashboard(props: { children: React.ReactNode }) {
       </div>
 
       <div className="flex h-full w-full">
-        <SideNavigation user={{ email: "henry_ball@hotmail.co.uk" }} />
+        <SideNavigation user={{ email: data?.email }} />
         <div className="w-full overflow-hidden">{props.children}</div>
       </div>
     </div>

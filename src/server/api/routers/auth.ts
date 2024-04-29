@@ -1,10 +1,26 @@
 import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  publicProcedure,
+  protectedProcedure,
+} from "~/server/api/trpc";
 
 import { env } from "~/env.mjs";
 
 export const authRouter = createTRPCRouter({
+  getUser: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.user?.id) return;
+
+    const { data } = await ctx.db
+      .from("user")
+      .select(`id, name, email`)
+      .eq("id", ctx.user.id)
+      .limit(1)
+      .single();
+
+    return data;
+  }),
   login: publicProcedure
     .input(z.object({ email: z.string() }))
     .mutation(async ({ ctx, input }) => {

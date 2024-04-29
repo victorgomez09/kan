@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import { Fragment } from "react";
 import Image from "next/image";
 import { Menu, Transition } from "@headlessui/react";
@@ -13,12 +14,15 @@ function classNames(...classes: string[]): string {
 }
 
 export default function UserMenu({ imageUrl, email }: UserMenuProps) {
+  const router = useRouter();
   const { theme, switchTheme } = useTheme();
 
   const handleLogout = async () => {
     const db = createClient();
 
     await db.auth.signOut();
+
+    router.push("/login");
   };
 
   return (
@@ -44,7 +48,7 @@ export default function UserMenu({ imageUrl, email }: UserMenuProps) {
               </svg>
             </span>
           )}
-          <span className="ml-2 truncate text-sm">{email}</span>
+          <span className="mx-2 truncate text-sm">{email}</span>
         </Menu.Button>
       </div>
 
