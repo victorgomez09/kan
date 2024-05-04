@@ -66,8 +66,6 @@ export default function BoardPage() {
   const [selectedPublicListId, setSelectedPublicListId] =
     useState<PublicListId>("");
 
-  console.log({ boardData });
-
   const boardId = params?.boardId?.length ? params.boardId[0] : null;
 
   const updateBoard = api.board.update.useMutation();
@@ -86,7 +84,7 @@ export default function BoardPage() {
     enableReinitialize: true,
   });
 
-  const { data, isSuccess } = api.board.byId.useQuery(
+  const { data, isSuccess, isLoading } = api.board.byId.useQuery(
     { id: boardId ?? "" },
     {
       enabled: !!boardId,
@@ -94,7 +92,6 @@ export default function BoardPage() {
   );
 
   if (isSuccess && data) {
-    console.log({ data });
     setBoardData(data);
   }
 
@@ -197,20 +194,27 @@ export default function BoardPage() {
       </div>
 
       <div className="z-20 flex w-full justify-between p-8 ">
-        <form
-          onSubmit={formik.handleSubmit}
-          className="focus-visible:outline-none"
-        >
-          <input
-            type="name"
-            id="name"
-            name="name"
-            value={formik.values.name}
-            onChange={formik.handleChange}
-            onBlur={formik.submitForm}
-            className="block border-0 bg-transparent p-0 py-0 font-medium leading-[2.3rem] tracking-tight text-neutral-900 focus:ring-0 focus-visible:outline-none dark:text-dark-1000 sm:text-[1.2rem]"
-          />
-        </form>
+        {isLoading ? (
+          <div className="flex space-x-2">
+            <div className="h-[2.3rem] w-[150px] animate-pulse rounded-[5px] bg-light-200 dark:bg-dark-200" />
+          </div>
+        ) : (
+          <form
+            onSubmit={formik.handleSubmit}
+            className="focus-visible:outline-none"
+          >
+            <input
+              type="name"
+              id="name"
+              name="name"
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              onBlur={formik.submitForm}
+              className="block border-0 bg-transparent p-0 py-0 font-medium leading-[2.3rem] tracking-tight text-neutral-900 focus:ring-0 focus-visible:outline-none dark:text-dark-1000 sm:text-[1.2rem]"
+            />
+          </form>
+        )}
+
         <div className="flex items-center">
           <button
             type="button"
@@ -228,103 +232,115 @@ export default function BoardPage() {
       </div>
 
       <div className="scrollbar-w-none z-10 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain pb-5 scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300">
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="all-lists" direction="horizontal" type="LIST">
-            {(provided) => (
-              <div
-                className="flex"
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-              >
-                <div className="min-w-[2rem]" />
-                {boardData?.lists?.map((list: List, index) => (
-                  <List
-                    index={index}
-                    key={index}
-                    list={list}
-                    setSelectedPublicListId={(publicListId) =>
-                      setSelectedPublicListId(publicListId)
-                    }
-                  >
-                    <Droppable droppableId={`${list.publicId}`} type="CARD">
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className="h-full max-h-[calc(100vh-250px)] min-h-[2rem] overflow-y-auto pr-1 scrollbar scrollbar-track-dark-100 scrollbar-thumb-dark-600 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-w-[8px]"
-                        >
-                          {list.cards?.map((card, index) => (
-                            <Draggable
-                              key={card.publicId}
-                              draggableId={card.publicId}
-                              index={index}
-                            >
-                              {(provided) => (
-                                <Link
-                                  key={card.publicId}
-                                  href={`/cards/${card.publicId}`}
-                                  className="mb-2 flex !cursor-pointer flex-col rounded-md border border-light-200 bg-light-50 px-3 py-2 text-sm text-neutral-900 dark:border-dark-200 dark:bg-dark-500 dark:text-dark-1000"
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                >
-                                  <div>{card.title}</div>
-                                  {(card.labels?.length ?? 0) ||
-                                  (card.members?.length ?? 0) ? (
-                                    <div className="mt-2 flex justify-end space-x-1">
-                                      {card.labels?.map((label) => (
-                                        <span
-                                          key={label.publicId}
-                                          className="inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[10px] font-medium text-neutral-600 ring-1 ring-inset ring-light-600 dark:text-dark-1000 dark:ring-dark-800"
-                                        >
-                                          <svg
-                                            fill={label.colourCode}
-                                            className="h-2 w-2"
-                                            viewBox="0 0 6 6"
-                                            aria-hidden="true"
-                                          >
-                                            <circle cx={3} cy={3} r={3} />
-                                          </svg>
-                                          <div>{label.name}</div>
-                                        </span>
-                                      ))}
-                                      <div className="isolate flex -space-x-1 overflow-hidden">
-                                        {card.members?.map((member) => (
+        {isLoading ? (
+          <div className="ml-[2rem] flex">
+            <div className="0 mr-5 h-[500px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-200" />
+            <div className="0 mr-5 h-[275px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-200" />
+            <div className="0 mr-5 h-[375px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-200" />
+          </div>
+        ) : (
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable
+              droppableId="all-lists"
+              direction="horizontal"
+              type="LIST"
+            >
+              {(provided) => (
+                <div
+                  className="flex"
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                >
+                  <div className="min-w-[2rem]" />
+                  {boardData?.lists?.map((list: List, index) => (
+                    <List
+                      index={index}
+                      key={index}
+                      list={list}
+                      setSelectedPublicListId={(publicListId) =>
+                        setSelectedPublicListId(publicListId)
+                      }
+                    >
+                      <Droppable droppableId={`${list.publicId}`} type="CARD">
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className="h-full max-h-[calc(100vh-250px)] min-h-[2rem] overflow-y-auto pr-1 scrollbar scrollbar-track-dark-100 scrollbar-thumb-dark-600 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-w-[8px]"
+                          >
+                            {list.cards?.map((card, index) => (
+                              <Draggable
+                                key={card.publicId}
+                                draggableId={card.publicId}
+                                index={index}
+                              >
+                                {(provided) => (
+                                  <Link
+                                    key={card.publicId}
+                                    href={`/cards/${card.publicId}`}
+                                    className="mb-2 flex !cursor-pointer flex-col rounded-md border border-light-200 bg-light-50 px-3 py-2 text-sm text-neutral-900 dark:border-dark-200 dark:bg-dark-300 dark:text-dark-1000 dark:hover:bg-dark-400"
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                  >
+                                    <div>{card.title}</div>
+                                    {(card.labels?.length ?? 0) ||
+                                    (card.members?.length ?? 0) ? (
+                                      <div className="mt-2 flex justify-end space-x-1">
+                                        {card.labels?.map((label) => (
                                           <span
-                                            key={member.publicId}
-                                            className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-light-900 ring-2 ring-light-50 dark:bg-gray-500 dark:ring-dark-500"
+                                            key={label.publicId}
+                                            className="inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[10px] font-medium text-neutral-600 ring-1 ring-inset ring-light-600 dark:text-dark-1000 dark:ring-dark-800"
                                           >
-                                            <span className="text-[10px] font-medium leading-none text-white">
-                                              {member.user.name
-                                                .split(" ")
-                                                .map((namePart) =>
-                                                  namePart
-                                                    .charAt(0)
-                                                    .toUpperCase(),
-                                                )
-                                                .join("")}
-                                            </span>
+                                            <svg
+                                              fill={label.colourCode}
+                                              className="h-2 w-2"
+                                              viewBox="0 0 6 6"
+                                              aria-hidden="true"
+                                            >
+                                              <circle cx={3} cy={3} r={3} />
+                                            </svg>
+                                            <div>{label.name}</div>
                                           </span>
                                         ))}
+                                        <div className="isolate flex -space-x-1 overflow-hidden">
+                                          {card.members?.map((member) => (
+                                            <span
+                                              key={member.publicId}
+                                              className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-light-900 ring-2 ring-light-50 dark:bg-gray-500 dark:ring-dark-500"
+                                            >
+                                              <span className="text-[10px] font-medium leading-none text-white">
+                                                {member.user.name
+                                                  .split(" ")
+                                                  .map((namePart) =>
+                                                    namePart
+                                                      .charAt(0)
+                                                      .toUpperCase(),
+                                                  )
+                                                  .join("")}
+                                              </span>
+                                            </span>
+                                          ))}
+                                        </div>
                                       </div>
-                                    </div>
-                                  ) : null}
-                                </Link>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </List>
-                ))}
-                <div className="min-w-[0.75rem]" />
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+                                    ) : null}
+                                  </Link>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    </List>
+                  ))}
+                  <div className="min-w-[0.75rem]" />
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        )}
       </div>
       <Modal>
         {modalContentType === "DELETE_BOARD" && <DeleteBoardConfirmation />}

@@ -6,10 +6,19 @@ import { useWorkspace } from "~/providers/workspace";
 export function BoardsList() {
   const { workspace } = useWorkspace();
 
-  const { data } = api.board.all.useQuery(
+  const { data, isLoading } = api.board.all.useQuery(
     { workspacePublicId: workspace?.publicId },
     { enabled: workspace?.publicId ? true : false },
   );
+
+  if (isLoading)
+    return (
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xxl:grid-cols-5">
+        <div className="mr-5 flex h-[150px] w-full animate-pulse rounded-md bg-light-200 dark:bg-dark-200" />
+        <div className="mr-5 flex h-[150px] w-full animate-pulse rounded-md bg-light-200 dark:bg-dark-200" />
+        <div className="mr-5 flex h-[150px] w-full animate-pulse rounded-md bg-light-200 dark:bg-dark-200" />
+      </div>
+    );
 
   if (data?.length === 0) return <></>;
 

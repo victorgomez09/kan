@@ -31,7 +31,7 @@ export default function CardPage() {
     ? params.cardId[0]
     : params?.cardId;
 
-  const { data, error } = api.card.byId.useQuery({ id: cardId ?? "" });
+  const { data, isLoading } = api.card.byId.useQuery({ id: cardId ?? "" });
 
   const board = data?.list?.board;
   const boardId = board?.publicId;
@@ -39,8 +39,6 @@ export default function CardPage() {
   const workspaceMembers = board?.workspace?.members;
   const selectedLabels = data?.labels;
   const selectedMembers = data?.members;
-
-  console.log({ board: error });
 
   const formattedLabels =
     labels?.map((label) => {
@@ -98,32 +96,41 @@ export default function CardPage() {
     <div className="flex h-full flex-1 flex-row">
       <div className="w-full p-8">
         <div className="mb-8 flex w-full items-center justify-between">
-          <Link
-            className="whitespace-nowrap font-medium leading-[2.3rem] tracking-tight text-light-900 dark:text-dark-900 sm:text-[1.2rem]"
-            href={`/boards/${board?.publicId}`}
-          >
-            {board?.name}
-          </Link>
-          <IoChevronForwardSharp
-            size={18}
-            className="mx-2 text-light-900 dark:text-dark-900"
-          />
-          <form onSubmit={formik.handleSubmit} className="w-full space-y-6">
-            <div>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                value={formik.values.title}
-                onChange={formik.handleChange}
-                onBlur={formik.submitForm}
-                className="block w-full border-0 bg-transparent p-0 py-0 font-medium tracking-tight text-neutral-900 focus:ring-0 dark:text-dark-1000 sm:text-[1.2rem]"
-              />
+          {isLoading ? (
+            <div className="flex space-x-2">
+              <div className="h-[2.3rem] w-[150px] animate-pulse rounded-[5px] bg-light-300 dark:bg-dark-300" />
+              <div className="h-[2.3rem] w-[300px] animate-pulse rounded-[5px] bg-light-300 dark:bg-dark-300" />
             </div>
-          </form>
-          <div className="flex">
-            <Dropdown />
-          </div>
+          ) : (
+            <>
+              <Link
+                className="whitespace-nowrap font-medium leading-[2.3rem] tracking-tight text-light-900 dark:text-dark-900 sm:text-[1.2rem]"
+                href={`/boards/${board?.publicId}`}
+              >
+                {board?.name}
+              </Link>
+              <IoChevronForwardSharp
+                size={18}
+                className="mx-2 text-light-900 dark:text-dark-900"
+              />
+              <form onSubmit={formik.handleSubmit} className="w-full space-y-6">
+                <div>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={formik.values.title}
+                    onChange={formik.handleChange}
+                    onBlur={formik.submitForm}
+                    className="block w-full border-0 bg-transparent p-0 py-0 font-medium tracking-tight text-neutral-900 focus:ring-0 dark:text-dark-1000 sm:text-[1.2rem]"
+                  />
+                </div>
+              </form>
+              <div className="flex">
+                <Dropdown />
+              </div>
+            </>
+          )}
         </div>
         <div className="mb-8 flex w-full max-w-2xl justify-between">
           <form onSubmit={formik.handleSubmit} className="w-full space-y-6">
