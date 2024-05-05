@@ -3,7 +3,7 @@ import SideNavigation from "./SideNavigation";
 import FeedbackButton from "./FeedbackButton";
 
 export default function Dashboard(props: { children: React.ReactNode }) {
-  const { data } = api.auth.getUser.useQuery();
+  const { data, isLoading } = api.auth.getUser.useQuery();
 
   return (
     <div className="flex h-screen flex-col items-center bg-light-100 dark:bg-dark-50">
@@ -17,7 +17,7 @@ export default function Dashboard(props: { children: React.ReactNode }) {
       </div>
 
       <div className="flex h-full w-full">
-        <SideNavigation user={{ email: data?.email }} />
+        <SideNavigation user={{ email: data?.email }} isLoading={isLoading} />
         <div className="w-full overflow-hidden">{props.children}</div>
       </div>
     </div>

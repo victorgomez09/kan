@@ -7,22 +7,30 @@ import { useWorkspace } from "~/providers/workspace";
 import { HiCheck } from "react-icons/hi2";
 
 export default function WorkspaceMenu() {
-  const { workspace, availableWorkspaces, switchWorkspace } = useWorkspace();
+  const { workspace, isLoading, availableWorkspaces, switchWorkspace } =
+    useWorkspace();
   const { openModal } = useModal();
 
   return (
     <Menu as="div" className="relative inline-block w-full pb-3 text-left">
       <div>
-        <Menu.Button className="mb-1 flex w-full items-center rounded-[5px] p-1.5 hover:bg-light-200 dark:hover:bg-dark-200">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-[5px] bg-indigo-700">
-            <span className="text-xs font-bold leading-none text-white">
-              {workspace?.name.charAt(0).toUpperCase()}
+        {isLoading ? (
+          <div className="mb-1 flex p-1.5">
+            <div className="h-6 w-6 animate-pulse rounded-[5px] bg-light-200 dark:bg-dark-200" />
+            <div className="ml-2 h-6 w-[150px] animate-pulse rounded-[5px] bg-light-200 dark:bg-dark-200" />
+          </div>
+        ) : (
+          <Menu.Button className="mb-1 flex w-full items-center rounded-[5px] p-1.5 hover:bg-light-200 dark:hover:bg-dark-200">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-[5px] bg-indigo-700">
+              <span className="text-xs font-bold leading-none text-white">
+                {workspace?.name.charAt(0).toUpperCase()}
+              </span>
             </span>
-          </span>
-          <span className="ml-2 text-sm font-bold text-neutral-900 dark:text-dark-1000">
-            {workspace?.name}
-          </span>
-        </Menu.Button>
+            <span className="ml-2 text-sm font-bold text-neutral-900 dark:text-dark-1000">
+              {workspace?.name}
+            </span>
+          </Menu.Button>
+        )}
       </div>
 
       <Transition

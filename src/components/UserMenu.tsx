@@ -7,13 +7,18 @@ import createClient from "~/utils/supabase/client";
 interface UserMenuProps {
   imageUrl: string | undefined;
   email: string;
+  isLoading: boolean;
 }
 
 function classNames(...classes: string[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function UserMenu({ imageUrl, email }: UserMenuProps) {
+export default function UserMenu({
+  imageUrl,
+  email,
+  isLoading,
+}: UserMenuProps) {
   const router = useRouter();
   const { theme, switchTheme } = useTheme();
 
@@ -28,28 +33,35 @@ export default function UserMenu({ imageUrl, email }: UserMenuProps) {
   return (
     <Menu as="div" className="relative inline-block w-full text-left">
       <div>
-        <Menu.Button className="flex w-full items-center rounded-md p-1.5 text-neutral-900 hover:bg-light-200 dark:text-dark-900 dark:hover:bg-dark-200 dark:hover:text-dark-1000">
-          {imageUrl ? (
-            <Image
-              src={imageUrl ?? ""}
-              className="h-8 w-8 rounded-full bg-gray-50"
-              width={30}
-              height={30}
-              alt=""
-            />
-          ) : (
-            <span className="inline-block h-6 w-6 overflow-hidden rounded-full bg-light-400 dark:bg-dark-400">
-              <svg
-                className="h-full w-full text-dark-700"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </span>
-          )}
-          <span className="mx-2 truncate text-sm">{email}</span>
-        </Menu.Button>
+        {isLoading ? (
+          <div className="flex">
+            <div className="h-[30px] w-[30px] animate-pulse rounded-full bg-light-200 dark:bg-dark-200" />
+            <div className="mx-2 h-[30px] w-[175px] animate-pulse rounded-md bg-light-200 dark:bg-dark-200" />
+          </div>
+        ) : (
+          <Menu.Button className="flex w-full items-center rounded-md p-1.5 text-neutral-900 hover:bg-light-200 dark:text-dark-900 dark:hover:bg-dark-200 dark:hover:text-dark-1000">
+            {imageUrl ? (
+              <Image
+                src={imageUrl ?? ""}
+                className="h-8 w-8 rounded-full bg-gray-50"
+                width={30}
+                height={30}
+                alt=""
+              />
+            ) : (
+              <span className="inline-block h-6 w-6 overflow-hidden rounded-full bg-light-400 dark:bg-dark-400">
+                <svg
+                  className="h-full w-full text-dark-700"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </span>
+            )}
+            <span className="mx-2 truncate text-sm">{email}</span>
+          </Menu.Button>
+        )}
       </div>
 
       <Transition

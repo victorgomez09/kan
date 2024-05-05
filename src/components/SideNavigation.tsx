@@ -15,6 +15,7 @@ import WorkspaceMenu from "~/components/WorkspaceMenu";
 
 interface SideNavigationProps {
   user: UserType;
+  isLoading: boolean;
 }
 
 interface UserType {
@@ -22,7 +23,10 @@ interface UserType {
   image?: string | null | undefined;
 }
 
-export default function SideNavigation({ user }: SideNavigationProps) {
+export default function SideNavigation({
+  user,
+  isLoading,
+}: SideNavigationProps) {
   const pathname = usePathname();
   const { theme } = useTheme();
 
@@ -65,6 +69,7 @@ export default function SideNavigation({ user }: SideNavigationProps) {
         <UserMenu
           email={user?.email ?? ""}
           imageUrl={user?.image ?? undefined}
+          isLoading={isLoading}
         />
       </nav>
     </>

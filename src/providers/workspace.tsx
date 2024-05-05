@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 
 interface WorkspaceContextProps {
   workspace: Workspace;
+  isLoading: boolean;
   switchWorkspace: (_workspace: Workspace) => void;
   availableWorkspaces: Workspace[];
 }
@@ -41,7 +42,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
     initialAvailableWorkspaces,
   );
 
-  const { data } = api.workspace.all.useQuery();
+  const { data, isLoading } = api.workspace.all.useQuery();
 
   const switchWorkspace = (_workspace: Workspace) => {
     localStorage.setItem("workspacePublicId", _workspace.publicId);
@@ -97,7 +98,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <WorkspaceContext.Provider
-      value={{ workspace, availableWorkspaces, switchWorkspace }}
+      value={{ workspace, isLoading, availableWorkspaces, switchWorkspace }}
     >
       {children}
     </WorkspaceContext.Provider>
