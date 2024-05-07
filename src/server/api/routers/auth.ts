@@ -21,13 +21,31 @@ export const authRouter = createTRPCRouter({
 
     return data;
   }),
-  login: publicProcedure
+  loginWithEmail: publicProcedure
     .input(z.object({ email: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { data } = await ctx.db.auth.signInWithOtp({
         email: input.email,
         options: {
           emailRedirectTo: `${env.WEBSITE_URL}`,
+        },
+      });
+
+      return data;
+    }),
+  loginWithOAuth: publicProcedure
+    .input(z.object({ provider: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      if (input.provider !== "google") return null;
+
+      const { data } = await ctx.db.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+          redirectTo: `${env.WEBSITE_URL}/api/auth/confirm`,
         },
       });
 

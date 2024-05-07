@@ -19,35 +19,43 @@ export default async function handler(
   const queryParams = req.query;
   const token_hash = stringOrFirstString(queryParams.token_hash);
   const type = stringOrFirstString(queryParams.type);
+  const code = stringOrFirstString(queryParams.code);
 
   let next = "/error";
 
-  if (token_hash && type) {
+  let authRes;
+
+  if ((token_hash && type) ?? code) {
     const db = createNextClient(req, res);
-    const { error, data } = await db.auth.verifyOtp({
-      type: type as EmailOtpType,
-      token_hash,
-    });
 
-    console.log({ error });
+    if (token_hash && type) {
+      authRes = await db.auth.verifyOtp({
+        type: type as EmailOtpType,
+        token_hash,
+      });
+    }
 
-    if (data.user?.id) {
-      const user = await db
+    if (code) {
+      authRes = await db.auth.exchangeCodeForSession(code);
+    }
+
+    const user = authRes?.data.user;
+
+    if (user?.id) {
+      const existingUser = await db
         .from("user")
         .select()
-        .eq("id", data.user.id)
+        .eq("id", user.id)
         .limit(1)
         .maybeSingle();
 
-      if (!user.data) {
-        await db
-          .from("user")
-          .insert({ id: data.user.id, email: data.user.email ?? "" });
+      if (!existingUser.data) {
+        await db.from("user").insert({ id: user.id, email: user.email ?? "" });
       }
     }
 
-    if (error) {
-      console.error(error);
+    if (authRes?.error) {
+      console.error(authRes.error);
     } else {
       next = stringOrFirstString(queryParams.next) ?? "/";
     }

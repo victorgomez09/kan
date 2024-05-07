@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { Auth } from "~/components/AuthForm";
 import { api } from "~/utils/api";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter();
   const [isMagicLinkSent, setIsMagicLinkSent] = useState<boolean>(false);
   const [magicLinkRecipient, setMagicLinkRecipient] = useState<string>("");
@@ -30,7 +30,7 @@ export default function LoginPage() {
           kan.bn
         </h1>
         <p className="mb-10 text-3xl text-dark-1000">
-          {isMagicLinkSent ? "Check your inbox" : "Welcome back"}
+          {isMagicLinkSent ? "Check your inbox" : "Get started"}
         </p>
         {isMagicLinkSent ? (
           <div className="sm:mx-auto sm:w-full sm:max-w-sm">
