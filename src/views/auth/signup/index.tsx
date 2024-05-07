@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { Auth } from "~/components/AuthForm";
-import { api } from "~/utils/api";
+// import { api } from "~/utils/api";
 
 export default function SignupPage() {
-  const router = useRouter();
+  // const router = useRouter();
   const [isMagicLinkSent, setIsMagicLinkSent] = useState<boolean>(false);
   const [magicLinkRecipient, setMagicLinkRecipient] = useState<string>("");
 
@@ -13,15 +13,15 @@ export default function SignupPage() {
     setMagicLinkRecipient(recipient);
   };
 
-  const authCookieExists = document.cookie
-    .split("; ")
-    .some((cookie) => cookie.includes("auth-token"));
+  // const authCookieExists = document.cookie
+  //   .split("; ")
+  //   .some((cookie) => cookie.includes("auth-token"));
 
-  if (authCookieExists) {
-    const { error } = api.auth.getUser.useQuery();
+  // const { data } = api.auth.getUser.useQuery(undefined, {
+  //   enabled: authCookieExists ? true : false,
+  // });
 
-    if (!error) router.push("/boards");
-  }
+  // if (data?.id) router.push("/boards");
 
   return (
     <main className="h-screen bg-dark-50">
