@@ -193,7 +193,7 @@ export default function BoardPage() {
         </svg>
       </div>
 
-      <div className="z-20 flex w-full justify-between p-8 ">
+      <div className="z-10 flex w-full justify-between p-8 ">
         {isLoading ? (
           <div className="flex space-x-2">
             <div className="h-[2.3rem] w-[150px] animate-pulse rounded-[5px] bg-light-200 dark:bg-dark-200" />
