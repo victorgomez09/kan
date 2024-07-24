@@ -7,7 +7,7 @@ import { useWorkspace } from "~/providers/workspace";
 
 import { Formik, Form, Field } from "formik";
 
-import { NewBoardInput } from "~/types/router.types";
+import { type NewBoardInput } from "~/types/router.types";
 
 export function NewBoardForm() {
   const utils = api.useUtils();

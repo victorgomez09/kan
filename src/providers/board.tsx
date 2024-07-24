@@ -8,9 +8,9 @@ import React, {
 import { api } from "~/utils/api";
 
 import {
-  GetBoardByIdOutput,
-  ReorderCardInput,
-  ReorderListInput,
+  type GetBoardByIdOutput,
+  type ReorderCardInput,
+  type ReorderListInput,
 } from "~/types/router.types";
 
 interface BoardContextProps {
@@ -40,29 +40,22 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
   const [boardData, setBoardData] =
     useState<GetBoardByIdOutput>(initialBoardData);
 
-  const refetchBoard = () => {
-    if (boardData?.publicId)
-      utils.board.byId.refetch({ boardPublicId: boardData.publicId });
+  const refetchBoard = async () => {
+    if (boardData?.publicId) {
+      try {
+        await utils.board.byId.refetch({ boardPublicId: boardData.publicId });
+      } catch (e) {
+        console.error(e);
+      }
+    }
   };
 
   const updateCardMutation = api.card.reorder.useMutation({
-    onSuccess: async () => {
-      try {
-        await refetchBoard();
-      } catch (e) {
-        console.log(e);
-      }
-    },
+    onSuccess: () => refetchBoard(),
   });
 
   const updateListMutation = api.list.reorder.useMutation({
-    onSuccess: async () => {
-      try {
-        await refetchBoard();
-      } catch (e) {
-        console.log(e);
-      }
-    },
+    onSuccess: () => refetchBoard(),
   });
 
   const updateList = ({

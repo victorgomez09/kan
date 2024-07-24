@@ -9,7 +9,7 @@ import CheckboxDropdown from "~/components/CheckboxDropdown";
 import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 
-import { NewCardInput } from "~/types/router.types";
+import { type NewCardInput } from "~/types/router.types";
 
 type NewCardFormInput = NewCardInput & {
   isCreateAnotherEnabled: boolean;
@@ -43,9 +43,14 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
   const memberPublicIds = watch("memberPublicIds") || [];
   const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
 
-  const refetchBoard = () => {
-    if (boardData?.publicId)
-      utils.board.byId.refetch({ boardPublicId: boardData.publicId });
+  const refetchBoard = async () => {
+    if (boardData?.publicId) {
+      try {
+        await utils.board.byId.refetch({ boardPublicId: boardData.publicId });
+      } catch (e) {
+        console.error(e);
+      }
+    }
   };
 
   const createCard = api.card.create.useMutation({

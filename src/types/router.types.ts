@@ -1,4 +1,4 @@
-import { RouterInputs, type RouterOutputs } from "~/utils/api";
+import { type RouterInputs, type RouterOutputs } from "~/utils/api";
 
 export type GetBoardByIdOutput = RouterOutputs["board"]["byId"];
 export type ReorderListInput = RouterInputs["list"]["reorder"];

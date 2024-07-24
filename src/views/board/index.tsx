@@ -25,7 +25,7 @@ import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { NewCardForm } from "./components/NewCardForm";
 import { NewListForm } from "./components/NewListForm";
 
-import { UpdateBoardInput } from "~/types/router.types";
+import { type UpdateBoardInput } from "~/types/router.types";
 
 type PublicListId = string;
 
@@ -228,7 +228,7 @@ export default function BoardPage() {
                                           >
                                             <svg
                                               fill={
-                                                label.colourCode || undefined
+                                                label.colourCode ?? undefined
                                               }
                                               className="h-2 w-2"
                                               viewBox="0 0 6 6"
@@ -246,15 +246,14 @@ export default function BoardPage() {
                                               className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-light-900 ring-2 ring-light-50 dark:bg-gray-500 dark:ring-dark-500"
                                             >
                                               <span className="text-[10px] font-medium leading-none text-white">
-                                                {member?.user?.name &&
-                                                  member.user.name
-                                                    .split(" ")
-                                                    .map((namePart) =>
-                                                      namePart
-                                                        .charAt(0)
-                                                        .toUpperCase(),
-                                                    )
-                                                    .join("")}
+                                                {member?.user?.name
+                                                  ?.split(" ")
+                                                  .map((namePart) =>
+                                                    namePart
+                                                      .charAt(0)
+                                                      .toUpperCase(),
+                                                  )
+                                                  .join("")}
                                               </span>
                                             </span>
                                           ))}

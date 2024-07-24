@@ -195,7 +195,7 @@ export const cardRouter = createTRPCRouter({
         input.cardPublicId,
       );
 
-      if (!card || !card?.list?.id) return;
+      if (!card ?? !card?.list?.id) return;
 
       const deletedAt = new Date().toISOString();
 

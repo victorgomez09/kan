@@ -7,7 +7,7 @@ import { Switch } from "@headlessui/react";
 import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 
-import { NewListInput } from "~/types/router.types";
+import { type NewListInput } from "~/types/router.types";
 
 import { Formik, Form, Field } from "formik";
 
@@ -21,16 +21,21 @@ export function NewListForm({ boardPublicId }: { boardPublicId: string }) {
   const { closeModal } = useModal();
   const [isCreateAnotherEnabled, setIsCreateAnotherEnabled] = useState(false);
 
-  const refetchBoard = () => {
-    if (boardData?.publicId)
-      utils.board.byId.refetch({ boardPublicId: boardData.publicId });
+  const refetchBoard = async () => {
+    if (boardData?.publicId) {
+      try {
+        await utils.board.byId.refetch({ boardPublicId: boardData.publicId });
+      } catch (e) {
+        console.error(e);
+      }
+    }
   };
 
   const createList = api.list.create.useMutation({
-    onSuccess: async () => {
+    onSuccess: () => {
       try {
-        await refetchBoard();
         if (!isCreateAnotherEnabled) closeModal();
+        return refetchBoard();
       } catch (e) {
         console.log(e);
       }

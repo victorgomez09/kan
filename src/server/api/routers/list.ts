@@ -105,5 +105,7 @@ export const listRouter = createTRPCRouter({
         { name: input.name },
         { listPublicId: input.listPublicId },
       );
+
+      return result;
     }),
 });

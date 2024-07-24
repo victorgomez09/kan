@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { generateUID } from "~/utils/generateUID";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import * as workspaceRepo from "~/server/db/repository/workspace.repo";
