@@ -1,7 +1,10 @@
 import { z } from "zod";
-import { generateUID } from "~/utils/generateUID";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+
+import * as cardRepo from "~/server/db/repository/card.repo";
+import * as boardRepo from "~/server/db/repository/board.repo";
+import * as listRepo from "~/server/db/repository/list.repo";
 
 export const listRouter = createTRPCRouter({
   create: protectedProcedure
@@ -16,31 +19,23 @@ export const listRouter = createTRPCRouter({
 
       if (!userId) return;
 
-      const board = await ctx.db
-        .from("board")
-        .select(`id, lists:list (index)`)
-        .eq("publicId", input.boardPublicId)
-        .order("index", { foreignTable: "list", ascending: false })
-        .is("list.deletedAt", null)
-        .limit(1)
-        .single();
+      const board = await boardRepo.getWithLatestListIndexByPublicId(
+        ctx.db,
+        input.boardPublicId,
+      );
 
-      if (!board.data) return;
+      if (!board) return;
 
-      const latestListIndex = board.data.lists[0]?.index;
+      const latestListIndex = board.lists[0]?.index;
 
-      const { data } = await ctx.db.from("list").insert({
-        publicId: generateUID(),
+      const result = await listRepo.create(ctx.db, {
         name: input.name,
         createdBy: userId,
-        boardId: board.data.id,
+        boardId: board.id,
         index: latestListIndex ? latestListIndex + 1 : 0,
-      }).select(`
-          publicId,
-          name
-        `);
+      });
 
-      return data;
+      return result;
     }),
   reorder: protectedProcedure
     .input(
@@ -52,23 +47,18 @@ export const listRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const list = await ctx.db
-        .from("list")
-        .select(`id, boardId`)
-        .eq("publicId", input.listId)
-        .limit(1)
-        .single();
+      const list = await listRepo.getByPublicId(ctx.db, input.listId);
 
-      if (!list?.data) return;
+      if (!list) return;
 
-      const { data } = await ctx.db.rpc("reorder_lists", {
-        board_id: list.data.boardId,
-        list_id: list.data.id,
-        current_index: input.currentIndex,
-        new_index: input.newIndex,
+      const result = listRepo.reorder(ctx.db, {
+        boardPublicId: list.boardId,
+        listPublicId: list.id,
+        currentIndex: input.currentIndex,
+        newIndex: input.newIndex,
       });
 
-      return data;
+      return result;
     }),
   delete: protectedProcedure
     .input(
@@ -79,35 +69,28 @@ export const listRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
-      const list = await ctx.db
-        .from("list")
-        .select(`id, boardId, index`)
-        .eq("publicId", input.listPublicId)
-        .limit(1)
-        .single();
+      const list = await listRepo.getByPublicId(ctx.db, input.listPublicId);
 
-      if (!list.data) return;
+      if (!list || !userId) return;
 
       const deletedAt = new Date().toISOString();
 
-      await ctx.db
-        .from("list")
-        .update({ deletedAt, deletedBy: userId })
-        .eq("id", list.data.id)
-        .is("deletedAt", null);
-
-      await ctx.db
-        .from("card")
-        .update({ deletedAt, deletedBy: userId })
-        .eq("listId", list.data.id)
-        .is("deletedAt", null);
-
-      const { data } = await ctx.db.rpc("shift_list_index", {
-        board_id: list.data.boardId,
-        list_index: list.data.index,
+      await listRepo.destroyById(ctx.db, {
+        listId: list.id,
+        deletedAt,
+        deletedBy: userId,
       });
 
-      return data;
+      await cardRepo.destroyAllByListIds(ctx.db, {
+        listIds: [list.id],
+        deletedAt,
+        deletedBy: userId,
+      });
+
+      await listRepo.shiftIndex(ctx.db, {
+        boardId: list.boardId,
+        listIndex: list.id,
+      });
     }),
   update: protectedProcedure
     .input(
@@ -117,13 +100,10 @@ export const listRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { data } = await ctx.db
-        .from("list")
-        .update({ name: input.name })
-        .eq("publicId", input.listPublicId)
-        .is("deletedAt", null)
-        .select(`publicId, name`);
-
-      return data;
+      const result = await listRepo.update(
+        ctx.db,
+        { name: input.name },
+        { listPublicId: input.listPublicId },
+      );
     }),
 });

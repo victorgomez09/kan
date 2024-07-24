@@ -1,7 +1,9 @@
 import { z } from "zod";
-import { generateUID } from "~/utils/generateUID";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+
+import * as cardRepo from "~/server/db/repository/card.repo";
+import * as labelRepo from "~/server/db/repository/label.repo";
 
 export const labelRouter = createTRPCRouter({
   create: protectedProcedure
@@ -17,36 +19,20 @@ export const labelRouter = createTRPCRouter({
 
       if (!userId) return;
 
-      const card = await ctx.db
-        .from("card")
-        .select(`id, list (boardId)`)
-        .eq("publicId", input.cardPublicId)
-        .is("deletedAt", null)
-        .limit(1)
-        .single();
+      const card = await cardRepo.getCardWithListByPublicId(
+        ctx.db,
+        input.cardPublicId,
+      );
 
-      if (!card.data?.list) return;
+      if (!card?.list) return;
 
-      const newLabel = await ctx.db
-        .from("label")
-        .insert({
-          publicId: generateUID(),
-          name: input.name,
-          colourCode: input.colourCode,
-          createdBy: userId,
-          boardId: card.data.list.boardId,
-        })
-        .select(`id`)
-        .limit(1)
-        .single();
-
-      if (!newLabel.data) return;
-
-      await ctx.db.from("_card_labels").insert({
-        cardId: card.data.id,
-        labelId: newLabel.data.id,
+      const result = await labelRepo.create(ctx.db, {
+        name: input.name,
+        colourCode: input.colourCode,
+        createdBy: userId,
+        boardId: card.list.boardId,
       });
 
-      return newLabel.data;
+      return result;
     }),
 });

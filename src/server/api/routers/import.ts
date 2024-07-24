@@ -1,8 +1,12 @@
 import { z } from "zod";
-
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-
 import { generateUID } from "~/utils/generateUID";
+
+import * as boardRepo from "~/server/db/repository/board.repo";
+import * as cardRepo from "~/server/db/repository/card.repo";
+import * as importRepo from "~/server/db/repository/import.repo";
+import * as listRepo from "~/server/db/repository/list.repo";
+import * as workspaceRepo from "~/server/db/repository/workspace.repo";
 
 const TRELLO_API_URL = "https://api.trello.com/1";
 
@@ -87,31 +91,21 @@ export const importRouter = createTRPCRouter({
 
         if (!userId) return;
 
-        const newImport = await ctx.db
-          .from("import")
-          .insert({
-            publicId: generateUID(),
-            source: "trello",
-            createdBy: userId,
-            status: "started",
-          })
-          .select(`id`)
-          .limit(1)
-          .single();
+        const newImport = await importRepo.create(ctx.db, {
+          source: "trello",
+          createdBy: userId,
+        });
 
-        const newImportId = newImport.data?.id;
+        const newImportId = newImport?.id;
 
         let boardsCreated = 0;
 
-        const workspace = await ctx.db
-          .from("workspace")
-          .select(`id`)
-          .eq("publicId", input.workspacePublicId)
-          .is("deletedAt", null)
-          .limit(1)
-          .single();
+        const workspace = await workspaceRepo.getByPublicId(
+          ctx.db,
+          input.workspacePublicId,
+        );
 
-        if (!workspace.data) return;
+        if (!workspace) return;
 
         for (const boardId of input.boardIds) {
           const response = await fetch(
@@ -132,41 +126,29 @@ export const importRouter = createTRPCRouter({
             })),
           };
 
-          const newBoard = await ctx.db
-            .from("board")
-            .insert({
-              publicId: generateUID(),
-              name: data.name,
-              createdBy: userId,
-              importId: newImportId,
-              workspaceId: workspace.data.id,
-            })
-            .select(`id`)
-            .limit(1)
-            .single();
+          const newBoard = await boardRepo.create(ctx.db, {
+            name: formattedData.name,
+            createdBy: userId,
+            importId: newImportId,
+            workspaceId: workspace.id,
+          });
 
-          const newBoardId = newBoard.data?.id;
+          const newBoardId = newBoard?.id;
 
           if (!newBoardId) return;
 
           let listIndex = 0;
 
           for (const list of formattedData.lists) {
-            const newList = await ctx.db
-              .from("list")
-              .insert({
-                publicId: generateUID(),
-                name: list.name,
-                createdBy: userId,
-                boardId: newBoardId,
-                index: listIndex,
-                importId: newImportId,
-              })
-              .select(`id`)
-              .limit(1)
-              .single();
+            const newList = await listRepo.create(ctx.db, {
+              name: list.name,
+              createdBy: userId,
+              boardId: newBoardId,
+              index: listIndex,
+              importId: newImportId,
+            });
 
-            const newListId = newList.data?.id;
+            const newListId = newList?.id;
 
             if (list.cards.length && newListId) {
               const cardsInsert = list.cards.map((card, index) => ({
@@ -179,6 +161,8 @@ export const importRouter = createTRPCRouter({
                 importId: newImportId,
               }));
 
+              await cardRepo.bulkCreate(ctx.db, cardsInsert);
+
               await ctx.db.from("card").insert(cardsInsert);
             }
 
@@ -188,10 +172,11 @@ export const importRouter = createTRPCRouter({
         }
 
         if (boardsCreated > 0 && newImportId) {
-          await ctx.db
-            .from("import")
-            .update({ status: "success" })
-            .eq("importId", newImportId);
+          await importRepo.update(
+            ctx.db,
+            { status: "success" },
+            { importId: newImport.id },
+          );
         }
 
         return { boardsCreated };

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { generateUID } from "~/utils/generateUID";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import * as workspaceRepo from "~/server/db/repository/workspace.repo";
 
 export const workspaceRouter = createTRPCRouter({
   all: protectedProcedure.query(async ({ ctx }) => {
@@ -9,47 +10,19 @@ export const workspaceRouter = createTRPCRouter({
 
     if (!userId) return;
 
-    const { data } = await ctx.db
-      .from("workspace_members")
-      .select(
-        `
-          role,
-          workspace (
-            publicId,
-            name
-          )
-        `,
-      )
-      .eq("userId", userId)
-      .is("deletedAt", null);
+    const result = await workspaceRepo.getAllByUserId(ctx.db, userId);
 
-    return data;
+    return result;
   }),
   byId: protectedProcedure
     .input(z.object({ publicId: z.string().min(12) }))
     .query(async ({ ctx, input }) => {
-      const { data } = await ctx.db
-        .from("workspace")
-        .select(
-          `
-            publicId,
-            members: workspace_members (
-              publicId,
-              role,
-              user (
-                id,
-                name,
-                email
-              )
-            )
-          `,
-        )
-        .eq("publicId", input.publicId)
-        .is("deletedAt", null)
-        .limit(1)
-        .single();
+      const result = await workspaceRepo.getByPublicIdWithMembers(
+        ctx.db,
+        input.publicId,
+      );
 
-      return data;
+      return result;
     }),
   create: protectedProcedure
     .input(
@@ -62,34 +35,12 @@ export const workspaceRouter = createTRPCRouter({
 
       if (!userId) return;
 
-      const workspace = await ctx.db
-        .from("workspace")
-        .insert({
-          publicId: generateUID(),
-          name: input.name,
-          slug: input.name.toLowerCase(),
-          createdBy: userId,
-        })
-        .select(`id, publicId, name`)
-        .limit(1)
-        .single();
-
-      const newWorkspaceId = workspace.data?.id;
-
-      if (!newWorkspaceId) return;
-
-      await ctx.db.from("workspace_members").insert({
-        publicId: generateUID(),
-        userId,
-        workspaceId: newWorkspaceId,
+      const result = await workspaceRepo.create(ctx.db, {
+        name: input.name,
+        slug: input.name,
         createdBy: userId,
-        role: "admin",
       });
 
-      const newWorkspace = { ...workspace.data };
-
-      delete newWorkspace.id;
-
-      return newWorkspace;
+      return result;
     }),
 });

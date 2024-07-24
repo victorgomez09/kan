@@ -1,7 +1,11 @@
 import { z } from "zod";
-import { generateUID } from "~/utils/generateUID";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+
+import * as cardRepo from "~/server/db/repository/card.repo";
+import * as labelRepo from "~/server/db/repository/label.repo";
+import * as listRepo from "~/server/db/repository/list.repo";
+import * as workspaceRepo from "~/server/db/repository/workspace.repo";
 
 export const cardRouter = createTRPCRouter({
   create: protectedProcedure
@@ -9,7 +13,7 @@ export const cardRouter = createTRPCRouter({
       z.object({
         title: z.string().min(1),
         listPublicId: z.string().min(12),
-        labelsPublicIds: z.array(z.string().min(12)),
+        labelPublicIds: z.array(z.string().min(12)),
         memberPublicIds: z.array(z.string().min(12)),
       }),
     )
@@ -18,63 +22,57 @@ export const cardRouter = createTRPCRouter({
 
       if (!userId) return;
 
-      const list = await ctx.db
-        .from("list")
-        .select(`id, cards:card (index)`)
-        .eq("publicId", input.listPublicId)
-        .order("index", { foreignTable: "card", ascending: false })
-        .limit(1)
-        .single();
+      const list = await listRepo.getWithCardsByPublicId(
+        ctx.db,
+        input.listPublicId,
+      );
 
-      if (!list.data?.id) return;
+      if (!list?.id) return;
 
-      const latestCard = list.data.cards.length && list.data.cards[0];
+      const latestCard = list.cards.length && list.cards[0];
 
-      const newCard = await ctx.db
-        .from("card")
-        .insert({
-          publicId: generateUID(),
-          title: input.title,
-          createdBy: userId,
-          listId: list.data.id,
-          index: latestCard ? latestCard.index + 1 : 0,
-        })
-        .select(`id`)
-        .limit(1)
-        .single();
+      const newCard = await cardRepo.create(ctx.db, {
+        title: input.title,
+        createdBy: userId,
+        listId: list.id,
+        index: latestCard ? latestCard.index + 1 : 0,
+      });
 
-      const newCardId = newCard.data?.id;
+      const newCardId = newCard?.id;
 
-      if (newCardId && input.labelsPublicIds.length) {
-        const labels = await ctx.db
-          .from("label")
-          .select(`id`)
-          .eq("publicId", input.labelsPublicIds);
+      if (newCardId && input.labelPublicIds.length) {
+        const labels = await labelRepo.getAllByPublicIds(
+          ctx.db,
+          input.labelPublicIds,
+        );
 
-        if (!labels.data?.length) return;
+        if (!labels?.length) return;
 
-        const labelsInsert = labels.data.map((label) => ({
+        const labelsInsert = labels.map((label) => ({
           cardId: newCardId,
           labelId: label.id,
         }));
 
-        await ctx.db.from("_card_labels").insert(labelsInsert);
+        await cardRepo.bulkCreateCardLabelRelationships(ctx.db, labelsInsert);
       }
 
       if (newCardId && input.memberPublicIds.length) {
-        const members = await ctx.db
-          .from("workspace_members")
-          .select(`id`)
-          .eq("publicId", input.memberPublicIds);
+        const members = await workspaceRepo.getAllMembersByPublicIds(
+          ctx.db,
+          input.memberPublicIds,
+        );
 
-        if (!members.data?.length) return;
+        if (!members?.length) return;
 
-        const membersInsert = members.data.map((member) => ({
+        const membersInsert = members.map((member) => ({
           cardId: newCardId,
           workspaceMemberId: member.id,
         }));
 
-        await ctx.db.from("_card_workspace_members").insert(membersInsert);
+        await cardRepo.bulkCreateCardWorkspaceMemberRelationships(
+          ctx.db,
+          membersInsert,
+        );
       }
 
       return newCard;
@@ -91,44 +89,25 @@ export const cardRouter = createTRPCRouter({
 
       if (!userId) return;
 
-      const card = await ctx.db
-        .from("card")
-        .select(`id`)
-        .eq("publicId", input.cardPublicId)
-        .limit(1)
-        .single();
+      const card = await cardRepo.getByPublicId(ctx.db, input.cardPublicId);
+      const label = await labelRepo.getByPublicId(ctx.db, input.labelPublicId);
 
-      const label = await ctx.db
-        .from("label")
-        .select(`id`)
-        .eq("publicId", input.labelPublicId)
-        .limit(1)
-        .single();
+      if (!card || !label) return;
 
-      if (!card.data || !label.data) return;
+      const cardLabelIds = { cardId: card.id, labelId: label.id };
 
-      const existingLabel = await ctx.db
-        .from("_card_labels")
-        .select()
-        .eq("cardId", card.data.id)
-        .eq("labelId", label.data.id)
-        .limit(1)
-        .single();
+      const existingLabel = await cardRepo.getCardLabelRelationship(
+        ctx.db,
+        cardLabelIds,
+      );
 
-      if (existingLabel.data) {
-        await ctx.db
-          .from("_card_labels")
-          .delete()
-          .eq("cardId", card.data.id)
-          .eq("labelId", label.data.id);
+      if (existingLabel) {
+        await cardRepo.destroyCardLabelRelationship(ctx.db, cardLabelIds);
 
         return { newLabel: false };
       }
 
-      await ctx.db.from("_card_labels").insert({
-        cardId: card.data.id,
-        labelId: label.data.id,
-      });
+      await cardRepo.createCardLabelRelationship(ctx.db, cardLabelIds);
 
       return { newLabel: true };
     }),
@@ -144,105 +123,40 @@ export const cardRouter = createTRPCRouter({
 
       if (!userId) return;
 
-      const card = await ctx.db
-        .from("card")
-        .select(`id`)
-        .eq("publicId", input.cardPublicId)
-        .limit(1)
-        .single();
+      const card = await cardRepo.getByPublicId(ctx.db, input.cardPublicId);
+      const member = await workspaceRepo.getMemberByPublicId(
+        ctx.db,
+        input.workspaceMemberPublicId,
+      );
 
-      const member = await ctx.db
-        .from("workspace_members")
-        .select(`id`)
-        .eq("publicId", input.workspaceMemberPublicId)
-        .limit(1)
-        .single();
+      if (!card || !member) return;
 
-      if (!card.data || !member.data) return;
+      const cardMemberIds = { cardId: card.id, memberId: member.id };
 
-      const existingMember = await ctx.db
-        .from("_card_workspace_members")
-        .select()
-        .eq("cardId", card.data.id)
-        .eq("workspaceMemberId", member.data.id)
-        .limit(1)
-        .single();
+      const existingMember = await cardRepo.getCardMemberRelationship(
+        ctx.db,
+        cardMemberIds,
+      );
 
-      if (existingMember.data) {
-        await ctx.db
-          .from("_card_workspace_members")
-          .delete()
-          .eq("cardId", card.data.id)
-          .eq("workspaceMemberId", member.data.id);
+      if (existingMember) {
+        await cardRepo.destroyCardMemberRelationship(ctx.db, cardMemberIds);
 
         return { newMember: false };
       }
 
-      await ctx.db.from("_card_workspace_members").insert({
-        cardId: card.data.id,
-        workspaceMemberId: member.data.id,
-      });
+      await cardRepo.createCardMemberRelationship(ctx.db, cardMemberIds);
 
       return { newMember: true };
     }),
   byId: protectedProcedure
     .input(z.object({ id: z.string().min(12) }))
     .query(async ({ ctx, input }) => {
-      const { data } = await ctx.db
-        .from("card")
-        .select(
-          `
-            publicId,
-            title,
-            description,
-            labels:label (
-              publicId,
-              name,
-              colourCode
-            ),
-            list (
-              publicId,
-              name,
-              board (
-                publicId,
-                name,
-                labels:label (
-                  publicId,
-                  colourCode,
-                  name
-                ),
-                lists:list (
-                  publicId,
-                  name
-                ),
-                workspace (
-                  publicId,
-                  members:workspace_members (
-                    publicId,
-                    user (
-                      id,
-                      name
-                    )
-                  )
-                )
-              )
-            ),
-            members:workspace_members (
-              publicId,
-              user (
-                id,
-                name
-              )
-            )
-          `,
-        )
-        .eq("publicId", input.id)
-        .is("deletedAt", null)
-        .is("list.board.lists.deletedAt", null)
-        .limit(1)
-        .single();
+      const result = await cardRepo.getWithListAndMembersByPublicId(
+        ctx.db,
+        input.id,
+      );
 
-      return data;
+      return result;
     }),
   update: protectedProcedure
     .input(
@@ -257,13 +171,13 @@ export const cardRouter = createTRPCRouter({
 
       if (!userId) return;
 
-      const { data } = await ctx.db
-        .from("card")
-        .update({ title: input.title, description: input.description })
-        .eq("publicId", input.cardId)
-        .is("deletedAt", null);
+      const result = cardRepo.update(
+        ctx.db,
+        { title: input.title, description: input.description },
+        { cardPublicId: input.cardId },
+      );
 
-      return data;
+      return result;
     }),
   delete: protectedProcedure
     .input(
@@ -276,30 +190,24 @@ export const cardRouter = createTRPCRouter({
 
       if (!userId) return;
 
-      const card = await ctx.db
-        .from("card")
-        .select(`id, index, listId`)
-        .eq("publicId", input.cardPublicId)
-        .limit(1)
-        .single();
+      const card = await cardRepo.getCardWithListByPublicId(
+        ctx.db,
+        input.cardPublicId,
+      );
 
-      if (!card.data) return;
+      if (!card || !card?.list?.id) return;
 
       const deletedAt = new Date().toISOString();
 
-      await ctx.db
-        .from("card")
-        .update({ deletedAt, deletedBy: userId })
-        .eq("publicId", input.cardPublicId);
+      await cardRepo.destroy(ctx.db, {
+        cardId: card.id,
+        deletedAt,
+        deletedBy: userId,
+      });
 
-      await ctx.db
-        .from("card")
-        .update({ deletedAt, deletedBy: userId })
-        .eq("publicId", input.cardPublicId);
-
-      await ctx.db.rpc("shift_card_index", {
-        list_id: card.data.listId,
-        card_index: card.data.index,
+      await cardRepo.shiftIndex(ctx.db, {
+        listId: card.list.id,
+        cardIndex: card.index,
       });
     }),
   reorder: protectedProcedure
@@ -315,50 +223,43 @@ export const cardRouter = createTRPCRouter({
 
       if (!userId) return;
 
-      const card = await ctx.db
-        .from("card")
-        .select(`id, index, list (id)`)
-        .eq("publicId", input.cardId)
-        .is("deletedAt", null)
-        .limit(1)
-        .single();
+      const card = await cardRepo.getCardWithListByPublicId(
+        ctx.db,
+        input.cardId,
+      );
 
-      if (!card.data) return;
+      if (!card) return;
 
-      const currentList = card.data.list;
-      const currentIndex = card.data.index;
+      const currentList = card.list;
+      const currentIndex = card.index;
 
       let newIndex = input.newIndex;
 
-      const newList = await ctx.db
-        .from("list")
-        .select(`id, cards:card (index)`)
-        .eq("publicId", input.newListId)
-        .is("deletedAt", null)
-        .order("index", { foreignTable: "card", ascending: false })
-        .limit(1)
-        .single();
+      const newList = await listRepo.getWithCardsByPublicId(
+        ctx.db,
+        input.newListId,
+      );
 
-      if (!newList.data) return;
+      if (!newList) return;
 
       if (newIndex === undefined) {
-        const lastCardIndex = newList.data.cards.length
-          ? newList.data.cards[0]?.index
+        const lastCardIndex = newList.cards.length
+          ? newList.cards[0]?.index
           : undefined;
 
         newIndex = lastCardIndex !== undefined ? lastCardIndex + 1 : 0;
       }
 
-      if (!currentList?.id || !newList?.data.id) return;
+      if (!currentList?.id || !newList.id) return;
 
-      const { error } = await ctx.db.rpc("reorder_cards", {
-        current_list_id: currentList.id,
-        new_list_id: newList.data.id,
-        current_index: currentIndex,
-        new_index: newIndex,
-        card_id: card.data.id,
+      const result = await cardRepo.reorder(ctx.db, {
+        currentListId: currentList.id,
+        newListId: newList.id,
+        currentIndex,
+        newIndex,
+        cardId: card.id,
       });
 
-      return { success: !!error };
+      return { success: !!result.error };
     }),
 });

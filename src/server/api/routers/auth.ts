@@ -8,18 +8,15 @@ import {
 
 import { env } from "~/env.mjs";
 
+import * as userRepo from "~/server/db/repository/user.repo";
+
 export const authRouter = createTRPCRouter({
   getUser: protectedProcedure.query(async ({ ctx }) => {
     if (!ctx.user?.id) return;
 
-    const { data } = await ctx.db
-      .from("user")
-      .select(`id, name, email`)
-      .eq("id", ctx.user.id)
-      .limit(1)
-      .single();
+    const result = await userRepo.getById(ctx.db, ctx.user.id);
 
-    return data;
+    return result;
   }),
   loginWithEmail: publicProcedure
     .input(z.object({ email: z.string() }))
