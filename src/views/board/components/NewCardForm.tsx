@@ -9,13 +9,11 @@ import CheckboxDropdown from "~/components/CheckboxDropdown";
 import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 
-interface FormData {
-  title: string;
-  listPublicId: string;
-  labelPublicIds: string[];
-  memberPublicIds: string[];
+import { NewCardInput } from "~/types/router.types";
+
+type NewCardFormInput = NewCardInput & {
   isCreateAnotherEnabled: boolean;
-}
+};
 
 interface NewCardFormProps {
   listPublicId: string;
@@ -30,22 +28,25 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
   const { boardData } = useBoard();
   const { closeModal } = useModal();
 
-  const { register, handleSubmit, reset, setValue, watch } = useForm<FormData>({
-    defaultValues: {
-      title: "",
-      listPublicId,
-      labelPublicIds: [],
-      memberPublicIds: [],
-      isCreateAnotherEnabled: false,
-    },
-  });
+  const { register, handleSubmit, reset, setValue, watch } =
+    useForm<NewCardFormInput>({
+      defaultValues: {
+        title: "",
+        listPublicId,
+        labelPublicIds: [],
+        memberPublicIds: [],
+        isCreateAnotherEnabled: false,
+      },
+    });
 
   const labelPublicIds = watch("labelPublicIds") || [];
   const memberPublicIds = watch("memberPublicIds") || [];
   const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
 
-  const refetchBoard = () =>
-    utils.board.byId.refetch({ id: boardData.publicId });
+  const refetchBoard = () => {
+    if (boardData?.publicId)
+      utils.board.byId.refetch({ boardPublicId: boardData.publicId });
+  };
 
   const createCard = api.card.create.useMutation({
     onSuccess: async () => {
@@ -92,11 +93,11 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
       selected: memberPublicIds.includes(member.publicId),
     })) ?? [];
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (data: NewCardInput) => {
     createCard.mutate({
       title: data.title,
       listPublicId: data.listPublicId,
-      labelsPublicIds: data.labelPublicIds,
+      labelPublicIds: data.labelPublicIds,
       memberPublicIds: data.memberPublicIds,
     });
   };

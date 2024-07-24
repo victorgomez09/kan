@@ -15,6 +15,7 @@ import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 
 import Modal from "~/components/modal";
+import PatternedBackground from "~/components/PatternedBackground";
 
 import BoardDropdown from "./components/BoardDropdown";
 import { DeleteBoardConfirmation } from "./components/DeleteBoardConfirmation";
@@ -24,38 +25,7 @@ import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { NewCardForm } from "./components/NewCardForm";
 import { NewListForm } from "./components/NewListForm";
 
-interface List {
-  publicId: string;
-  name: string;
-  cards?: Card[];
-}
-
-interface Card {
-  publicId: string;
-  title: string;
-  labels?: Label[];
-  members?: Member[];
-}
-
-interface Label {
-  publicId: string;
-  name: string;
-  colourCode: string;
-}
-
-interface Member {
-  publicId: string;
-  user: User;
-}
-
-interface User {
-  name: string;
-}
-
-interface FormValues {
-  boardId: string;
-  name: string;
-}
+import { UpdateBoardInput } from "~/types/router.types";
 
 type PublicListId = string;
 
@@ -72,12 +42,12 @@ export default function BoardPage() {
 
   const formik = useFormik({
     initialValues: {
-      boardId: boardId ?? "",
+      boardPublicId: boardId ?? "",
       name: boardData?.name ? boardData.name : "",
     },
-    onSubmit: (values: FormValues) => {
+    onSubmit: (values: UpdateBoardInput) => {
       updateBoard.mutate({
-        boardId: values.boardId,
+        boardPublicId: values.boardPublicId,
         name: values.name,
       });
     },
@@ -85,7 +55,7 @@ export default function BoardPage() {
   });
 
   const { data, isSuccess, isLoading } = api.board.byId.useQuery(
-    { id: boardId ?? "" },
+    { boardPublicId: boardId ?? "" },
     {
       enabled: !!boardId,
     },
@@ -95,7 +65,7 @@ export default function BoardPage() {
     setBoardData(data);
   }
 
-  if (!boardId) return <></>;
+  if (!boardId || !boardData) return <></>;
 
   const openNewListForm = (publicBoardId: string) => {
     openModal("NEW_LIST");
@@ -156,43 +126,7 @@ export default function BoardPage() {
 
   return (
     <div className="relative flex h-full flex-col">
-      <div>
-        <svg
-          style={{
-            position: "absolute",
-            width: "100%",
-            height: "100%",
-            top: "0px",
-            left: "0px",
-            color: "white",
-          }}
-        >
-          <pattern
-            id="pattern"
-            x="0.034759358288862785"
-            y="3.335370511841166"
-            width="14.423223834988539"
-            height="14.423223834988539"
-            patternUnits="userSpaceOnUse"
-            patternTransform="translate(-0.45072574484339184,-0.45072574484339184)"
-          >
-            <circle
-              cx="0.45072574484339184"
-              cy="0.45072574484339184"
-              r="0.45072574484339184"
-              fill="#3e3e3e"
-            ></circle>
-          </pattern>
-          <rect
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            fill="url(#pattern)"
-          ></rect>
-        </svg>
-      </div>
-
+      <PatternedBackground />
       <div className="z-10 flex w-full justify-between p-8 ">
         {isLoading ? (
           <div className="flex space-x-2">
@@ -252,7 +186,7 @@ export default function BoardPage() {
                   {...provided.droppableProps}
                 >
                   <div className="min-w-[2rem]" />
-                  {boardData?.lists?.map((list: List, index) => (
+                  {boardData?.lists?.map((list, index) => (
                     <List
                       index={index}
                       key={index}
@@ -293,7 +227,9 @@ export default function BoardPage() {
                                             className="inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[10px] font-medium text-neutral-600 ring-1 ring-inset ring-light-600 dark:text-dark-1000 dark:ring-dark-800"
                                           >
                                             <svg
-                                              fill={label.colourCode}
+                                              fill={
+                                                label.colourCode || undefined
+                                              }
                                               className="h-2 w-2"
                                               viewBox="0 0 6 6"
                                               aria-hidden="true"
@@ -310,14 +246,15 @@ export default function BoardPage() {
                                               className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-light-900 ring-2 ring-light-50 dark:bg-gray-500 dark:ring-dark-500"
                                             >
                                               <span className="text-[10px] font-medium leading-none text-white">
-                                                {member.user.name
-                                                  .split(" ")
-                                                  .map((namePart) =>
-                                                    namePart
-                                                      .charAt(0)
-                                                      .toUpperCase(),
-                                                  )
-                                                  .join("")}
+                                                {member?.user?.name &&
+                                                  member.user.name
+                                                    .split(" ")
+                                                    .map((namePart) =>
+                                                      namePart
+                                                        .charAt(0)
+                                                        .toUpperCase(),
+                                                    )
+                                                    .join("")}
                                               </span>
                                             </span>
                                           ))}

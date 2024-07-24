@@ -13,8 +13,10 @@ export function DeleteListConfirmation({
   const { boardData } = useBoard();
   const { closeModal } = useModal();
 
-  const refetchBoard = () =>
-    utils.board.byId.refetch({ id: boardData.publicId });
+  const refetchBoard = () => {
+    if (boardData?.publicId)
+      utils.board.byId.refetch({ boardPublicId: boardData.publicId });
+  };
 
   const deleteList = api.list.delete.useMutation({
     onSuccess: async () => {

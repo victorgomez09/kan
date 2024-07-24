@@ -69,56 +69,6 @@ export type Database = {
           },
         ]
       }
-      account: {
-        Row: {
-          access_token: string | null
-          expires_at: number | null
-          id_token: string | null
-          provider: string
-          providerAccountId: string
-          refresh_token: string | null
-          scope: string | null
-          session_state: string | null
-          token_type: string | null
-          type: string
-          userId: string
-        }
-        Insert: {
-          access_token?: string | null
-          expires_at?: number | null
-          id_token?: string | null
-          provider: string
-          providerAccountId: string
-          refresh_token?: string | null
-          scope?: string | null
-          session_state?: string | null
-          token_type?: string | null
-          type: string
-          userId: string
-        }
-        Update: {
-          access_token?: string | null
-          expires_at?: number | null
-          id_token?: string | null
-          provider?: string
-          providerAccountId?: string
-          refresh_token?: string | null
-          scope?: string | null
-          session_state?: string | null
-          token_type?: string | null
-          type?: string
-          userId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "account_userId_user_id_fk"
-            columns: ["userId"]
-            isOneToOne: false
-            referencedRelation: "user"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       board: {
         Row: {
           createdAt: string
@@ -425,32 +375,6 @@ export type Database = {
           },
         ]
       }
-      session: {
-        Row: {
-          expires: string
-          sessionToken: string
-          userId: string
-        }
-        Insert: {
-          expires: string
-          sessionToken: string
-          userId: string
-        }
-        Update: {
-          expires?: string
-          sessionToken?: string
-          userId?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "session_userId_user_id_fk"
-            columns: ["userId"]
-            isOneToOne: false
-            referencedRelation: "user"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user: {
         Row: {
           email: string
@@ -472,24 +396,6 @@ export type Database = {
           id?: string
           image?: string | null
           name?: string | null
-        }
-        Relationships: []
-      }
-      verificationToken: {
-        Row: {
-          expires: string
-          identifier: string
-          token: string
-        }
-        Insert: {
-          expires: string
-          identifier: string
-          token: string
-        }
-        Update: {
-          expires?: string
-          identifier?: string
-          token?: string
         }
         Relationships: []
       }

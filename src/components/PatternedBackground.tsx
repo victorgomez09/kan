@@ -1,0 +1,34 @@
+const PatternedBackground = () => (
+  <div>
+    <svg
+      style={{
+        position: "absolute",
+        width: "100%",
+        height: "100%",
+        top: "0px",
+        left: "0px",
+        color: "white",
+      }}
+    >
+      <pattern
+        id="pattern"
+        x="0.034759358288862785"
+        y="3.335370511841166"
+        width="14.423223834988539"
+        height="14.423223834988539"
+        patternUnits="userSpaceOnUse"
+        patternTransform="translate(-0.45072574484339184,-0.45072574484339184)"
+      >
+        <circle
+          cx="0.45072574484339184"
+          cy="0.45072574484339184"
+          r="0.45072574484339184"
+          fill="#3e3e3e"
+        ></circle>
+      </pattern>
+      <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern)"></rect>
+    </svg>
+  </div>
+);
+
+export default PatternedBackground;

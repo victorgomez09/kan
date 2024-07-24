@@ -16,6 +16,13 @@ export function DeleteBoardConfirmation() {
     },
   });
 
+  const handleDeleteBoard = () => {
+    if (boardData?.publicId)
+      deleteBoard.mutate({
+        boardPublicId: boardData.publicId,
+      });
+  };
+
   return (
     <>
       <div className="flex w-full flex-col justify-between pb-4">
@@ -34,11 +41,7 @@ export function DeleteBoardConfirmation() {
           Cancel
         </button>
         <button
-          onClick={() =>
-            deleteBoard.mutate({
-              boardPublicId: boardData.publicId,
-            })
-          }
+          onClick={handleDeleteBoard}
           className="inline-flex justify-center rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
         >
           Delete

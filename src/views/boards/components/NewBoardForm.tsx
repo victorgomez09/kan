@@ -7,9 +7,7 @@ import { useWorkspace } from "~/providers/workspace";
 
 import { Formik, Form, Field } from "formik";
 
-interface FormValues {
-  name: string;
-}
+import { NewBoardInput } from "~/types/router.types";
 
 export function NewBoardForm() {
   const utils = api.useUtils();
@@ -40,8 +38,9 @@ export function NewBoardForm() {
       <Formik
         initialValues={{
           name: "",
+          workspacePublicId: "",
         }}
-        onSubmit={(values: FormValues) => {
+        onSubmit={(values: NewBoardInput) => {
           createBoard.mutate({
             name: values.name,
             workspacePublicId: workspace?.publicId,

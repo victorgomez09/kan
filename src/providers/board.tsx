@@ -7,68 +7,26 @@ import React, {
 
 import { api } from "~/utils/api";
 
+import {
+  GetBoardByIdOutput,
+  ReorderCardInput,
+  ReorderListInput,
+} from "~/types/router.types";
+
 interface BoardContextProps {
-  boardData: BoardData;
-  setBoardData: React.Dispatch<React.SetStateAction<BoardData>>;
-  updateList: (params: UpdateListParams) => void;
-  updateCard: (params: UpdateCardParams) => void;
+  boardData: GetBoardByIdOutput;
+  setBoardData: React.Dispatch<React.SetStateAction<GetBoardByIdOutput>>;
+  updateList: (params: ReorderListInput) => void;
+  updateCard: (params: ReorderCardInput) => void;
 }
 
-interface BoardData {
-  name: string;
-  publicId: string;
-  labels: Label[];
-  lists: List[];
-  workspace: {
-    members: Members[];
-  } | null;
-}
-
-interface Label {
-  publicId: string;
-  name: string;
-  colourCode: string | null;
-}
-
-interface List {
-  publicId: string;
-  name: string;
-  boardId: number;
-  index: number;
-  cards: Card[];
-}
-
-interface Members {
-  publicId: string;
-  user: {
-    name: string | null;
-  } | null;
-}
-
-interface Card {
-  publicId: string;
-  title: string;
-}
-
-interface UpdateListParams {
-  boardId: string;
-  listId: string;
-  currentIndex: number;
-  newIndex: number;
-}
-
-interface UpdateCardParams {
-  cardId: string;
-  newListId: string;
-  newIndex: number;
-}
-
-const initialBoardData: BoardData = {
+const initialBoardData: GetBoardByIdOutput = {
   name: "",
   publicId: "",
   lists: [],
   labels: [],
   workspace: {
+    publicId: "",
     members: [],
   },
 };
@@ -79,10 +37,13 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const utils = api.useUtils();
-  const [boardData, setBoardData] = useState<BoardData>(initialBoardData);
+  const [boardData, setBoardData] =
+    useState<GetBoardByIdOutput>(initialBoardData);
 
-  const refetchBoard = () =>
-    utils.board.byId.refetch({ id: boardData.publicId });
+  const refetchBoard = () => {
+    if (boardData?.publicId)
+      utils.board.byId.refetch({ boardPublicId: boardData.publicId });
+  };
 
   const updateCardMutation = api.card.reorder.useMutation({
     onSuccess: async () => {
@@ -109,7 +70,7 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
     listId,
     currentIndex,
     newIndex,
-  }: UpdateListParams) => {
+  }: ReorderListInput) => {
     updateListMutation.mutate({
       boardId,
       listId,
@@ -118,7 +79,7 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
     });
   };
 
-  const updateCard = ({ cardId, newListId, newIndex }: UpdateCardParams) => {
+  const updateCard = ({ cardId, newListId, newIndex }: ReorderCardInput) => {
     updateCardMutation.mutate({
       cardId,
       newListId,

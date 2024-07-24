@@ -7,28 +7,24 @@ import { Switch } from "@headlessui/react";
 import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 
+import { NewListInput } from "~/types/router.types";
+
 import { Formik, Form, Field } from "formik";
-
-interface FormValues {
-  name: string;
-}
-
-interface boardPublicId {
-  boardPublicId: string;
-}
 
 function classNames(...classes: string[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
-export function NewListForm({ boardPublicId }: boardPublicId) {
+export function NewListForm({ boardPublicId }: { boardPublicId: string }) {
   const utils = api.useUtils();
   const { boardData } = useBoard();
   const { closeModal } = useModal();
   const [isCreateAnotherEnabled, setIsCreateAnotherEnabled] = useState(false);
 
-  const refetchBoard = () =>
-    utils.board.byId.refetch({ id: boardData.publicId });
+  const refetchBoard = () => {
+    if (boardData?.publicId)
+      utils.board.byId.refetch({ boardPublicId: boardData.publicId });
+  };
 
   const createList = api.list.create.useMutation({
     onSuccess: async () => {
@@ -64,8 +60,9 @@ export function NewListForm({ boardPublicId }: boardPublicId) {
       <Formik
         initialValues={{
           name: "",
+          boardPublicId: "",
         }}
-        onSubmit={(values: FormValues, { resetForm }) => {
+        onSubmit={(values: NewListInput, { resetForm }) => {
           createList.mutate({
             name: values.name,
             boardPublicId,
