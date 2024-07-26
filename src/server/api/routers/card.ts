@@ -15,6 +15,7 @@ export const cardRouter = createTRPCRouter({
         listPublicId: z.string().min(12),
         labelPublicIds: z.array(z.string().min(12)),
         memberPublicIds: z.array(z.string().min(12)),
+        position: z.enum(["start", "end"]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -29,13 +30,26 @@ export const cardRouter = createTRPCRouter({
 
       if (!list?.id) return;
 
-      const latestCard = list.cards.length && list.cards[0];
+      const lastCard = list.cards.length && list.cards[0];
+
+      let index = 0;
+
+      if (list.cards.length) {
+        if (input.position === "end" && lastCard) index = lastCard.index + 1;
+
+        if (input.position === "start") {
+          await cardRepo.pushIndex(ctx.db, {
+            listId: list.id,
+            cardIndex: 0,
+          });
+        }
+      }
 
       const newCard = await cardRepo.create(ctx.db, {
         title: input.title,
         createdBy: userId,
         listId: list.id,
-        index: latestCard ? latestCard.index + 1 : 0,
+        index,
       });
 
       const newCardId = newCard?.id;

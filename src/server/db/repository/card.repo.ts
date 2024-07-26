@@ -83,7 +83,7 @@ export const destroy = async (
   const result = await db
     .from("card")
     .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
-    .eq("publicId", args.cardId);
+    .eq("id", args.cardId);
 
   return result;
 };
@@ -321,6 +321,21 @@ export const shiftIndex = async (
   },
 ) => {
   const { data } = await db.rpc("shift_card_index", {
+    list_id: args.listId,
+    card_index: args.cardIndex,
+  });
+
+  return data;
+};
+
+export const pushIndex = async (
+  db: SupabaseClient<Database>,
+  args: {
+    listId: number;
+    cardIndex: number;
+  },
+) => {
+  const { data } = await db.rpc("push_card_index", {
     list_id: args.listId,
     card_index: args.cardIndex,
   });

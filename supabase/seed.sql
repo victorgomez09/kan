@@ -66,3 +66,12 @@ AS $$
     WHERE "listId" = list_id AND index > card_index AND "deletedAt" IS NULL;
 $$;
 
+CREATE OR REPLACE FUNCTION push_card_index(list_id BIGINT, card_index INT)
+RETURNS VOID
+LANGUAGE SQL
+AS $$
+  UPDATE card
+    SET index = index + 1
+    WHERE "listId" = list_id AND index >= card_index AND "deletedAt" IS NULL;
+$$;
+

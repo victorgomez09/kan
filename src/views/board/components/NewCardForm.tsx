@@ -2,7 +2,12 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { api } from "~/utils/api";
 
-import { HiXMark } from "react-icons/hi2";
+import {
+  HiXMark,
+  HiOutlineBarsArrowDown,
+  HiOutlineBarsArrowUp,
+} from "react-icons/hi2";
+
 import { Switch } from "@headlessui/react";
 
 import CheckboxDropdown from "~/components/CheckboxDropdown";
@@ -36,12 +41,14 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
         labelPublicIds: [],
         memberPublicIds: [],
         isCreateAnotherEnabled: false,
+        position: "start",
       },
     });
 
   const labelPublicIds = watch("labelPublicIds") || [];
   const memberPublicIds = watch("memberPublicIds") || [];
   const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
+  const position = watch("position");
 
   const refetchBoard = async () => {
     if (boardData?.publicId) {
@@ -104,6 +111,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
       listPublicId: data.listPublicId,
       labelPublicIds: data.labelPublicIds,
       memberPublicIds: data.memberPublicIds,
+      position: data.position,
     });
   };
 
@@ -268,6 +276,18 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
               </div>
             </CheckboxDropdown>
           </div>
+          <button
+            onClick={() =>
+              setValue("position", position === "start" ? "end" : "start")
+            }
+            className="flex h-auto items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-1.5 py-1 text-left text-xs text-light-800 hover:bg-light-300 dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500"
+          >
+            {position === "start" ? (
+              <HiOutlineBarsArrowUp size={14} />
+            ) : (
+              <HiOutlineBarsArrowDown size={14} />
+            )}
+          </button>
         </div>
 
         <div className="mt-3 flex items-center justify-end">

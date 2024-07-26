@@ -506,6 +506,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      push_card_index: {
+        Args: {
+          list_id: number
+          card_index: number
+        }
+        Returns: undefined
+      }
       reorder_cards: {
         Args: {
           card_id: number
