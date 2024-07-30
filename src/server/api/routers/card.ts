@@ -71,7 +71,7 @@ export const cardRouter = createTRPCRouter({
 
         if (!labels?.length)
           throw new TRPCError({
-            message: `Labels with public IDs ${input.labelPublicIds} not found`,
+            message: `Labels with public IDs (${input.labelPublicIds.join(", ")}) not found`,
             code: "NOT_FOUND",
           });
 
@@ -91,7 +91,7 @@ export const cardRouter = createTRPCRouter({
 
         if (!members?.length)
           throw new TRPCError({
-            message: `Members with public IDs ${input.memberPublicIds} not found`,
+            message: `Members with public IDs (${input.memberPublicIds.join(", ")}) not found`,
             code: "NOT_FOUND",
           });
 
@@ -303,7 +303,7 @@ export const cardRouter = createTRPCRouter({
         input.cardId,
       );
 
-      if (!card || !card.list)
+      if (!card?.list)
         throw new TRPCError({
           message: `Card with public ID ${input.cardId} not found`,
           code: "NOT_FOUND",
