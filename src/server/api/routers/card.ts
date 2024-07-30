@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
@@ -21,14 +22,22 @@ export const cardRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
-      if (!userId) return;
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
 
       const list = await listRepo.getWithCardsByPublicId(
         ctx.db,
         input.listPublicId,
       );
 
-      if (!list?.id) return;
+      if (!list?.id)
+        throw new TRPCError({
+          message: `List with public ID ${input.listPublicId} not found`,
+          code: "NOT_FOUND",
+        });
 
       const lastCard = list.cards.length && list.cards[0];
 
@@ -60,7 +69,11 @@ export const cardRouter = createTRPCRouter({
           input.labelPublicIds,
         );
 
-        if (!labels?.length) return;
+        if (!labels?.length)
+          throw new TRPCError({
+            message: `Labels with public IDs ${input.labelPublicIds} not found`,
+            code: "NOT_FOUND",
+          });
 
         const labelsInsert = labels.map((label) => ({
           cardId: newCardId,
@@ -76,7 +89,11 @@ export const cardRouter = createTRPCRouter({
           input.memberPublicIds,
         );
 
-        if (!members?.length) return;
+        if (!members?.length)
+          throw new TRPCError({
+            message: `Members with public IDs ${input.memberPublicIds} not found`,
+            code: "NOT_FOUND",
+          });
 
         const membersInsert = members.map((member) => ({
           cardId: newCardId,
@@ -101,12 +118,26 @@ export const cardRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
-      if (!userId) return;
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
 
       const card = await cardRepo.getByPublicId(ctx.db, input.cardPublicId);
       const label = await labelRepo.getByPublicId(ctx.db, input.labelPublicId);
 
-      if (!card || !label) return;
+      if (!card)
+        throw new TRPCError({
+          message: `Card with public ID ${input.cardPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      if (!label)
+        throw new TRPCError({
+          message: `Label with public ID ${input.labelPublicId} not found`,
+          code: "NOT_FOUND",
+        });
 
       const cardLabelIds = { cardId: card.id, labelId: label.id };
 
@@ -135,7 +166,11 @@ export const cardRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
-      if (!userId) return;
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
 
       const card = await cardRepo.getByPublicId(ctx.db, input.cardPublicId);
       const member = await workspaceRepo.getMemberByPublicId(
@@ -143,7 +178,17 @@ export const cardRouter = createTRPCRouter({
         input.workspaceMemberPublicId,
       );
 
-      if (!card || !member) return;
+      if (!card)
+        throw new TRPCError({
+          message: `Card with public ID ${input.cardPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      if (!member)
+        throw new TRPCError({
+          message: `Member with public ID ${input.workspaceMemberPublicId} not found`,
+          code: "NOT_FOUND",
+        });
 
       const cardMemberIds = { cardId: card.id, memberId: member.id };
 
@@ -183,7 +228,11 @@ export const cardRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
-      if (!userId) return;
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
 
       const result = cardRepo.update(
         ctx.db,
@@ -202,14 +251,22 @@ export const cardRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
-      if (!userId) return;
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
 
       const card = await cardRepo.getCardWithListByPublicId(
         ctx.db,
         input.cardPublicId,
       );
 
-      if (!card ?? !card?.list?.id) return;
+      if (!card ?? !card?.list?.id)
+        throw new TRPCError({
+          message: `Card with public ID ${input.cardPublicId} not found`,
+          code: "NOT_FOUND",
+        });
 
       const deletedAt = new Date().toISOString();
 
@@ -235,14 +292,22 @@ export const cardRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
-      if (!userId) return;
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
 
       const card = await cardRepo.getCardWithListByPublicId(
         ctx.db,
         input.cardId,
       );
 
-      if (!card) return;
+      if (!card || !card.list)
+        throw new TRPCError({
+          message: `Card with public ID ${input.cardId} not found`,
+          code: "NOT_FOUND",
+        });
 
       const currentList = card.list;
       const currentIndex = card.index;
@@ -254,7 +319,11 @@ export const cardRouter = createTRPCRouter({
         input.newListId,
       );
 
-      if (!newList) return;
+      if (!newList)
+        throw new TRPCError({
+          message: `List with public ID ${input.newListId} not found`,
+          code: "NOT_FOUND",
+        });
 
       if (newIndex === undefined) {
         const lastCardIndex = newList.cards.length
@@ -263,8 +332,6 @@ export const cardRouter = createTRPCRouter({
 
         newIndex = lastCardIndex !== undefined ? lastCardIndex + 1 : 0;
       }
-
-      if (!currentList?.id || !newList.id) return;
 
       const result = await cardRepo.reorder(ctx.db, {
         currentListId: currentList.id,

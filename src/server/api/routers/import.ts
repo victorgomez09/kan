@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { generateUID } from "~/utils/generateUID";
 
@@ -89,7 +90,11 @@ export const importRouter = createTRPCRouter({
       .mutation(async ({ ctx, input }) => {
         const userId = ctx.user?.id;
 
-        if (!userId) return;
+        if (!userId)
+          throw new TRPCError({
+            message: `User not authenticated`,
+            code: "UNAUTHORIZED",
+          });
 
         const newImport = await importRepo.create(ctx.db, {
           source: "trello",
@@ -105,7 +110,11 @@ export const importRouter = createTRPCRouter({
           input.workspacePublicId,
         );
 
-        if (!workspace) return;
+        if (!workspace)
+          throw new TRPCError({
+            message: `Workspace with public ID ${input.workspacePublicId} not found`,
+            code: "NOT_FOUND",
+          });
 
         for (const boardId of input.boardIds) {
           const response = await fetch(
@@ -135,7 +144,11 @@ export const importRouter = createTRPCRouter({
 
           const newBoardId = newBoard?.id;
 
-          if (!newBoardId) return;
+          if (!newBoardId)
+            throw new TRPCError({
+              message: "Failed to create new board",
+              code: "INTERNAL_SERVER_ERROR",
+            });
 
           let listIndex = 0;
 

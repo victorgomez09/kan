@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
@@ -17,14 +18,22 @@ export const listRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
-      if (!userId) return;
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
 
       const board = await boardRepo.getWithLatestListIndexByPublicId(
         ctx.db,
         input.boardPublicId,
       );
 
-      if (!board) return;
+      if (!board)
+        throw new TRPCError({
+          message: `Board with public ID ${input.boardPublicId} not found`,
+          code: "NOT_FOUND",
+        });
 
       const latestListIndex = board.lists[0]?.index;
 
@@ -49,7 +58,11 @@ export const listRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const list = await listRepo.getByPublicId(ctx.db, input.listId);
 
-      if (!list) return;
+      if (!list)
+        throw new TRPCError({
+          message: `List with public ID ${input.listId} not found`,
+          code: "NOT_FOUND",
+        });
 
       const result = listRepo.reorder(ctx.db, {
         boardPublicId: list.boardId,
@@ -69,9 +82,19 @@ export const listRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
       const list = await listRepo.getByPublicId(ctx.db, input.listPublicId);
 
-      if (!list || !userId) return;
+      if (!list)
+        throw new TRPCError({
+          message: `List with public ID ${input.listPublicId} not found`,
+          code: "NOT_FOUND",
+        });
 
       const deletedAt = new Date().toISOString();
 

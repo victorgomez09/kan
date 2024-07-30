@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
@@ -17,14 +18,22 @@ export const labelRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
-      if (!userId) return;
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
 
       const card = await cardRepo.getCardWithListByPublicId(
         ctx.db,
         input.cardPublicId,
       );
 
-      if (!card?.list) return;
+      if (!card?.list)
+        throw new TRPCError({
+          message: `Card with public ID ${input.cardPublicId} not found`,
+          code: "NOT_FOUND",
+        });
 
       const result = await labelRepo.create(ctx.db, {
         name: input.name,

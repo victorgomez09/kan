@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import * as workspaceRepo from "~/server/db/repository/workspace.repo";
@@ -7,7 +8,11 @@ export const workspaceRouter = createTRPCRouter({
   all: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.user?.id;
 
-    if (!userId) return;
+    if (!userId)
+      throw new TRPCError({
+        message: `User not authenticated`,
+        code: "UNAUTHORIZED",
+      });
 
     const result = await workspaceRepo.getAllByUserId(ctx.db, userId);
 
@@ -32,7 +37,11 @@ export const workspaceRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
-      if (!userId) return;
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
 
       const result = await workspaceRepo.create(ctx.db, {
         name: input.name,
