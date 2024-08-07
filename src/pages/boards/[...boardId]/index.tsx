@@ -1,5 +1,6 @@
 import { WorkspaceProvider } from "~/providers/workspace";
 import Dashboard from "~/components/dashboard";
+import Popup from "~/components/Popup";
 import BoardView from "~/views/board";
 
 export default function BoardPage() {
@@ -8,6 +9,7 @@ export default function BoardPage() {
       <Dashboard>
         <BoardView />
       </Dashboard>
+      <Popup />
     </WorkspaceProvider>
   );
 }

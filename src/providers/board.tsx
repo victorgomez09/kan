@@ -6,6 +6,7 @@ import React, {
 } from "react";
 
 import { api } from "~/utils/api";
+import { usePopup } from "~/providers/popup";
 
 import {
   type GetBoardByIdOutput,
@@ -40,6 +41,8 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
   const [boardData, setBoardData] =
     useState<GetBoardByIdOutput>(initialBoardData);
 
+  const { showPopup } = usePopup();
+
   const refetchBoard = async () => {
     if (boardData?.publicId) {
       try {
@@ -52,10 +55,24 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
 
   const updateCardMutation = api.card.reorder.useMutation({
     onSuccess: () => refetchBoard(),
+    onError: () => {
+      refetchBoard();
+      showPopup({
+        header: "Unable to update card",
+        message: "Please try again later, or contact customer support.",
+      });
+    },
   });
 
   const updateListMutation = api.list.reorder.useMutation({
     onSuccess: () => refetchBoard(),
+    onError: () => {
+      refetchBoard();
+      showPopup({
+        header: "Unable to update list",
+        message: "Please try again later, or contact customer support.",
+      });
+    },
   });
 
   const updateList = ({

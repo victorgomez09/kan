@@ -5,6 +5,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 
 import { ModalProvider } from "~/providers/modal";
 import { BoardProvider } from "~/providers/board";
+import { PopupProvider } from "~/providers/popup";
 import { ThemeProvider } from "~/providers/theme";
 
 import { api } from "~/utils/api";
@@ -33,9 +34,11 @@ const MyApp: AppType = ({ Component, pageProps }) => {
       <main className="font-sans">
         <ThemeProvider>
           <ModalProvider>
-            <BoardProvider>
-              <Component {...pageProps} />
-            </BoardProvider>
+            <PopupProvider>
+              <BoardProvider>
+                <Component {...pageProps} />
+              </BoardProvider>
+            </PopupProvider>
           </ModalProvider>
         </ThemeProvider>
       </main>
