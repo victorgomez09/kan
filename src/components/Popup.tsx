@@ -56,7 +56,7 @@ const Popup: React.FC = () => {
                   onClick={() => {
                     hidePopup();
                   }}
-                  className="dark:hover:bg-dark-4000 mx-1 inline-flex h-fit items-center rounded-md p-1 px-1 text-sm font-semibold text-dark-50 hover:bg-light-100"
+                  className="mx-1 inline-flex h-fit items-center rounded-md p-1 px-1 text-sm font-semibold text-dark-50 hover:bg-light-100 dark:hover:bg-dark-400"
                 >
                   <span className="sr-only">Close</span>
                   <HiXMark

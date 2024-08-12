@@ -41,7 +41,7 @@ export const getAllByPublicIds = async (
   const { data } = await db
     .from("label")
     .select(`id`)
-    .eq("publicId", labelPublicIds);
+    .in("publicId", labelPublicIds);
 
   return data;
 };
