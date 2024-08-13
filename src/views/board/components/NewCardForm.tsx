@@ -11,8 +11,10 @@ import {
 import { Switch } from "@headlessui/react";
 
 import CheckboxDropdown from "~/components/CheckboxDropdown";
+
 import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
+import { usePopup } from "~/providers/popup";
 
 import { type NewCardInput } from "~/types/router.types";
 
@@ -30,7 +32,8 @@ function classNames(...classes: string[]): string {
 
 export function NewCardForm({ listPublicId }: NewCardFormProps) {
   const utils = api.useUtils();
-  const { boardData } = useBoard();
+  const { boardData, addCard, refetchBoard } = useBoard();
+  const { showPopup } = usePopup();
   const { closeModal } = useModal();
 
   const { register, handleSubmit, reset, setValue, watch } =
@@ -50,31 +53,17 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
   const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
   const position = watch("position");
 
-  const refetchBoard = async () => {
-    if (boardData?.publicId) {
-      try {
-        await utils.board.byId.refetch({ boardPublicId: boardData.publicId });
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  };
-
   const createCard = api.card.create.useMutation({
     onSuccess: async () => {
-      try {
-        await refetchBoard();
-        if (!isCreateAnotherEnabled) closeModal();
-        reset({
-          title: "",
-          listPublicId: watch("listPublicId"),
-          labelPublicIds: [],
-          memberPublicIds: [],
-          isCreateAnotherEnabled: watch("isCreateAnotherEnabled"),
-        });
-      } catch (e) {
-        console.log(e);
-      }
+      refetchBoard();
+    },
+    onError: async () => {
+      closeModal();
+      refetchBoard();
+      showPopup({
+        header: "Unable to create card",
+        message: "Please try again later, or contact customer support.",
+      });
     },
   });
 
@@ -106,6 +95,17 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
     })) ?? [];
 
   const onSubmit = (data: NewCardInput) => {
+    addCard(data);
+    const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
+    if (!isCreateAnotherEnabled) closeModal();
+    reset({
+      title: "",
+      listPublicId: watch("listPublicId"),
+      labelPublicIds: [],
+      memberPublicIds: [],
+      isCreateAnotherEnabled,
+    });
+
     createCard.mutate({
       title: data.title,
       listPublicId: data.listPublicId,
@@ -277,9 +277,10 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
             </CheckboxDropdown>
           </div>
           <button
-            onClick={() =>
-              setValue("position", position === "start" ? "end" : "start")
-            }
+            onClick={(e) => {
+              e.preventDefault();
+              setValue("position", position === "start" ? "end" : "start");
+            }}
             className="flex h-auto items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-1.5 py-1 text-left text-xs text-light-800 hover:bg-light-300 dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500"
           >
             {position === "start" ? (

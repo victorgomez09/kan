@@ -6,10 +6,12 @@ import React, {
 } from "react";
 
 import { api } from "~/utils/api";
+import { generateUID } from "~/utils/generateUID";
 import { usePopup } from "~/providers/popup";
 
 import {
   type GetBoardByIdOutput,
+  type NewCardInput,
   type ReorderCardInput,
   type ReorderListInput,
 } from "~/types/router.types";
@@ -19,6 +21,8 @@ interface BoardContextProps {
   setBoardData: React.Dispatch<React.SetStateAction<GetBoardByIdOutput>>;
   updateList: (params: ReorderListInput) => void;
   updateCard: (params: ReorderCardInput) => void;
+  addCard: (params: NewCardInput) => void;
+  refetchBoard: () => void;
 }
 
 const initialBoardData: GetBoardByIdOutput = {
@@ -44,12 +48,18 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
   const { showPopup } = usePopup();
 
   const refetchBoard = async () => {
-    if (boardData?.publicId) {
-      try {
-        await utils.board.byId.refetch({ boardPublicId: boardData.publicId });
-      } catch (e) {
-        console.error(e);
-      }
+    if (!boardData?.publicId) return;
+
+    try {
+      const data = await utils.board.byId.fetch({
+        boardPublicId: boardData.publicId,
+      });
+      if (data) setBoardData(data);
+    } catch (e) {
+      showPopup({
+        header: "Error fetching board",
+        message: "Please try again later, or contact customer support.",
+      });
     }
   };
 
@@ -75,6 +85,50 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
     },
   });
 
+  const addCard = ({
+    title,
+    listPublicId,
+    labelPublicIds,
+    memberPublicIds,
+    position,
+  }: {
+    title: string;
+    listPublicId: string;
+    labelPublicIds: string[];
+    memberPublicIds: string[];
+    position: "start" | "end";
+  }) => {
+    if (!boardData) return;
+
+    const updatedLists = boardData.lists.map((list) => {
+      if (list.publicId === listPublicId) {
+        const newCard = {
+          publicId: generateUID(),
+          title,
+          listId: 2,
+          description: "",
+          labels: boardData.labels.filter((label) =>
+            labelPublicIds.includes(label.publicId),
+          ),
+          members:
+            boardData.workspace?.members.filter((member) =>
+              memberPublicIds.includes(member.publicId),
+            ) || [],
+          index: position === "start" ? 0 : list.cards.length,
+        };
+
+        const updatedCards =
+          position === "start"
+            ? [newCard, ...list.cards]
+            : [...list.cards, newCard];
+        return { ...list, cards: updatedCards };
+      }
+      return list;
+    });
+
+    setBoardData({ ...boardData, lists: updatedLists });
+  };
+
   const updateList = ({
     boardId,
     listId,
@@ -99,16 +153,23 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <BoardContext.Provider
-      value={{ boardData, setBoardData, updateList, updateCard }}
+      value={{
+        boardData,
+        setBoardData,
+        updateList,
+        updateCard,
+        addCard,
+        refetchBoard,
+      }}
     >
       {children}
     </BoardContext.Provider>
   );
 };
 
-export const useBoard = (): BoardContextProps => {
+export const useBoard = () => {
   const context = useContext(BoardContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error("useBoard must be used within a BoardProvider");
   }
   return context;

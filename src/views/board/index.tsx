@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { HiOutlinePlusSmall } from "react-icons/hi2";
@@ -61,9 +61,11 @@ export default function BoardPage() {
     },
   );
 
-  if (isSuccess && data) {
-    setBoardData(data);
-  }
+  useEffect(() => {
+    if (isSuccess && data) {
+      setBoardData(data);
+    }
+  }, [isSuccess, data, setBoardData]);
 
   if (!boardId || !boardData) return <></>;
 
