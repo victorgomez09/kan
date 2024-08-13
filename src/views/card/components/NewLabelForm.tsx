@@ -52,7 +52,7 @@ export function NewLabelForm({ cardPublicId }: cardPublicId) {
   });
 
   return (
-    <>
+    <div className="p-5">
       <div className="flex w-full items-center justify-between pb-4 text-neutral-900 dark:text-dark-1000">
         <h2 className="text-sm font-medium">New label</h2>
         <button
@@ -158,6 +158,6 @@ export function NewLabelForm({ cardPublicId }: cardPublicId) {
           </div>
         </Form>
       </Formik>
-    </>
+    </div>
   );
 }

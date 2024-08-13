@@ -13,6 +13,7 @@ export const cardRouter = createTRPCRouter({
     .input(
       z.object({
         title: z.string().min(1),
+        description: z.string().max(10000),
         listPublicId: z.string().min(12),
         labelPublicIds: z.array(z.string().min(12)),
         memberPublicIds: z.array(z.string().min(12)),
@@ -56,6 +57,7 @@ export const cardRouter = createTRPCRouter({
 
       const newCard = await cardRepo.create(ctx.db, {
         title: input.title,
+        description: input.description,
         createdBy: userId,
         listId: list.id,
         index,

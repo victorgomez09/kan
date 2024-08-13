@@ -24,7 +24,7 @@ export function DeleteBoardConfirmation() {
   };
 
   return (
-    <>
+    <div className="p-5">
       <div className="flex w-full flex-col justify-between pb-4">
         <h2 className="text-md pb-4 font-medium text-neutral-900 dark:text-dark-1000">
           Are you sure you want to delete this board?
@@ -47,6 +47,6 @@ export function DeleteBoardConfirmation() {
           Delete
         </button>
       </div>
-    </>
+    </div>
   );
 }

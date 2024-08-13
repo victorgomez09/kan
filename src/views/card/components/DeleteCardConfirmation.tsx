@@ -1,6 +1,8 @@
 import { useRouter } from "next/navigation";
 import { api } from "~/utils/api";
 import { useModal } from "~/providers/modal";
+import { useBoard } from "~/providers/board";
+import { usePopup } from "~/providers/popup";
 
 interface DeleteCardConfirmationProps {
   cardPublicId: string;
@@ -13,16 +15,31 @@ export function DeleteCardConfirmation({
 }: DeleteCardConfirmationProps) {
   const { closeModal } = useModal();
   const router = useRouter();
+  const { removeCard, refetchBoard } = useBoard();
+  const { showPopup } = usePopup();
 
-  const deleteCard = api.card.delete.useMutation({
-    onSuccess: () => {
-      closeModal();
-      router.push(`/boards/${boardPublicId}`);
-    },
+  const deleteCardMutation = api.card.delete.useMutation({
+    onSuccess: () => refetchBoard(),
+    onError: () =>
+      showPopup({
+        header: "Error deleting card",
+        message: "Please try again later, or contact customer support.",
+      }),
   });
 
+  const handleDeleteCard = () => {
+    removeCard({
+      cardPublicId,
+    });
+    closeModal();
+    router.push(`/boards/${boardPublicId}`);
+    deleteCardMutation.mutate({
+      cardPublicId,
+    });
+  };
+
   return (
-    <>
+    <div className="p-5">
       <div className="flex w-full flex-col justify-between pb-4">
         <h2 className="text-md pb-4 font-medium text-neutral-900 dark:text-dark-1000">
           Are you sure you want to delete this card?
@@ -39,16 +56,12 @@ export function DeleteCardConfirmation({
           Cancel
         </button>
         <button
-          onClick={() =>
-            deleteCard.mutate({
-              cardPublicId,
-            })
-          }
+          onClick={handleDeleteCard}
           className="inline-flex justify-center rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
         >
           Delete
         </button>
       </div>
-    </>
+    </div>
   );
 }

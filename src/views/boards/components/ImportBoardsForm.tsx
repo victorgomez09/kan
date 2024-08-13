@@ -251,7 +251,7 @@ export function ImportBoardsForm() {
   const [step, setStep] = useState(1);
 
   return (
-    <>
+    <div className="p-5">
       <div className="flex w-full justify-between pb-4">
         <h2 className="text-sm font-medium text-neutral-900 dark:text-dark-1000">
           New import
@@ -266,6 +266,6 @@ export function ImportBoardsForm() {
 
       {step === 1 && <SelectSource handleNextStep={() => setStep(step + 1)} />}
       {step === 2 && <ImportTrello />}
-    </>
+    </div>
   );
 }

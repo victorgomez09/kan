@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import ContentEditable from "react-contenteditable";
 import { api } from "~/utils/api";
 
 import {
@@ -39,6 +40,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
     useForm<NewCardFormInput>({
       defaultValues: {
         title: "",
+        description: "",
         listPublicId,
         labelPublicIds: [],
         memberPublicIds: [],
@@ -53,10 +55,10 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
   const position = watch("position");
 
   const createCard = api.card.create.useMutation({
-    onSuccess: async () => {
+    onSuccess: () => {
       refetchBoard();
     },
-    onError: async () => {
+    onError: () => {
       closeModal();
       refetchBoard();
       showPopup({
@@ -107,6 +109,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
 
     createCard.mutate({
       title: data.title,
+      description: data.description,
       listPublicId: data.listPublicId,
       labelPublicIds: data.labelPublicIds,
       memberPublicIds: data.memberPublicIds,
@@ -147,32 +150,38 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
   const selectedList = formattedLists.find((item) => item.selected);
 
   return (
-    <>
-      <div className="flex w-full items-center justify-between pb-4">
-        <h2 className="text-sm font-bold text-neutral-900 dark:text-dark-1000">
-          New card
-        </h2>
-        <button
-          className="rounded p-1 hover:bg-light-200 focus:outline-none dark:hover:bg-dark-300"
-          onClick={() => closeModal()}
-        >
-          <HiXMark size={18} className="text-light-900 dark:text-dark-900" />
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div>
-          <label
-            htmlFor="title"
-            className="block pb-2 text-sm font-normal leading-6 text-neutral-900 dark:text-dark-1000"
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="px-5 pt-5">
+        <div className="flex w-full items-center justify-between pb-5">
+          <h2 className="text-sm font-bold text-neutral-900 dark:text-dark-1000">
+            New card
+          </h2>
+          <button
+            className="rounded p-1 hover:bg-light-200 focus:outline-none dark:hover:bg-dark-300"
+            onClick={(e) => {
+              closeModal();
+              e.preventDefault();
+            }}
           >
-            Title
-          </label>
+            <HiXMark size={18} className="text-light-900 dark:text-dark-900" />
+          </button>
+        </div>
+
+        <div>
           <input
             id="title"
             type="text"
             {...register("title")}
-            className="block w-full rounded-md border-0 bg-dark-300 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6"
+            placeholder="Card title"
+            className="block w-full rounded-md border-0 bg-dark-300 bg-white/5 py-1.5 text-neutral-900 placeholder-dark-800 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6"
+          />
+        </div>
+        <div className="mt-2 ">
+          <ContentEditable
+            placeholder="Add description..."
+            html={watch("description") || ""}
+            onChange={(e) => setValue("description", e.target.value)}
+            className="block min-h-[70px] w-full rounded-md border-0 bg-dark-300 bg-white/5 px-3 py-1.5 text-light-900 text-neutral-900 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 focus-visible:outline-none dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6"
           />
         </div>
         <div className="mt-2 flex space-x-1">
@@ -280,7 +289,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
               e.preventDefault();
               setValue("position", position === "start" ? "end" : "start");
             }}
-            className="flex h-auto items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-1.5 py-1 text-left text-xs text-light-800 hover:bg-light-300 dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500"
+            className="flex h-auto items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-1.5 py-1 text-left text-xs text-light-800 hover:bg-light-300 focus-visible:outline-none dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500"
           >
             {position === "start" ? (
               <HiOutlineBarsArrowUp size={14} />
@@ -289,8 +298,10 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
             )}
           </button>
         </div>
+      </div>
 
-        <div className="mt-3 flex items-center justify-end">
+      <div className="mt-5 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
+        <div className="mr-4 flex items-center justify-end">
           <span className="mr-2 text-xs text-light-900 dark:text-dark-900">
             Create more
           </span>
@@ -315,7 +326,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
           </Switch>
         </div>
 
-        <div className="mt-5 sm:mt-6">
+        <div>
           <button
             type="submit"
             className="inline-flex w-full justify-center rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
@@ -323,7 +334,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
             Create card
           </button>
         </div>
-      </form>
-    </>
+      </div>
+    </form>
   );
 }

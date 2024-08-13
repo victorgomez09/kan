@@ -24,7 +24,8 @@ interface BoardContextProps {
   updateCard: (params: ReorderCardInput) => void;
   addCard: (params: NewCardInput) => void;
   addList: (params: NewListInput) => void;
-  refetchBoard: () => void;
+  removeCard: (params: { cardPublicId: string }) => void;
+  refetchBoard: () => Promise<void>;
 }
 
 const initialBoardData: GetBoardByIdOutput = {
@@ -66,9 +67,11 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const updateCardMutation = api.card.reorder.useMutation({
-    onSuccess: () => refetchBoard(),
-    onError: () => {
-      refetchBoard();
+    onSuccess: async () => {
+      await refetchBoard();
+    },
+    onError: async () => {
+      await refetchBoard();
       showPopup({
         header: "Unable to update card",
         message: "Please try again later, or contact customer support.",
@@ -77,9 +80,11 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
   });
 
   const updateListMutation = api.list.reorder.useMutation({
-    onSuccess: () => refetchBoard(),
-    onError: () => {
-      refetchBoard();
+    onSuccess: async () => {
+      await refetchBoard();
+    },
+    onError: async () => {
+      await refetchBoard();
       showPopup({
         header: "Unable to update list",
         message: "Please try again later, or contact customer support.",
@@ -105,7 +110,7 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
     const updatedLists = boardData.lists.map((list) => {
       if (list.publicId === listPublicId) {
         const newCard = {
-          publicId: generateUID(),
+          publicId: `PLACEHOLDER_${generateUID()}`,
           title,
           listId: 2,
           description: "",
@@ -115,7 +120,7 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
           members:
             boardData.workspace?.members.filter((member) =>
               memberPublicIds.includes(member.publicId),
-            ) || [],
+            ) ?? [],
           index: position === "start" ? 0 : list.cards.length,
         };
 
@@ -144,6 +149,19 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
     };
 
     const updatedLists = [...boardData.lists, newList];
+
+    setBoardData({ ...boardData, lists: updatedLists });
+  };
+
+  const removeCard = ({ cardPublicId }: { cardPublicId: string }) => {
+    if (!boardData) return;
+
+    const updatedLists = boardData.lists.map((list) => {
+      const updatedCards = list.cards.filter(
+        (card) => card.publicId !== cardPublicId,
+      );
+      return { ...list, cards: updatedCards };
+    });
 
     setBoardData({ ...boardData, lists: updatedLists });
   };
@@ -179,6 +197,7 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
         updateCard,
         addCard,
         addList,
+        removeCard,
         refetchBoard,
       }}
     >

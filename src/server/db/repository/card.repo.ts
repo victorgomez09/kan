@@ -6,6 +6,7 @@ export const create = async (
   db: SupabaseClient<Database>,
   cardInput: {
     title: string;
+    description: string;
     createdBy: string;
     listId: number;
     index: number;
@@ -16,6 +17,7 @@ export const create = async (
     .insert({
       publicId: generateUID(),
       title: cardInput.title,
+      description: cardInput.description,
       createdBy: cardInput.createdBy,
       listId: cardInput.listId,
       index: cardInput.index,

@@ -22,7 +22,9 @@ export default function CheckboxDropdown({
         as="div"
         className="relative flex w-full flex-wrap items-center text-left"
       >
-        <Menu.Button>{children}</Menu.Button>
+        <Menu.Button className="focus-visible:outline-none">
+          {children}
+        </Menu.Button>
 
         <Transition
           as={Fragment}

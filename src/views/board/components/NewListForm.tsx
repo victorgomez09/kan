@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { api } from "~/utils/api";
 import { useForm } from "react-hook-form";
 
@@ -69,7 +69,7 @@ export function NewListForm({ boardPublicId }: { boardPublicId: string }) {
   };
 
   return (
-    <>
+    <div className="p-5">
       <div className="flex w-full items-center justify-between pb-4">
         <h2 className="text-sm font-bold text-neutral-900 dark:text-dark-1000">
           New list
@@ -129,6 +129,6 @@ export function NewListForm({ boardPublicId }: { boardPublicId: string }) {
           </button>
         </div>
       </form>
-    </>
+    </div>
   );
 }

@@ -212,9 +212,19 @@ export default function BoardPage() {
                               >
                                 {(provided) => (
                                   <Link
+                                    onClick={(e) => {
+                                      if (
+                                        card.publicId.startsWith("PLACEHOLDER")
+                                      )
+                                        e.preventDefault();
+                                    }}
                                     key={card.publicId}
                                     href={`/cards/${card.publicId}`}
-                                    className="mb-2 flex !cursor-pointer flex-col rounded-md border border-light-200 bg-light-50 px-3 py-2 text-sm text-neutral-900 dark:border-dark-200 dark:bg-dark-300 dark:text-dark-1000 dark:hover:bg-dark-400"
+                                    className={`mb-2 flex !cursor-pointer flex-col rounded-md border border-light-200 bg-light-50 px-3 py-2 text-sm text-neutral-900 dark:border-dark-200 dark:bg-dark-300 dark:text-dark-1000 dark:hover:bg-dark-400 ${
+                                      card.publicId.startsWith("PLACEHOLDER")
+                                        ? "pointer-events-none"
+                                        : ""
+                                    }`}
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
@@ -280,7 +290,7 @@ export default function BoardPage() {
           </DragDropContext>
         )}
       </div>
-      <Modal>
+      <Modal modalSize={modalContentType === "NEW_CARD" ? "md" : "sm"}>
         {modalContentType === "DELETE_BOARD" && <DeleteBoardConfirmation />}
         {modalContentType === "DELETE_LIST" && (
           <DeleteListConfirmation listPublicId={selectedPublicListId} />
