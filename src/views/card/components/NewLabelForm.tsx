@@ -1,16 +1,13 @@
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { api } from "~/utils/api";
-
 import { HiChevronUpDown, HiXMark } from "react-icons/hi2";
-
 import { useModal } from "~/providers/modal";
-
-import { Formik, Form, Field } from "formik";
+import { useForm, Controller } from "react-hook-form";
 
 interface FormValues {
   name: string;
-  colour: Colour | undefined;
+  colour: Colour;
 }
 
 interface Colour {
@@ -18,7 +15,7 @@ interface Colour {
   code: string;
 }
 
-interface cardPublicId {
+interface CardPublicId {
   cardPublicId: string;
 }
 
@@ -33,10 +30,16 @@ const colours = [
   { name: "Pink", code: "#db2777" },
 ];
 
-export function NewLabelForm({ cardPublicId }: cardPublicId) {
-  const [selected, setSelected] = useState(colours[0]);
+export function NewLabelForm({ cardPublicId }: CardPublicId) {
   const utils = api.useUtils();
   const { closeModal } = useModal();
+
+  const { control, handleSubmit } = useForm<FormValues>({
+    defaultValues: {
+      name: "",
+      colour: colours[0],
+    },
+  });
 
   const refetchCard = () => utils.card.byId.refetch({ id: cardPublicId });
 
@@ -51,6 +54,16 @@ export function NewLabelForm({ cardPublicId }: cardPublicId) {
     },
   });
 
+  const onSubmit = (values: FormValues) => {
+    if (!values.colour?.code) return;
+
+    createLabel.mutate({
+      name: values.name,
+      cardPublicId,
+      colourCode: values.colour.code,
+    });
+  };
+
   return (
     <div className="p-5">
       <div className="flex w-full items-center justify-between pb-4 text-neutral-900 dark:text-dark-1000">
@@ -63,101 +76,97 @@ export function NewLabelForm({ cardPublicId }: cardPublicId) {
         </button>
       </div>
 
-      <Formik
-        initialValues={{
-          name: "",
-          colour: colours[0],
-        }}
-        onSubmit={(values: FormValues) => {
-          if (!values.colour?.code) return;
-
-          createLabel.mutate({
-            name: values.name,
-            cardPublicId,
-            colourCode: values.colour.code,
-          });
-        }}
-      >
-        <Form>
-          <label
-            htmlFor="name"
-            className="block pb-2 text-sm font-normal leading-6 text-neutral-900 dark:text-dark-1000"
-          >
-            Name
-          </label>
-          <Field
-            id="name"
-            name="name"
-            className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 dark:bg-dark-300 dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6"
-          />
-          <Listbox value={selected} onChange={setSelected}>
-            {({ open }) => (
-              <>
-                <div className="relative mt-4">
-                  <Listbox.Button className="block w-full rounded-md border-0 bg-white/5 px-4 py-1.5 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 dark:bg-dark-300 dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6">
-                    <span className="flex items-center">
-                      <span
-                        style={{ backgroundColor: selected?.code }}
-                        className={`inline-block h-2 w-2 flex-shrink-0 rounded-full`}
-                      />
-                      <span className="ml-3 block truncate">
-                        {selected?.name}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <label
+          htmlFor="name"
+          className="block pb-2 text-sm font-normal leading-6 text-neutral-900 dark:text-dark-1000"
+        >
+          Name
+        </label>
+        <Controller
+          name="name"
+          control={control}
+          render={({ field }) => (
+            <input
+              {...field}
+              id="name"
+              className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 dark:bg-dark-300 dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6"
+            />
+          )}
+        />
+        <Controller
+          name="colour"
+          control={control}
+          render={({ field }) => (
+            <Listbox {...field}>
+              {({ open }) => (
+                <>
+                  <div className="relative mt-4">
+                    <Listbox.Button className="block w-full rounded-md border-0 bg-white/5 px-4 py-1.5 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 dark:bg-dark-300 dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6">
+                      <span className="flex items-center">
+                        <span
+                          style={{ backgroundColor: field.value?.code }}
+                          className={`inline-block h-2 w-2 flex-shrink-0 rounded-full`}
+                        />
+                        <span className="ml-3 block truncate">
+                          {field.value?.name}
+                        </span>
                       </span>
-                    </span>
-                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                      <HiChevronUpDown
-                        className="h-5 w-5 text-gray-400"
-                        aria-hidden="true"
-                      />
-                    </span>
-                  </Listbox.Button>
+                      <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                        <HiChevronUpDown
+                          className="h-5 w-5 text-gray-400"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    </Listbox.Button>
 
-                  <Transition
-                    show={open}
-                    as={Fragment}
-                    leave="transition ease-in duration-100"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
-                  >
-                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-light-50 py-2 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-dark-300 sm:text-sm">
-                      {colours.map((colour, index) => (
-                        <Listbox.Option
-                          key={`colours_${index}`}
-                          className="relative cursor-default select-none px-2 text-neutral-900 dark:text-dark-1000 "
-                          value={colour}
-                        >
-                          {() => (
-                            <>
-                              <div className="flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-400">
-                                <span
-                                  style={{ backgroundColor: colour?.code }}
-                                  className="ml-2 inline-block h-2 w-2 flex-shrink-0 rounded-full"
-                                  aria-hidden="true"
-                                />
-                                <span className="ml-3 block truncate font-normal">
-                                  {colour.name}
-                                </span>
-                              </div>
-                            </>
-                          )}
-                        </Listbox.Option>
-                      ))}
-                    </Listbox.Options>
-                  </Transition>
-                </div>
-              </>
-            )}
-          </Listbox>
-          <div className="mt-5 sm:mt-6">
-            <button
-              type="submit"
-              className="inline-flex w-full justify-center rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
-            >
-              Create label
-            </button>
-          </div>
-        </Form>
-      </Formik>
+                    <Transition
+                      show={open}
+                      as={Fragment}
+                      leave="transition ease-in duration-100"
+                      leaveFrom="opacity-100"
+                      leaveTo="opacity-0"
+                    >
+                      <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-light-50 py-2 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-dark-300 sm:text-sm">
+                        {colours.map((colour, index) => (
+                          <Listbox.Option
+                            key={`colours_${index}`}
+                            className="relative cursor-default select-none px-2 text-neutral-900 dark:text-dark-1000 "
+                            value={colour}
+                          >
+                            {() => (
+                              <>
+                                <div className="flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-400">
+                                  <span
+                                    style={{ backgroundColor: colour?.code }}
+                                    className="ml-2 inline-block h-2 w-2 flex-shrink-0 rounded-full"
+                                    aria-hidden="true"
+                                  />
+                                  <span className="ml-3 block truncate font-normal">
+                                    {colour.name}
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                          </Listbox.Option>
+                        ))}
+                      </Listbox.Options>
+                    </Transition>
+                  </div>
+                </>
+              )}
+            </Listbox>
+          )}
+        />
+        <div className="mt-5 sm:mt-6">
+          <button
+            type="submit"
+            className="inline-flex w-full justify-center rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
+          >
+            Create label
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
