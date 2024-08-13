@@ -12,6 +12,7 @@ import { usePopup } from "~/providers/popup";
 import {
   type GetBoardByIdOutput,
   type NewCardInput,
+  type NewListInput,
   type ReorderCardInput,
   type ReorderListInput,
 } from "~/types/router.types";
@@ -22,6 +23,7 @@ interface BoardContextProps {
   updateList: (params: ReorderListInput) => void;
   updateCard: (params: ReorderCardInput) => void;
   addCard: (params: NewCardInput) => void;
+  addList: (params: NewListInput) => void;
   refetchBoard: () => void;
 }
 
@@ -129,6 +131,23 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
     setBoardData({ ...boardData, lists: updatedLists });
   };
 
+  const addList = ({ name, boardPublicId }: NewListInput) => {
+    if (!boardData) return;
+
+    const newList = {
+      publicId: generateUID(),
+      name,
+      boardId: 1,
+      boardPublicId,
+      cards: [],
+      index: boardData.lists.length,
+    };
+
+    const updatedLists = [...boardData.lists, newList];
+
+    setBoardData({ ...boardData, lists: updatedLists });
+  };
+
   const updateList = ({
     boardId,
     listId,
@@ -159,6 +178,7 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
         updateList,
         updateCard,
         addCard,
+        addList,
         refetchBoard,
       }}
     >

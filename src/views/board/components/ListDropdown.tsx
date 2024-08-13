@@ -39,7 +39,7 @@ export default function ListDropdown({
             <Menu.Item>
               <button
                 onClick={handleOpenDeleteListConfirmation}
-                className="m-1 w-full rounded-[5px] px-3 py-2 text-left text-sm hover:bg-light-400 dark:hover:bg-dark-400"
+                className="m-1 w-full rounded-[5px] px-3 py-2 text-left text-sm text-neutral-900 hover:bg-light-200 dark:text-dark-1000 dark:hover:bg-dark-400"
               >
                 Delete list
               </button>

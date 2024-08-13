@@ -31,7 +31,6 @@ function classNames(...classes: string[]): string {
 }
 
 export function NewCardForm({ listPublicId }: NewCardFormProps) {
-  const utils = api.useUtils();
   const { boardData, addCard, refetchBoard } = useBoard();
   const { showPopup } = usePopup();
   const { closeModal } = useModal();
