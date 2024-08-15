@@ -55,12 +55,12 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
   const position = watch("position");
 
   const createCard = api.card.create.useMutation({
-    onSuccess: () => {
-      refetchBoard();
+    onSuccess: async () => {
+      await refetchBoard();
     },
-    onError: () => {
+    onError: async () => {
       closeModal();
-      refetchBoard();
+      await refetchBoard();
       showPopup({
         header: "Unable to create card",
         message: "Please try again later, or contact customer support.",

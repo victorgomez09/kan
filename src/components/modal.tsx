@@ -46,7 +46,7 @@ const Modal: React.FC<Props> = ({ children, modalSize = "sm" }) => {
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel
-                className={`relative mt-[25vh] w-full transform rounded-lg border border-light-600 bg-dark-1000 bg-light-50 text-left shadow-3xl-light transition-all dark:border-dark-600 dark:bg-dark-100/20 dark:shadow-3xl-dark dark:backdrop-blur-lg ${modalSizeMap[modalSize]}`}
+                className={`bg-white/1 relative mt-[25vh] w-full transform rounded-lg border border-light-600 text-left shadow-3xl-light backdrop-blur-[10px] transition-all dark:border-dark-600 dark:bg-dark-100/20 dark:shadow-3xl-dark ${modalSizeMap[modalSize]}`}
               >
                 {children}
               </Dialog.Panel>

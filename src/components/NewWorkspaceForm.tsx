@@ -12,11 +12,7 @@ interface FormValues {
 export function NewWorkspaceForm() {
   const { closeModal } = useModal();
   const { switchWorkspace } = useWorkspace();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormValues>();
+  const { register, handleSubmit } = useForm<FormValues>();
 
   const createWorkspace = api.workspace.create.useMutation({
     onSuccess: (values) => {
