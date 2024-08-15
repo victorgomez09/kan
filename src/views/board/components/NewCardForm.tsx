@@ -1,21 +1,21 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import ContentEditable from "react-contenteditable";
-import { api } from "~/utils/api";
-
 import {
   HiXMark,
   HiOutlineBarsArrowDown,
   HiOutlineBarsArrowUp,
 } from "react-icons/hi2";
 
-import { Switch } from "@headlessui/react";
-
+import Button from "~/components/Button";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
+import Input from "~/components/Input";
+import Toggle from "~/components/Toggle";
 
 import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
+
+import { api } from "~/utils/api";
 
 import { type NewCardInput } from "~/types/router.types";
 
@@ -25,10 +25,6 @@ type NewCardFormInput = NewCardInput & {
 
 interface NewCardFormProps {
   listPublicId: string;
-}
-
-function classNames(...classes: string[]): string {
-  return classes.filter(Boolean).join(" ");
 }
 
 export function NewCardForm({ listPublicId }: NewCardFormProps) {
@@ -168,20 +164,14 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
         </div>
 
         <div>
-          <input
-            id="title"
-            type="text"
-            {...register("title")}
-            placeholder="Card title"
-            className="block w-full rounded-md border-0 bg-dark-300 bg-white/5 py-1.5 text-neutral-900 placeholder-dark-800 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6"
-          />
+          <Input id="title" placeholder="Card title" {...register("title")} />
         </div>
         <div className="mt-2 ">
-          <ContentEditable
+          <Input
             placeholder="Add description..."
-            html={watch("description") || ""}
             onChange={(e) => setValue("description", e.target.value)}
-            className="block min-h-[70px] w-full rounded-md border-0 bg-dark-300 bg-white/5 px-3 py-1.5 text-light-900 text-neutral-900 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 focus-visible:outline-none dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6"
+            value={watch("description")}
+            contentEditable
           />
         </div>
         <div className="mt-2 flex space-x-1">
@@ -301,38 +291,14 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
       </div>
 
       <div className="mt-5 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
-        <div className="mr-4 flex items-center justify-end">
-          <span className="mr-2 text-xs text-light-900 dark:text-dark-900">
-            Create more
-          </span>
-          <Switch
-            checked={isCreateAnotherEnabled}
-            onChange={handleToggleCreateAnother}
-            className={classNames(
-              isCreateAnotherEnabled
-                ? "bg-indigo-600"
-                : "bg-light-800 dark:bg-dark-800",
-              "relative inline-flex h-4 w-6 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-            )}
-          >
-            <span className="sr-only">Create another</span>
-            <span
-              aria-hidden="true"
-              className={classNames(
-                isCreateAnotherEnabled ? "translate-x-2" : "translate-x-0",
-                "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-              )}
-            />
-          </Switch>
-        </div>
+        <Toggle
+          label="Create another"
+          isChecked={isCreateAnotherEnabled}
+          onChange={handleToggleCreateAnother}
+        />
 
         <div>
-          <button
-            type="submit"
-            className="inline-flex w-full justify-center rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
-          >
-            Create card
-          </button>
+          <Button type="submit">Create card</Button>
         </div>
       </div>
     </form>

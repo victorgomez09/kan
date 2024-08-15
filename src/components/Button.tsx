@@ -1,11 +1,25 @@
+import { twMerge } from "tailwind-merge";
+
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary";
   isLoading?: boolean;
 }
 
-const Button = ({ children, isLoading, ...props }: ButtonProps) => {
+const Button = ({
+  children,
+  isLoading,
+  variant = "primary",
+  ...props
+}: ButtonProps) => {
   return (
     <button
-      className="inline-flex items-center justify-center rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
+      className={twMerge(
+        "inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none",
+        variant === "primary" &&
+          "bg-light-1000 dark:bg-dark-1000 dark:text-dark-50",
+        variant === "secondary" &&
+          "border-[1px] border-light-600 bg-light-50 dark:border-dark-600 dark:bg-dark-300 dark:text-dark-1000",
+      )}
       disabled={isLoading}
       {...props}
     >

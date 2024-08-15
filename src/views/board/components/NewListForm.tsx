@@ -1,19 +1,19 @@
 import { useEffect } from "react";
-import { api } from "~/utils/api";
 import { useForm } from "react-hook-form";
 
 import { HiXMark } from "react-icons/hi2";
-import { Switch } from "@headlessui/react";
 
 import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 
-import { type NewListInput } from "~/types/router.types";
+import { api } from "~/utils/api";
 
-function classNames(...classes: string[]): string {
-  return classes.filter(Boolean).join(" ");
-}
+import Button from "~/components/Button";
+import Input from "~/components/Input";
+import Toggle from "~/components/Toggle";
+
+import { type NewListInput } from "~/types/router.types";
 
 type NewListFormInput = NewListInput & {
   isCreateAnotherEnabled: boolean;
@@ -88,48 +88,19 @@ export function NewListForm({ boardPublicId }: { boardPublicId: string }) {
           </button>
         </div>
 
-        <input
-          id="list-name"
-          placeholder="List name"
-          {...register("name", { required: true })}
-          className="block w-full rounded-md border-0 bg-dark-300 bg-white/5 py-1.5 text-neutral-900 placeholder-dark-800 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6"
-        />
+        <Input id="list-name" placeholder="List name" {...register("name")} />
       </div>
       <div className="mt-12 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
-        <div className="mr-4 flex items-center justify-end">
-          <span className="mr-2 text-xs text-light-900 dark:text-dark-900">
-            Create more
-          </span>
-          <Switch
-            checked={isCreateAnotherEnabled}
-            onChange={() =>
-              setValue("isCreateAnotherEnabled", !isCreateAnotherEnabled)
-            }
-            className={classNames(
-              isCreateAnotherEnabled
-                ? "bg-indigo-600"
-                : "bg-light-800 dark:bg-dark-800",
-              "relative inline-flex h-4 w-6 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-            )}
-          >
-            <span className="sr-only">Create another</span>
-            <span
-              aria-hidden="true"
-              className={classNames(
-                isCreateAnotherEnabled ? "translate-x-2" : "translate-x-0",
-                "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-              )}
-            />
-          </Switch>
-        </div>
+        <Toggle
+          label="Create another"
+          isChecked={isCreateAnotherEnabled}
+          onChange={() =>
+            setValue("isCreateAnotherEnabled", !isCreateAnotherEnabled)
+          }
+        />
 
         <div>
-          <button
-            type="submit"
-            className="inline-flex w-full justify-center rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
-          >
-            Create list
-          </button>
+          <Button type="submit">Create list</Button>
         </div>
       </div>
     </form>

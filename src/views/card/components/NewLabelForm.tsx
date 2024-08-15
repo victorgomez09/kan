@@ -1,23 +1,26 @@
 import { Fragment } from "react";
-import { Listbox, Transition } from "@headlessui/react";
-import { api } from "~/utils/api";
 import { HiChevronUpDown, HiXMark } from "react-icons/hi2";
-import { useModal } from "~/providers/modal";
 import { useForm, Controller } from "react-hook-form";
+import { Listbox, Transition } from "@headlessui/react";
 
-interface FormValues {
-  name: string;
+import { api } from "~/utils/api";
+import { useModal } from "~/providers/modal";
+
+import Button from "~/components/Button";
+import Input from "~/components/Input";
+import Toggle from "~/components/Toggle";
+
+import { type NewLabelInput } from "~/types/router.types";
+
+type NewLabelFormInput = NewLabelInput & {
   colour: Colour;
-}
+  isCreateAnotherEnabled: boolean;
+};
 
-interface Colour {
+type Colour = {
   name: string;
   code: string;
-}
-
-interface CardPublicId {
-  cardPublicId: string;
-}
+};
 
 const colours = [
   { name: "Teal", code: "#0d9488" },
@@ -30,31 +33,43 @@ const colours = [
   { name: "Pink", code: "#db2777" },
 ];
 
-export function NewLabelForm({ cardPublicId }: CardPublicId) {
+export function NewLabelForm({ cardPublicId }: { cardPublicId: string }) {
   const utils = api.useUtils();
   const { closeModal } = useModal();
 
-  const { control, handleSubmit } = useForm<FormValues>({
-    defaultValues: {
-      name: "",
-      colour: colours[0],
-    },
-  });
+  const { control, register, reset, handleSubmit, setValue, watch } =
+    useForm<NewLabelFormInput>({
+      defaultValues: {
+        name: "",
+        colour: colours[0],
+        isCreateAnotherEnabled: false,
+      },
+    });
 
   const refetchCard = () => utils.card.byId.refetch({ id: cardPublicId });
 
+  const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
+
   const createLabel = api.label.create.useMutation({
     onSuccess: async () => {
+      const currentColourIndex = colours.findIndex(
+        (c) => c.code === watch("colour").code,
+      );
       try {
         await refetchCard();
-        closeModal();
+        if (!isCreateAnotherEnabled) closeModal();
+        reset({
+          name: "",
+          colour: colours[(currentColourIndex + 1) % colours.length],
+          isCreateAnotherEnabled,
+        });
       } catch (e) {
         console.log(e);
       }
     },
   });
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = (values: NewLabelFormInput) => {
     if (!values.colour?.code) return;
 
     createLabel.mutate({
@@ -65,35 +80,22 @@ export function NewLabelForm({ cardPublicId }: CardPublicId) {
   };
 
   return (
-    <div className="p-5">
-      <div className="flex w-full items-center justify-between pb-4 text-neutral-900 dark:text-dark-1000">
-        <h2 className="text-sm font-medium">New label</h2>
-        <button
-          className="rounded p-1 hover:bg-light-300 focus:outline-none dark:hover:bg-dark-300"
-          onClick={() => closeModal()}
-        >
-          <HiXMark size={18} className="text-light-900 dark:text-dark-900" />
-        </button>
-      </div>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="px-5 pt-5">
+        <div className="flex w-full items-center justify-between pb-4 text-neutral-900 dark:text-dark-1000">
+          <h2 className="text-sm font-medium">New label</h2>
+          <button
+            className="rounded p-1 hover:bg-light-300 focus:outline-none dark:hover:bg-dark-300"
+            onClick={(e) => {
+              e.preventDefault();
+              closeModal();
+            }}
+          >
+            <HiXMark size={18} className="text-light-900 dark:text-dark-900" />
+          </button>
+        </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <label
-          htmlFor="name"
-          className="block pb-2 text-sm font-normal leading-6 text-neutral-900 dark:text-dark-1000"
-        >
-          Name
-        </label>
-        <Controller
-          name="name"
-          control={control}
-          render={({ field }) => (
-            <input
-              {...field}
-              id="name"
-              className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 dark:bg-dark-300 dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6"
-            />
-          )}
-        />
+        <Input id="label-name" placeholder="Name" {...register("name")} />
         <Controller
           name="colour"
           control={control}
@@ -158,15 +160,21 @@ export function NewLabelForm({ cardPublicId }: CardPublicId) {
             </Listbox>
           )}
         />
-        <div className="mt-5 sm:mt-6">
-          <button
-            type="submit"
-            className="inline-flex w-full justify-center rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
-          >
-            Create label
-          </button>
+      </div>
+
+      <div className="mt-12 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
+        <Toggle
+          label="Create another"
+          isChecked={isCreateAnotherEnabled}
+          onChange={() =>
+            setValue("isCreateAnotherEnabled", !isCreateAnotherEnabled)
+          }
+        />
+
+        <div>
+          <Button type="submit">Create label</Button>
         </div>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 }

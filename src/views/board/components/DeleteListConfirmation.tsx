@@ -2,6 +2,8 @@ import { api } from "~/utils/api";
 import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 
+import Button from "~/components/Button";
+
 interface DeleteListConfirmationProps {
   listPublicId: string;
 }
@@ -40,23 +42,13 @@ export function DeleteListConfirmation({
           {"This action can't be undone."}
         </p>
       </div>
-      <div className="mt-5 flex justify-end sm:mt-6">
-        <button
-          className="mr-4 inline-flex justify-center rounded-md border-[1px] border-light-600 bg-light-50 px-3 py-2 text-sm font-semibold text-neutral-900 shadow-sm focus-visible:outline-none dark:border-dark-600 dark:bg-dark-300 dark:text-dark-1000"
-          onClick={() => closeModal()}
-        >
+      <div className="mt-5 flex justify-end space-x-2 sm:mt-6">
+        <Button onClick={() => closeModal()} variant="secondary">
           Cancel
-        </button>
-        <button
-          onClick={() =>
-            deleteList.mutate({
-              listPublicId,
-            })
-          }
-          className="inline-flex justify-center rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
-        >
+        </Button>
+        <Button onClick={() => deleteList.mutate({ listPublicId })}>
           Delete
-        </button>
+        </Button>
       </div>
     </div>
   );
