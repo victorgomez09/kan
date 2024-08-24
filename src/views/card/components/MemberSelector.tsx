@@ -100,7 +100,7 @@ export default function MemberSelector({
                         <div
                           key={member.publicId}
                           className="flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-300"
-                          onClick={async () => {
+                          onClick={() => {
                             const newValue = !watch(member.publicId);
                             setValue(member.publicId, newValue);
 
@@ -109,7 +109,7 @@ export default function MemberSelector({
                               workspaceMemberPublicId: member.publicId,
                             });
 
-                            handleSubmit(onSubmit)();
+                            handleSubmit(onSubmit);
                           }}
                         >
                           <input

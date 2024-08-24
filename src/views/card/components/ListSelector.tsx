@@ -73,7 +73,7 @@ export default function ListSelector({
                         <div
                           key={list.publicId}
                           className="flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-300"
-                          onClick={async () => {
+                          onClick={() => {
                             const newValue = !watch(list.publicId);
                             setValue(list.publicId, newValue);
 
@@ -82,7 +82,7 @@ export default function ListSelector({
                               newListId: list.publicId,
                             });
 
-                            handleSubmit(onSubmit)();
+                            handleSubmit(onSubmit);
                           }}
                         >
                           <input

@@ -104,7 +104,7 @@ export default function LabelSelector({
                         <div
                           key={label.publicId}
                           className="flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-300"
-                          onClick={async () => {
+                          onClick={() => {
                             const newValue = !watch(label.publicId);
                             setValue(label.publicId, newValue);
 
@@ -113,7 +113,7 @@ export default function LabelSelector({
                               labelPublicId: label.publicId,
                             });
 
-                            handleSubmit(onSubmit)();
+                            handleSubmit(onSubmit);
                           }}
                         >
                           <input

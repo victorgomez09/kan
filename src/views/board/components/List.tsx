@@ -42,7 +42,7 @@ export default function List({
 
   const updateList = api.list.update.useMutation();
 
-  const { register, handleSubmit, setValue } = useForm<FormValues>({
+  const { register, handleSubmit } = useForm<FormValues>({
     defaultValues: {
       listPublicId: list.publicId,
       name: list.name,
