@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { HiOutlinePlusSmall } from "react-icons/hi2";
 import { Draggable } from "react-beautiful-dnd";
-import { useFormik } from "formik";
+import { useForm } from "react-hook-form";
 
 import { api } from "~/utils/api";
 import { useModal } from "~/providers/modal";
@@ -42,19 +42,19 @@ export default function List({
 
   const updateList = api.list.update.useMutation();
 
-  const formik = useFormik({
-    initialValues: {
+  const { register, handleSubmit, setValue } = useForm<FormValues>({
+    defaultValues: {
       listPublicId: list.publicId,
       name: list.name,
     },
-    onSubmit: (values: FormValues) => {
-      updateList.mutate({
-        listPublicId: values.listPublicId,
-        name: values.name,
-      });
-    },
-    enableReinitialize: true,
   });
+
+  const onSubmit = (values: FormValues) => {
+    updateList.mutate({
+      listPublicId: values.listPublicId,
+      name: values.name,
+    });
+  };
 
   return (
     <Draggable key={list.publicId} draggableId={list.publicId} index={index}>
@@ -68,17 +68,15 @@ export default function List({
         >
           <div className="flex justify-between">
             <form
-              onSubmit={formik.handleSubmit}
+              onSubmit={handleSubmit(onSubmit)}
               className="focus-visible:outline-none"
             >
               <input
-                type="name"
                 id="name"
-                name="name"
-                value={formik.values.name}
-                onChange={formik.handleChange}
-                onBlur={formik.submitForm}
-                className="font-mediumfocus:ring-0 mb-4 block border-0 bg-transparent px-4 pt-1 text-sm text-neutral-900 focus-visible:outline-none dark:text-dark-1000"
+                type="text"
+                {...register("name")}
+                onBlur={handleSubmit(onSubmit)}
+                className="mb-4 block border-0 bg-transparent px-4 pt-1 text-sm font-medium text-neutral-900 focus:ring-0 focus-visible:outline-none dark:text-dark-1000"
               />
             </form>
             <div>

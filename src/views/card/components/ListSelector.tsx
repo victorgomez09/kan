@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { api } from "~/utils/api";
 import { Menu, Transition } from "@headlessui/react";
-import { useFormik } from "formik";
+import { useForm } from "react-hook-form";
 
 interface ListSelectorProps {
   cardPublicId: string;
@@ -28,17 +28,15 @@ export default function ListSelector({
     },
   });
 
-  const formik = useFormik({
-    initialValues: {
-      ...Object.fromEntries(
-        lists?.map((list) => [list.publicId, list.selected]) ?? [],
-      ),
-    },
-    onSubmit: (values) => {
-      console.log({ values });
-    },
-    enableReinitialize: true,
+  const { register, handleSubmit, setValue, watch } = useForm({
+    values: Object.fromEntries(
+      lists?.map((list) => [list.publicId, list.selected]) ?? [],
+    ),
   });
+
+  const onSubmit = (values: Record<string, boolean>) => {
+    console.log({ values });
+  };
 
   const selectedList = lists.find((list) => list.selected);
 
@@ -68,40 +66,41 @@ export default function ListSelector({
           >
             <Menu.Items className="absolute right-[200px] top-[30px] z-10 mt-2 w-56 origin-top-right rounded-md border-[1px] border-light-600 bg-light-50 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border-dark-500 dark:bg-dark-200">
               <div className="p-2">
-                <form onSubmit={formik.handleSubmit}>
+                <form onSubmit={handleSubmit(onSubmit)}>
                   {lists?.map((list) => (
                     <Menu.Item key={list.publicId}>
-                      <div
-                        key={list.publicId}
-                        className="flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-300"
-                        onClick={async (e) => {
-                          e.preventDefault();
-                          await formik.setFieldValue(
-                            list.publicId,
-                            !formik.values[list.publicId],
-                          );
+                      {() => (
+                        <div
+                          key={list.publicId}
+                          className="flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-300"
+                          onClick={async () => {
+                            const newValue = !watch(list.publicId);
+                            setValue(list.publicId, newValue);
 
-                          updateCardList.mutate({
-                            cardId: cardPublicId,
-                            newListId: list.publicId,
-                          });
+                            updateCardList.mutate({
+                              cardId: cardPublicId,
+                              newListId: list.publicId,
+                            });
 
-                          await formik.submitForm();
-                        }}
-                      >
-                        <input
-                          id={list.publicId}
-                          name={list.publicId}
-                          type="checkbox"
-                          className="h-[14px] w-[14px] rounded bg-transparent"
-                          onClick={(event) => event.stopPropagation()}
-                          onChange={formik.handleChange}
-                          checked={formik.values[list.publicId]}
-                        />
-                        <label htmlFor={list.publicId} className="ml-3 text-sm">
-                          {list.name}
-                        </label>
-                      </div>
+                            handleSubmit(onSubmit)();
+                          }}
+                        >
+                          <input
+                            id={list.publicId}
+                            type="checkbox"
+                            className="h-[14px] w-[14px] rounded bg-transparent"
+                            onClick={(event) => event.stopPropagation()}
+                            {...register(list.publicId)}
+                            checked={watch(list.publicId)}
+                          />
+                          <label
+                            htmlFor={list.publicId}
+                            className="ml-3 text-sm"
+                          >
+                            {list.name}
+                          </label>
+                        </div>
+                      )}
                     </Menu.Item>
                   ))}
                 </form>

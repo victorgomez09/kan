@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { api } from "~/utils/api";
 import { Menu, Transition } from "@headlessui/react";
 import { HiMiniPlus } from "react-icons/hi2";
-import { useFormik } from "formik";
+import { useForm } from "react-hook-form";
 
 import { useModal } from "~/providers/modal";
 
@@ -33,17 +33,15 @@ export default function LabelSelector({
     },
   });
 
-  const formik = useFormik({
-    initialValues: {
-      ...Object.fromEntries(
-        labels?.map((label) => [label.publicId, label.selected]) ?? [],
-      ),
-    },
-    onSubmit: (values) => {
-      console.log({ values });
-    },
-    enableReinitialize: true,
+  const { register, handleSubmit, setValue, watch } = useForm({
+    values: Object.fromEntries(
+      labels?.map((label) => [label.publicId, label.selected]) ?? [],
+    ),
   });
+
+  const onSubmit = (values: Record<string, boolean>) => {
+    console.log({ values });
+  };
 
   const selectedLabels = labels.filter((label) => label.selected);
 
@@ -99,36 +97,32 @@ export default function LabelSelector({
           >
             <Menu.Items className="absolute right-[200px] top-[30px] z-10 mt-2 w-56 origin-top-right rounded-md border-[1px] border-light-600 bg-light-50 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border-dark-500 dark:bg-dark-200">
               <div className="p-2">
-                <form onSubmit={formik.handleSubmit}>
+                <form onSubmit={handleSubmit(onSubmit)}>
                   {labels?.map((label) => (
                     <Menu.Item key={label.publicId}>
                       {() => (
                         <div
                           key={label.publicId}
                           className="flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-300"
-                          onClick={async (e) => {
-                            e.preventDefault();
-                            await formik.setFieldValue(
-                              label.publicId,
-                              !formik.values[label.publicId],
-                            );
+                          onClick={async () => {
+                            const newValue = !watch(label.publicId);
+                            setValue(label.publicId, newValue);
 
                             addOrRemoveLabel.mutate({
                               cardPublicId,
                               labelPublicId: label.publicId,
                             });
 
-                            await formik.submitForm();
+                            handleSubmit(onSubmit)();
                           }}
                         >
                           <input
                             id={label.publicId}
-                            name={label.publicId}
                             type="checkbox"
                             className="h-[14px] w-[14px] rounded bg-transparent"
                             onClick={(event) => event.stopPropagation()}
-                            onChange={formik.handleChange}
-                            checked={formik.values[label.publicId]}
+                            {...register(label.publicId)}
+                            checked={watch(label.publicId)}
                           />
                           <label
                             htmlFor={label.publicId}

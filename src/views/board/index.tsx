@@ -8,7 +8,7 @@ import {
   type DropResult,
   Draggable,
 } from "react-beautiful-dnd";
-import { useFormik } from "formik";
+import { useForm } from "react-hook-form";
 
 import { api } from "~/utils/api";
 import { useBoard } from "~/providers/board";
@@ -40,19 +40,19 @@ export default function BoardPage() {
 
   const updateBoard = api.board.update.useMutation();
 
-  const formik = useFormik({
-    initialValues: {
+  const { register, handleSubmit, setValue } = useForm<UpdateBoardInput>({
+    values: {
       boardPublicId: boardId ?? "",
-      name: boardData?.name ? boardData.name : "",
+      name: "",
     },
-    onSubmit: (values: UpdateBoardInput) => {
-      updateBoard.mutate({
-        boardPublicId: values.boardPublicId,
-        name: values.name,
-      });
-    },
-    enableReinitialize: true,
   });
+
+  const onSubmit = (values: UpdateBoardInput) => {
+    updateBoard.mutate({
+      boardPublicId: values.boardPublicId,
+      name: values.name,
+    });
+  };
 
   const { data, isSuccess, isLoading } = api.board.byId.useQuery(
     { boardPublicId: boardId ?? "" },
@@ -64,8 +64,9 @@ export default function BoardPage() {
   useEffect(() => {
     if (isSuccess && data) {
       setBoardData(data);
+      setValue("name", data.name || "");
     }
-  }, [isSuccess, data, setBoardData]);
+  }, [isSuccess, data, setBoardData, setValue]);
 
   if (!boardId || !boardData) return <></>;
 
@@ -136,16 +137,14 @@ export default function BoardPage() {
           </div>
         ) : (
           <form
-            onSubmit={formik.handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             className="focus-visible:outline-none"
           >
             <input
-              type="name"
               id="name"
-              name="name"
-              value={formik.values.name}
-              onChange={formik.handleChange}
-              onBlur={formik.submitForm}
+              type="text"
+              {...register("name")}
+              onBlur={handleSubmit(onSubmit)}
               className="block border-0 bg-transparent p-0 py-0 font-medium leading-[2.3rem] tracking-tight text-neutral-900 focus:ring-0 focus-visible:outline-none dark:text-dark-1000 sm:text-[1.2rem]"
             />
           </form>

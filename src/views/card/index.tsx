@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useFormik } from "formik";
+import { useForm } from "react-hook-form";
 import ContentEditable from "react-contenteditable";
 import { IoChevronForwardSharp } from "react-icons/io5";
 
@@ -74,21 +74,21 @@ export default function CardPage() {
 
   const updateCard = api.card.update.useMutation();
 
-  const formik = useFormik({
-    initialValues: {
+  const { register, handleSubmit, setValue, watch } = useForm<FormValues>({
+    values: {
       cardId: cardId ?? "",
-      title: data?.title ? data.title : "",
-      description: data?.description ? data.description : "",
+      title: data?.title ?? "",
+      description: data?.description ?? "",
     },
-    onSubmit: (values: FormValues) => {
-      updateCard.mutate({
-        cardId: values.cardId,
-        title: values.title,
-        description: values.description,
-      });
-    },
-    enableReinitialize: true,
   });
+
+  const onSubmit = (values: FormValues) => {
+    updateCard.mutate({
+      cardId: values.cardId,
+      title: values.title,
+      description: values.description,
+    });
+  };
 
   if (!cardId) return <></>;
 
@@ -113,15 +113,16 @@ export default function CardPage() {
                 size={18}
                 className="mx-2 text-light-900 dark:text-dark-900"
               />
-              <form onSubmit={formik.handleSubmit} className="w-full space-y-6">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="w-full space-y-6"
+              >
                 <div>
                   <input
                     type="text"
                     id="title"
-                    name="title"
-                    value={formik.values.title}
-                    onChange={formik.handleChange}
-                    onBlur={formik.submitForm}
+                    {...register("title")}
+                    onBlur={handleSubmit(onSubmit)}
                     className="block w-full border-0 bg-transparent p-0 py-0 font-medium tracking-tight text-neutral-900 focus:ring-0 dark:text-dark-1000 sm:text-[1.2rem]"
                   />
                 </div>
@@ -133,16 +134,14 @@ export default function CardPage() {
           )}
         </div>
         <div className="mb-8 flex w-full max-w-2xl justify-between">
-          <form onSubmit={formik.handleSubmit} className="w-full space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
             <div className="mt-2">
               <ContentEditable
                 placeholder="Add description..."
-                html={formik.values.description}
+                html={watch("description")}
                 disabled={false}
-                onChange={(e) =>
-                  formik.setFieldValue("description", e.target.value)
-                }
-                onBlur={formik.submitForm}
+                onChange={(e) => setValue("description", e.target.value)}
+                onBlur={handleSubmit(onSubmit)}
                 className="block w-full border-0 bg-transparent py-1.5 text-light-900 focus-visible:outline-none dark:text-dark-1000 sm:text-sm sm:leading-6"
               />
             </div>
