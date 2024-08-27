@@ -75,3 +75,167 @@ AS $$
     WHERE "listId" = list_id AND index >= card_index AND "deletedAt" IS NULL;
 $$;
 
+alter table "_card_labels" enable row level security;
+alter table "_card_workspace_members" enable row level security;
+alter table "board" enable row level security;
+alter table "card" enable row level security;
+alter table "import" enable row level security;
+alter table "label" enable row level security;
+alter table "user" enable row level security;
+alter table "list" enable row level security;
+alter table "workspace" enable row level security;
+alter table "workspace_members" enable row level security;
+
+CREATE POLICY "Allow access to boards in user's workspace"
+ON public.board
+AS PERMISSIVE
+FOR ALL
+TO authenticated
+USING (
+  "workspaceId" IN (
+    SELECT "workspaceId"
+    FROM workspace_members
+    WHERE "userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow access to lists in user's workspace"
+ON public.list
+AS PERMISSIVE
+FOR ALL
+TO authenticated
+USING (
+  "boardId" IN (
+    SELECT b.id
+    FROM board b
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow access to cards in user's workspace"
+ON public.card
+AS PERMISSIVE
+FOR ALL
+TO authenticated
+USING (
+  "listId" IN (
+    SELECT l.id
+    FROM list l
+    JOIN board b ON l."boardId" = b."id"
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow access to labels in user's workspace"
+ON public.label
+AS PERMISSIVE
+FOR ALL
+TO authenticated
+USING (
+  "boardId" IN (
+    SELECT b.id
+    FROM board b
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow access to card labels in user's workspace"
+ON public._card_labels
+AS PERMISSIVE
+FOR ALL
+TO authenticated
+USING (
+  "cardId" IN (
+    SELECT c.id
+    FROM card c
+    JOIN list l ON c."listId" = l.id
+    JOIN board b ON l."boardId" = b.id
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+  AND
+  "labelId" IN (
+    SELECT l.id
+    FROM label l
+    JOIN board b ON l."boardId" = b.id
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow access to card workspace members in user's workspace"
+ON public._card_workspace_members
+AS PERMISSIVE
+FOR ALL
+TO authenticated
+USING (
+  "cardId" IN (
+    SELECT c.id
+    FROM card c
+    JOIN list l ON c."listId" = l.id
+    JOIN board b ON l."boardId" = b.id
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+  AND
+  "workspaceMemberId" IN (
+    SELECT wm.id
+    FROM workspace_members wm
+    JOIN workspace w ON wm."workspaceId" = w.id
+    JOIN board b ON w.id = b."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow viewing members in user's workspace"
+ON public.user
+AS PERMISSIVE
+FOR SELECT
+TO authenticated
+USING (
+  id IN (
+    SELECT wm."userId"
+    FROM workspace_members wm
+    WHERE wm."workspaceId" IN (
+      SELECT "workspaceId"
+      FROM workspace_members
+      WHERE "userId" = auth.uid()
+    )
+  )
+);
+
+CREATE POLICY "Allow access to user's workspaces"
+ON public.workspace
+AS PERMISSIVE
+FOR ALL
+TO authenticated
+USING (
+  id IN (
+    SELECT "workspaceId"
+    FROM workspace_members
+    WHERE "userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow access to user's own workspace membership"
+ON public.workspace_members
+AS PERMISSIVE
+FOR ALL
+TO authenticated
+USING (
+  "userId" = auth.uid()
+);
+
+CREATE POLICY "Allow access to user's own imports"
+ON public.import
+AS PERMISSIVE
+FOR ALL
+TO authenticated
+USING (
+  "createdBy" = auth.uid()
+);
+
+
