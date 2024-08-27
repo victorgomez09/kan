@@ -2,9 +2,10 @@ import { createContext, useContext, useState } from "react";
 
 type ModalContextType = {
   isOpen: boolean;
-  openModal: (contentType: string) => void;
+  openModal: (contentType: string, entityId?: string) => void;
   closeModal: () => void;
   modalContentType: string;
+  entityId: string;
 };
 
 interface Props {
@@ -15,11 +16,13 @@ const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
 export const ModalProvider: React.FC<Props> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [entityId, setEntityId] = useState("");
   const [modalContentType, setModalContentType] = useState("");
 
-  const openModal = (contentType: string) => {
+  const openModal = (contentType: string, entityId?: string) => {
     setIsOpen(true);
     setModalContentType(contentType);
+    if (entityId) setEntityId(entityId);
   };
 
   const closeModal = () => {
@@ -28,7 +31,7 @@ export const ModalProvider: React.FC<Props> = ({ children }) => {
 
   return (
     <ModalContext.Provider
-      value={{ isOpen, openModal, closeModal, modalContentType }}
+      value={{ isOpen, openModal, closeModal, modalContentType, entityId }}
     >
       {children}
     </ModalContext.Provider>

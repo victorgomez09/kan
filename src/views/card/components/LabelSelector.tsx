@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 
 import { useModal } from "~/providers/modal";
 
+import { HiEllipsisHorizontal } from "react-icons/hi2";
+
 interface LabelSelectorProps {
   cardPublicId: string;
   labels: {
@@ -103,7 +105,7 @@ export default function LabelSelector({
                       {() => (
                         <div
                           key={label.publicId}
-                          className="flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-300"
+                          className="group flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-300"
                           onClick={() => {
                             const newValue = !watch(label.publicId);
                             setValue(label.publicId, newValue);
@@ -124,12 +126,23 @@ export default function LabelSelector({
                             {...register(label.publicId)}
                             checked={watch(label.publicId)}
                           />
-                          <label
-                            htmlFor={label.publicId}
-                            className="ml-3 text-sm"
-                          >
-                            {label.name}
-                          </label>
+                          <div className="flex w-full items-center justify-between">
+                            <label
+                              htmlFor={label.publicId}
+                              className="ml-3 text-sm"
+                            >
+                              {label.name}
+                            </label>
+                            <button
+                              className="invisible group-hover:visible"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                openModal("EDIT_LABEL", label.publicId);
+                              }}
+                            >
+                              <HiEllipsisHorizontal size={20} />
+                            </button>
+                          </div>
                         </div>
                       )}
                     </Menu.Item>

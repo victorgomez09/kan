@@ -52,10 +52,29 @@ export const getByPublicId = async (
 ) => {
   const { data } = await db
     .from("label")
-    .select(`id`)
+    .select(`id, publicId, name, colourCode`)
     .eq("publicId", labelPublicId)
     .limit(1)
     .single();
+
+  return data;
+};
+
+export const update = async (
+  db: SupabaseClient<Database>,
+  labelInput: {
+    publicId: string;
+    name: string;
+    colourCode: string;
+  },
+) => {
+  const { data } = await db
+    .from("label")
+    .update({
+      name: labelInput.name,
+      colourCode: labelInput.colourCode,
+    })
+    .eq("publicId", labelInput.publicId);
 
   return data;
 };

@@ -9,7 +9,7 @@ import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
 import LabelSelector from "./components/LabelSelector";
 import ListSelector from "./components/ListSelector";
 import MemberSelector from "./components/MemberSelector";
-import { NewLabelForm } from "./components/NewLabelForm";
+import { LabelForm } from "./components/LabelForm";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 
 import Modal from "~/components/modal";
@@ -177,7 +177,10 @@ export default function CardPage() {
 
       <Modal>
         {modalContentType === "NEW_LABEL" && (
-          <NewLabelForm cardPublicId={cardId} />
+          <LabelForm cardPublicId={cardId} />
+        )}
+        {modalContentType === "EDIT_LABEL" && (
+          <LabelForm cardPublicId={cardId} isEdit />
         )}
         {modalContentType === "DELETE_CARD" && (
           <DeleteCardConfirmation

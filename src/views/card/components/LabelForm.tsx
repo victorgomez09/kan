@@ -10,11 +10,10 @@ import Button from "~/components/Button";
 import Input from "~/components/Input";
 import Toggle from "~/components/Toggle";
 
-import { type NewLabelInput } from "~/types/router.types";
-
-type NewLabelFormInput = NewLabelInput & {
+type LabelFormInput = {
+  name: string;
   colour: Colour;
-  isCreateAnotherEnabled: boolean;
+  isCreateAnotherEnabled?: boolean;
 };
 
 type Colour = {
@@ -33,18 +32,37 @@ const colours = [
   { name: "Pink", code: "#db2777" },
 ];
 
-export function NewLabelForm({ cardPublicId }: { cardPublicId: string }) {
+export function LabelForm({
+  cardPublicId,
+  isEdit,
+}: {
+  cardPublicId: string;
+  isEdit?: boolean;
+}) {
   const utils = api.useUtils();
-  const { closeModal } = useModal();
+  const { closeModal, entityId } = useModal();
+
+  const label = api.label.byPublicId.useQuery(
+    {
+      publicId: entityId,
+    },
+    {
+      enabled: isEdit && !!entityId,
+    },
+  );
 
   const { control, register, reset, handleSubmit, setValue, watch } =
-    useForm<NewLabelFormInput>({
-      defaultValues: {
-        name: "",
-        colour: colours[0],
+    useForm<LabelFormInput>({
+      values: {
+        name: isEdit && label.data?.name ? label.data.name : "",
+        colour: (isEdit && label.data?.colourCode
+          ? colours.find((c) => c.code === label.data.colourCode)
+          : colours[0]) as Colour,
         isCreateAnotherEnabled: false,
       },
     });
+
+  console.log({ entityId });
 
   const refetchCard = () => utils.card.byId.refetch({ id: cardPublicId });
 
@@ -69,21 +87,42 @@ export function NewLabelForm({ cardPublicId }: { cardPublicId: string }) {
     },
   });
 
-  const onSubmit = (values: NewLabelFormInput) => {
+  const updateLabel = api.label.update.useMutation({
+    onSuccess: async () => {
+      await refetchCard();
+      closeModal();
+      reset({
+        name: "",
+        colour: colours[0],
+      });
+    },
+  });
+
+  const onSubmit = (values: LabelFormInput) => {
     if (!values.colour?.code) return;
 
-    createLabel.mutate({
-      name: values.name,
-      cardPublicId,
-      colourCode: values.colour.code,
-    });
+    if (isEdit) {
+      updateLabel.mutate({
+        publicId: label.data?.publicId || "",
+        name: values.name,
+        colourCode: values.colour.code,
+      });
+    } else {
+      createLabel.mutate({
+        name: values.name,
+        cardPublicId,
+        colourCode: values.colour.code,
+      });
+    }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="px-5 pt-5">
         <div className="flex w-full items-center justify-between pb-4 text-neutral-900 dark:text-dark-1000">
-          <h2 className="text-sm font-medium">New label</h2>
+          <h2 className="text-sm font-medium">
+            {isEdit ? "Edit label" : "New label"}
+          </h2>
           <button
             className="rounded p-1 hover:bg-light-300 focus:outline-none dark:hover:bg-dark-300"
             onClick={(e) => {
@@ -163,16 +202,20 @@ export function NewLabelForm({ cardPublicId }: { cardPublicId: string }) {
       </div>
 
       <div className="mt-12 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
-        <Toggle
-          label="Create another"
-          isChecked={isCreateAnotherEnabled}
-          onChange={() =>
-            setValue("isCreateAnotherEnabled", !isCreateAnotherEnabled)
-          }
-        />
+        {!isEdit && (
+          <Toggle
+            label="Create another"
+            isChecked={!!isCreateAnotherEnabled}
+            onChange={() =>
+              setValue("isCreateAnotherEnabled", !isCreateAnotherEnabled)
+            }
+          />
+        )}
 
         <div>
-          <Button type="submit">Create label</Button>
+          <Button type="submit">
+            {isEdit ? "Update label" : "Create label"}
+          </Button>
         </div>
       </div>
     </form>
