@@ -103,7 +103,7 @@ export function LabelForm({
 
     if (isEdit) {
       updateLabel.mutate({
-        publicId: label.data?.publicId || "",
+        publicId: label.data?.publicId ?? "",
         name: values.name,
         colourCode: values.colour.code,
       });
