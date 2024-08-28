@@ -11,8 +11,6 @@ interface Props {
 const Modal: React.FC<Props> = ({ children, modalSize = "sm" }) => {
   const { isOpen, closeModal } = useModal();
 
-  console.log({ modalSize });
-
   const modalSizeMap = {
     sm: "max-w-[400px]",
     md: "max-w-[550px]",

@@ -6,6 +6,7 @@ import { IoChevronForwardSharp } from "react-icons/io5";
 
 import Dropdown from "./components/Dropdown";
 import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
+import { DeleteLabelConfirmation } from "./components/DeleteLabelConfirmation";
 import LabelSelector from "./components/LabelSelector";
 import ListSelector from "./components/ListSelector";
 import MemberSelector from "./components/MemberSelector";
@@ -25,7 +26,7 @@ interface FormValues {
 
 export default function CardPage() {
   const params = useParams();
-  const { modalContentType } = useModal();
+  const { modalContentType, entityId } = useModal();
 
   const cardId = Array.isArray(params?.cardId)
     ? params.cardId[0]
@@ -181,6 +182,12 @@ export default function CardPage() {
         )}
         {modalContentType === "EDIT_LABEL" && (
           <LabelForm cardPublicId={cardId} isEdit />
+        )}
+        {modalContentType === "DELETE_LABEL" && (
+          <DeleteLabelConfirmation
+            cardPublicId={cardId}
+            labelPublicId={entityId}
+          />
         )}
         {modalContentType === "DELETE_CARD" && (
           <DeleteCardConfirmation

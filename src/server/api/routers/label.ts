@@ -70,4 +70,21 @@ export const labelRouter = createTRPCRouter({
 
       return result;
     }),
+  delete: protectedProcedure
+    .input(z.object({ publicId: z.string().min(12) }))
+    .mutation(async ({ ctx, input }) => {
+      const label = await labelRepo.getByPublicId(ctx.db, input.publicId);
+
+      if (!label)
+        throw new TRPCError({
+          message: `Label with public ID ${input.publicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      await cardRepo.destroyAllCardLabelRelationships(ctx.db, label.id);
+
+      await labelRepo.destroy(ctx.db, label.id);
+
+      return { success: true };
+    }),
 });

@@ -40,7 +40,7 @@ export function LabelForm({
   isEdit?: boolean;
 }) {
   const utils = api.useUtils();
-  const { closeModal, entityId } = useModal();
+  const { closeModal, entityId, openModal } = useModal();
 
   const label = api.label.byPublicId.useQuery(
     {
@@ -61,8 +61,6 @@ export function LabelForm({
         isCreateAnotherEnabled: false,
       },
     });
-
-  console.log({ entityId });
 
   const refetchCard = () => utils.card.byId.refetch({ id: cardPublicId });
 
@@ -212,7 +210,15 @@ export function LabelForm({
           />
         )}
 
-        <div>
+        <div className="space-x-2">
+          {isEdit && (
+            <Button
+              variant="secondary"
+              onClick={() => openModal("DELETE_LABEL", entityId)}
+            >
+              Delete
+            </Button>
+          )}
           <Button type="submit">
             {isEdit ? "Update label" : "Create label"}
           </Button>

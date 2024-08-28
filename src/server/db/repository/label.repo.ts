@@ -78,3 +78,12 @@ export const update = async (
 
   return data;
 };
+
+export const destroy = async (
+  db: SupabaseClient<Database>,
+  labelId: number,
+) => {
+  const { data } = await db.from("label").delete().eq("id", labelId);
+
+  return data;
+};

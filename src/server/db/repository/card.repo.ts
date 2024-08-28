@@ -181,6 +181,15 @@ export const destroyCardLabelRelationship = async (
   return result;
 };
 
+export const destroyAllCardLabelRelationships = async (
+  db: SupabaseClient<Database>,
+  labelId: number,
+) => {
+  const result = await db.from("_card_labels").delete().eq("labelId", labelId);
+
+  return result;
+};
+
 export const createCardLabelRelationship = async (
   db: SupabaseClient<Database>,
   cardLabelRelationshipInput: { cardId: number; labelId: number },

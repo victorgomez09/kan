@@ -1,0 +1,54 @@
+import { api } from "~/utils/api";
+import { useModal } from "~/providers/modal";
+import { usePopup } from "~/providers/popup";
+
+import Button from "~/components/Button";
+
+export function DeleteLabelConfirmation({
+  cardPublicId,
+  labelPublicId,
+}: {
+  cardPublicId: string;
+  labelPublicId: string;
+}) {
+  const utils = api.useUtils();
+  const { closeModal } = useModal();
+  const { showPopup } = usePopup();
+
+  const refetchCard = () => utils.card.byId.refetch({ id: cardPublicId });
+
+  const deleteLabelMutation = api.label.delete.useMutation({
+    onSuccess: () => refetchCard(),
+    onError: () =>
+      showPopup({
+        header: "Error deleting label",
+        message: "Please try again later, or contact customer support.",
+      }),
+  });
+
+  const handleDeleteLabel = () => {
+    closeModal();
+    deleteLabelMutation.mutate({
+      publicId: labelPublicId,
+    });
+  };
+
+  return (
+    <div className="p-5">
+      <div className="flex w-full flex-col justify-between pb-4">
+        <h2 className="text-md pb-4 font-medium text-neutral-900 dark:text-dark-1000">
+          Are you sure you want to delete this label?
+        </h2>
+        <p className="text-sm font-medium text-light-900 dark:text-dark-900">
+          {"This action can't be undone."}
+        </p>
+      </div>
+      <div className="mt-5 flex justify-end space-x-2 sm:mt-6">
+        <Button variant="secondary" onClick={() => closeModal()}>
+          Cancel
+        </Button>
+        <Button onClick={handleDeleteLabel}>Delete</Button>
+      </div>
+    </div>
+  );
+}
