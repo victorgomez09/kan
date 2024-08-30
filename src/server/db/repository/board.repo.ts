@@ -144,7 +144,7 @@ export const update = async (
   return data;
 };
 
-export const destroy = async (
+export const softDelete = async (
   db: SupabaseClient<Database>,
   args: {
     boardId: number;
@@ -157,6 +157,15 @@ export const destroy = async (
     .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
     .eq("id", args.boardId)
     .is("deletedAt", null);
+
+  return result;
+};
+
+export const hardDelete = async (
+  db: SupabaseClient<Database>,
+  workspaceId: number,
+) => {
+  const result = db.from("board").delete().eq("workspaceId", workspaceId);
 
   return result;
 };

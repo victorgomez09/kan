@@ -207,10 +207,25 @@ USING (
   )
 );
 
-CREATE POLICY "Allow access to user's workspaces"
+CREATE POLICY "Allow viewing user's workspaces"
 ON public.workspace
 AS PERMISSIVE
-FOR ALL
+FOR SELECT
+TO authenticated
+USING (
+  id IN (
+    SELECT "workspaceId"
+    FROM workspace_members
+    WHERE "userId" = auth.uid()
+  )
+  OR
+  "createdBy" = auth.uid()
+);
+
+CREATE POLICY "Allow updating user's workspaces"
+ON public.workspace
+AS PERMISSIVE
+FOR UPDATE
 TO authenticated
 USING (
   id IN (
@@ -219,6 +234,26 @@ USING (
     WHERE "userId" = auth.uid()
   )
 );
+
+CREATE POLICY "Allow deleting user's workspaces"
+ON public.workspace
+AS PERMISSIVE
+FOR DELETE
+TO authenticated
+USING (
+  id IN (
+    SELECT "workspaceId"
+    FROM workspace_members
+    WHERE "userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow authenticated users to create workspaces"
+ON public.workspace
+AS PERMISSIVE
+FOR INSERT
+TO authenticated
+USING (true);
 
 CREATE POLICY "Allow access to user's own workspace membership"
 ON public.workspace_members

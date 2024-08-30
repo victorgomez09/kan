@@ -49,6 +49,22 @@ export const workspaceRouter = createTRPCRouter({
         createdBy: userId,
       });
 
+      if (!result?.publicId)
+        throw new TRPCError({
+          message: `Unable to create workspace`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
       return result;
+    }),
+  delete: protectedProcedure
+    .input(z.object({ workspacePublicId: z.string().min(12) }))
+    .mutation(async ({ ctx, input }) => {
+      const { data } = await workspaceRepo.hardDelete(
+        ctx.db,
+        input.workspacePublicId,
+      );
+
+      return data;
     }),
 });

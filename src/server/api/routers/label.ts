@@ -81,9 +81,9 @@ export const labelRouter = createTRPCRouter({
           code: "NOT_FOUND",
         });
 
-      await cardRepo.destroyAllCardLabelRelationships(ctx.db, label.id);
+      await cardRepo.hardDeleteAllCardLabelRelationships(ctx.db, label.id);
 
-      await labelRepo.destroy(ctx.db, label.id);
+      await labelRepo.hardDelete(ctx.db, label.id);
 
       return { success: true };
     }),

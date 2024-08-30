@@ -74,39 +74,6 @@ export const update = async (
   return data;
 };
 
-export const destroy = async (
-  db: SupabaseClient<Database>,
-  args: {
-    cardId: number;
-    deletedAt: string;
-    deletedBy: string;
-  },
-) => {
-  const result = await db
-    .from("card")
-    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
-    .eq("id", args.cardId);
-
-  return result;
-};
-
-export const destroyAllByListIds = async (
-  db: SupabaseClient<Database>,
-  args: {
-    listIds: number[];
-    deletedAt: string;
-    deletedBy: string;
-  },
-) => {
-  const result = await db
-    .from("card")
-    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
-    .in("listId", args.listIds)
-    .is("deletedAt", null);
-
-  return result;
-};
-
 export const getCardWithListByPublicId = async (
   db: SupabaseClient<Database>,
   cardPublicId: string,
@@ -168,28 +135,6 @@ export const bulkCreate = async (
   return data;
 };
 
-export const destroyCardLabelRelationship = async (
-  db: SupabaseClient<Database>,
-  args: { cardId: number; labelId: number },
-) => {
-  const result = await db
-    .from("_card_labels")
-    .delete()
-    .eq("cardId", args.cardId)
-    .eq("labelId", args.labelId);
-
-  return result;
-};
-
-export const destroyAllCardLabelRelationships = async (
-  db: SupabaseClient<Database>,
-  labelId: number,
-) => {
-  const result = await db.from("_card_labels").delete().eq("labelId", labelId);
-
-  return result;
-};
-
 export const createCardLabelRelationship = async (
   db: SupabaseClient<Database>,
   cardLabelRelationshipInput: { cardId: number; labelId: number },
@@ -215,19 +160,6 @@ export const getCardMemberRelationship = async (
     .single();
 
   return data;
-};
-
-export const destroyCardMemberRelationship = async (
-  db: SupabaseClient<Database>,
-  args: { cardId: number; memberId: number },
-) => {
-  const result = await db
-    .from("_card_workspace_members")
-    .delete()
-    .eq("cardId", args.cardId)
-    .eq("workspaceMemberId", args.memberId);
-
-  return result;
 };
 
 export const createCardMemberRelationship = async (
@@ -352,4 +284,72 @@ export const pushIndex = async (
   });
 
   return data;
+};
+
+export const softDelete = async (
+  db: SupabaseClient<Database>,
+  args: {
+    cardId: number;
+    deletedAt: string;
+    deletedBy: string;
+  },
+) => {
+  const result = await db
+    .from("card")
+    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
+    .eq("id", args.cardId);
+
+  return result;
+};
+
+export const softDeleteAllByListIds = async (
+  db: SupabaseClient<Database>,
+  args: {
+    listIds: number[];
+    deletedAt: string;
+    deletedBy: string;
+  },
+) => {
+  const result = await db
+    .from("card")
+    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
+    .in("listId", args.listIds)
+    .is("deletedAt", null);
+
+  return result;
+};
+
+export const hardDeleteCardMemberRelationship = async (
+  db: SupabaseClient<Database>,
+  args: { cardId: number; memberId: number },
+) => {
+  const result = await db
+    .from("_card_workspace_members")
+    .delete()
+    .eq("cardId", args.cardId)
+    .eq("workspaceMemberId", args.memberId);
+
+  return result;
+};
+
+export const hardDeleteCardLabelRelationship = async (
+  db: SupabaseClient<Database>,
+  args: { cardId: number; labelId: number },
+) => {
+  const result = await db
+    .from("_card_labels")
+    .delete()
+    .eq("cardId", args.cardId)
+    .eq("labelId", args.labelId);
+
+  return result;
+};
+
+export const hardDeleteAllCardLabelRelationships = async (
+  db: SupabaseClient<Database>,
+  labelId: number,
+) => {
+  const result = await db.from("_card_labels").delete().eq("labelId", labelId);
+
+  return result;
 };

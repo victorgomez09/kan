@@ -114,20 +114,20 @@ export const boardRouter = createTRPCRouter({
 
       const deletedAt = new Date().toISOString();
 
-      await boardRepo.destroy(ctx.db, {
+      await boardRepo.softDelete(ctx.db, {
         boardId: board.id,
         deletedAt,
         deletedBy: userId,
       });
 
       if (listIds.length) {
-        await listRepo.destroyAllByBoardId(ctx.db, {
+        await listRepo.softDeleteAllByBoardId(ctx.db, {
           boardId: board.id,
           deletedAt,
           deletedBy: userId,
         });
 
-        await cardRepo.destroyAllByListIds(ctx.db, {
+        await cardRepo.softDeleteAllByListIds(ctx.db, {
           listIds,
           deletedAt,
           deletedBy: userId,

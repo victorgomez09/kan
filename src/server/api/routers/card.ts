@@ -149,7 +149,7 @@ export const cardRouter = createTRPCRouter({
       );
 
       if (existingLabel) {
-        await cardRepo.destroyCardLabelRelationship(ctx.db, cardLabelIds);
+        await cardRepo.hardDeleteCardLabelRelationship(ctx.db, cardLabelIds);
 
         return { newLabel: false };
       }
@@ -200,7 +200,7 @@ export const cardRouter = createTRPCRouter({
       );
 
       if (existingMember) {
-        await cardRepo.destroyCardMemberRelationship(ctx.db, cardMemberIds);
+        await cardRepo.hardDeleteCardMemberRelationship(ctx.db, cardMemberIds);
 
         return { newMember: false };
       }
@@ -272,7 +272,7 @@ export const cardRouter = createTRPCRouter({
 
       const deletedAt = new Date().toISOString();
 
-      await cardRepo.destroy(ctx.db, {
+      await cardRepo.softDelete(ctx.db, {
         cardId: card.id,
         deletedAt,
         deletedBy: userId,

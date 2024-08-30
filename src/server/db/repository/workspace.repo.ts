@@ -127,3 +127,15 @@ export const getAllMembersByPublicIds = async (
 
   return data;
 };
+
+export const hardDelete = async (
+  db: SupabaseClient<Database>,
+  workspacePublicId: string,
+) => {
+  const result = db
+    .from("workspace")
+    .delete()
+    .eq("publicId", workspacePublicId);
+
+  return result;
+};

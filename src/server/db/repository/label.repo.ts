@@ -79,7 +79,7 @@ export const update = async (
   return data;
 };
 
-export const destroy = async (
+export const hardDelete = async (
   db: SupabaseClient<Database>,
   labelId: number,
 ) => {

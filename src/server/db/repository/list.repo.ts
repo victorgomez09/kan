@@ -85,40 +85,6 @@ export const update = async (
   return data;
 };
 
-export const destroyAllByBoardId = async (
-  db: SupabaseClient<Database>,
-  args: {
-    boardId: number;
-    deletedAt: string;
-    deletedBy: string;
-  },
-) => {
-  const result = await db
-    .from("list")
-    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
-    .eq("boardId", args.boardId)
-    .is("deletedAt", null);
-
-  return result;
-};
-
-export const destroyById = async (
-  db: SupabaseClient<Database>,
-  args: {
-    listId: number;
-    deletedAt: string;
-    deletedBy: string;
-  },
-) => {
-  const result = await db
-    .from("list")
-    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
-    .eq("id", args.listId)
-    .is("deletedAt", null);
-
-  return result;
-};
-
 export const reorder = async (
   db: SupabaseClient<Database>,
   args: {
@@ -151,4 +117,38 @@ export const shiftIndex = async (
   });
 
   return data;
+};
+
+export const softDeleteAllByBoardId = async (
+  db: SupabaseClient<Database>,
+  args: {
+    boardId: number;
+    deletedAt: string;
+    deletedBy: string;
+  },
+) => {
+  const result = await db
+    .from("list")
+    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
+    .eq("boardId", args.boardId)
+    .is("deletedAt", null);
+
+  return result;
+};
+
+export const softDeleteById = async (
+  db: SupabaseClient<Database>,
+  args: {
+    listId: number;
+    deletedAt: string;
+    deletedBy: string;
+  },
+) => {
+  const result = await db
+    .from("list")
+    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
+    .eq("id", args.listId)
+    .is("deletedAt", null);
+
+  return result;
 };

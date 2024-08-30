@@ -15,6 +15,13 @@
       "when": 1713021051974,
       "tag": "0001_stale_mattie_franklin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1724967733894,
+      "tag": "0002_clever_robin_chapel",
+      "breakpoints": true
     }
   ]
 }

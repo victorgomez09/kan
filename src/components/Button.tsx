@@ -1,7 +1,7 @@
 import { twMerge } from "tailwind-merge";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "danger";
   isLoading?: boolean;
 }
 
@@ -19,8 +19,11 @@ const Button = ({
           "bg-light-1000 dark:bg-dark-1000 dark:text-dark-50",
         variant === "secondary" &&
           "border-[1px] border-light-600 bg-light-50 dark:border-dark-600 dark:bg-dark-300 dark:text-dark-1000",
+        variant === "danger" &&
+          "dark:text-red-1000 border-[1px] border-red-600 bg-red-50 dark:border-red-600 dark:bg-red-500",
+        props.disabled && "opacity-50",
       )}
-      disabled={isLoading}
+      disabled={isLoading ?? props.disabled}
       {...props}
     >
       <span className="relative flex items-center justify-center">
