@@ -38,6 +38,20 @@ export const create = async (
   return newWorkspace;
 };
 
+export const update = async (
+  db: SupabaseClient<Database>,
+  workspacePublicId: string,
+  name: string,
+) => {
+  const { data, error } = await db
+    .from("workspace")
+    .update({ name })
+    .eq("publicId", workspacePublicId)
+    .is("deletedAt", null);
+
+  return data;
+};
+
 export const getByPublicId = async (
   db: SupabaseClient<Database>,
   workspacePublicId: string,

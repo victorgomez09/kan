@@ -1,6 +1,7 @@
 import { WorkspaceProvider } from "~/providers/workspace";
 import Dashboard from "~/components/dashboard";
 import SettingsView from "~/views/settings";
+import Popup from "~/components/Popup";
 
 export default function SettingsPage() {
   return (
@@ -8,6 +9,7 @@ export default function SettingsPage() {
       <Dashboard>
         <SettingsView />
       </Dashboard>
+      <Popup />
     </WorkspaceProvider>
   );
 }

@@ -57,6 +57,22 @@ export const workspaceRouter = createTRPCRouter({
 
       return result;
     }),
+  update: protectedProcedure
+    .input(
+      z.object({
+        workspacePublicId: z.string().min(12),
+        name: z.string().min(3).max(24),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await workspaceRepo.update(
+        ctx.db,
+        input.workspacePublicId,
+        input.name,
+      );
+
+      return result;
+    }),
   delete: protectedProcedure
     .input(z.object({ workspacePublicId: z.string().min(12) }))
     .mutation(async ({ ctx, input }) => {
