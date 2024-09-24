@@ -3,10 +3,12 @@ import { twMerge } from "tailwind-merge";
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger";
   isLoading?: boolean;
+  icon?: React.ReactNode;
 }
 
 const Button = ({
   children,
+  icon,
   isLoading,
   variant = "primary",
   ...props
@@ -14,7 +16,7 @@ const Button = ({
   return (
     <button
       className={twMerge(
-        "inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none",
+        "inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold text-light-1000 shadow-sm focus-visible:outline-none",
         variant === "primary" &&
           "bg-light-1000 dark:bg-dark-1000 dark:text-dark-50",
         variant === "secondary" &&
@@ -51,7 +53,15 @@ const Button = ({
             </svg>
           </span>
         )}
-        <span className={isLoading ? "invisible" : "visible"}>{children}</span>
+        <div
+          className={twMerge(
+            "flex items-center",
+            isLoading ? "invisible" : "visible",
+          )}
+        >
+          {icon && <span className="mr-2">{icon}</span>}
+          {children}
+        </div>
       </span>
     </button>
   );

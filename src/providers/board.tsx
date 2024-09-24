@@ -56,6 +56,10 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
     try {
       const data = await utils.board.byId.fetch({
         boardPublicId: boardData.publicId,
+        filters: {
+          members: [],
+          labels: [],
+        },
       });
       if (data) setBoardData(data);
     } catch (e) {

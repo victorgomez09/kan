@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useParams } from "next/navigation";
 import { HiOutlinePlusSmall } from "react-icons/hi2";
 import {
@@ -24,13 +25,22 @@ import List from "./components/List";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { NewCardForm } from "./components/NewCardForm";
 import { NewListForm } from "./components/NewListForm";
+import Filters from "./components/Filters";
 
 import { type UpdateBoardInput } from "~/types/router.types";
 
 type PublicListId = string;
 
+const formatToArray = (value: string | string[] | undefined): string[] => {
+  if (Array.isArray(value)) {
+    return value.filter((item) => item !== undefined);
+  }
+  return value ? [value] : [];
+};
+
 export default function BoardPage() {
   const params = useParams();
+  const router = useRouter();
   const { boardData, setBoardData, updateCard, updateList } = useBoard();
   const { openModal, modalContentType } = useModal();
   const [selectedPublicListId, setSelectedPublicListId] =
@@ -55,7 +65,13 @@ export default function BoardPage() {
   };
 
   const { data, isSuccess, isLoading } = api.board.byId.useQuery(
-    { boardPublicId: boardId ?? "" },
+    {
+      boardPublicId: boardId ?? "",
+      filters: {
+        members: formatToArray(router.query.members),
+        labels: formatToArray(router.query.labels),
+      },
+    },
     {
       enabled: !!boardId,
     },
@@ -150,7 +166,8 @@ export default function BoardPage() {
           </form>
         )}
 
-        <div className="flex items-center">
+        <div className="flex items-center space-x-2">
+          <Filters />
           <button
             type="button"
             className="mr-2 inline-flex items-center gap-x-1.5 rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-dark-1000 dark:text-dark-50"
@@ -166,7 +183,7 @@ export default function BoardPage() {
         </div>
       </div>
 
-      <div className="scrollbar-w-none z-10 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain pb-5 scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300">
+      <div className="scrollbar-w-none z-0 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain pb-5 scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300">
         {isLoading ? (
           <div className="ml-[2rem] flex">
             <div className="0 mr-5 h-[500px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-200" />

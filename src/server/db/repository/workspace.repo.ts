@@ -43,7 +43,7 @@ export const update = async (
   workspacePublicId: string,
   name: string,
 ) => {
-  const { data, error } = await db
+  const { data } = await db
     .from("workspace")
     .update({ name })
     .eq("publicId", workspacePublicId)

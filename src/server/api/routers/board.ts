@@ -28,9 +28,23 @@ export const boardRouter = createTRPCRouter({
       return result;
     }),
   byId: protectedProcedure
-    .input(z.object({ boardPublicId: z.string().min(12) }))
+    .input(
+      z.object({
+        boardPublicId: z.string().min(12),
+        filters: z.object({
+          members: z.array(z.string().min(12)),
+          labels: z.array(z.string().min(12)),
+        }),
+      }),
+    )
     .query(async ({ ctx, input }) => {
-      const result = await boardRepo.getByPublicId(ctx.db, input.boardPublicId);
+      const result = await boardRepo.getByPublicId(
+        ctx.db,
+        input.boardPublicId,
+        input.filters,
+      );
+
+      console.log(result);
 
       return result;
     }),

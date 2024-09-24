@@ -18,8 +18,12 @@ export const getAllByWorkspaceId = async (
 export const getByPublicId = async (
   db: SupabaseClient<Database>,
   boardPublicId: string,
+  filters: {
+    members: string[];
+    labels: string[];
+  },
 ) => {
-  const { data } = await db
+  let query = db
     .from("board")
     .select(
       `
@@ -50,12 +54,12 @@ export const getByPublicId = async (
             description,
             listId,
             index,
-            labels:label (
+            labels:label${filters.labels.length > 0 ? "!inner" : ""} (
               publicId,
               name,
               colourCode
             ),
-            members:workspace_members (
+            members:workspace_members${filters.members.length > 0 ? "!inner" : ""} (
               publicId,
               user (
                 name
@@ -68,11 +72,23 @@ export const getByPublicId = async (
     .eq("publicId", boardPublicId)
     .is("deletedAt", null)
     .is("lists.deletedAt", null)
-    .is("lists.cards.deletedAt", null)
+    .is("lists.cards.deletedAt", null);
+
+  if (filters.labels.length > 0) {
+    query = query.in("lists.cards.labels.publicId", filters.labels);
+  }
+
+  if (filters.members.length > 0) {
+    query = query.in("lists.cards.members.publicId", filters.members);
+  }
+
+  const { data, error } = await query
     .order("index", { foreignTable: "list", ascending: true })
     .order("index", { foreignTable: "list.card", ascending: true })
     .limit(1)
     .single();
+
+  console.log(error);
 
   return data;
 };

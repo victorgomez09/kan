@@ -178,9 +178,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
           <div className="w-fit">
             <CheckboxDropdown
               items={formattedLists}
-              handleSelect={(list: { key: string }) =>
-                handleSelectList(list.key)
-              }
+              handleSelect={(_groupKey, item) => handleSelectList(item.key)}
             >
               <div className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-2 py-1 text-left text-xs text-light-800 hover:bg-light-300 dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500">
                 {selectedList?.value}
@@ -190,9 +188,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
           <div className="w-fit">
             <CheckboxDropdown
               items={formattedMembers}
-              handleSelect={(list: { key: string }) =>
-                handleSelectMembers(list.key)
-              }
+              handleSelect={(_groupKey, item) => handleSelectMembers(item.key)}
             >
               <div className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-2 py-1 text-left text-xs text-light-800 hover:bg-light-300 dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500">
                 {!memberPublicIds.length ? (
@@ -228,9 +224,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
           <div className="w-fit">
             <CheckboxDropdown
               items={formattedLabels}
-              handleSelect={(list: { key: string }) =>
-                handleSelectLabels(list.key)
-              }
+              handleSelect={(_groupKey, item) => handleSelectLabels(item.key)}
             >
               <div className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-2 py-1 text-left text-xs text-light-800 hover:bg-light-300 dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500">
                 {!labelPublicIds.length ? (
