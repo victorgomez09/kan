@@ -44,8 +44,6 @@ export const boardRouter = createTRPCRouter({
         input.filters,
       );
 
-      console.log(result);
-
       return result;
     }),
   create: protectedProcedure

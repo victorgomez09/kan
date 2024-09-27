@@ -146,7 +146,7 @@ export default function BoardPage() {
   return (
     <div className="relative flex h-full flex-col">
       <PatternedBackground />
-      <div className="z-10 flex w-full justify-between p-8 ">
+      <div className="z-10 flex w-full justify-between p-8">
         {isLoading ? (
           <div className="flex space-x-2">
             <div className="h-[2.3rem] w-[150px] animate-pulse rounded-[5px] bg-light-200 dark:bg-dark-200" />
@@ -183,7 +183,7 @@ export default function BoardPage() {
         </div>
       </div>
 
-      <div className="scrollbar-w-none z-0 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain pb-5 scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300">
+      <div className="scrollbar-w-none z-0 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300">
         {isLoading ? (
           <div className="ml-[2rem] flex">
             <div className="0 mr-5 h-[500px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-200" />
@@ -218,7 +218,7 @@ export default function BoardPage() {
                           <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
-                            className="z-10 h-full max-h-[calc(100vh-250px)] min-h-[2rem] overflow-y-auto pr-1 scrollbar scrollbar-track-dark-100 scrollbar-thumb-dark-600 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-w-[8px]"
+                            className="z-10 h-full max-h-[calc(100vh-265px)] min-h-[2rem] overflow-y-auto pr-1 scrollbar scrollbar-track-dark-100 scrollbar-thumb-dark-600 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-w-[8px]"
                           >
                             {list.cards?.map((card, index) => (
                               <Draggable
