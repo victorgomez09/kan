@@ -1,9 +1,13 @@
 import { IoFilterOutline } from "react-icons/io5";
-import { HiOutlineUserCircle, HiOutlineTag } from "react-icons/hi2";
+import {
+  HiOutlineUserCircle,
+  HiOutlineTag,
+  HiMiniXMark,
+} from "react-icons/hi2";
 import { useRouter } from "next/router";
 import Button from "~/components/Button";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
-
+import { formatToArray } from "~/utils/helpers";
 import { useBoard } from "~/providers/board";
 
 const LabelIcon = ({ colourCode }: { colourCode: string | null }) => (
@@ -31,6 +35,16 @@ const Avatar = ({ name }: { name: string }) => (
 const Filters = () => {
   const { boardData } = useBoard();
   const router = useRouter();
+
+  const clearFilters = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, members: [], labels: [] },
+    });
+  };
 
   const formattedMembers =
     boardData?.workspace?.members?.map((member) => ({
@@ -87,6 +101,11 @@ const Filters = () => {
     }
   };
 
+  const numOfFilters = [
+    ...formatToArray(router.query.members),
+    ...formatToArray(router.query.labels),
+  ].length;
+
   return (
     <div className="relative">
       <CheckboxDropdown
@@ -96,6 +115,17 @@ const Filters = () => {
       >
         <Button variant="secondary" icon={<IoFilterOutline />}>
           Filter
+          {numOfFilters > 0 && (
+            <button
+              onClick={clearFilters}
+              className="group absolute -right-[18px] -top-[15px] flex h-5 w-5 items-center justify-center rounded-full border-2 border-light-100 bg-light-1000 text-[8px] font-[700] text-light-600 dark:border-dark-50 dark:bg-dark-1000 dark:text-dark-600 dark:text-dark-600"
+            >
+              <span className="group-hover:hidden">{numOfFilters}</span>
+              <span className="hidden text-light-50 group-hover:inline dark:text-dark-50">
+                <HiMiniXMark size={12} />
+              </span>
+            </button>
+          )}
         </Button>
       </CheckboxDropdown>
     </div>

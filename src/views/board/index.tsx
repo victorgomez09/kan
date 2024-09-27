@@ -12,6 +12,7 @@ import {
 import { useForm } from "react-hook-form";
 
 import { api } from "~/utils/api";
+import { formatToArray } from "~/utils/helpers";
 import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 
@@ -30,13 +31,6 @@ import Filters from "./components/Filters";
 import { type UpdateBoardInput } from "~/types/router.types";
 
 type PublicListId = string;
-
-const formatToArray = (value: string | string[] | undefined): string[] => {
-  if (Array.isArray(value)) {
-    return value.filter((item) => item !== undefined);
-  }
-  return value ? [value] : [];
-};
 
 export default function BoardPage() {
   const params = useParams();
