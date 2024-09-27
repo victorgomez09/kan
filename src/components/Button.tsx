@@ -16,7 +16,7 @@ const Button = ({
   return (
     <button
       className={twMerge(
-        "inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold text-light-1000 shadow-sm focus-visible:outline-none",
+        "inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none",
         variant === "primary" &&
           "bg-light-1000 dark:bg-dark-1000 dark:text-dark-50",
         variant === "secondary" &&
