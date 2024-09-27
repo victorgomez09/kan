@@ -36,14 +36,18 @@ const Filters = () => {
   const { boardData } = useBoard();
   const router = useRouter();
 
-  const clearFilters = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const clearFilters = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
-    router.push({
-      pathname: router.pathname,
-      query: { ...router.query, members: [], labels: [] },
-    });
+    try {
+      await router.push({
+        pathname: router.pathname,
+        query: { ...router.query, members: [], labels: [] },
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const formattedMembers =
