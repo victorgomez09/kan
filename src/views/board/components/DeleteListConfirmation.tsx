@@ -18,13 +18,7 @@ export function DeleteListConfirmation({
   const refetchBoard = async () => {
     if (boardData?.publicId) {
       try {
-        await utils.board.byId.refetch({
-          boardPublicId: boardData.publicId,
-          filters: {
-            members: [],
-            labels: [],
-          },
-        });
+        await utils.board.byId.refetch();
       } catch (e) {
         console.error(e);
       }

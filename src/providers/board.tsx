@@ -54,14 +54,7 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
     if (!boardData?.publicId) return;
 
     try {
-      const data = await utils.board.byId.fetch({
-        boardPublicId: boardData.publicId,
-        filters: {
-          members: [],
-          labels: [],
-        },
-      });
-      if (data) setBoardData(data);
+      await utils.board.byId.refetch();
     } catch (e) {
       showPopup({
         header: "Error fetching board",
