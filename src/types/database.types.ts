@@ -458,6 +458,7 @@ export type Database = {
           id: number
           publicId: string
           role: Database["public"]["Enums"]["role"]
+          status: Database["public"]["Enums"]["member_status"]
           updatedAt: string | null
           userId: string
           workspaceId: number
@@ -469,6 +470,7 @@ export type Database = {
           id?: number
           publicId: string
           role: Database["public"]["Enums"]["role"]
+          status?: Database["public"]["Enums"]["member_status"]
           updatedAt?: string | null
           userId: string
           workspaceId: number
@@ -480,6 +482,7 @@ export type Database = {
           id?: number
           publicId?: string
           role?: Database["public"]["Enums"]["role"]
+          status?: Database["public"]["Enums"]["member_status"]
           updatedAt?: string | null
           userId?: string
           workspaceId?: number
@@ -548,9 +551,11 @@ export type Database = {
       }
     }
     Enums: {
+      member_status: "invited" | "active" | "removed"
       role: "admin" | "member" | "guest"
       source: "trello"
       status: "started" | "success" | "failed"
+      workspace_invite_status: "pending" | "accepted" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never

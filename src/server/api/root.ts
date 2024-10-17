@@ -3,6 +3,7 @@ import { boardRouter } from "~/server/api/routers/board";
 import { cardRouter } from "~/server/api/routers/card";
 import { labelRouter } from "~/server/api/routers/label";
 import { listRouter } from "~/server/api/routers/list";
+import { memberRouter } from "~/server/api/routers/member";
 import { importRouter } from "~/server/api/routers/import";
 import { workspaceRouter } from "~/server/api/routers/workspace";
 import { createTRPCRouter } from "~/server/api/trpc";
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   card: cardRouter,
   label: labelRouter,
   list: listRouter,
+  member: memberRouter,
   import: importRouter,
   workspace: workspaceRouter,
 });

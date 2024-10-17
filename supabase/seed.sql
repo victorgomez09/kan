@@ -75,6 +75,19 @@ AS $$
     WHERE "listId" = list_id AND index >= card_index AND "deletedAt" IS NULL;
 $$;
 
+CREATE OR REPLACE FUNCTION is_workspace_admin(user_id UUID, workspace_id BIGINT)
+RETURNS BOOLEAN
+LANGUAGE SQL
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM workspace_members
+    WHERE "workspaceId" = workspace_id
+      AND "userId" = user_id
+      AND "role" = 'admin'
+  );
+$$;
+
 alter table "_card_labels" enable row level security;
 alter table "_card_workspace_members" enable row level security;
 alter table "board" enable row level security;
@@ -255,15 +268,42 @@ FOR INSERT
 TO authenticated
 USING (true);
 
-CREATE POLICY "Allow access to user's own workspace membership"
+CREATE POLICY "Allow members to view workspace membership"
 ON public.workspace_members
 AS PERMISSIVE
-FOR ALL
+FOR SELECT
 TO authenticated
 USING (
-  "userId" = auth.uid()
+  "userId" = auth.uid() OR
+  is_workspace_admin(auth.uid(), "workspaceId")
 );
 
+CREATE POLICY "Allow admins to add workspace members"
+ON public.workspace_members
+AS PERMISSIVE
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  is_workspace_admin(auth.uid(), "workspaceId")
+);
+
+CREATE POLICY "Allow admins to update workspace members"
+ON public.workspace_members
+AS PERMISSIVE
+FOR UPDATE
+TO authenticated
+USING (
+  is_workspace_admin(auth.uid(), "workspaceId")
+);
+
+CREATE POLICY "Allow admins to remove workspace members"
+ON public.workspace_members
+AS PERMISSIVE
+FOR DELETE
+TO authenticated
+USING (
+  is_workspace_admin(auth.uid(), "workspaceId")
+);
 CREATE POLICY "Allow access to user's own imports"
 ON public.import
 AS PERMISSIVE

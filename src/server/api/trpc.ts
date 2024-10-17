@@ -11,7 +11,7 @@ import { type FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import { createTRPCClient } from "~/utils/supabase/api";
+import { createTRPCClient, createTRPCAdminClient } from "~/utils/supabase/api";
 import { type Database } from "~/types/database.types";
 import { type SupabaseClient } from "@supabase/supabase-js";
 
@@ -30,6 +30,7 @@ type User = {
 interface CreateContextOptions {
   user: User | null;
   db: SupabaseClient<Database>;
+  adminDb: SupabaseClient<Database>;
 }
 
 /**
@@ -47,6 +48,7 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     user: opts.user,
     db: opts.db,
+    adminDb: opts.adminDb,
   };
 };
 
@@ -61,12 +63,13 @@ export const createTRPCContext = async ({
   resHeaders,
 }: FetchCreateContextFnOptions) => {
   const db = createTRPCClient(req, resHeaders);
+  const adminDb = createTRPCAdminClient();
 
   const {
     data: { user },
   } = await db.auth.getUser();
 
-  return createInnerTRPCContext({ db, user });
+  return createInnerTRPCContext({ db, adminDb, user });
 };
 
 /**

@@ -18,7 +18,7 @@ interface MagicLinkEmailProps {
   loginUrl?: string;
 }
 
-export const MagicLinkEmail = ({ loginUrl }: MagicLinkEmailProps) => (
+export const MagicLinkTemplate = ({ loginUrl }: MagicLinkEmailProps) => (
   <Tailwind
     config={{
       theme: {
@@ -97,4 +97,4 @@ export const MagicLinkEmail = ({ loginUrl }: MagicLinkEmailProps) => (
   </Tailwind>
 );
 
-export default MagicLinkEmail;
+export default MagicLinkTemplate;

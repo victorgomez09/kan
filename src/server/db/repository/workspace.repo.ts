@@ -75,6 +75,7 @@ export const getByPublicIdWithMembers = async (
     .from("workspace")
     .select(
       `
+        id,
         publicId,
         members: workspace_members (
           publicId,
@@ -89,6 +90,7 @@ export const getByPublicIdWithMembers = async (
     )
     .eq("publicId", workspacePublicId)
     .is("deletedAt", null)
+    .is("members.deletedAt", null)
     .limit(1)
     .single();
 
@@ -99,7 +101,7 @@ export const getAllByUserId = async (
   db: SupabaseClient<Database>,
   userId: string,
 ) => {
-  const { data } = await db
+  const { data, error } = await db
     .from("workspace_members")
     .select(
       `
@@ -112,6 +114,8 @@ export const getAllByUserId = async (
     )
     .eq("userId", userId)
     .is("deletedAt", null);
+
+  console.log({ error });
 
   return data;
 };

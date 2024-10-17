@@ -19,6 +19,11 @@ export const importStatusEnum = pgEnum("status", [
   "failed",
 ]);
 export const memberRoleEnum = pgEnum("role", ["admin", "member", "guest"]);
+export const memberStatusEnum = pgEnum("member_status", [
+  "invited",
+  "active",
+  "removed",
+]);
 
 export const boards = pgTable("board", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
@@ -294,6 +299,7 @@ export const workspaceMembers = pgTable("workspace_members", {
   updatedAt: timestamp("updatedAt"),
   deletedAt: timestamp("deletedAt"),
   role: memberRoleEnum("role").notNull(),
+  status: memberStatusEnum("status").default("invited").notNull(),
 });
 
 export const usersToWorkspacesRelations = relations(

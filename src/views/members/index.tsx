@@ -4,11 +4,12 @@ import { useWorkspace } from "~/providers/workspace";
 import Modal from "~/components/modal";
 
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
-
+import { InviteMemberForm } from "./components/InviteMemberForm";
 import { api } from "~/utils/api";
+import { getInitialsFromName, inferInitialsFromEmail } from "~/utils/helpers";
 
 export default function MembersPage() {
-  const { modalContentType } = useModal();
+  const { modalContentType, openModal } = useModal();
   const { workspace } = useWorkspace();
 
   const { data } = api.workspace.byId.useQuery(
@@ -26,7 +27,7 @@ export default function MembersPage() {
           <button
             type="button"
             className="flex items-center gap-x-1.5 rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-dark-1000 dark:text-dark-50"
-            // onClick={() => openModal("")}
+            onClick={() => openModal("INVITE_MEMBER")}
           >
             <div className="h-5 w-5 items-center">
               <HiOutlinePlusSmall
@@ -61,46 +62,47 @@ export default function MembersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-light-600 bg-light-50 dark:divide-dark-600 dark:bg-dark-100">
-                  {data?.members.map((member) => (
-                    <tr key={member.publicId}>
-                      <td>
-                        <div className="flex items-center p-4">
-                          <div className="flex-shrink-0">
-                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-light-1000 dark:bg-dark-400">
-                              <span className="text-sm font-medium leading-none text-white">
-                                {member.user?.name
-                                  ?.split(" ")
-                                  .map((namePart) =>
-                                    namePart.charAt(0).toUpperCase(),
-                                  )
-                                  .join("")}
+                  {data?.members.map((member) => {
+                    const initials = member.user?.name
+                      ? getInitialsFromName(member.user.name)
+                      : inferInitialsFromEmail(member.user?.email ?? "");
+
+                    return (
+                      <tr key={member.publicId}>
+                        <td>
+                          <div className="flex items-center p-4">
+                            <div className="flex-shrink-0">
+                              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-light-1000 dark:bg-dark-400">
+                                <span className="text-sm font-medium leading-none text-white">
+                                  {initials}
+                                </span>
                               </span>
-                            </span>
-                          </div>
-                          <div className="ml-2 min-w-0 flex-1">
-                            <div>
-                              <div className="flex items-center">
-                                <p className="mr-2 text-sm font-medium text-neutral-900 dark:text-dark-1000">
-                                  {member.user?.name}
+                            </div>
+                            <div className="ml-2 min-w-0 flex-1">
+                              <div>
+                                <div className="flex items-center">
+                                  <p className="mr-2 text-sm font-medium text-neutral-900 dark:text-dark-1000">
+                                    {member.user?.name}
+                                  </p>
+                                </div>
+                                <p className="truncate text-sm text-dark-900">
+                                  {member.user?.email}
                                 </p>
                               </div>
-                              <p className="truncate text-sm text-dark-900">
-                                {member.user?.email}
-                              </p>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="px-3">
-                          <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[11px] font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                            {member.role.charAt(0).toUpperCase() +
-                              member.role.slice(1)}
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td>
+                          <div className="px-3">
+                            <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[11px] font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                              {member.role.charAt(0).toUpperCase() +
+                                member.role.slice(1)}
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -110,6 +112,7 @@ export default function MembersPage() {
 
       <Modal>
         {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
+        {modalContentType === "INVITE_MEMBER" && <InviteMemberForm />}
       </Modal>
     </div>
   );

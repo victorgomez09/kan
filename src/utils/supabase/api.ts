@@ -56,3 +56,13 @@ export function createTRPCClient(req: Request, resHeaders: Headers) {
 
   return supabase;
 }
+
+export function createTRPCAdminClient() {
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_API_KEY!,
+    { cookies: {} },
+  );
+
+  return supabase;
+}
