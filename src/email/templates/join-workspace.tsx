@@ -1,16 +1,13 @@
-import {
-  Body,
-  Button,
-  Container,
-  Head,
-  Heading,
-  Html,
-  Hr,
-  Link,
-  Preview,
-  Tailwind,
-  Text,
-} from "@react-email/components";
+import { Body } from "@react-email/body";
+import { Button } from "@react-email/button";
+import { Container } from "@react-email/container";
+import { Head } from "@react-email/head";
+import { Heading } from "@react-email/heading";
+import { Html } from "@react-email/html";
+import { Hr } from "@react-email/hr";
+import { Link } from "@react-email/link";
+import { Preview } from "@react-email/preview";
+import { Text } from "@react-email/text";
 
 import * as React from "react";
 
@@ -19,82 +16,92 @@ export const JoinWorkspaceTemplate = ({
 }: {
   magicLoginUrl?: string;
 }) => (
-  <Tailwind
-    config={{
-      theme: {
-        extend: {
-          fontFamily: {
-            body: [
-              "-apple-system",
-              "BlinkMacSystemFont",
-              "Segoe UI",
-              "Roboto",
-              "Oxygen",
-              "Ubuntu",
-              "Cantarell",
-              "Fira Sans",
-              "Droid Sans",
-              "Helvetica Neue",
-              "sans-serif",
-            ],
-          },
-          colors: {
-            "dark-50": "#161616",
-            "dark-100": "#1c1c1c",
-            "dark-200": "#232323",
-            "dark-300": "#282828",
-            "dark-400": "#2e2e2e",
-            "dark-500": "#343434",
-            "dark-600": "#3e3e3e",
-            "dark-700": "#505050",
-            "dark-800": "#707070",
-            "dark-900": "#7e7e7e",
-            "dark-950": "#bbb",
-            "dark-1000": "#ededed",
-          },
-        },
-      },
-    }}
-  >
-    <Html>
-      <Head />
-      <Preview>Log in with this magic link</Preview>
-      <Body className="bg-white">
-        <Container className="font-body m-auto px-3">
-          <Heading className="my-10 text-[24px] font-bold text-dark-200">
-            kan.bn
-          </Heading>
-          <Heading className="text-[24px] font-bold text-dark-200">
-            Login to your Kan account
-          </Heading>
-          <Text className="font-sm mb-8 text-dark-200">
-            Click the button below to instantly login to your account.
-          </Text>
-          <Button
+  <Html>
+    <Head />
+    <Preview>Log in with this magic link</Preview>
+    <Body style={{ backgroundColor: "white" }}>
+      <Container
+        style={{
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+          margin: "auto",
+          paddingLeft: "0.75rem",
+          paddingRight: "0.75rem",
+        }}
+      >
+        <Heading
+          style={{
+            marginTop: "2.5rem",
+            marginBottom: "2.5rem",
+            fontSize: "24px",
+            fontWeight: "bold",
+            color: "#232323",
+          }}
+        >
+          kan.bn
+        </Heading>
+        <Heading
+          style={{ fontSize: "24px", fontWeight: "bold", color: "#232323" }}
+        >
+          Login to your Kan account
+        </Heading>
+        <Text
+          style={{
+            fontSize: "0.875rem",
+            marginBottom: "2rem",
+            color: "#232323",
+          }}
+        >
+          Click the button below to instantly login to your account.
+        </Text>
+        <Button
+          target="_blank"
+          href={loginUrl}
+          style={{
+            marginBottom: "2rem",
+            borderRadius: "0.375rem",
+            backgroundColor: "#282828",
+            paddingLeft: "1.5rem",
+            paddingRight: "1.5rem",
+            paddingTop: "1rem",
+            paddingBottom: "1rem",
+            fontSize: "0.875rem",
+            fontWeight: "500",
+            lineHeight: "1",
+            color: "white",
+          }}
+        >
+          Login to your account
+        </Button>
+        <Text
+          style={{
+            marginBottom: "1rem",
+            fontSize: "0.875rem",
+            color: "#7e7e7e",
+          }}
+        >
+          If you didn&apos;t try to login, you can safely ignore this email.
+        </Text>
+        <Hr
+          style={{
+            marginTop: "2.5rem",
+            marginBottom: "2rem",
+            borderWidth: "1px",
+          }}
+        />
+        <Text style={{ color: "#7e7e7e" }}>
+          <Link
+            href={process.env.WEBSITE_URL}
             target="_blank"
-            href={magicLoginUrl}
-            className="mb-8 rounded-md bg-dark-300 px-6 py-4 text-sm font-medium leading-4 text-white"
+            style={{ color: "#7e7e7e", textDecoration: "underline" }}
           >
-            Login to your account
-          </Button>
-          <Text className="mb-4 text-sm text-dark-900">
-            If you didn&apos;t try to login, you can safely ignore this email.
-          </Text>
-          <Hr className="mb-8 mt-10 border" />
-          <Text className="text-dark-900">
-            <Link
-              href={process.env.WEBSITE_URL}
-              target="_blank"
-              className="text-dark-900 underline"
-            >
-              Kan
-            </Link>
-            , the open source Trello alternative.
-          </Text>
-        </Container>
-      </Body>
-    </Html>
-  </Tailwind>
+            Kan
+          </Link>
+          , the open source Trello alternative.
+        </Text>
+      </Container>
+    </Body>
+  </Html>
 );
 
 export default JoinWorkspaceTemplate;

@@ -264,7 +264,7 @@ export const cardRouter = createTRPCRouter({
         input.cardPublicId,
       );
 
-      if (!card ?? !card?.list?.id)
+      if (!card?.list?.id)
         throw new TRPCError({
           message: `Card with public ID ${input.cardPublicId} not found`,
           code: "NOT_FOUND",
