@@ -103,7 +103,7 @@ export const memberRouter = createTRPCRouter({
         const invitedUserEmail = invite.data.user?.email;
 
         if (invitedUserId && invitedUserEmail)
-          userRepo.create(ctx.adminDb, {
+          await userRepo.create(ctx.adminDb, {
             email: invitedUserEmail,
             id: invitedUserId,
           });
