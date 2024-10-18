@@ -56,7 +56,7 @@ export const JoinWorkspaceTemplate = ({
         </Text>
         <Button
           target="_blank"
-          href={loginUrl}
+          href={magicLoginUrl}
           style={{
             marginBottom: "2rem",
             borderRadius: "0.375rem",
