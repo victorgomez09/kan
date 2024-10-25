@@ -80,6 +80,7 @@ export const getByPublicIdWithMembers = async (
         members: workspace_members (
           publicId,
           role,
+          status,
           user (
             id,
             name,

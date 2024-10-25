@@ -1,37 +1,46 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
-import type { NextApiRequest, NextApiResponse } from "next";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { createNextClient } from "~/utils/supabase/api";
 
-function stringOrFirstString(item: string | string[] | undefined) {
-  return Array.isArray(item) ? item[0] : item;
-}
+import * as userRepo from "~/server/db/repository/user.repo";
+import * as memberRepo from "~/server/db/repository/member.repo";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(req: NextRequest) {
   if (req.method !== "GET") {
-    res.status(405).appendHeader("Allow", "GET").end();
-    return;
+    return new NextResponse(null, {
+      status: 405,
+      headers: { Allow: "GET" },
+    });
   }
 
-  const queryParams = req.query;
-  const token_hash = stringOrFirstString(queryParams.token_hash);
-  const type = stringOrFirstString(queryParams.type);
-  const code = stringOrFirstString(queryParams.code);
+  if (!req.url) {
+    return new NextResponse(null, {
+      status: 400,
+    });
+  }
+
+  const url = new URL(req.url);
+  const queryParams = Object.fromEntries(url.searchParams.entries());
+
+  const tokenHash = queryParams.token_hash;
+  const type = queryParams.type;
+  const code = queryParams.code;
+  const memberPublicId = queryParams.memberPublicId;
 
   let next = "/error";
 
   let authRes;
 
-  if ((token_hash && type) ?? code) {
-    const db = createNextClient(req, res);
+  const response = NextResponse.next();
 
-    if (token_hash && type) {
+  if ((tokenHash && type) ?? code) {
+    const db = createNextClient(req, response);
+
+    if (tokenHash && type) {
       authRes = await db.auth.verifyOtp({
         type: type as EmailOtpType,
-        token_hash,
+        token_hash: tokenHash,
       });
     }
 
@@ -41,29 +50,41 @@ export default async function handler(
 
     const user = authRes?.data.user;
 
-    if (user?.id) {
-      const existingUser = await db
-        .from("user")
-        .select()
-        .eq("id", user.id)
-        .limit(1)
-        .maybeSingle();
+    if (user?.id && user.email) {
+      const existingUser = await userRepo.getById(db, user.id);
 
-      if (!existingUser.data) {
-        await db.from("user").insert({ id: user.id, email: user.email ?? "" });
+      if (!existingUser) {
+        await userRepo.create(db, {
+          id: user.id,
+          email: user.email,
+        });
+      }
+    }
+
+    if (memberPublicId) {
+      const member = await memberRepo.getByPublicId(db, memberPublicId);
+
+      if (member?.id) {
+        await memberRepo.acceptInvite(db, member.id);
       }
     }
 
     if (authRes?.error) {
       console.error(authRes.error);
     } else {
-      next = stringOrFirstString(queryParams.next) ?? "/";
+      next = queryParams.next ?? "/";
     }
   }
 
-  res.redirect(next);
+  const redirectResponse = NextResponse.redirect(new URL(next, req.url));
+
+  response.headers.getSetCookie().forEach((cookie) => {
+    redirectResponse.headers.append("Set-Cookie", cookie);
+  });
+
+  return redirectResponse;
 }
 
-// export const runtime = "edge";
-// export const preferredRegion = "lhr1";
-// export const dynamic = "force-dynamic";
+export const runtime = "edge";
+export const preferredRegion = "lhr1";
+export const dynamic = "force-dynamic";

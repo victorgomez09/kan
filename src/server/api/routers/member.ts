@@ -48,7 +48,9 @@ export const memberRouter = createTRPCRouter({
         });
       }
 
-      let invitedUserId: string | null = null;
+      let invitedUserId: string | undefined;
+      let hashedToken: string | undefined;
+      let verificationType: string | undefined;
 
       const existingUser = await userRepo.getByEmail(ctx.adminDb, input.email);
 
@@ -58,60 +60,47 @@ export const memberRouter = createTRPCRouter({
         const magicLink = await ctx.adminDb.auth.admin.generateLink({
           type: "magiclink",
           email: input.email,
+          options: {
+            redirectTo: process.env.WEBSITE_URL,
+          },
         });
 
-        const magicLinkUrl = magicLink.data.properties?.action_link;
-
-        if (!magicLinkUrl)
-          throw new TRPCError({
-            message: `Unable to generate magic link for user with email ${input.email}`,
-            code: "INTERNAL_SERVER_ERROR",
-          });
-
-        await sendEmail(
-          input.email,
-          "Invitation to join workspace",
-          "JOIN_WORKSPACE",
-          {
-            magicLinkUrl,
-          },
-        );
+        hashedToken = magicLink.data.properties?.hashed_token;
+        verificationType = magicLink.data.properties?.verification_type;
       } else {
         const invite = await ctx.adminDb.auth.admin.generateLink({
           type: "invite",
           email: input.email,
+          options: {
+            redirectTo: process.env.WEBSITE_URL,
+          },
         });
 
-        const magicLinkUrl = invite.data.properties?.action_link;
+        hashedToken = invite.data.properties?.hashed_token;
+        verificationType = invite.data.properties?.verification_type;
 
-        if (!magicLinkUrl)
-          throw new TRPCError({
-            message: `Unable to generate invite link for user with email ${input.email}`,
-            code: "INTERNAL_SERVER_ERROR",
-          });
-
-        await sendEmail(
-          input.email,
-          "Invitation to join workspace",
-          "JOIN_WORKSPACE",
-          {
-            magicLinkUrl,
-          },
-        );
-
-        invitedUserId = invite.data.user?.id ?? null;
+        const invitedUserAuthId = invite.data.user?.id;
         const invitedUserEmail = invite.data.user?.email;
 
-        if (invitedUserId && invitedUserEmail)
-          await userRepo.create(ctx.adminDb, {
+        if (invitedUserAuthId && invitedUserEmail) {
+          const newUser = await userRepo.create(ctx.adminDb, {
             email: invitedUserEmail,
-            id: invitedUserId,
+            id: invitedUserAuthId,
           });
+
+          invitedUserId = newUser?.id;
+        }
       }
 
       if (!invitedUserId)
         throw new TRPCError({
           message: `Unable to invite user with email ${input.email}`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
+      if (!hashedToken || !verificationType)
+        throw new TRPCError({
+          message: `Unable to generate magic link for user with email ${input.email}`,
           code: "INTERNAL_SERVER_ERROR",
         });
 
@@ -122,6 +111,23 @@ export const memberRouter = createTRPCRouter({
         role: "member",
         status: "invited",
       });
+
+      if (!invite)
+        throw new TRPCError({
+          message: `Unable to invite user with email ${input.email}`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
+      const magicLoginUrl = `${process.env.WEBSITE_URL}/api/auth/confirm?token_hash=${hashedToken}&type=${verificationType}&memberPublicId=${invite.publicId}`;
+
+      await sendEmail(
+        input.email,
+        "Invitation to join workspace",
+        "JOIN_WORKSPACE",
+        {
+          magicLoginUrl,
+        },
+      );
 
       return invite;
     }),

@@ -98,6 +98,11 @@ export default function MembersPage() {
                               {member.role.charAt(0).toUpperCase() +
                                 member.role.slice(1)}
                             </span>
+                            {member.status === "invited" && (
+                              <span className="ml-2 inline-flex items-center rounded-md bg-gray-500/10 px-1.5 py-0.5 text-[11px] font-medium text-gray-400 ring-1 ring-inset ring-gray-500/20">
+                                Pending
+                              </span>
+                            )}
                           </div>
                         </td>
                       </tr>

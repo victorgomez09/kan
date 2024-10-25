@@ -6,24 +6,22 @@ import {
 import { RequestCookies } from "@edge-runtime/cookies";
 import { type Database } from "~/types/database.types";
 
-import { type NextApiRequest, type NextApiResponse } from "next";
+import { type NextRequest, NextResponse } from "next/server";
 
-export function createNextClient(req: NextApiRequest, res: NextApiResponse) {
+export function createNextClient(req: NextRequest, res: NextResponse) {
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.SUPABASE_SERVICE_API_KEY!,
     {
       cookies: {
         get(name: string) {
-          return req.cookies[name];
+          return req.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
-          res.appendHeader("Set-Cookie", serialize(name, value, options));
+          res.headers.append("Set-Cookie", serialize(name, value, options));
         },
         remove(name: string, options: CookieOptions) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
-          res.appendHeader("Set-Cookie", serialize(name, "", options));
+          res.headers.append("Set-Cookie", serialize(name, "", options));
         },
       },
     },

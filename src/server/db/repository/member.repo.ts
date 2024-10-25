@@ -28,3 +28,29 @@ export const create = async (
 
   return data;
 };
+
+export const getByPublicId = async (
+  db: SupabaseClient<Database>,
+  publicId: string,
+) => {
+  const { data } = await db
+    .from("workspace_members")
+    .select()
+    .eq("publicId", publicId)
+    .limit(1)
+    .single();
+
+  return data;
+};
+
+export const acceptInvite = async (
+  db: SupabaseClient<Database>,
+  id: number,
+) => {
+  const { data } = await db
+    .from("workspace_members")
+    .update({ status: "active" })
+    .eq("id", id);
+
+  return data;
+};
