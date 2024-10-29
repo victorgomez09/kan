@@ -131,4 +131,38 @@ export const memberRouter = createTRPCRouter({
 
       return invite;
     }),
+  delete: protectedProcedure
+    .input(
+      z.object({
+        memberPublicId: z.string().min(12),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
+      const member = await memberRepo.getByPublicId(
+        ctx.db,
+        input.memberPublicId,
+      );
+
+      if (!member)
+        throw new TRPCError({
+          message: `Member with public ID ${input.memberPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      const deletedMember = await memberRepo.softDelete(ctx.db, {
+        memberId: member.id,
+        deletedAt: new Date().toISOString(),
+        deletedBy: userId,
+      });
+
+      return deletedMember;
+    }),
 });

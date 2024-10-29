@@ -33,7 +33,7 @@ export const getByPublicId = async (
           publicId,
           members:workspace_members (
             publicId,
-            user (
+            user!workspace_members_userId_user_id_fk (
               name
             )
           )
@@ -61,7 +61,7 @@ export const getByPublicId = async (
             ),
             members:workspace_members${filters.members.length > 0 ? "!inner" : ""} (
               publicId,
-              user (
+              user!workspace_members_userId_user_id_fk (
                 name
               )
             )
@@ -72,7 +72,9 @@ export const getByPublicId = async (
     .eq("publicId", boardPublicId)
     .is("deletedAt", null)
     .is("lists.deletedAt", null)
-    .is("lists.cards.deletedAt", null);
+    .is("lists.cards.deletedAt", null)
+    .is("workspace.members.deletedAt", null)
+    .is("lists.cards.members.deletedAt", null);
 
   if (filters.labels.length > 0) {
     query = query.in("lists.cards.labels.publicId", filters.labels);

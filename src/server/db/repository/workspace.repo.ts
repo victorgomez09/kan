@@ -81,7 +81,7 @@ export const getByPublicIdWithMembers = async (
           publicId,
           role,
           status,
-          user (
+          user!workspace_members_userId_user_id_fk (
             id,
             name,
             email

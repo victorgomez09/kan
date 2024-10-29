@@ -298,6 +298,7 @@ export const workspaceMembers = pgTable("workspace_members", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt"),
   deletedAt: timestamp("deletedAt"),
+  deletedBy: uuid("deletedBy").references(() => users.id),
   role: memberRoleEnum("role").notNull(),
   status: memberStatusEnum("status").default("invited").notNull(),
 });
@@ -307,6 +308,10 @@ export const usersToWorkspacesRelations = relations(
   ({ one }) => ({
     addedBy: one(users, {
       fields: [workspaceMembers.createdBy],
+      references: [users.id],
+    }),
+    deletedBy: one(users, {
+      fields: [workspaceMembers.deletedBy],
       references: [users.id],
     }),
     user: one(users, {

@@ -6,7 +6,7 @@ import {
 import { RequestCookies } from "@edge-runtime/cookies";
 import { type Database } from "~/types/database.types";
 
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest, type NextResponse } from "next/server";
 
 export function createNextClient(req: NextRequest, res: NextResponse) {
   const supabase = createServerClient<Database>(

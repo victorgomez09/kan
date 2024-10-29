@@ -54,3 +54,20 @@ export const acceptInvite = async (
 
   return data;
 };
+
+export const softDelete = async (
+  db: SupabaseClient<Database>,
+  args: {
+    memberId: number;
+    deletedAt: string;
+    deletedBy: string;
+  },
+) => {
+  const result = await db
+    .from("workspace_members")
+    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
+    .eq("id", args.memberId)
+    .is("deletedAt", null);
+
+  return result;
+};

@@ -1,5 +1,6 @@
 import { WorkspaceProvider } from "~/providers/workspace";
 import Dashboard from "~/components/dashboard";
+import Popup from "~/components/Popup";
 import MembersView from "~/views/members";
 
 export default function MembersPage() {
@@ -8,6 +9,7 @@ export default function MembersPage() {
       <Dashboard>
         <MembersView />
       </Dashboard>
+      <Popup />
     </WorkspaceProvider>
   );
 }

@@ -209,7 +209,7 @@ export const getWithListAndMembersByPublicId = async (
               publicId,
               members:workspace_members (
                 publicId,
-                user (
+                user!workspace_members_userId_user_id_fk (
                   id,
                   name
                 )
@@ -219,7 +219,7 @@ export const getWithListAndMembersByPublicId = async (
         ),
         members:workspace_members (
           publicId,
-          user (
+          user!workspace_members_userId_user_id_fk (
             id,
             name
           )
@@ -229,6 +229,8 @@ export const getWithListAndMembersByPublicId = async (
     .eq("publicId", cardPublicId)
     .is("deletedAt", null)
     .is("list.board.lists.deletedAt", null)
+    .is("list.board.workspace.members.deletedAt", null)
+    .is("members.deletedAt", null)
     .limit(1)
     .single();
 

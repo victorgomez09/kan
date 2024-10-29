@@ -1,10 +1,13 @@
-import { HiOutlinePlusSmall } from "react-icons/hi2";
+import { HiOutlinePlusSmall, HiEllipsisHorizontal } from "react-icons/hi2";
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import Modal from "~/components/modal";
 
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { InviteMemberForm } from "./components/InviteMemberForm";
+import { DeleteMemberConfirmation } from "./components/DeleteMemberConfirmation";
+import Dropdown from "~/components/Dropdown";
+
 import { api } from "~/utils/api";
 import { getInitialsFromName, inferInitialsFromEmail } from "~/utils/helpers";
 
@@ -41,71 +44,107 @@ export default function MembersPage() {
       </div>
 
       <div className="mt-8 flow-root">
-        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div className="-mx-4 -my-2 overflow-x-visible sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <div className="h-full shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
               <table className="min-w-full divide-y divide-light-600 dark:divide-dark-600">
-                <thead className="bg-light-300 dark:bg-dark-200">
-                  <tr>
+                <thead className="rounded-t-lg bg-light-300 dark:bg-dark-200">
+                  <tr className="">
                     <th
                       scope="col"
-                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-light-900 dark:text-dark-900 sm:pl-6"
+                      className="rounded-tl-lg py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-light-900 dark:text-dark-900 sm:pl-6"
                     >
                       User
                     </th>
                     <th
                       scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-light-900 dark:text-dark-900"
+                      className="rounded-tr-lg px-3 py-3.5 text-left text-sm font-semibold text-light-900 dark:text-dark-900"
                     >
                       Role
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-light-600 bg-light-50 dark:divide-dark-600 dark:bg-dark-100">
-                  {data?.members.map((member) => {
+                  {data?.members.map((member, index) => {
                     const initials = member.user?.name
                       ? getInitialsFromName(member.user.name)
                       : inferInitialsFromEmail(member.user?.email ?? "");
 
                     return (
-                      <tr key={member.publicId}>
-                        <td>
-                          <div className="flex items-center p-4">
-                            <div className="flex-shrink-0">
-                              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-light-1000 dark:bg-dark-400">
-                                <span className="text-sm font-medium leading-none text-white">
-                                  {initials}
+                      <>
+                        <tr key={member.publicId} className="rounded-b-lg">
+                          <td
+                            className={
+                              index === data.members.length - 1
+                                ? "rounded-bl-lg"
+                                : ""
+                            }
+                          >
+                            <div className="flex items-center p-4">
+                              <div className="flex-shrink-0">
+                                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-light-1000 dark:bg-dark-400">
+                                  <span className="text-sm font-medium leading-none text-white">
+                                    {initials}
+                                  </span>
                                 </span>
-                              </span>
-                            </div>
-                            <div className="ml-2 min-w-0 flex-1">
-                              <div>
-                                <div className="flex items-center">
-                                  <p className="mr-2 text-sm font-medium text-neutral-900 dark:text-dark-1000">
-                                    {member.user?.name}
+                              </div>
+                              <div className="ml-2 min-w-0 flex-1">
+                                <div>
+                                  <div className="flex items-center">
+                                    <p className="mr-2 text-sm font-medium text-neutral-900 dark:text-dark-1000">
+                                      {member.user?.name}
+                                    </p>
+                                  </div>
+                                  <p className="truncate text-sm text-dark-900">
+                                    {member.user?.email}
                                   </p>
                                 </div>
-                                <p className="truncate text-sm text-dark-900">
-                                  {member.user?.email}
-                                </p>
                               </div>
                             </div>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="px-3">
-                            <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[11px] font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                              {member.role.charAt(0).toUpperCase() +
-                                member.role.slice(1)}
-                            </span>
-                            {member.status === "invited" && (
-                              <span className="ml-2 inline-flex items-center rounded-md bg-gray-500/10 px-1.5 py-0.5 text-[11px] font-medium text-gray-400 ring-1 ring-inset ring-gray-500/20">
-                                Pending
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
+                          </td>
+                          <td
+                            className={
+                              index === data.members.length - 1
+                                ? "rounded-br-lg"
+                                : ""
+                            }
+                          >
+                            <div className="flex items-center justify-between px-3">
+                              <div>
+                                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[11px] font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                                  {member.role.charAt(0).toUpperCase() +
+                                    member.role.slice(1)}
+                                </span>
+                                {member.status === "invited" && (
+                                  <span className="ml-2 inline-flex items-center rounded-md bg-gray-500/10 px-1.5 py-0.5 text-[11px] font-medium text-gray-400 ring-1 ring-inset ring-gray-500/20">
+                                    Pending
+                                  </span>
+                                )}
+                              </div>
+                              <div className="relative">
+                                <Dropdown
+                                  items={[
+                                    {
+                                      label: "Remove member",
+                                      action: () =>
+                                        openModal(
+                                          "REMOVE_MEMBER",
+                                          member.publicId,
+                                          member.user?.email ?? "",
+                                        ),
+                                    },
+                                  ]}
+                                >
+                                  <HiEllipsisHorizontal
+                                    size={25}
+                                    className="text-light-900 dark:text-dark-900"
+                                  />
+                                </Dropdown>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </>
                     );
                   })}
                 </tbody>
@@ -118,6 +157,7 @@ export default function MembersPage() {
       <Modal>
         {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
         {modalContentType === "INVITE_MEMBER" && <InviteMemberForm />}
+        {modalContentType === "REMOVE_MEMBER" && <DeleteMemberConfirmation />}
       </Modal>
     </div>
   );
