@@ -47,6 +47,10 @@ export default function List({
       listPublicId: list.publicId,
       name: list.name,
     },
+    values: {
+      listPublicId: list.publicId,
+      name: list.name,
+    },
   });
 
   const onSubmit = (values: FormValues) => {
