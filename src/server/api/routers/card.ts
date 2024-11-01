@@ -10,6 +10,13 @@ import * as workspaceRepo from "~/server/db/repository/workspace.repo";
 
 export const cardRouter = createTRPCRouter({
   create: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Create a card",
+        method: "POST",
+        path: "/",
+      },
+    })
     .input(
       z.object({
         title: z.string().min(1),
@@ -20,6 +27,7 @@ export const cardRouter = createTRPCRouter({
         position: z.enum(["start", "end"]),
       }),
     )
+    .output(z.custom<Awaited<ReturnType<typeof cardRepo.create>>>())
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
@@ -64,6 +72,12 @@ export const cardRouter = createTRPCRouter({
       });
 
       const newCardId = newCard?.id;
+
+      if (!newCardId)
+        throw new TRPCError({
+          message: `Failed to create card`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
 
       if (newCardId && input.labelPublicIds.length) {
         const labels = await labelRepo.getAllByPublicIds(
@@ -111,12 +125,20 @@ export const cardRouter = createTRPCRouter({
       return newCard;
     }),
   addOrRemoveLabel: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Add or remove a label from a card",
+        method: "POST",
+        path: "/{cardPublicId}/label/{labelPublicId}",
+      },
+    })
     .input(
       z.object({
         cardPublicId: z.string().min(12),
         labelPublicId: z.string().min(12),
       }),
     )
+    .output(z.object({ newLabel: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
@@ -159,12 +181,20 @@ export const cardRouter = createTRPCRouter({
       return { newLabel: true };
     }),
   addOrRemoveMember: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Add or remove a member from a card",
+        method: "POST",
+        path: "/{cardPublicId}/member/{workspaceMemberPublicId}",
+      },
+    })
     .input(
       z.object({
         cardPublicId: z.string().min(12),
         workspaceMemberPublicId: z.string().min(12),
       }),
     )
+    .output(z.object({ newMember: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
@@ -210,16 +240,41 @@ export const cardRouter = createTRPCRouter({
       return { newMember: true };
     }),
   byId: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Get a card by ID",
+        method: "GET",
+        path: "/{id}",
+      },
+    })
     .input(z.object({ id: z.string().min(12) }))
+    .output(
+      z.custom<
+        Awaited<ReturnType<typeof cardRepo.getWithListAndMembersByPublicId>>
+      >(),
+    )
     .query(async ({ ctx, input }) => {
       const result = await cardRepo.getWithListAndMembersByPublicId(
         ctx.db,
         input.id,
       );
 
+      if (!result)
+        throw new TRPCError({
+          message: `Card with ID ${input.id} not found`,
+          code: "NOT_FOUND",
+        });
+
       return result;
     }),
   update: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Update a card",
+        method: "PUT",
+        path: "/{cardId}",
+      },
+    })
     .input(
       z.object({
         cardId: z.string().min(12),
@@ -227,6 +282,7 @@ export const cardRouter = createTRPCRouter({
         description: z.string(),
       }),
     )
+    .output(z.custom<Awaited<ReturnType<typeof cardRepo.update>>>())
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
@@ -236,20 +292,34 @@ export const cardRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const result = cardRepo.update(
+      const result = await cardRepo.update(
         ctx.db,
         { title: input.title, description: input.description },
         { cardPublicId: input.cardId },
       );
 
+      if (!result)
+        throw new TRPCError({
+          message: `Failed to update card`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
       return result;
     }),
   delete: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Delete a card",
+        method: "DELETE",
+        path: "/{cardPublicId}",
+      },
+    })
     .input(
       z.object({
         cardPublicId: z.string().min(12),
       }),
     )
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
@@ -282,8 +352,17 @@ export const cardRouter = createTRPCRouter({
         listId: card.list.id,
         cardIndex: card.index,
       });
+
+      return { success: true };
     }),
   reorder: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Reorder a card",
+        method: "POST",
+        path: "/{cardId}/reorder",
+      },
+    })
     .input(
       z.object({
         cardId: z.string().min(12),
@@ -291,6 +370,7 @@ export const cardRouter = createTRPCRouter({
         newIndex: z.number().optional(),
       }),
     )
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 

@@ -12,7 +12,7 @@ export const getAllByWorkspaceId = async (
     .is("deletedAt", null)
     .eq("workspaceId", workspaceId);
 
-  return data;
+  return data ?? [];
 };
 
 export const getByPublicId = async (
@@ -157,7 +157,10 @@ export const update = async (
   const { data } = await db
     .from("board")
     .update({ name: boardInput.name })
-    .eq("publicId", boardInput.boardPublicId);
+    .eq("publicId", boardInput.boardPublicId)
+    .select(`publicId, name`)
+    .limit(1)
+    .single();
 
   return data;
 };

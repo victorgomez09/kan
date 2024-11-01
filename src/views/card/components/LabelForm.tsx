@@ -54,9 +54,9 @@ export function LabelForm({
   const { control, register, reset, handleSubmit, setValue, watch } =
     useForm<LabelFormInput>({
       values: {
-        name: isEdit && label.data?.name ? label.data.name : "",
-        colour: (isEdit && label.data?.colourCode
-          ? colours.find((c) => c.code === label.data.colourCode)
+        name: isEdit && label?.data?.name ? label?.data?.name : "",
+        colour: (isEdit && label?.data?.colourCode
+          ? colours.find((c) => c.code === label?.data?.colourCode)
           : colours[0]) as Colour,
         isCreateAnotherEnabled: false,
       },

@@ -12,21 +12,52 @@ import { env } from "~/env.mjs";
 import * as userRepo from "~/server/db/repository/user.repo";
 
 export const authRouter = createTRPCRouter({
-  getUser: protectedProcedure.query(async ({ ctx }) => {
-    const userId = ctx.user?.id;
+  getUser: protectedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/auth/user",
+        summary: "Get user",
+      },
+    })
+    .input(z.void())
+    .output(
+      z.object({
+        id: z.string(),
+        email: z.string(),
+        name: z.string().nullable(),
+      }),
+    )
+    .query(async ({ ctx }) => {
+      const userId = ctx.user?.id;
 
-    if (!userId)
-      throw new TRPCError({
-        message: `User not authenticated`,
-        code: "UNAUTHORIZED",
-      });
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
 
-    const result = await userRepo.getById(ctx.db, userId);
+      const result = await userRepo.getById(ctx.db, userId);
 
-    return result;
-  }),
+      if (!result?.name) {
+        throw new TRPCError({
+          message: `User not found`,
+          code: "NOT_FOUND",
+        });
+      }
+
+      return result;
+    }),
   loginWithEmail: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/auth/email",
+        summary: "Login with email",
+      },
+    })
     .input(z.object({ email: z.string() }))
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const { data } = await ctx.db.auth.signInWithOtp({
         email: input.email,
@@ -35,10 +66,24 @@ export const authRouter = createTRPCRouter({
         },
       });
 
-      return data;
+      if (!data)
+        throw new TRPCError({
+          message: `Failed to login with email`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
+      return { success: true };
     }),
   loginWithOAuth: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/auth/oauth",
+        summary: "Login with OAuth",
+      },
+    })
     .input(z.object({ provider: z.string() }))
+    .output(z.object({ url: z.string() }))
     .mutation(async ({ ctx, input }) => {
       if (input.provider !== "google")
         throw new TRPCError({
@@ -57,6 +102,12 @@ export const authRouter = createTRPCRouter({
         },
       });
 
-      return data;
+      if (!data?.url)
+        throw new TRPCError({
+          message: `Failed to login with OAuth`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
+      return { url: data.url };
     }),
 });

@@ -6,6 +6,7 @@ import {
 import { RequestCookies } from "@edge-runtime/cookies";
 import { type Database } from "~/types/database.types";
 
+import { type NextApiRequest, type NextApiResponse } from "next";
 import { type NextRequest, type NextResponse } from "next/server";
 
 export function createNextClient(req: NextRequest, res: NextResponse) {
@@ -22,6 +23,32 @@ export function createNextClient(req: NextRequest, res: NextResponse) {
         },
         remove(name: string, options: CookieOptions) {
           res.headers.append("Set-Cookie", serialize(name, "", options));
+        },
+      },
+    },
+  );
+
+  return supabase;
+}
+
+export function createNextApiClient(
+  _req: NextApiRequest,
+  _res: NextApiResponse,
+) {
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_API_KEY!,
+    {
+      cookies: {
+        get(_name: string) {
+          // return req.cookies.get(name)?.value;
+          return "";
+        },
+        set(_name: string, _value: string, _options: CookieOptions) {
+          // res.headers.append("Set-Cookie", serialize(name, value, options));
+        },
+        remove(_name: string, _options: CookieOptions) {
+          // res.headers.append("Set-Cookie", serialize(name, "", options));
         },
       },
     },

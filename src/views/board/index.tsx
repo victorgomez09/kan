@@ -61,10 +61,8 @@ export default function BoardPage() {
   const { data, isSuccess, isLoading } = api.board.byId.useQuery(
     {
       boardPublicId: boardId ?? "",
-      filters: {
-        members: formatToArray(router.query.members),
-        labels: formatToArray(router.query.labels),
-      },
+      members: formatToArray(router.query.members),
+      labels: formatToArray(router.query.labels),
     },
     {
       enabled: !!boardId,

@@ -9,12 +9,20 @@ import * as listRepo from "~/server/db/repository/list.repo";
 
 export const listRouter = createTRPCRouter({
   create: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Create a list",
+        method: "POST",
+        path: "/list/create",
+      },
+    })
     .input(
       z.object({
         name: z.string().min(1),
         boardPublicId: z.string().min(12),
       }),
     )
+    .output(z.custom<Awaited<ReturnType<typeof listRepo.create>>>())
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
@@ -44,9 +52,22 @@ export const listRouter = createTRPCRouter({
         index: latestListIndex ? latestListIndex + 1 : 0,
       });
 
+      if (!result)
+        throw new TRPCError({
+          message: `Failed to create list`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
       return result;
     }),
   reorder: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Reorder a list",
+        method: "POST",
+        path: "/{listId}/reorder",
+      },
+    })
     .input(
       z.object({
         boardId: z.string().min(12),
@@ -55,6 +76,7 @@ export const listRouter = createTRPCRouter({
         newIndex: z.number(),
       }),
     )
+    .output(z.custom<Awaited<ReturnType<typeof listRepo.reorder>>>())
     .mutation(async ({ ctx, input }) => {
       const list = await listRepo.getByPublicId(ctx.db, input.listId);
 
@@ -64,21 +86,35 @@ export const listRouter = createTRPCRouter({
           code: "NOT_FOUND",
         });
 
-      const result = listRepo.reorder(ctx.db, {
+      const result = await listRepo.reorder(ctx.db, {
         boardPublicId: list.boardId,
         listPublicId: list.id,
         currentIndex: input.currentIndex,
         newIndex: input.newIndex,
       });
 
+      if (!result)
+        throw new TRPCError({
+          message: `Failed to reorder list`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
       return result;
     }),
   delete: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Delete a list",
+        method: "DELETE",
+        path: "/{listPublicId}",
+      },
+    })
     .input(
       z.object({
         listPublicId: z.string().min(12),
       }),
     )
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
@@ -114,20 +150,36 @@ export const listRouter = createTRPCRouter({
         boardId: list.boardId,
         listIndex: list.id,
       });
+
+      return { success: true };
     }),
   update: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Update a list",
+        method: "PUT",
+        path: "/list/{listPublicId}",
+      },
+    })
     .input(
       z.object({
         listPublicId: z.string().min(12),
         name: z.string().min(1),
       }),
     )
+    .output(z.custom<Awaited<ReturnType<typeof listRepo.update>>>())
     .mutation(async ({ ctx, input }) => {
       const result = await listRepo.update(
         ctx.db,
         { name: input.name },
         { listPublicId: input.listPublicId },
       );
+
+      if (!result)
+        throw new TRPCError({
+          message: `Failed to update list`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
 
       return result;
     }),

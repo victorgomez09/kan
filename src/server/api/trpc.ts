@@ -7,11 +7,18 @@
  * need to use are documented accordingly near the end.
  */
 import { initTRPC, TRPCError } from "@trpc/server";
+import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+import { type OpenApiMeta } from "trpc-to-openapi";
+
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import { createTRPCClient, createTRPCAdminClient } from "~/utils/supabase/api";
+import {
+  createNextApiClient,
+  createTRPCClient,
+  createTRPCAdminClient,
+} from "~/utils/supabase/api";
 import { type Database } from "~/types/database.types";
 import { type SupabaseClient } from "@supabase/supabase-js";
 
@@ -72,6 +79,20 @@ export const createTRPCContext = async ({
   return createInnerTRPCContext({ db, adminDb, user });
 };
 
+export const createRESTContext = async ({
+  req,
+  res,
+}: CreateNextContextOptions) => {
+  const db = createNextApiClient(req, res);
+  const adminDb = createTRPCAdminClient();
+
+  const {
+    data: { user },
+  } = await db.auth.getUser();
+
+  return createInnerTRPCContext({ db, adminDb, user });
+};
+
 /**
  * 2. INITIALIZATION
  *
@@ -80,19 +101,22 @@ export const createTRPCContext = async ({
  * errors on the backend.
  */
 
-const t = initTRPC.context<typeof createTRPCContext>().create({
-  transformer: superjson,
-  errorFormatter({ shape, error }) {
-    return {
-      ...shape,
-      data: {
-        ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
-      },
-    };
-  },
-});
+const t = initTRPC
+  .context<typeof createTRPCContext>()
+  .meta<OpenApiMeta>()
+  .create({
+    transformer: superjson,
+    errorFormatter({ shape, error }) {
+      return {
+        ...shape,
+        data: {
+          ...shape.data,
+          zodError:
+            error.cause instanceof ZodError ? error.cause.flatten() : null,
+        },
+      };
+    },
+  });
 
 /**
  * Create a server-side caller.
@@ -122,7 +146,9 @@ export const createTRPCRouter = t.router;
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure;
+export const publicProcedure = t.procedure.meta({
+  openapi: { method: "GET", path: "/public" },
+});
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */
 const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
@@ -143,4 +169,9 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed).meta({
+  openapi: {
+    method: "GET",
+    path: "/protected",
+  },
+});

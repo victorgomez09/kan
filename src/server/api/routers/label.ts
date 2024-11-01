@@ -8,7 +8,15 @@ import * as labelRepo from "~/server/db/repository/label.repo";
 
 export const labelRouter = createTRPCRouter({
   byPublicId: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Get a label by public ID",
+        method: "GET",
+        path: "/{publicId}",
+      },
+    })
     .input(z.object({ publicId: z.string().min(12) }))
+    .output(z.custom<Awaited<ReturnType<typeof labelRepo.getByPublicId>>>())
     .query(async ({ ctx, input }) => {
       const label = await labelRepo.getByPublicId(ctx.db, input.publicId);
 
@@ -21,6 +29,13 @@ export const labelRouter = createTRPCRouter({
       return label;
     }),
   create: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Create a label",
+        method: "POST",
+        path: "/create",
+      },
+    })
     .input(
       z.object({
         name: z.string().min(1).max(36),
@@ -28,6 +43,7 @@ export const labelRouter = createTRPCRouter({
         colourCode: z.string().length(7),
       }),
     )
+    .output(z.custom<Awaited<ReturnType<typeof labelRepo.create>>>())
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
@@ -55,9 +71,22 @@ export const labelRouter = createTRPCRouter({
         boardId: card.list.boardId,
       });
 
+      if (!result)
+        throw new TRPCError({
+          message: `Failed to create label`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
       return result;
     }),
   update: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Update a label",
+        method: "PUT",
+        path: "/{publicId}",
+      },
+    })
     .input(
       z.object({
         publicId: z.string().min(12),
@@ -65,13 +94,22 @@ export const labelRouter = createTRPCRouter({
         colourCode: z.string().length(7),
       }),
     )
+    .output(z.custom<Awaited<ReturnType<typeof labelRepo.update>>>())
     .mutation(async ({ ctx, input }) => {
       const result = await labelRepo.update(ctx.db, input);
 
       return result;
     }),
   delete: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Delete a label",
+        method: "DELETE",
+        path: "/{publicId}",
+      },
+    })
     .input(z.object({ publicId: z.string().min(12) }))
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const label = await labelRepo.getByPublicId(ctx.db, input.publicId);
 

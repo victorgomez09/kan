@@ -10,7 +10,17 @@ import * as workspaceRepo from "~/server/db/repository/workspace.repo";
 
 export const boardRouter = createTRPCRouter({
   all: protectedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/board/{workspacePublicId}",
+        summary: "Get all boards",
+      },
+    })
     .input(z.object({ workspacePublicId: z.string().min(12) }))
+    .output(
+      z.custom<Awaited<ReturnType<typeof boardRepo.getAllByWorkspaceId>>>(),
+    )
     .query(async ({ ctx, input }) => {
       const workspace = await workspaceRepo.getByPublicId(
         ctx.db,
@@ -28,31 +38,48 @@ export const boardRouter = createTRPCRouter({
       return result;
     }),
   byId: protectedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/board/{boardPublicId}",
+        summary: "Get board by public ID",
+      },
+    })
     .input(
       z.object({
         boardPublicId: z.string().min(12),
-        filters: z.object({
-          members: z.array(z.string().min(12)),
-          labels: z.array(z.string().min(12)),
-        }),
+        members: z.array(z.string().min(12)),
+        labels: z.array(z.string().min(12)),
       }),
     )
+    .output(z.custom<Awaited<ReturnType<typeof boardRepo.getByPublicId>>>())
     .query(async ({ ctx, input }) => {
       const result = await boardRepo.getByPublicId(
         ctx.db,
         input.boardPublicId,
-        input.filters,
+        {
+          members: input.members,
+          labels: input.labels,
+        },
       );
 
       return result;
     }),
   create: protectedProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/board",
+        summary: "Create board",
+      },
+    })
     .input(
       z.object({
         name: z.string().min(1),
         workspacePublicId: z.string().min(12),
       }),
     )
+    .output(z.custom<Awaited<ReturnType<typeof boardRepo.create>>>())
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
@@ -79,29 +106,57 @@ export const boardRouter = createTRPCRouter({
         workspaceId: workspace.id,
       });
 
+      if (!result)
+        throw new TRPCError({
+          message: `Failed to create board`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
       return result;
     }),
   update: protectedProcedure
+    .meta({
+      openapi: {
+        method: "PUT",
+        path: "/board/{boardPublicId}",
+        summary: "Update board",
+      },
+    })
     .input(
       z.object({
         boardPublicId: z.string().min(12),
         name: z.string().min(1),
       }),
     )
+    .output(z.custom<Awaited<ReturnType<typeof boardRepo.update>>>())
     .mutation(async ({ ctx, input }) => {
       const result = await boardRepo.update(ctx.db, {
         name: input.name,
         boardPublicId: input.boardPublicId,
       });
 
+      if (!result)
+        throw new TRPCError({
+          message: `Failed to update board`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
       return result;
     }),
   delete: protectedProcedure
+    .meta({
+      openapi: {
+        method: "DELETE",
+        path: "/board/{boardPublicId}",
+        summary: "Delete board",
+      },
+    })
     .input(
       z.object({
         boardPublicId: z.string().min(12),
       }),
     )
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
@@ -145,5 +200,7 @@ export const boardRouter = createTRPCRouter({
           deletedBy: userId,
         });
       }
+
+      return { success: true };
     }),
 });

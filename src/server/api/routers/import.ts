@@ -37,12 +37,20 @@ interface MemberData {
 export const importRouter = createTRPCRouter({
   trello: createTRPCRouter({
     getBoards: protectedProcedure
+      .meta({
+        openapi: {
+          summary: "Get boards from Trello",
+          method: "GET",
+          path: "/boards",
+        },
+      })
       .input(
         z.object({
           apiKey: z.string().length(32),
           token: z.string().length(76),
         }),
       )
+      .output(z.array(z.object({ id: z.string(), name: z.string() })))
       .query(async ({ input }) => {
         const fetchMemberRes = await fetch(
           `${TRELLO_API_URL}/tokens/${input.token}/member?key=${input.apiKey}`,
@@ -79,6 +87,13 @@ export const importRouter = createTRPCRouter({
         }));
       }),
     importBoards: protectedProcedure
+      .meta({
+        openapi: {
+          summary: "Import boards from Trello",
+          method: "POST",
+          path: "/import",
+        },
+      })
       .input(
         z.object({
           boardIds: z.array(z.string()),
@@ -87,6 +102,7 @@ export const importRouter = createTRPCRouter({
           workspacePublicId: z.string().min(12),
         }),
       )
+      .output(z.object({ boardsCreated: z.number() }))
       .mutation(async ({ ctx, input }) => {
         const userId = ctx.user?.id;
 

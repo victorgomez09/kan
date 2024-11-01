@@ -11,12 +11,20 @@ import { sendEmail } from "~/email/sendEmail";
 
 export const memberRouter = createTRPCRouter({
   invite: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Invite a member to a workspace",
+        method: "POST",
+        path: "/invite",
+      },
+    })
     .input(
       z.object({
         email: z.string().email(),
         workspacePublicId: z.string().min(12),
       }),
     )
+    .output(z.custom<Awaited<ReturnType<typeof memberRepo.create>>>())
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
@@ -132,11 +140,19 @@ export const memberRouter = createTRPCRouter({
       return invite;
     }),
   delete: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Delete a member from a workspace",
+        method: "DELETE",
+        path: "/{memberPublicId}",
+      },
+    })
     .input(
       z.object({
         memberPublicId: z.string().min(12),
       }),
     )
+    .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
 
@@ -163,6 +179,12 @@ export const memberRouter = createTRPCRouter({
         deletedBy: userId,
       });
 
-      return deletedMember;
+      if (!deletedMember)
+        throw new TRPCError({
+          message: `Failed to delete member with public ID ${input.memberPublicId}`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
+      return { success: true };
     }),
 });
