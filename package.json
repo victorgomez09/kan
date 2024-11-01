@@ -28,7 +28,7 @@
     "@trpc/client": "next",
     "@trpc/next": "next",
     "@trpc/react-query": "next",
-    "@trpc/server": "next",
+    "@trpc/server": "^11.0.0-rc.566",
     "@vercel/postgres": "^0.7.2",
     "drizzle-orm": "^0.28.5",
     "next": "^14.1.3",
