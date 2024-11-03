@@ -7,6 +7,6 @@ export const openApiDocument = generateOpenApiDocument(appRouter, {
   description: "OpenAPI compliant REST API",
   version: "1.0.0",
   baseUrl: `${process.env.WEBSITE_URL}/api/v1`,
-  docsUrl: "",
-  tags: ["auth", "users", "posts"],
+  docsUrl: "docs.kan.bn",
+  tags: ["Auth", "Users", "Boards", "Lists", "Cards", "Labels", "Imports"],
 });

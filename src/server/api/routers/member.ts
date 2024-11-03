@@ -17,7 +17,7 @@ export const memberRouter = createTRPCRouter({
         method: "POST",
         path: "/workspaces/{workspacePublicId}/members/invite",
         description: "Invites a member to a workspace",
-        tags: ["Members"],
+        tags: ["Workspaces"],
         protect: true,
       },
     })
@@ -149,7 +149,7 @@ export const memberRouter = createTRPCRouter({
         method: "DELETE",
         path: "/workspaces/{workspacePublicId}/members/{memberPublicId}",
         description: "Deletes a member from a workspace",
-        tags: ["Members"],
+        tags: ["Workspaces"],
         protect: true,
       },
     })
