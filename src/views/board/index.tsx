@@ -104,8 +104,7 @@ export default function BoardPage() {
       }
 
       updateList({
-        boardId,
-        listId: draggableId,
+        listPublicId: draggableId,
         currentIndex: source.index,
         newIndex: destination.index,
       });
@@ -128,8 +127,8 @@ export default function BoardPage() {
       }
 
       updateCard({
-        cardId: draggableId,
-        newListId: destination.droppableId,
+        cardPublicId: draggableId,
+        newListPublicId: destination.droppableId,
         newIndex: destination.index,
       });
     }

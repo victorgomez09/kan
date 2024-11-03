@@ -14,7 +14,10 @@ export const cardRouter = createTRPCRouter({
       openapi: {
         summary: "Create a card",
         method: "POST",
-        path: "/",
+        path: "/cards",
+        description: "Creates a new card for a given list",
+        tags: ["Cards"],
+        protect: true,
       },
     })
     .input(
@@ -128,8 +131,11 @@ export const cardRouter = createTRPCRouter({
     .meta({
       openapi: {
         summary: "Add or remove a label from a card",
-        method: "POST",
-        path: "/{cardPublicId}/label/{labelPublicId}",
+        method: "PUT",
+        path: "/cards/{cardPublicId}/labels/{labelPublicId}",
+        description: "Adds or removes a label from a card",
+        tags: ["Cards"],
+        protect: true,
       },
     })
     .input(
@@ -184,8 +190,10 @@ export const cardRouter = createTRPCRouter({
     .meta({
       openapi: {
         summary: "Add or remove a member from a card",
-        method: "POST",
-        path: "/{cardPublicId}/member/{workspaceMemberPublicId}",
+        method: "PUT",
+        path: "/cards/{cardPublicId}/members/{workspaceMemberPublicId}",
+        description: "Adds or removes a member from a card",
+        tags: ["Cards"],
       },
     })
     .input(
@@ -242,12 +250,15 @@ export const cardRouter = createTRPCRouter({
   byId: protectedProcedure
     .meta({
       openapi: {
-        summary: "Get a card by ID",
+        summary: "Get a card by public ID",
         method: "GET",
-        path: "/{id}",
+        path: "/cards/{cardPublicId}",
+        description: "Retrieves a card by its public ID",
+        tags: ["Cards"],
+        protect: true,
       },
     })
-    .input(z.object({ id: z.string().min(12) }))
+    .input(z.object({ cardPublicId: z.string().min(12) }))
     .output(
       z.custom<
         Awaited<ReturnType<typeof cardRepo.getWithListAndMembersByPublicId>>
@@ -256,12 +267,12 @@ export const cardRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const result = await cardRepo.getWithListAndMembersByPublicId(
         ctx.db,
-        input.id,
+        input.cardPublicId,
       );
 
       if (!result)
         throw new TRPCError({
-          message: `Card with ID ${input.id} not found`,
+          message: `Card with public ID ${input.cardPublicId} not found`,
           code: "NOT_FOUND",
         });
 
@@ -272,12 +283,15 @@ export const cardRouter = createTRPCRouter({
       openapi: {
         summary: "Update a card",
         method: "PUT",
-        path: "/{cardId}",
+        path: "/cards/{cardPublicId}",
+        description: "Updates a card by its public ID",
+        tags: ["Cards"],
+        protect: true,
       },
     })
     .input(
       z.object({
-        cardId: z.string().min(12),
+        cardPublicId: z.string().min(12),
         title: z.string().min(1),
         description: z.string(),
       }),
@@ -295,7 +309,7 @@ export const cardRouter = createTRPCRouter({
       const result = await cardRepo.update(
         ctx.db,
         { title: input.title, description: input.description },
-        { cardPublicId: input.cardId },
+        { cardPublicId: input.cardPublicId },
       );
 
       if (!result)
@@ -311,7 +325,10 @@ export const cardRouter = createTRPCRouter({
       openapi: {
         summary: "Delete a card",
         method: "DELETE",
-        path: "/{cardPublicId}",
+        path: "/cards/{cardPublicId}",
+        description: "Deletes a card by its public ID",
+        tags: ["Cards"],
+        protect: true,
       },
     })
     .input(
@@ -359,14 +376,17 @@ export const cardRouter = createTRPCRouter({
     .meta({
       openapi: {
         summary: "Reorder a card",
-        method: "POST",
-        path: "/{cardId}/reorder",
+        method: "PUT",
+        path: "/cards/{cardPublicId}/reorder",
+        description: "Reorders the position of a card in a given list",
+        tags: ["Cards"],
+        protect: true,
       },
     })
     .input(
       z.object({
-        cardId: z.string().min(12),
-        newListId: z.string().min(12),
+        cardPublicId: z.string().min(12),
+        newListPublicId: z.string().min(12),
         newIndex: z.number().optional(),
       }),
     )
@@ -382,12 +402,12 @@ export const cardRouter = createTRPCRouter({
 
       const card = await cardRepo.getCardWithListByPublicId(
         ctx.db,
-        input.cardId,
+        input.cardPublicId,
       );
 
       if (!card?.list)
         throw new TRPCError({
-          message: `Card with public ID ${input.cardId} not found`,
+          message: `Card with public ID ${input.cardPublicId} not found`,
           code: "NOT_FOUND",
         });
 
@@ -398,12 +418,12 @@ export const cardRouter = createTRPCRouter({
 
       const newList = await listRepo.getWithCardsByPublicId(
         ctx.db,
-        input.newListId,
+        input.newListPublicId,
       );
 
       if (!newList)
         throw new TRPCError({
-          message: `List with public ID ${input.newListId} not found`,
+          message: `List with public ID ${input.newListPublicId} not found`,
           code: "NOT_FOUND",
         });
 

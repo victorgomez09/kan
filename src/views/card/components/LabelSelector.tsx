@@ -27,7 +27,7 @@ export default function LabelSelector({
   const { openModal } = useModal();
   const utils = api.useUtils();
 
-  const refetchCard = () => utils.card.byId.refetch({ id: cardPublicId });
+  const refetchCard = () => utils.card.byId.refetch({ cardPublicId });
 
   const addOrRemoveLabel = api.card.addOrRemoveLabel.useMutation({
     onSuccess: async () => {

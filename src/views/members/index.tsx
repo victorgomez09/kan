@@ -18,7 +18,7 @@ export default function MembersPage() {
   const { workspace } = useWorkspace();
 
   const { data, isLoading } = api.workspace.byId.useQuery(
-    { publicId: workspace.publicId },
+    { workspacePublicId: workspace.publicId },
     // { enabled: workspace?.publicId ? true : false },
   );
 

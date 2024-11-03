@@ -15,7 +15,10 @@ export const memberRouter = createTRPCRouter({
       openapi: {
         summary: "Invite a member to a workspace",
         method: "POST",
-        path: "/invite",
+        path: "/workspaces/{workspacePublicId}/members/invite",
+        description: "Invites a member to a workspace",
+        tags: ["Members"],
+        protect: true,
       },
     })
     .input(
@@ -144,11 +147,15 @@ export const memberRouter = createTRPCRouter({
       openapi: {
         summary: "Delete a member from a workspace",
         method: "DELETE",
-        path: "/{memberPublicId}",
+        path: "/workspaces/{workspacePublicId}/members/{memberPublicId}",
+        description: "Deletes a member from a workspace",
+        tags: ["Members"],
+        protect: true,
       },
     })
     .input(
       z.object({
+        workspacePublicId: z.string().min(12),
         memberPublicId: z.string().min(12),
       }),
     )
@@ -160,6 +167,17 @@ export const memberRouter = createTRPCRouter({
         throw new TRPCError({
           message: `User not authenticated`,
           code: "UNAUTHORIZED",
+        });
+
+      const workspace = await workspaceRepo.getByPublicId(
+        ctx.db,
+        input.workspacePublicId,
+      );
+
+      if (!workspace)
+        throw new TRPCError({
+          message: `Workspace with public ID ${input.workspacePublicId} not found`,
+          code: "NOT_FOUND",
         });
 
       const member = await memberRepo.getByPublicId(

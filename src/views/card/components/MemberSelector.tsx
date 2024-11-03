@@ -24,7 +24,7 @@ export default function MemberSelector({
 }: MemberSelectorProps) {
   const utils = api.useUtils();
 
-  const refetchCard = () => utils.card.byId.refetch({ id: cardPublicId });
+  const refetchCard = () => utils.card.byId.refetch({ cardPublicId });
 
   const addOrRemoveMember = api.card.addOrRemoveMember.useMutation({
     onSuccess: async () => {

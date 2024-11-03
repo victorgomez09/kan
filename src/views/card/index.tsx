@@ -32,7 +32,9 @@ export default function CardPage() {
     ? params.cardId[0]
     : params?.cardId;
 
-  const { data, isLoading } = api.card.byId.useQuery({ id: cardId ?? "" });
+  const { data, isLoading } = api.card.byId.useQuery({
+    cardPublicId: cardId ?? "",
+  });
 
   const board = data?.list?.board;
   const boardId = board?.publicId;
@@ -85,7 +87,7 @@ export default function CardPage() {
 
   const onSubmit = (values: FormValues) => {
     updateCard.mutate({
-      cardId: values.cardId,
+      cardPublicId: values.cardId,
       title: values.title,
       description: values.description,
     });

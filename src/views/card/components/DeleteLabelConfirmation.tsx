@@ -15,7 +15,7 @@ export function DeleteLabelConfirmation({
   const { closeModal } = useModal();
   const { showPopup } = usePopup();
 
-  const refetchCard = () => utils.card.byId.refetch({ id: cardPublicId });
+  const refetchCard = () => utils.card.byId.refetch({ cardPublicId });
 
   const deleteLabelMutation = api.label.delete.useMutation({
     onSuccess: () => refetchCard(),
@@ -29,7 +29,7 @@ export function DeleteLabelConfirmation({
   const handleDeleteLabel = () => {
     closeModal();
     deleteLabelMutation.mutate({
-      publicId: labelPublicId,
+      labelPublicId,
     });
   };
 

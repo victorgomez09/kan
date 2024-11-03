@@ -12,17 +12,20 @@ export const labelRouter = createTRPCRouter({
       openapi: {
         summary: "Get a label by public ID",
         method: "GET",
-        path: "/{publicId}",
+        path: "/labels/{labelPublicId}",
+        description: "Retrieves a label by its public ID",
+        tags: ["Labels"],
+        protect: true,
       },
     })
-    .input(z.object({ publicId: z.string().min(12) }))
+    .input(z.object({ labelPublicId: z.string().min(12) }))
     .output(z.custom<Awaited<ReturnType<typeof labelRepo.getByPublicId>>>())
     .query(async ({ ctx, input }) => {
-      const label = await labelRepo.getByPublicId(ctx.db, input.publicId);
+      const label = await labelRepo.getByPublicId(ctx.db, input.labelPublicId);
 
       if (!label)
         throw new TRPCError({
-          message: `Label with public ID ${input.publicId} not found`,
+          message: `Label with public ID ${input.labelPublicId} not found`,
           code: "NOT_FOUND",
         });
 
@@ -33,7 +36,10 @@ export const labelRouter = createTRPCRouter({
       openapi: {
         summary: "Create a label",
         method: "POST",
-        path: "/create",
+        path: "/labels",
+        description: "Creates a new label",
+        tags: ["Labels"],
+        protect: true,
       },
     })
     .input(
@@ -84,12 +90,15 @@ export const labelRouter = createTRPCRouter({
       openapi: {
         summary: "Update a label",
         method: "PUT",
-        path: "/{publicId}",
+        path: "/labels/{labelPublicId}",
+        description: "Updates a label by its public ID",
+        tags: ["Labels"],
+        protect: true,
       },
     })
     .input(
       z.object({
-        publicId: z.string().min(12),
+        labelPublicId: z.string().min(12),
         name: z.string().min(1).max(36),
         colourCode: z.string().length(7),
       }),
@@ -105,17 +114,20 @@ export const labelRouter = createTRPCRouter({
       openapi: {
         summary: "Delete a label",
         method: "DELETE",
-        path: "/{publicId}",
+        path: "/labels/{labelPublicId}",
+        description: "Deletes a label by its public ID",
+        tags: ["Labels"],
+        protect: true,
       },
     })
-    .input(z.object({ publicId: z.string().min(12) }))
+    .input(z.object({ labelPublicId: z.string().min(12) }))
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      const label = await labelRepo.getByPublicId(ctx.db, input.publicId);
+      const label = await labelRepo.getByPublicId(ctx.db, input.labelPublicId);
 
       if (!label)
         throw new TRPCError({
-          message: `Label with public ID ${input.publicId} not found`,
+          message: `Label with public ID ${input.labelPublicId} not found`,
           code: "NOT_FOUND",
         });
 

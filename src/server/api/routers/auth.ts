@@ -16,8 +16,12 @@ export const authRouter = createTRPCRouter({
     .meta({
       openapi: {
         method: "GET",
-        path: "/auth/user",
+        path: "/users/me",
         summary: "Get user",
+        description:
+          "Retrieves the currently authenticated user's profile information",
+        tags: ["Users"],
+        protect: true,
       },
     })
     .input(z.void())
@@ -52,8 +56,10 @@ export const authRouter = createTRPCRouter({
     .meta({
       openapi: {
         method: "POST",
-        path: "/auth/email",
+        path: "/auth/login/email",
         summary: "Login with email",
+        description: "Sends a login URL to the provided email address",
+        tags: ["Auth"],
       },
     })
     .input(z.object({ email: z.string() }))
@@ -78,8 +84,11 @@ export const authRouter = createTRPCRouter({
     .meta({
       openapi: {
         method: "POST",
-        path: "/auth/oauth",
+        path: "/auth/login/oauth",
         summary: "Login with OAuth",
+        description:
+          "Initiates the login process for a user with the given OAuth provider",
+        tags: ["Auth"],
       },
     })
     .input(z.object({ provider: z.string() }))

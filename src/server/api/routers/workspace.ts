@@ -10,7 +10,10 @@ export const workspaceRouter = createTRPCRouter({
       openapi: {
         summary: "Get all workspaces",
         method: "GET",
-        path: "/",
+        path: "/workspaces",
+        description: "Retrieves all workspaces for the authenticated user",
+        tags: ["Workspaces"],
+        protect: true,
       },
     })
     .input(z.void())
@@ -35,10 +38,13 @@ export const workspaceRouter = createTRPCRouter({
       openapi: {
         summary: "Get a workspace by public ID",
         method: "GET",
-        path: "/workspace/{publicId}",
+        path: "/workspaces/{workspacePublicId}",
+        description: "Retrieves a workspace by its public ID",
+        tags: ["Workspaces"],
+        protect: true,
       },
     })
-    .input(z.object({ publicId: z.string().min(12) }))
+    .input(z.object({ workspacePublicId: z.string().min(12) }))
     .output(
       z.custom<
         Awaited<ReturnType<typeof workspaceRepo.getByPublicIdWithMembers>>
@@ -47,7 +53,7 @@ export const workspaceRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const result = await workspaceRepo.getByPublicIdWithMembers(
         ctx.db,
-        input.publicId,
+        input.workspacePublicId,
       );
 
       if (!result)
@@ -63,7 +69,10 @@ export const workspaceRouter = createTRPCRouter({
       openapi: {
         summary: "Create a workspace",
         method: "POST",
-        path: "/workspace/create",
+        path: "/workspaces",
+        description: "Creates a new workspace",
+        tags: ["Workspaces"],
+        protect: true,
       },
     })
     .input(
@@ -100,7 +109,10 @@ export const workspaceRouter = createTRPCRouter({
       openapi: {
         summary: "Update a workspace",
         method: "PUT",
-        path: "/workspace/{workspacePublicId}",
+        path: "/workspaces/{workspacePublicId}",
+        description: "Updates a workspace by its public ID",
+        tags: ["Workspaces"],
+        protect: true,
       },
     })
     .input(
@@ -124,7 +136,10 @@ export const workspaceRouter = createTRPCRouter({
       openapi: {
         summary: "Delete a workspace",
         method: "DELETE",
-        path: "/workspace/{workspacePublicId}",
+        path: "/workspaces/{workspacePublicId}",
+        description: "Deletes a workspace by its public ID",
+        tags: ["Workspaces"],
+        protect: true,
       },
     })
     .input(z.object({ workspacePublicId: z.string().min(12) }))

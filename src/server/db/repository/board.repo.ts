@@ -84,13 +84,11 @@ export const getByPublicId = async (
     query = query.in("lists.cards.members.publicId", filters.members);
   }
 
-  const { data, error } = await query
+  const { data } = await query
     .order("index", { foreignTable: "list", ascending: true })
     .order("index", { foreignTable: "list.card", ascending: true })
     .limit(1)
     .single();
-
-  console.log(error);
 
   return data;
 };

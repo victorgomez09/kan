@@ -63,7 +63,7 @@ export const getByPublicId = async (
 export const update = async (
   db: SupabaseClient<Database>,
   labelInput: {
-    publicId: string;
+    labelPublicId: string;
     name: string;
     colourCode: string;
   },
@@ -74,7 +74,7 @@ export const update = async (
       name: labelInput.name,
       colourCode: labelInput.colourCode,
     })
-    .eq("publicId", labelInput.publicId);
+    .eq("publicId", labelInput.labelPublicId);
 
   return data;
 };

@@ -1,12 +1,14 @@
 import { api } from "~/utils/api";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
+import { useWorkspace } from "~/providers/workspace";
 
 import Button from "~/components/Button";
 
 export function DeleteMemberConfirmation() {
   const utils = api.useUtils();
   const { closeModal, entityLabel, entityId } = useModal();
+  const { workspace } = useWorkspace();
   const { showPopup } = usePopup();
 
   const deleteMember = api.member.delete.useMutation({
@@ -31,6 +33,7 @@ export function DeleteMemberConfirmation() {
     if (entityId)
       deleteMember.mutate({
         memberPublicId: entityId,
+        workspacePublicId: workspace.publicId,
       });
   };
 

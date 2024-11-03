@@ -79,16 +79,22 @@ export const createTRPCContext = async ({
   return createInnerTRPCContext({ db, adminDb, user });
 };
 
-export const createRESTContext = async ({
-  req,
-  res,
-}: CreateNextContextOptions) => {
-  const db = createNextApiClient(req, res);
+export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
+  const db = createNextApiClient(req);
   const adminDb = createTRPCAdminClient();
+
+  const authHeader = req.headers.authorization;
+  const accessToken = authHeader?.startsWith("Bearer ")
+    ? authHeader.substring(7)
+    : null;
+
+  if (!accessToken) {
+    return createInnerTRPCContext({ db, adminDb, user: null });
+  }
 
   const {
     data: { user },
-  } = await db.auth.getUser();
+  } = await db.auth.getUser(accessToken);
 
   return createInnerTRPCContext({ db, adminDb, user });
 };

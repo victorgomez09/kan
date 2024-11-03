@@ -13,8 +13,11 @@ export const boardRouter = createTRPCRouter({
     .meta({
       openapi: {
         method: "GET",
-        path: "/board/{workspacePublicId}",
+        path: "/workspaces/{workspacePublicId}/boards",
         summary: "Get all boards",
+        description: "Retrieves all boards for a given workspace",
+        tags: ["Boards"],
+        protect: true,
       },
     })
     .input(z.object({ workspacePublicId: z.string().min(12) }))
@@ -41,15 +44,18 @@ export const boardRouter = createTRPCRouter({
     .meta({
       openapi: {
         method: "GET",
-        path: "/board/{boardPublicId}",
+        path: "/boards/{boardPublicId}",
         summary: "Get board by public ID",
+        description: "Retrieves a board by its public ID",
+        tags: ["Boards"],
+        protect: true,
       },
     })
     .input(
       z.object({
         boardPublicId: z.string().min(12),
-        members: z.array(z.string().min(12)),
-        labels: z.array(z.string().min(12)),
+        members: z.array(z.string().min(12)).optional(),
+        labels: z.array(z.string().min(12)).optional(),
       }),
     )
     .output(z.custom<Awaited<ReturnType<typeof boardRepo.getByPublicId>>>())
@@ -58,8 +64,8 @@ export const boardRouter = createTRPCRouter({
         ctx.db,
         input.boardPublicId,
         {
-          members: input.members,
-          labels: input.labels,
+          members: input.members ?? [],
+          labels: input.labels ?? [],
         },
       );
 
@@ -69,8 +75,11 @@ export const boardRouter = createTRPCRouter({
     .meta({
       openapi: {
         method: "POST",
-        path: "/board",
+        path: "/workspaces/{workspacePublicId}/boards",
         summary: "Create board",
+        description: "Creates a new board for a given workspace",
+        tags: ["Boards"],
+        protect: true,
       },
     })
     .input(
@@ -118,8 +127,11 @@ export const boardRouter = createTRPCRouter({
     .meta({
       openapi: {
         method: "PUT",
-        path: "/board/{boardPublicId}",
+        path: "/boards/{boardPublicId}",
         summary: "Update board",
+        description: "Updates a board by its public ID",
+        tags: ["Boards"],
+        protect: true,
       },
     })
     .input(
@@ -147,8 +159,11 @@ export const boardRouter = createTRPCRouter({
     .meta({
       openapi: {
         method: "DELETE",
-        path: "/board/{boardPublicId}",
+        path: "/boards/{boardPublicId}",
         summary: "Delete board",
+        description: "Deletes a board by its public ID",
+        tags: ["Boards"],
+        protect: true,
       },
     })
     .input(

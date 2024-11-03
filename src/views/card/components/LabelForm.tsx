@@ -44,7 +44,7 @@ export function LabelForm({
 
   const label = api.label.byPublicId.useQuery(
     {
-      publicId: entityId,
+      labelPublicId: entityId,
     },
     {
       enabled: isEdit && !!entityId,
@@ -62,7 +62,7 @@ export function LabelForm({
       },
     });
 
-  const refetchCard = () => utils.card.byId.refetch({ id: cardPublicId });
+  const refetchCard = () => utils.card.byId.refetch({ cardPublicId });
 
   const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
 
@@ -101,7 +101,7 @@ export function LabelForm({
 
     if (isEdit) {
       updateLabel.mutate({
-        publicId: label.data?.publicId ?? "",
+        labelPublicId: label.data?.publicId ?? "",
         name: values.name,
         colourCode: values.colour.code,
       });

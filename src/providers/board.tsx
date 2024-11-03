@@ -164,23 +164,25 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const updateList = ({
-    boardId,
-    listId,
+    listPublicId,
     currentIndex,
     newIndex,
   }: ReorderListInput) => {
     updateListMutation.mutate({
-      boardId,
-      listId,
+      listPublicId,
       currentIndex,
       newIndex,
     });
   };
 
-  const updateCard = ({ cardId, newListId, newIndex }: ReorderCardInput) => {
+  const updateCard = ({
+    cardPublicId,
+    newListPublicId,
+    newIndex,
+  }: ReorderCardInput) => {
     updateCardMutation.mutate({
-      cardId,
-      newListId,
+      cardPublicId,
+      newListPublicId,
       newIndex,
     });
   };

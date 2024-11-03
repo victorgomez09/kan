@@ -13,7 +13,10 @@ export const listRouter = createTRPCRouter({
       openapi: {
         summary: "Create a list",
         method: "POST",
-        path: "/list/create",
+        path: "/lists",
+        description: "Creates a new list for a given board",
+        tags: ["Lists"],
+        protect: true,
       },
     })
     .input(
@@ -65,24 +68,26 @@ export const listRouter = createTRPCRouter({
       openapi: {
         summary: "Reorder a list",
         method: "POST",
-        path: "/{listId}/reorder",
+        path: "/lists/{listPublicId}/reorder",
+        description: "Reorders the position of a list",
+        tags: ["Lists"],
+        protect: true,
       },
     })
     .input(
       z.object({
-        boardId: z.string().min(12),
-        listId: z.string().min(12),
+        listPublicId: z.string().min(12),
         currentIndex: z.number(),
         newIndex: z.number(),
       }),
     )
     .output(z.custom<Awaited<ReturnType<typeof listRepo.reorder>>>())
     .mutation(async ({ ctx, input }) => {
-      const list = await listRepo.getByPublicId(ctx.db, input.listId);
+      const list = await listRepo.getByPublicId(ctx.db, input.listPublicId);
 
       if (!list)
         throw new TRPCError({
-          message: `List with public ID ${input.listId} not found`,
+          message: `List with public ID ${input.listPublicId} not found`,
           code: "NOT_FOUND",
         });
 
@@ -106,7 +111,10 @@ export const listRouter = createTRPCRouter({
       openapi: {
         summary: "Delete a list",
         method: "DELETE",
-        path: "/{listPublicId}",
+        path: "/lists/{listPublicId}",
+        description: "Deletes a list by its public ID",
+        tags: ["Lists"],
+        protect: true,
       },
     })
     .input(
@@ -158,7 +166,10 @@ export const listRouter = createTRPCRouter({
       openapi: {
         summary: "Update a list",
         method: "PUT",
-        path: "/list/{listPublicId}",
+        path: "/lists/{listPublicId}",
+        description: "Updates a list by its public ID",
+        tags: ["Lists"],
+        protect: true,
       },
     })
     .input(

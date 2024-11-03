@@ -20,7 +20,7 @@ export default function ListSelector({
 }: ListSelectorProps) {
   const utils = api.useUtils();
 
-  const refetchCard = () => utils.card.byId.refetch({ id: cardPublicId });
+  const refetchCard = () => utils.card.byId.refetch({ cardPublicId });
 
   const updateCardList = api.card.reorder.useMutation({
     onSuccess: async () => {
@@ -78,8 +78,8 @@ export default function ListSelector({
                             setValue(list.publicId, newValue);
 
                             updateCardList.mutate({
-                              cardId: cardPublicId,
-                              newListId: list.publicId,
+                              cardPublicId,
+                              newListPublicId: list.publicId,
                             });
 
                             handleSubmit(onSubmit);
