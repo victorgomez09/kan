@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 import * as cardRepo from "~/server/db/repository/card.repo";
+import * as cardActivityRepo from "~/server/db/repository/cardActivity.repo";
 import * as labelRepo from "~/server/db/repository/label.repo";
 import * as listRepo from "~/server/db/repository/list.repo";
 import * as workspaceRepo from "~/server/db/repository/workspace.repo";
@@ -82,6 +83,12 @@ export const cardRouter = createTRPCRouter({
           code: "INTERNAL_SERVER_ERROR",
         });
 
+      await cardActivityRepo.create(ctx.db, {
+        type: "card.created",
+        cardId: newCard.id,
+        createdBy: userId,
+      });
+
       if (newCardId && input.labelPublicIds.length) {
         const labels = await labelRepo.getAllByPublicIds(
           ctx.db,
@@ -99,7 +106,25 @@ export const cardRouter = createTRPCRouter({
           labelId: label.id,
         }));
 
-        await cardRepo.bulkCreateCardLabelRelationships(ctx.db, labelsInsert);
+        const cardLabels = await cardRepo.bulkCreateCardLabelRelationships(
+          ctx.db,
+          labelsInsert,
+        );
+
+        if (!cardLabels?.length)
+          throw new TRPCError({
+            message: `Failed to create card label relationships`,
+            code: "INTERNAL_SERVER_ERROR",
+          });
+
+        const cardActivitesInsert = cardLabels.map((cardLabel) => ({
+          type: "card.updated.label.added" as const,
+          cardId: cardLabel.cardId,
+          labelId: cardLabel.labelId,
+          createdBy: userId,
+        }));
+
+        await cardActivityRepo.bulkCreate(ctx.db, cardActivitesInsert);
       }
 
       if (newCardId && input.memberPublicIds.length) {
@@ -119,10 +144,26 @@ export const cardRouter = createTRPCRouter({
           workspaceMemberId: member.id,
         }));
 
-        await cardRepo.bulkCreateCardWorkspaceMemberRelationships(
-          ctx.db,
-          membersInsert,
-        );
+        const cardMembers =
+          await cardRepo.bulkCreateCardWorkspaceMemberRelationships(
+            ctx.db,
+            membersInsert,
+          );
+
+        if (!cardMembers?.length)
+          throw new TRPCError({
+            message: `Failed to create card member relationships`,
+            code: "INTERNAL_SERVER_ERROR",
+          });
+
+        const cardActivitesInsert = cardMembers.map((cardMember) => ({
+          type: "card.updated.member.added" as const,
+          cardId: cardMember.cardId,
+          workspaceMemberId: cardMember.workspaceMemberId,
+          createdBy: userId,
+        }));
+
+        await cardActivityRepo.bulkCreate(ctx.db, cardActivitesInsert);
       }
 
       return newCard;
@@ -177,12 +218,40 @@ export const cardRouter = createTRPCRouter({
       );
 
       if (existingLabel) {
-        await cardRepo.hardDeleteCardLabelRelationship(ctx.db, cardLabelIds);
+        const deletedCardLabelRelationship =
+          await cardRepo.hardDeleteCardLabelRelationship(ctx.db, cardLabelIds);
+
+        if (!deletedCardLabelRelationship)
+          throw new TRPCError({
+            message: `Failed to remove label from card`,
+            code: "INTERNAL_SERVER_ERROR",
+          });
+
+        await cardActivityRepo.create(ctx.db, {
+          type: "card.updated.label.removed" as const,
+          cardId: card.id,
+          labelId: label.id,
+          createdBy: userId,
+        });
 
         return { newLabel: false };
       }
 
-      await cardRepo.createCardLabelRelationship(ctx.db, cardLabelIds);
+      const newCardLabelRelationship =
+        await cardRepo.createCardLabelRelationship(ctx.db, cardLabelIds);
+
+      if (!newCardLabelRelationship)
+        throw new TRPCError({
+          message: `Failed to add label to card`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
+      await cardActivityRepo.create(ctx.db, {
+        type: "card.updated.label.added" as const,
+        cardId: card.id,
+        labelId: label.id,
+        createdBy: userId,
+      });
 
       return { newLabel: true };
     }),
@@ -238,12 +307,43 @@ export const cardRouter = createTRPCRouter({
       );
 
       if (existingMember) {
-        await cardRepo.hardDeleteCardMemberRelationship(ctx.db, cardMemberIds);
+        const deletedCardMemberRelationship =
+          await cardRepo.hardDeleteCardMemberRelationship(
+            ctx.db,
+            cardMemberIds,
+          );
+
+        if (!deletedCardMemberRelationship?.success)
+          throw new TRPCError({
+            message: `Failed to remove member from card`,
+            code: "INTERNAL_SERVER_ERROR",
+          });
+
+        await cardActivityRepo.create(ctx.db, {
+          type: "card.updated.member.removed" as const,
+          cardId: card.id,
+          workspaceMemberId: member.id,
+          createdBy: userId,
+        });
 
         return { newMember: false };
       }
 
-      await cardRepo.createCardMemberRelationship(ctx.db, cardMemberIds);
+      const newCardMemberRelationship =
+        await cardRepo.createCardMemberRelationship(ctx.db, cardMemberIds);
+
+      if (!newCardMemberRelationship?.success)
+        throw new TRPCError({
+          message: `Failed to add member to card`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
+      await cardActivityRepo.create(ctx.db, {
+        type: "card.updated.member.added" as const,
+        cardId: card.id,
+        workspaceMemberId: member.id,
+        createdBy: userId,
+      });
 
       return { newMember: true };
     }),
@@ -306,6 +406,18 @@ export const cardRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
+      const existingCard = await cardRepo.getByPublicId(
+        ctx.db,
+        input.cardPublicId,
+      );
+
+      if (!existingCard) {
+        throw new TRPCError({
+          message: `Card with public ID ${input.cardPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+      }
+
       const result = await cardRepo.update(
         ctx.db,
         { title: input.title, description: input.description },
@@ -317,6 +429,32 @@ export const cardRouter = createTRPCRouter({
           message: `Failed to update card`,
           code: "INTERNAL_SERVER_ERROR",
         });
+
+      const activities = [];
+
+      if (existingCard.title !== input.title) {
+        activities.push({
+          type: "card.updated.title" as const,
+          cardId: result.id,
+          createdBy: userId,
+          fromTitle: existingCard.title,
+          toTitle: input.title,
+        });
+      }
+
+      if (existingCard.description !== input.description) {
+        activities.push({
+          type: "card.updated.description" as const,
+          cardId: result.id,
+          createdBy: userId,
+          fromDescription: existingCard.description ?? undefined,
+          toDescription: input.description,
+        });
+      }
+
+      if (activities.length > 0) {
+        await cardActivityRepo.bulkCreate(ctx.db, activities);
+      }
 
       return result;
     }),
@@ -359,15 +497,27 @@ export const cardRouter = createTRPCRouter({
 
       const deletedAt = new Date().toISOString();
 
-      await cardRepo.softDelete(ctx.db, {
+      const deletedCard = await cardRepo.softDelete(ctx.db, {
         cardId: card.id,
         deletedAt,
         deletedBy: userId,
       });
 
+      if (!deletedCard)
+        throw new TRPCError({
+          message: `Failed to delete card`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
       await cardRepo.shiftIndex(ctx.db, {
         listId: card.list.id,
         cardIndex: card.index,
+      });
+
+      await cardActivityRepo.create(ctx.db, {
+        type: "card.archived",
+        cardId: card.id,
+        createdBy: userId,
       });
 
       return { success: true };
@@ -435,7 +585,7 @@ export const cardRouter = createTRPCRouter({
         newIndex = lastCardIndex !== undefined ? lastCardIndex + 1 : 0;
       }
 
-      const result = await cardRepo.reorder(ctx.db, {
+      const { success } = await cardRepo.reorder(ctx.db, {
         currentListId: currentList.id,
         newListId: newList.id,
         currentIndex,
@@ -443,6 +593,38 @@ export const cardRouter = createTRPCRouter({
         cardId: card.id,
       });
 
-      return { success: !!result.error };
+      if (!success)
+        throw new TRPCError({
+          message: `Failed to reorder card`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
+      const activities = [];
+
+      if (currentIndex !== newIndex) {
+        activities.push({
+          type: "card.updated.index" as const,
+          cardId: card.id,
+          createdBy: userId,
+          fromIndex: currentIndex,
+          toIndex: newIndex,
+        });
+      }
+
+      if (currentList.id !== newList.id) {
+        activities.push({
+          type: "card.updated.list" as const,
+          cardId: card.id,
+          createdBy: userId,
+          fromListId: currentList.id,
+          toListId: newList.id,
+        });
+      }
+
+      if (activities.length > 0) {
+        await cardActivityRepo.bulkCreate(ctx.db, activities);
+      }
+
+      return { success };
     }),
 });

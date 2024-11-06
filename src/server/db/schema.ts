@@ -24,6 +24,18 @@ export const memberStatusEnum = pgEnum("member_status", [
   "active",
   "removed",
 ]);
+export const activityTypeEnum = pgEnum("card_activity_type", [
+  "card.created",
+  "card.updated.title",
+  "card.updated.description",
+  "card.updated.index",
+  "card.updated.list",
+  "card.updated.label.added",
+  "card.updated.label.removed",
+  "card.updated.member.added",
+  "card.updated.member.removed",
+  "card.archived",
+]);
 
 export const boards = pgTable("board", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
@@ -324,3 +336,55 @@ export const usersToWorkspacesRelations = relations(
     }),
   }),
 );
+
+export const cardActivities = pgTable("card_activity", {
+  id: bigserial("id", { mode: "number" }).primaryKey(),
+  publicId: varchar("publicId", { length: 12 }).notNull().unique(),
+  type: activityTypeEnum("type").notNull(),
+  cardId: bigint("cardId", { mode: "number" })
+    .notNull()
+    .references(() => cards.id, { onDelete: "cascade" }),
+  fromIndex: integer("fromIndex"),
+  toIndex: integer("toIndex"),
+  fromListId: bigint("fromListId", { mode: "number" }),
+  toListId: bigint("toListId", { mode: "number" }).references(() => lists.id),
+  labelId: bigint("labelId", { mode: "number" }).references(() => labels.id),
+  workspaceMemberId: bigint("workspaceMemberId", { mode: "number" }).references(
+    () => workspaceMembers.id,
+  ),
+  fromTitle: varchar("fromTitle", { length: 255 }),
+  toTitle: varchar("toTitle", { length: 255 }),
+  fromDescription: text("fromDescription"),
+  toDescription: text("toDescription"),
+  createdBy: uuid("createdBy")
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const cardActivitiesRelations = relations(cardActivities, ({ one }) => ({
+  card: one(cards, {
+    fields: [cardActivities.cardId],
+    references: [cards.id],
+  }),
+  fromList: one(lists, {
+    fields: [cardActivities.fromListId],
+    references: [lists.id],
+  }),
+  toList: one(lists, {
+    fields: [cardActivities.toListId],
+    references: [lists.id],
+  }),
+  label: one(labels, {
+    fields: [cardActivities.labelId],
+    references: [labels.id],
+  }),
+  workspaceMember: one(workspaceMembers, {
+    fields: [cardActivities.workspaceMemberId],
+    references: [workspaceMembers.id],
+  }),
+  createdBy: one(users, {
+    fields: [cardActivities.createdBy],
+    references: [users.id],
+  }),
+}));

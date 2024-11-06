@@ -127,13 +127,15 @@ export const softDeleteAllByBoardId = async (
     deletedBy: string;
   },
 ) => {
-  const result = await db
+  const { data } = await db
     .from("list")
     .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
     .eq("boardId", args.boardId)
-    .is("deletedAt", null);
+    .is("deletedAt", null)
+    .select(`id`)
+    .order("id", { ascending: true });
 
-  return result;
+  return data;
 };
 
 export const softDeleteById = async (
@@ -144,11 +146,15 @@ export const softDeleteById = async (
     deletedBy: string;
   },
 ) => {
-  const result = await db
+  const { data } = await db
     .from("list")
     .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
     .eq("id", args.listId)
-    .is("deletedAt", null);
+    .is("deletedAt", null)
+    .select(`id`)
+    .order("id", { ascending: true })
+    .limit(1)
+    .single();
 
-  return result;
+  return data;
 };

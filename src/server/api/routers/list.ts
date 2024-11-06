@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
+import * as activityRepo from "~/server/db/repository/cardActivity.repo";
 import * as cardRepo from "~/server/db/repository/card.repo";
 import * as boardRepo from "~/server/db/repository/board.repo";
 import * as listRepo from "~/server/db/repository/list.repo";
@@ -142,17 +143,37 @@ export const listRouter = createTRPCRouter({
 
       const deletedAt = new Date().toISOString();
 
-      await listRepo.softDeleteById(ctx.db, {
+      const deletedList = await listRepo.softDeleteById(ctx.db, {
         listId: list.id,
         deletedAt,
         deletedBy: userId,
       });
 
-      await cardRepo.softDeleteAllByListIds(ctx.db, {
+      if (!deletedList)
+        throw new TRPCError({
+          message: `Failed to delete list`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
+      const deletedCards = await cardRepo.softDeleteAllByListIds(ctx.db, {
         listIds: [list.id],
         deletedAt,
         deletedBy: userId,
       });
+
+      if (!deletedCards?.length)
+        throw new TRPCError({
+          message: `Failed to delete cards`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
+      const activities = deletedCards.map((card) => ({
+        type: "card.archived" as const,
+        createdBy: userId,
+        cardId: card.id,
+      }));
+
+      await activityRepo.bulkCreate(ctx.db, activities);
 
       await listRepo.shiftIndex(ctx.db, {
         boardId: list.boardId,

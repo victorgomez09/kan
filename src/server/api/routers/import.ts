@@ -5,6 +5,7 @@ import { generateUID } from "~/utils/generateUID";
 
 import * as boardRepo from "~/server/db/repository/board.repo";
 import * as cardRepo from "~/server/db/repository/card.repo";
+import * as cardActivityRepo from "~/server/db/repository/cardActivity.repo";
 import * as importRepo from "~/server/db/repository/import.repo";
 import * as listRepo from "~/server/db/repository/list.repo";
 import * as workspaceRepo from "~/server/db/repository/workspace.repo";
@@ -196,9 +197,26 @@ export const importRouter = createTRPCRouter({
                 importId: newImportId,
               }));
 
-              await cardRepo.bulkCreate(ctx.db, cardsInsert);
+              const createdCards = await cardRepo.bulkCreate(
+                ctx.db,
+                cardsInsert,
+              );
 
-              await ctx.db.from("card").insert(cardsInsert);
+              if (!createdCards?.length)
+                throw new TRPCError({
+                  message: "Failed to create new cards",
+                  code: "INTERNAL_SERVER_ERROR",
+                });
+
+              const activities = createdCards.map((card) => ({
+                type: "card.created" as const,
+                cardId: card.id,
+                createdBy: userId,
+              }));
+
+              if (createdCards.length > 0) {
+                await cardActivityRepo.bulkCreate(ctx.db, activities);
+              }
             }
 
             listIndex++;
