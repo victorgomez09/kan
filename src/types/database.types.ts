@@ -284,6 +284,13 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "card_activity_fromListId_list_id_fk";
+            columns: ["fromListId"];
+            isOneToOne: false;
+            referencedRelation: "list";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "card_activity_labelId_label_id_fk";
             columns: ["labelId"];
             isOneToOne: false;

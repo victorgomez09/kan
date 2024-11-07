@@ -346,7 +346,9 @@ export const cardActivities = pgTable("card_activity", {
     .references(() => cards.id, { onDelete: "cascade" }),
   fromIndex: integer("fromIndex"),
   toIndex: integer("toIndex"),
-  fromListId: bigint("fromListId", { mode: "number" }),
+  fromListId: bigint("fromListId", { mode: "number" }).references(
+    () => lists.id,
+  ),
   toListId: bigint("toListId", { mode: "number" }).references(() => lists.id),
   labelId: bigint("labelId", { mode: "number" }).references(() => labels.id),
   workspaceMemberId: bigint("workspaceMemberId", { mode: "number" }).references(

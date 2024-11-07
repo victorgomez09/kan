@@ -236,6 +236,40 @@ export const getWithListAndMembersByPublicId = async (
             id,
             name
           )
+        ),
+        activities:card_activity (
+          publicId,
+          type,
+          createdAt,
+          fromIndex,
+          toIndex,
+          fromTitle,
+          toTitle,
+          fromDescription,
+          toDescription,
+          fromList:list!card_activity_fromListId_list_id_fk (
+            publicId,
+            name
+          ),
+          toList:list!card_activity_toListId_list_id_fk (
+            publicId,
+            name
+          ),
+          label!card_activity_labelId_label_id_fk (
+            publicId,
+            name
+          ),
+          member:workspace_members!card_activity_workspaceMemberId_workspace_members_id_fk (
+            publicId,
+            user!workspace_members_userId_user_id_fk (
+              id,
+              name
+            )
+          ),
+          user!card_activity_createdBy_user_id_fk (
+            id,
+            name
+          )
         )
       `,
     )
@@ -349,6 +383,7 @@ export const hardDeleteCardMemberRelationship = async (
     .eq("cardId", args.cardId)
     .eq("workspaceMemberId", args.memberId)
     .select()
+    .order("cardId", { ascending: true })
     .limit(1)
     .single();
 
