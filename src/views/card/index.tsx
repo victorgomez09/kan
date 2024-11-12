@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import ContentEditable from "react-contenteditable";
 import { IoChevronForwardSharp } from "react-icons/io5";
 
+import ActivityList from "./components/ActivityList";
 import Dropdown from "./components/Dropdown";
 import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
 import { DeleteLabelConfirmation } from "./components/DeleteLabelConfirmation";
@@ -15,6 +16,7 @@ import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 
 import Modal from "~/components/modal";
 import { useModal } from "~/providers/modal";
+import { usePopup } from "~/providers/popup";
 
 import { api } from "~/utils/api";
 
@@ -26,7 +28,9 @@ interface FormValues {
 
 export default function CardPage() {
   const params = useParams();
+  const utils = api.useUtils();
   const { modalContentType, entityId } = useModal();
+  const { showPopup } = usePopup();
 
   const cardId = Array.isArray(params?.cardId)
     ? params.cardId[0]
@@ -39,6 +43,7 @@ export default function CardPage() {
   const board = data?.list?.board;
   const boardId = board?.publicId;
   const labels = board?.labels;
+  const activities = data?.activities;
   const workspaceMembers = board?.workspace?.members;
   const selectedLabels = data?.labels;
   const selectedMembers = data?.members;
@@ -75,7 +80,17 @@ export default function CardPage() {
       };
     }) ?? [];
 
-  const updateCard = api.card.update.useMutation();
+  const updateCard = api.card.update.useMutation({
+    onSuccess: async () => {
+      await utils.card.byId.refetch();
+    },
+    onError: () => {
+      showPopup({
+        header: "Unable to update card",
+        message: "Please try again later, or contact customer support.",
+      });
+    },
+  });
 
   const { register, handleSubmit, setValue, watch } = useForm<FormValues>({
     values: {
@@ -97,58 +112,74 @@ export default function CardPage() {
 
   return (
     <div className="flex h-full flex-1 flex-row">
-      <div className="w-full p-8">
-        <div className="mb-8 flex w-full items-center justify-between">
-          {isLoading ? (
-            <div className="flex space-x-2">
-              <div className="h-[2.3rem] w-[150px] animate-pulse rounded-[5px] bg-light-300 dark:bg-dark-300" />
-              <div className="h-[2.3rem] w-[300px] animate-pulse rounded-[5px] bg-light-300 dark:bg-dark-300" />
-            </div>
-          ) : (
-            <>
-              <Link
-                className="whitespace-nowrap font-medium leading-[2.3rem] tracking-tight text-light-900 dark:text-dark-900 sm:text-[1.2rem]"
-                href={`/boards/${board?.publicId}`}
-              >
-                {board?.name}
-              </Link>
-              <IoChevronForwardSharp
-                size={18}
-                className="mx-2 text-light-900 dark:text-dark-900"
-              />
-              <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="w-full space-y-6"
-              >
-                <div>
-                  <input
-                    type="text"
-                    id="title"
-                    {...register("title")}
-                    onBlur={handleSubmit(onSubmit)}
-                    className="block w-full border-0 bg-transparent p-0 py-0 font-medium tracking-tight text-neutral-900 focus:ring-0 dark:text-dark-1000 sm:text-[1.2rem]"
-                  />
-                </div>
-              </form>
-              <div className="flex">
-                <Dropdown />
+      <div className="flex h-full w-full flex-col overflow-hidden">
+        <div className="h-full max-h-[calc(100vh-4rem)] overflow-y-auto p-8">
+          <div className="mb-8 flex w-full items-center justify-between">
+            {isLoading ? (
+              <div className="flex space-x-2">
+                <div className="h-[2.3rem] w-[150px] animate-pulse rounded-[5px] bg-light-300 dark:bg-dark-300" />
+                <div className="h-[2.3rem] w-[300px] animate-pulse rounded-[5px] bg-light-300 dark:bg-dark-300" />
               </div>
-            </>
-          )}
-        </div>
-        <div className="mb-8 flex w-full max-w-2xl justify-between">
-          <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
-            <div className="mt-2">
-              <ContentEditable
-                placeholder="Add description..."
-                html={watch("description")}
-                disabled={false}
-                onChange={(e) => setValue("description", e.target.value)}
-                onBlur={handleSubmit(onSubmit)}
-                className="block w-full border-0 bg-transparent py-1.5 text-light-900 focus-visible:outline-none dark:text-dark-1000 sm:text-sm sm:leading-6"
+            ) : (
+              <>
+                <Link
+                  className="whitespace-nowrap font-medium leading-[2.3rem] tracking-tight text-light-900 dark:text-dark-900 sm:text-[1.2rem]"
+                  href={`/boards/${board?.publicId}`}
+                >
+                  {board?.name}
+                </Link>
+                <IoChevronForwardSharp
+                  size={18}
+                  className="mx-2 text-light-900 dark:text-dark-900"
+                />
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="w-full space-y-6"
+                >
+                  <div>
+                    <input
+                      type="text"
+                      id="title"
+                      {...register("title")}
+                      onBlur={handleSubmit(onSubmit)}
+                      className="block w-full border-0 bg-transparent p-0 py-0 font-medium tracking-tight text-neutral-900 focus:ring-0 dark:text-dark-1000 sm:text-[1.2rem]"
+                    />
+                  </div>
+                </form>
+                <div className="flex">
+                  <Dropdown />
+                </div>
+              </>
+            )}
+          </div>
+          <div className="mb-10 flex w-full max-w-2xl justify-between">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="w-full space-y-6"
+            >
+              <div className="mt-2">
+                <ContentEditable
+                  placeholder="Add description..."
+                  html={watch("description")}
+                  disabled={false}
+                  onChange={(e) => setValue("description", e.target.value)}
+                  onBlur={handleSubmit(onSubmit)}
+                  className="block w-full border-0 bg-transparent py-1.5 text-light-900 focus-visible:outline-none dark:text-dark-1000 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </form>
+          </div>
+          <div className="border-t-[1px] border-light-600 pt-12 dark:border-dark-600">
+            <h2 className="text-md pb-4 font-medium text-light-900 dark:text-dark-1000">
+              Activity
+            </h2>
+            <div>
+              <ActivityList
+                activities={activities ?? []}
+                isLoading={isLoading}
               />
             </div>
-          </form>
+          </div>
         </div>
       </div>
       <div className="min-w-[325px] border-l-[1px] border-light-600 bg-light-200 p-8 text-light-900 dark:border-dark-400 dark:bg-dark-100 dark:text-dark-900">

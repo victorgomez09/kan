@@ -263,12 +263,14 @@ export const getWithListAndMembersByPublicId = async (
             publicId,
             user!workspace_members_userId_user_id_fk (
               id,
-              name
+              name,
+              email
             )
           ),
           user!card_activity_createdBy_user_id_fk (
             id,
-            name
+            name,
+            email
           )
         )
       `,
