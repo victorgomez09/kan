@@ -407,7 +407,6 @@ export const hardDeleteCardLabelRelationship = async (
     .eq("cardId", args.cardId)
     .eq("labelId", args.labelId)
     .select()
-    .limit(1)
     .single();
 
   return { data };
