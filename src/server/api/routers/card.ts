@@ -5,6 +5,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 import * as cardRepo from "~/server/db/repository/card.repo";
 import * as cardActivityRepo from "~/server/db/repository/cardActivity.repo";
+import * as cardCommentRepo from "~/server/db/repository/cardComment.repo";
 import * as labelRepo from "~/server/db/repository/label.repo";
 import * as listRepo from "~/server/db/repository/list.repo";
 import * as workspaceRepo from "~/server/db/repository/workspace.repo";
@@ -167,6 +168,63 @@ export const cardRouter = createTRPCRouter({
       }
 
       return newCard;
+    }),
+  addComment: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Add a comment to a card",
+        method: "POST",
+        path: "/cards/{cardPublicId}/comments",
+        description: "Adds a comment to a card",
+        tags: ["Cards"],
+        protect: true,
+      },
+    })
+    .input(
+      z.object({
+        cardPublicId: z.string().min(12),
+        comment: z.string().min(1),
+      }),
+    )
+    .output(z.custom<Awaited<ReturnType<typeof cardCommentRepo.create>>>())
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
+      const card = await cardRepo.getByPublicId(ctx.db, input.cardPublicId);
+
+      if (!card)
+        throw new TRPCError({
+          message: `Card with public ID ${input.cardPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      const newComment = await cardCommentRepo.create(ctx.db, {
+        comment: input.comment,
+        createdBy: userId,
+        cardId: card.id,
+      });
+
+      if (!newComment?.id)
+        throw new TRPCError({
+          message: `Failed to create comment`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
+      await cardActivityRepo.create(ctx.db, {
+        type: "card.updated.comment.added" as const,
+        cardId: card.id,
+        commentId: newComment.id,
+        toComment: newComment.comment,
+        createdBy: userId,
+      });
+
+      return newComment;
     }),
   addOrRemoveLabel: protectedProcedure
     .meta({

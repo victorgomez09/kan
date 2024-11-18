@@ -13,6 +13,7 @@ import ListSelector from "./components/ListSelector";
 import MemberSelector from "./components/MemberSelector";
 import { LabelForm } from "./components/LabelForm";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
+import NewCommentForm from "./components/NewCommentForm";
 
 import Modal from "~/components/modal";
 import { useModal } from "~/providers/modal";
@@ -178,6 +179,9 @@ export default function CardPage() {
                 activities={activities ?? []}
                 isLoading={isLoading}
               />
+            </div>
+            <div className="mt-6">
+              <NewCommentForm cardPublicId={cardId} />
             </div>
           </div>
         </div>

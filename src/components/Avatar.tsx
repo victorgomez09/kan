@@ -11,7 +11,7 @@ const Avatar = ({
   size?: "sm" | "md" | "lg";
   name: string;
   email: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   isLoading: boolean;
 }) => {
   const initials = name

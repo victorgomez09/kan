@@ -144,6 +144,35 @@ const ActivityList = ({
           label: activity.label?.name ?? null,
         });
 
+        if (activity.type === "card.updated.comment.added")
+          return (
+            <div
+              key={activity.publicId}
+              className="relative flex flex w-full flex-col rounded-xl border border-light-600 bg-light-200 p-5 text-light-900 focus-visible:outline-none dark:border-dark-600 dark:bg-dark-100 dark:text-dark-1000 sm:text-sm sm:leading-6"
+            >
+              <div className="flex items-center space-x-2">
+                <Avatar
+                  size="sm"
+                  name={activity.user?.name ?? ""}
+                  email={activity.user?.email ?? ""}
+                  isLoading={isLoading}
+                />
+                <p className="text-sm">
+                  <span className="font-medium dark:text-dark-1000">{`${activity.user?.name} `}</span>
+                  <span className="mx-1 text-light-900 dark:text-dark-800">
+                    ·
+                  </span>
+                  <span className="space-x-1 text-light-900 dark:text-dark-800">
+                    {formatDistanceToNow(new Date(activity.createdAt), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                </p>
+              </div>
+              <p className="mt-2 text-sm">{activity.comment?.comment}</p>
+            </div>
+          );
+
         if (!activityText) return null;
 
         return (
@@ -159,9 +188,11 @@ const ActivityList = ({
                 icon={getActivityIcon(activity.type)}
                 isLoading={isLoading}
               />
-              {index !== activities.length - 1 && (
-                <div className="absolute bottom-[-14px] left-1/2 top-[30px] w-0.5 -translate-x-1/2 bg-light-600 dark:bg-dark-600" />
-              )}
+              {index !== activities.length - 1 &&
+                activities[index + 1]?.type !==
+                  "card.updated.comment.added" && (
+                  <div className="absolute bottom-[-14px] left-1/2 top-[30px] w-0.5 -translate-x-1/2 bg-light-600 dark:bg-dark-600" />
+                )}
             </div>
             <p className="text-sm">
               <span className="font-medium dark:text-dark-1000">{`${activity.user?.name} `}</span>

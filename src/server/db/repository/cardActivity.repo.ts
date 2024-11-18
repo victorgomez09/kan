@@ -18,6 +18,9 @@ export const create = async (
     fromDescription?: string;
     toDescription?: string;
     createdBy: string;
+    commentId?: number;
+    fromComment?: string;
+    toComment?: string;
   },
 ) => {
   const { data } = await db
@@ -37,6 +40,9 @@ export const create = async (
       fromDescription: activityInput.fromDescription,
       toDescription: activityInput.toDescription,
       createdBy: activityInput.createdBy,
+      commentId: activityInput.commentId,
+      fromComment: activityInput.fromComment,
+      toComment: activityInput.toComment,
     })
     .select(`id`)
     .limit(1)

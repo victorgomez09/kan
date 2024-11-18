@@ -216,8 +216,10 @@ export type Database = {
       card_activity: {
         Row: {
           cardId: number;
+          commentId: number | null;
           createdAt: string;
           createdBy: string;
+          fromComment: string | null;
           fromDescription: string | null;
           fromIndex: number | null;
           fromListId: number | null;
@@ -225,6 +227,7 @@ export type Database = {
           id: number;
           labelId: number | null;
           publicId: string;
+          toComment: string | null;
           toDescription: string | null;
           toIndex: number | null;
           toListId: number | null;
@@ -234,8 +237,10 @@ export type Database = {
         };
         Insert: {
           cardId: number;
+          commentId?: number | null;
           createdAt?: string;
           createdBy: string;
+          fromComment?: string | null;
           fromDescription?: string | null;
           fromIndex?: number | null;
           fromListId?: number | null;
@@ -243,6 +248,7 @@ export type Database = {
           id?: number;
           labelId?: number | null;
           publicId: string;
+          toComment?: string | null;
           toDescription?: string | null;
           toIndex?: number | null;
           toListId?: number | null;
@@ -252,8 +258,10 @@ export type Database = {
         };
         Update: {
           cardId?: number;
+          commentId?: number | null;
           createdAt?: string;
           createdBy?: string;
+          fromComment?: string | null;
           fromDescription?: string | null;
           fromIndex?: number | null;
           fromListId?: number | null;
@@ -261,6 +269,7 @@ export type Database = {
           id?: number;
           labelId?: number | null;
           publicId?: string;
+          toComment?: string | null;
           toDescription?: string | null;
           toIndex?: number | null;
           toListId?: number | null;
@@ -274,6 +283,13 @@ export type Database = {
             columns: ["cardId"];
             isOneToOne: false;
             referencedRelation: "card";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "card_activity_commentId_card_comments_id_fk";
+            columns: ["commentId"];
+            isOneToOne: false;
+            referencedRelation: "card_comments";
             referencedColumns: ["id"];
           },
           {
@@ -309,6 +325,64 @@ export type Database = {
             columns: ["workspaceMemberId"];
             isOneToOne: false;
             referencedRelation: "workspace_members";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      card_comments: {
+        Row: {
+          cardId: number;
+          comment: string;
+          createdAt: string;
+          createdBy: string;
+          deletedAt: string | null;
+          deletedBy: string | null;
+          id: number;
+          publicId: string;
+          updatedAt: string | null;
+        };
+        Insert: {
+          cardId: number;
+          comment: string;
+          createdAt?: string;
+          createdBy: string;
+          deletedAt?: string | null;
+          deletedBy?: string | null;
+          id?: number;
+          publicId: string;
+          updatedAt?: string | null;
+        };
+        Update: {
+          cardId?: number;
+          comment?: string;
+          createdAt?: string;
+          createdBy?: string;
+          deletedAt?: string | null;
+          deletedBy?: string | null;
+          id?: number;
+          publicId?: string;
+          updatedAt?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "card_comments_cardId_card_id_fk";
+            columns: ["cardId"];
+            isOneToOne: false;
+            referencedRelation: "card";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "card_comments_createdBy_user_id_fk";
+            columns: ["createdBy"];
+            isOneToOne: false;
+            referencedRelation: "user";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "card_comments_deletedBy_user_id_fk";
+            columns: ["deletedBy"];
+            isOneToOne: false;
+            referencedRelation: "user";
             referencedColumns: ["id"];
           },
         ];
@@ -680,7 +754,10 @@ export type Database = {
         | "card.updated.label.removed"
         | "card.updated.member.added"
         | "card.updated.member.removed"
-        | "card.archived";
+        | "card.archived"
+        | "card.updated.comment.added"
+        | "card.updated.comment.updated"
+        | "card.updated.comment.deleted";
       member_status: "invited" | "active" | "removed";
       role: "admin" | "member" | "guest";
       source: "trello";

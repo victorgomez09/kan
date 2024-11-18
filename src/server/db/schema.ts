@@ -34,6 +34,9 @@ export const activityTypeEnum = pgEnum("card_activity_type", [
   "card.updated.label.removed",
   "card.updated.member.added",
   "card.updated.member.removed",
+  "card.updated.comment.added",
+  "card.updated.comment.updated",
+  "card.updated.comment.deleted",
   "card.archived",
 ]);
 
@@ -260,6 +263,7 @@ export const cardsRelations = relations(cards, ({ one, many }) => ({
     fields: [cards.importId],
     references: [imports.id],
   }),
+  comments: many(comments),
 }));
 
 export const users = pgTable("user", {
@@ -362,6 +366,11 @@ export const cardActivities = pgTable("card_activity", {
     .notNull()
     .references(() => users.id),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
+  commentId: bigint("commentId", { mode: "number" }).references(
+    () => comments.id,
+  ),
+  fromComment: text("fromComment"),
+  toComment: text("toComment"),
 });
 
 export const cardActivitiesRelations = relations(cardActivities, ({ one }) => ({
@@ -387,6 +396,37 @@ export const cardActivitiesRelations = relations(cardActivities, ({ one }) => ({
   }),
   createdBy: one(users, {
     fields: [cardActivities.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const comments = pgTable("card_comments", {
+  id: bigserial("id", { mode: "number" }).primaryKey(),
+  publicId: varchar("publicId", { length: 12 }).notNull().unique(),
+  comment: text("comment").notNull(),
+  cardId: bigint("cardId", { mode: "number" })
+    .notNull()
+    .references(() => cards.id, { onDelete: "cascade" }),
+  createdBy: uuid("createdBy")
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt"),
+  deletedAt: timestamp("deletedAt"),
+  deletedBy: uuid("deletedBy").references(() => users.id),
+});
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+  card: one(cards, {
+    fields: [comments.cardId],
+    references: [cards.id],
+  }),
+  createdBy: one(users, {
+    fields: [comments.createdBy],
+    references: [users.id],
+  }),
+  deletedBy: one(users, {
+    fields: [comments.deletedBy],
     references: [users.id],
   }),
 }));

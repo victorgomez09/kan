@@ -1,6 +1,16 @@
-const LoadingSpinner = () => {
+import { twMerge } from "tailwind-merge";
+
+const LoadingSpinner = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
   return (
-    <svg className="h-6 w-6 animate-spin" viewBox="0 0 100 100">
+    <svg
+      className={twMerge(
+        "animate-spin",
+        size === "sm" && "h-4 w-4",
+        size === "md" && "h-5 w-5",
+        size === "lg" && "h-6 w-6",
+      )}
+      viewBox="0 0 100 100"
+    >
       <circle
         fill="none"
         stroke-width="10"
