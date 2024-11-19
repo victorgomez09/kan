@@ -181,6 +181,7 @@ export default function CardPage() {
               </h2>
               <div>
                 <ActivityList
+                  cardPublicId={cardId}
                   activities={activities ?? []}
                   isLoading={isLoading}
                 />

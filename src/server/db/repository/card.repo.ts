@@ -275,7 +275,8 @@ export const getWithListAndMembersByPublicId = async (
           comment:card_comments!card_activity_commentId_card_comments_id_fk (
             publicId,
             comment,
-            createdBy
+            createdBy,
+            updatedAt
           )
         )
       `,

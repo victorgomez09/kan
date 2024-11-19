@@ -9,6 +9,7 @@ import {
 } from "react-icons/hi2";
 
 import Avatar from "~/components/Avatar";
+import Comment from "./Comment";
 
 import { type GetCardByIdOutput } from "~/types/router.types";
 
@@ -126,9 +127,11 @@ const getActivityIcon = (type: ActivityType): React.ReactNode | null => {
 
 const ActivityList = ({
   activities,
+  cardPublicId,
   isLoading,
 }: {
   activities: NonNullable<GetCardByIdOutput>["activities"];
+  cardPublicId: string;
   isLoading: boolean;
 }) => {
   return (
@@ -146,31 +149,17 @@ const ActivityList = ({
 
         if (activity.type === "card.updated.comment.added")
           return (
-            <div
+            <Comment
               key={activity.publicId}
-              className="relative flex flex w-full flex-col rounded-xl border border-light-600 bg-light-200 p-5 text-light-900 focus-visible:outline-none dark:border-dark-600 dark:bg-dark-100 dark:text-dark-1000 sm:text-sm sm:leading-6"
-            >
-              <div className="flex items-center space-x-2">
-                <Avatar
-                  size="sm"
-                  name={activity.user?.name ?? ""}
-                  email={activity.user?.email ?? ""}
-                  isLoading={isLoading}
-                />
-                <p className="text-sm">
-                  <span className="font-medium dark:text-dark-1000">{`${activity.user?.name} `}</span>
-                  <span className="mx-1 text-light-900 dark:text-dark-800">
-                    ·
-                  </span>
-                  <span className="space-x-1 text-light-900 dark:text-dark-800">
-                    {formatDistanceToNow(new Date(activity.createdAt), {
-                      addSuffix: true,
-                    })}
-                  </span>
-                </p>
-              </div>
-              <p className="mt-2 text-sm">{activity.comment?.comment}</p>
-            </div>
+              publicId={activity.comment?.publicId}
+              cardPublicId={cardPublicId}
+              name={activity.user?.name ?? ""}
+              email={activity.user?.email ?? ""}
+              isLoading={isLoading}
+              createdAt={activity.createdAt}
+              comment={activity.comment?.comment}
+              isEdited={!!activity.comment?.updatedAt}
+            />
           );
 
         if (!activityText) return null;

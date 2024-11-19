@@ -226,6 +226,80 @@ export const cardRouter = createTRPCRouter({
 
       return newComment;
     }),
+  updateComment: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Update a comment",
+        method: "PUT",
+        path: "/cards/{cardPublicId}/comments/{commentPublicId}",
+        description: "Updates a comment",
+        tags: ["Cards"],
+        protect: true,
+      },
+    })
+    .input(
+      z.object({
+        cardPublicId: z.string().min(12),
+        commentPublicId: z.string().min(12),
+        comment: z.string().min(1),
+      }),
+    )
+    .output(z.custom<Awaited<ReturnType<typeof cardCommentRepo.update>>>())
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
+      const card = await cardRepo.getByPublicId(ctx.db, input.cardPublicId);
+      const existingComment = await cardCommentRepo.getByPublicId(
+        ctx.db,
+        input.commentPublicId,
+      );
+
+      if (!card)
+        throw new TRPCError({
+          message: `Card with public ID ${input.cardPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      if (!existingComment)
+        throw new TRPCError({
+          message: `Comment with public ID ${input.commentPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      if (existingComment.createdBy !== userId)
+        throw new TRPCError({
+          message: `You do not have permission to update this comment`,
+          code: "FORBIDDEN",
+        });
+
+      const updatedComment = await cardCommentRepo.update(ctx.db, {
+        id: existingComment.id,
+        comment: input.comment,
+      });
+
+      if (!updatedComment?.id)
+        throw new TRPCError({
+          message: `Failed to update comment`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
+      await cardActivityRepo.create(ctx.db, {
+        type: "card.updated.comment.updated" as const,
+        cardId: card.id,
+        commentId: updatedComment.id,
+        fromComment: existingComment.comment,
+        toComment: updatedComment.comment,
+        createdBy: userId,
+      });
+
+      return updatedComment;
+    }),
   addOrRemoveLabel: protectedProcedure
     .meta({
       openapi: {

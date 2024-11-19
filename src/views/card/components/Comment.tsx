@@ -1,0 +1,143 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import ContentEditable from "react-contenteditable";
+import { formatDistanceToNow } from "date-fns";
+
+import { api } from "~/utils/api";
+import { usePopup } from "~/providers/popup";
+
+import Avatar from "~/components/Avatar";
+import Button from "~/components/Button";
+import Dropdown from "~/components/Dropdown";
+import { HiEllipsisHorizontal } from "react-icons/hi2";
+
+interface FormValues {
+  comment: string;
+}
+
+const Comment = ({
+  publicId,
+  cardPublicId,
+  name,
+  email,
+  isLoading,
+  createdAt,
+  comment,
+  isEdited = false,
+}: {
+  publicId: string | undefined;
+  cardPublicId: string;
+  name: string;
+  email: string;
+  isLoading: boolean;
+  createdAt: string;
+  comment: string | undefined;
+  isEdited: boolean;
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const utils = api.useUtils();
+  const { showPopup } = usePopup();
+  const { handleSubmit, setValue, watch } = useForm<FormValues>({
+    defaultValues: {
+      comment,
+    },
+  });
+
+  if (!publicId) return null;
+
+  const updateCommentMutation = api.card.updateComment.useMutation({
+    onSuccess: async () => {
+      await utils.card.byId.refetch();
+      setIsEditing(false);
+    },
+    onError: () => {
+      showPopup({
+        header: "Unable to update comment",
+        message: "Please try again later, or contact customer support.",
+      });
+    },
+  });
+
+  const onSubmit = (data: FormValues) => {
+    updateCommentMutation.mutate({
+      cardPublicId,
+      comment: data.comment,
+      commentPublicId: publicId,
+    });
+  };
+
+  return (
+    <div
+      key={publicId}
+      className="group relative flex w-full flex-col rounded-xl border border-light-600 bg-light-200 p-5 text-light-900 focus-visible:outline-none dark:border-dark-600 dark:bg-dark-100 dark:text-dark-1000 sm:text-sm sm:leading-6"
+    >
+      <div className="flex justify-between">
+        <div className="flex items-center space-x-2">
+          <Avatar
+            size="sm"
+            name={name ?? ""}
+            email={email ?? ""}
+            isLoading={isLoading}
+          />
+
+          <p className="text-sm">
+            <span className="font-medium dark:text-dark-1000">{`${name} `}</span>
+            <span className="mx-1 text-light-900 dark:text-dark-800">·</span>
+            <span className="space-x-1 text-light-900 dark:text-dark-800">
+              {formatDistanceToNow(new Date(createdAt), {
+                addSuffix: true,
+              })}
+            </span>
+            {isEdited && (
+              <span className="text-light-900 dark:text-dark-800">
+                {" (edited)"}
+              </span>
+            )}
+          </p>
+        </div>
+
+        <Dropdown
+          items={[
+            {
+              label: "Edit",
+              action: () => setIsEditing(true),
+            },
+          ]}
+        >
+          <HiEllipsisHorizontal className="h-5 w-5" />
+        </Dropdown>
+      </div>
+      {!isEditing ? (
+        <p className="mt-2 text-sm">{comment}</p>
+      ) : (
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <ContentEditable
+            placeholder="Add a comment..."
+            html={watch("comment")}
+            disabled={false}
+            onChange={(e) => setValue("comment", e.target.value)}
+            className="block w-full border-0 bg-transparent py-1.5 text-light-900 focus-visible:outline-none dark:text-dark-1000 sm:text-sm sm:leading-6"
+          />
+          <div className="flex justify-end space-x-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setIsEditing(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              isLoading={updateCommentMutation.isPending}
+              type="submit"
+              size="sm"
+            >
+              Save
+            </Button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+};
+
+export default Comment;
