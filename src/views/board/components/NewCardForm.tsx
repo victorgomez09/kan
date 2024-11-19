@@ -97,10 +97,12 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
     if (!isCreateAnotherEnabled) closeModal();
     reset({
       title: "",
+      description: "",
       listPublicId: watch("listPublicId"),
       labelPublicIds: [],
       memberPublicIds: [],
       isCreateAnotherEnabled,
+      position,
     });
 
     createCard.mutate({
