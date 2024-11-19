@@ -15,6 +15,7 @@ import { LabelForm } from "./components/LabelForm";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import NewCommentForm from "./components/NewCommentForm";
 
+import { PageHead } from "~/components/PageHead";
 import Modal from "~/components/modal";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
@@ -112,128 +113,133 @@ export default function CardPage() {
   if (!cardId) return <></>;
 
   return (
-    <div className="flex h-full flex-1 flex-row">
-      <div className="flex h-full w-full flex-col overflow-hidden">
-        <div className="h-full max-h-[calc(100vh-4rem)] overflow-y-auto p-8">
-          <div className="mb-8 flex w-full items-center justify-between">
-            {isLoading ? (
-              <div className="flex space-x-2">
-                <div className="h-[2.3rem] w-[150px] animate-pulse rounded-[5px] bg-light-300 dark:bg-dark-300" />
-                <div className="h-[2.3rem] w-[300px] animate-pulse rounded-[5px] bg-light-300 dark:bg-dark-300" />
-              </div>
-            ) : (
-              <>
-                <Link
-                  className="whitespace-nowrap font-medium leading-[2.3rem] tracking-tight text-light-900 dark:text-dark-900 sm:text-[1.2rem]"
-                  href={`/boards/${board?.publicId}`}
-                >
-                  {board?.name}
-                </Link>
-                <IoChevronForwardSharp
-                  size={18}
-                  className="mx-2 text-light-900 dark:text-dark-900"
-                />
-                <form
-                  onSubmit={handleSubmit(onSubmit)}
-                  className="w-full space-y-6"
-                >
-                  <div>
-                    <input
-                      type="text"
-                      id="title"
-                      {...register("title")}
-                      onBlur={handleSubmit(onSubmit)}
-                      className="block w-full border-0 bg-transparent p-0 py-0 font-medium tracking-tight text-neutral-900 focus:ring-0 dark:text-dark-1000 sm:text-[1.2rem]"
-                    />
-                  </div>
-                </form>
-                <div className="flex">
-                  <Dropdown />
+    <>
+      <PageHead
+        title={`${data?.title ?? "Card"} | ${board?.name ?? "Board"}`}
+      />
+      <div className="flex h-full flex-1 flex-row">
+        <div className="flex h-full w-full flex-col overflow-hidden">
+          <div className="h-full max-h-[calc(100vh-4rem)] overflow-y-auto p-8">
+            <div className="mb-8 flex w-full items-center justify-between">
+              {isLoading ? (
+                <div className="flex space-x-2">
+                  <div className="h-[2.3rem] w-[150px] animate-pulse rounded-[5px] bg-light-300 dark:bg-dark-300" />
+                  <div className="h-[2.3rem] w-[300px] animate-pulse rounded-[5px] bg-light-300 dark:bg-dark-300" />
                 </div>
-              </>
-            )}
-          </div>
-          <div className="mb-10 flex w-full max-w-2xl justify-between">
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="w-full space-y-6"
-            >
-              <div className="mt-2">
-                <ContentEditable
-                  placeholder="Add description..."
-                  html={watch("description")}
-                  disabled={false}
-                  onChange={(e) => setValue("description", e.target.value)}
-                  onBlur={handleSubmit(onSubmit)}
-                  className="block w-full border-0 bg-transparent py-1.5 text-light-900 focus-visible:outline-none dark:text-dark-1000 sm:text-sm sm:leading-6"
+              ) : (
+                <>
+                  <Link
+                    className="whitespace-nowrap font-medium leading-[2.3rem] tracking-tight text-light-900 dark:text-dark-900 sm:text-[1.2rem]"
+                    href={`/boards/${board?.publicId}`}
+                  >
+                    {board?.name}
+                  </Link>
+                  <IoChevronForwardSharp
+                    size={18}
+                    className="mx-2 text-light-900 dark:text-dark-900"
+                  />
+                  <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="w-full space-y-6"
+                  >
+                    <div>
+                      <input
+                        type="text"
+                        id="title"
+                        {...register("title")}
+                        onBlur={handleSubmit(onSubmit)}
+                        className="block w-full border-0 bg-transparent p-0 py-0 font-medium tracking-tight text-neutral-900 focus:ring-0 dark:text-dark-1000 sm:text-[1.2rem]"
+                      />
+                    </div>
+                  </form>
+                  <div className="flex">
+                    <Dropdown />
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="mb-10 flex w-full max-w-2xl justify-between">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="w-full space-y-6"
+              >
+                <div className="mt-2">
+                  <ContentEditable
+                    placeholder="Add description..."
+                    html={watch("description")}
+                    disabled={false}
+                    onChange={(e) => setValue("description", e.target.value)}
+                    onBlur={handleSubmit(onSubmit)}
+                    className="block w-full border-0 bg-transparent py-1.5 text-light-900 focus-visible:outline-none dark:text-dark-1000 sm:text-sm sm:leading-6"
+                  />
+                </div>
+              </form>
+            </div>
+            <div className="border-t-[1px] border-light-600 pt-12 dark:border-dark-600">
+              <h2 className="text-md pb-4 font-medium text-light-900 dark:text-dark-1000">
+                Activity
+              </h2>
+              <div>
+                <ActivityList
+                  activities={activities ?? []}
+                  isLoading={isLoading}
                 />
               </div>
-            </form>
-          </div>
-          <div className="border-t-[1px] border-light-600 pt-12 dark:border-dark-600">
-            <h2 className="text-md pb-4 font-medium text-light-900 dark:text-dark-1000">
-              Activity
-            </h2>
-            <div>
-              <ActivityList
-                activities={activities ?? []}
-                isLoading={isLoading}
-              />
-            </div>
-            <div className="mt-6">
-              <NewCommentForm cardPublicId={cardId} />
+              <div className="mt-6">
+                <NewCommentForm cardPublicId={cardId} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="min-w-[325px] border-l-[1px] border-light-600 bg-light-200 p-8 text-light-900 dark:border-dark-400 dark:bg-dark-100 dark:text-dark-900">
-        <div className="mb-4 flex w-full">
-          <p className="my-2 w-[100px] text-sm">List</p>
-          <ListSelector
-            cardPublicId={cardId}
-            lists={formattedLists}
-            isLoading={isLoading}
-          />
+        <div className="min-w-[325px] border-l-[1px] border-light-600 bg-light-200 p-8 text-light-900 dark:border-dark-400 dark:bg-dark-100 dark:text-dark-900">
+          <div className="mb-4 flex w-full">
+            <p className="my-2 w-[100px] text-sm">List</p>
+            <ListSelector
+              cardPublicId={cardId}
+              lists={formattedLists}
+              isLoading={isLoading}
+            />
+          </div>
+          <div className="mb-4 flex w-full">
+            <p className="my-2 w-[100px] text-sm">Labels</p>
+            <LabelSelector
+              cardPublicId={cardId}
+              labels={formattedLabels}
+              isLoading={isLoading}
+            />
+          </div>
+          <div className="flex w-full">
+            <p className="my-2 w-[100px] text-sm">Members</p>
+            <MemberSelector
+              cardPublicId={cardId}
+              members={formattedMembers}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
-        <div className="mb-4 flex w-full">
-          <p className="my-2 w-[100px] text-sm">Labels</p>
-          <LabelSelector
-            cardPublicId={cardId}
-            labels={formattedLabels}
-            isLoading={isLoading}
-          />
-        </div>
-        <div className="flex w-full">
-          <p className="my-2 w-[100px] text-sm">Members</p>
-          <MemberSelector
-            cardPublicId={cardId}
-            members={formattedMembers}
-            isLoading={isLoading}
-          />
-        </div>
-      </div>
 
-      <Modal>
-        {modalContentType === "NEW_LABEL" && (
-          <LabelForm cardPublicId={cardId} />
-        )}
-        {modalContentType === "EDIT_LABEL" && (
-          <LabelForm cardPublicId={cardId} isEdit />
-        )}
-        {modalContentType === "DELETE_LABEL" && (
-          <DeleteLabelConfirmation
-            cardPublicId={cardId}
-            labelPublicId={entityId}
-          />
-        )}
-        {modalContentType === "DELETE_CARD" && (
-          <DeleteCardConfirmation
-            boardPublicId={boardId ?? ""}
-            cardPublicId={cardId}
-          />
-        )}
-        {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
-      </Modal>
-    </div>
+        <Modal>
+          {modalContentType === "NEW_LABEL" && (
+            <LabelForm cardPublicId={cardId} />
+          )}
+          {modalContentType === "EDIT_LABEL" && (
+            <LabelForm cardPublicId={cardId} isEdit />
+          )}
+          {modalContentType === "DELETE_LABEL" && (
+            <DeleteLabelConfirmation
+              cardPublicId={cardId}
+              labelPublicId={entityId}
+            />
+          )}
+          {modalContentType === "DELETE_CARD" && (
+            <DeleteCardConfirmation
+              boardPublicId={boardId ?? ""}
+              cardPublicId={cardId}
+            />
+          )}
+          {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
+        </Modal>
+      </div>
+    </>
   );
 }

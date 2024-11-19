@@ -3,6 +3,8 @@ import { twMerge } from "tailwind-merge";
 
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
+
+import { PageHead } from "~/components/PageHead";
 import Modal from "~/components/modal";
 
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
@@ -136,82 +138,85 @@ export default function MembersPage() {
   };
 
   return (
-    <div className="px-28 py-12">
-      <div className="mb-8 flex w-full justify-between">
-        <h1 className="font-medium tracking-tight text-neutral-900 dark:text-dark-1000 sm:text-[1.2rem]">
-          Members
-        </h1>
-        <div className="flex">
-          <button
-            type="button"
-            className="flex items-center gap-x-1.5 rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-dark-1000 dark:text-dark-50"
-            onClick={() => openModal("INVITE_MEMBER")}
-          >
-            <div className="h-5 w-5 items-center">
-              <HiOutlinePlusSmall
-                className="-mr-0.5 h-5 w-5"
-                aria-hidden="true"
-              />
-            </div>
-            Invite
-          </button>
+    <>
+      <PageHead title={`Members | ${workspace?.name ?? "Workspace"}`} />
+      <div className="px-28 py-12">
+        <div className="mb-8 flex w-full justify-between">
+          <h1 className="font-medium tracking-tight text-neutral-900 dark:text-dark-1000 sm:text-[1.2rem]">
+            Members
+          </h1>
+          <div className="flex">
+            <button
+              type="button"
+              className="flex items-center gap-x-1.5 rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-dark-1000 dark:text-dark-50"
+              onClick={() => openModal("INVITE_MEMBER")}
+            >
+              <div className="h-5 w-5 items-center">
+                <HiOutlinePlusSmall
+                  className="-mr-0.5 h-5 w-5"
+                  aria-hidden="true"
+                />
+              </div>
+              Invite
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="mt-8 flow-root">
-        <div className="-mx-4 -my-2 overflow-x-visible sm:-mx-6 lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div className="h-full shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-              <table className="min-w-full divide-y divide-light-600 dark:divide-dark-600">
-                <thead className="rounded-t-lg bg-light-300 dark:bg-dark-200">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="w-[65%] rounded-tl-lg py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-light-900 dark:text-dark-900 sm:pl-6"
-                    >
-                      User
-                    </th>
-                    <th
-                      scope="col"
-                      className="w-[35%] rounded-tr-lg px-3 py-3.5 text-left text-sm font-semibold text-light-900 dark:text-dark-900"
-                    >
-                      Role
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-light-600 bg-light-50 dark:divide-dark-600 dark:bg-dark-100">
-                  {!isLoading &&
-                    data?.members.map((member, index) => (
-                      <TableRow
-                        key={member.publicId}
-                        memberPublicId={member.publicId}
-                        memberName={member?.user?.name}
-                        memberEmail={member?.user?.email}
-                        memberRole={member.role}
-                        memberStatus={member.status}
-                        isLastRow={index === data.members.length - 1}
-                      />
-                    ))}
+        <div className="mt-8 flow-root">
+          <div className="-mx-4 -my-2 overflow-x-visible sm:-mx-6 lg:-mx-8">
+            <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+              <div className="h-full shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                <table className="min-w-full divide-y divide-light-600 dark:divide-dark-600">
+                  <thead className="rounded-t-lg bg-light-300 dark:bg-dark-200">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="w-[65%] rounded-tl-lg py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-light-900 dark:text-dark-900 sm:pl-6"
+                      >
+                        User
+                      </th>
+                      <th
+                        scope="col"
+                        className="w-[35%] rounded-tr-lg px-3 py-3.5 text-left text-sm font-semibold text-light-900 dark:text-dark-900"
+                      >
+                        Role
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-light-600 bg-light-50 dark:divide-dark-600 dark:bg-dark-100">
+                    {!isLoading &&
+                      data?.members.map((member, index) => (
+                        <TableRow
+                          key={member.publicId}
+                          memberPublicId={member.publicId}
+                          memberName={member?.user?.name}
+                          memberEmail={member?.user?.email}
+                          memberRole={member.role}
+                          memberStatus={member.status}
+                          isLastRow={index === data.members.length - 1}
+                        />
+                      ))}
 
-                  {isLoading && (
-                    <>
-                      <TableRow showSkeleton />
-                      <TableRow showSkeleton />
-                      <TableRow showSkeleton isLastRow />
-                    </>
-                  )}
-                </tbody>
-              </table>
+                    {isLoading && (
+                      <>
+                        <TableRow showSkeleton />
+                        <TableRow showSkeleton />
+                        <TableRow showSkeleton isLastRow />
+                      </>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <Modal>
-        {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
-        {modalContentType === "INVITE_MEMBER" && <InviteMemberForm />}
-        {modalContentType === "REMOVE_MEMBER" && <DeleteMemberConfirmation />}
-      </Modal>
-    </div>
+        <Modal>
+          {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
+          {modalContentType === "INVITE_MEMBER" && <InviteMemberForm />}
+          {modalContentType === "REMOVE_MEMBER" && <DeleteMemberConfirmation />}
+        </Modal>
+      </div>
+    </>
   );
 }
