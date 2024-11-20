@@ -1,20 +1,36 @@
 CREATE OR REPLACE FUNCTION reorder_lists(board_id BIGINT, list_id BIGINT, current_index INT, new_index INT)
-RETURNS VOID
-LANGUAGE SQL
-AS $$  
-  UPDATE list
-    SET index =
-      CASE
-        WHEN index = current_index AND id = list_id THEN new_index
-        WHEN current_index < new_index AND index > current_index AND index <= new_index THEN index - 1
-        WHEN current_index > new_index AND index >= new_index AND index < current_index THEN index + 1
-        ELSE index
-      END
-    WHERE "boardId" = board_id;
+RETURNS BOOLEAN
+LANGUAGE PLPGSQL
+AS $$
+BEGIN
+    UPDATE list
+      SET index =
+        CASE
+          WHEN index = current_index AND id = list_id THEN new_index
+          WHEN current_index < new_index AND index > current_index AND index <= new_index THEN index - 1
+          WHEN current_index > new_index AND index >= new_index AND index < current_index THEN index + 1
+          ELSE index
+        END
+      WHERE "boardId" = board_id;
+
+    -- Check for duplicate indices after the update
+    IF EXISTS (
+      SELECT index, COUNT(*)
+      FROM list 
+      WHERE "boardId" = board_id 
+      AND "deletedAt" IS NULL
+      GROUP BY index
+      HAVING COUNT(*) > 1
+    ) THEN
+      RAISE EXCEPTION 'Duplicate indices found after reordering in board %', board_id;
+    END IF;
+
+    RETURN TRUE;
+END;
 $$;
 
 CREATE OR REPLACE FUNCTION reorder_cards(card_id BIGINT, current_list_id BIGINT, new_list_id BIGINT, current_index INT, new_index INT)
-RETURNS VOID
+RETURNS BOOLEAN
 LANGUAGE PLPGSQL
 AS $$
   DECLARE
@@ -45,8 +61,22 @@ AS $$
           SET "listId" = new_list_id, index = new_index
           WHERE id = card_id AND "deletedAt" IS NULL;
       END IF;
+
+      -- Check for duplicate indices in both affected lists
+      IF EXISTS (
+        SELECT index, COUNT(*)
+        FROM card 
+        WHERE "listId" IN (current_list_id, new_list_id)
+        AND "deletedAt" IS NULL
+        GROUP BY "listId", index
+        HAVING COUNT(*) > 1
+      ) THEN
+        RAISE EXCEPTION 'Duplicate indices found after reordering in list % or %', current_list_id, new_list_id;
+      END IF;
+
+      RETURN TRUE;
   END;
-$$
+$$;
 
 CREATE OR REPLACE FUNCTION shift_list_index(board_id BIGINT, list_index INT)
 RETURNS VOID

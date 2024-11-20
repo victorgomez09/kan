@@ -210,7 +210,7 @@ export const boardRouter = createTRPCRouter({
           deletedBy: userId,
         });
 
-        if (!deletedLists?.length) {
+        if (!Array.isArray(deletedLists)) {
           throw new TRPCError({
             message: `Failed to delete lists`,
             code: "INTERNAL_SERVER_ERROR",
@@ -223,7 +223,7 @@ export const boardRouter = createTRPCRouter({
           deletedBy: userId,
         });
 
-        if (!deletedCards?.length) {
+        if (!Array.isArray(deletedCards)) {
           throw new TRPCError({
             message: `Failed to delete cards`,
             code: "INTERNAL_SERVER_ERROR",

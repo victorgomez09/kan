@@ -53,7 +53,8 @@ export const listRouter = createTRPCRouter({
         name: input.name,
         createdBy: userId,
         boardId: board.id,
-        index: latestListIndex ? latestListIndex + 1 : 0,
+        index:
+          latestListIndex || latestListIndex === 0 ? latestListIndex + 1 : 0,
       });
 
       if (!result)
@@ -161,7 +162,7 @@ export const listRouter = createTRPCRouter({
         deletedBy: userId,
       });
 
-      if (!deletedCards?.length)
+      if (!Array.isArray(deletedCards))
         throw new TRPCError({
           message: `Failed to delete cards`,
           code: "INTERNAL_SERVER_ERROR",
@@ -177,7 +178,7 @@ export const listRouter = createTRPCRouter({
 
       await listRepo.shiftIndex(ctx.db, {
         boardId: list.boardId,
-        listIndex: list.id,
+        listIndex: list.index,
       });
 
       return { success: true };

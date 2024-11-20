@@ -1,6 +1,7 @@
 import { api } from "~/utils/api";
 import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
+import { usePopup } from "~/providers/popup";
 
 import Button from "~/components/Button";
 
@@ -14,6 +15,7 @@ export function DeleteListConfirmation({
   const utils = api.useUtils();
   const { boardData } = useBoard();
   const { closeModal } = useModal();
+  const { showPopup } = usePopup();
 
   const refetchBoard = async () => {
     if (boardData?.publicId) {
@@ -29,6 +31,14 @@ export function DeleteListConfirmation({
     onSuccess: () => {
       closeModal();
       return refetchBoard();
+    },
+    onError: async () => {
+      closeModal();
+      await refetchBoard();
+      showPopup({
+        header: "Unable to delete list",
+        message: "Please try again later, or contact customer support.",
+      });
     },
   });
 
@@ -46,7 +56,10 @@ export function DeleteListConfirmation({
         <Button onClick={() => closeModal()} variant="secondary">
           Cancel
         </Button>
-        <Button onClick={() => deleteList.mutate({ listPublicId })}>
+        <Button
+          isLoading={deleteList.isPending}
+          onClick={() => deleteList.mutate({ listPublicId })}
+        >
           Delete
         </Button>
       </div>
