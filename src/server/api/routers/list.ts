@@ -54,7 +54,7 @@ export const listRouter = createTRPCRouter({
         createdBy: userId,
         boardId: board.id,
         index:
-          latestListIndex || latestListIndex === 0 ? latestListIndex + 1 : 0,
+          (latestListIndex ?? latestListIndex === 0) ? latestListIndex + 1 : 0,
       });
 
       if (!result)
