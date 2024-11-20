@@ -6,6 +6,7 @@ import {
   HiOutlineUserMinus,
   HiOutlineArrowRight,
   HiOutlinePlus,
+  HiOutlineArrowLeft,
 } from "react-icons/hi2";
 
 import Avatar from "~/components/Avatar";
@@ -114,14 +115,25 @@ const ACTIVITY_ICON_MAP: Partial<Record<ActivityType, React.ReactNode | null>> =
     "card.created": <HiOutlinePlus />,
     "card.updated.title": <HiOutlinePencil />,
     "card.updated.description": <HiOutlinePencil />,
-    "card.updated.list": <HiOutlineArrowRight />,
     "card.updated.label.added": <HiOutlineTag />,
     "card.updated.label.removed": <HiOutlineTag />,
     "card.updated.member.added": <HiOutlineUserPlus />,
     "card.updated.member.removed": <HiOutlineUserMinus />,
   } as const;
 
-const getActivityIcon = (type: ActivityType): React.ReactNode | null => {
+const getActivityIcon = (
+  type: ActivityType,
+  fromIndex?: number | null,
+  toIndex?: number | null,
+): React.ReactNode | null => {
+  console.log({ fromIndex, toIndex });
+  if (type === "card.updated.list" && fromIndex != null && toIndex != null) {
+    return fromIndex > toIndex ? (
+      <HiOutlineArrowLeft />
+    ) : (
+      <HiOutlineArrowRight />
+    );
+  }
   return ACTIVITY_ICON_MAP[type] ?? null;
 };
 
@@ -174,7 +186,11 @@ const ActivityList = ({
                 size="sm"
                 name={activity.user?.name ?? ""}
                 email={activity.user?.email ?? ""}
-                icon={getActivityIcon(activity.type)}
+                icon={getActivityIcon(
+                  activity.type,
+                  activity.fromList?.index,
+                  activity.toList?.index,
+                )}
                 isLoading={isLoading}
               />
               {index !== activities.length - 1 &&

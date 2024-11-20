@@ -249,11 +249,13 @@ export const getWithListAndMembersByPublicId = async (
           toDescription,
           fromList:list!card_activity_fromListId_list_id_fk (
             publicId,
-            name
+            name,
+            index
           ),
           toList:list!card_activity_toListId_list_id_fk (
             publicId,
-            name
+            name,
+            index
           ),
           label!card_activity_labelId_label_id_fk (
             publicId,
