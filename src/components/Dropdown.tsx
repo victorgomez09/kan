@@ -4,13 +4,13 @@ export default function Dropdown({
   items,
   children,
 }: {
-  items: { label: string; action: () => void }[];
+  items: { label: string; action: () => void; icon?: React.ReactNode }[];
   children: React.ReactNode;
 }) {
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <Menu.Button className="flex h-8 w-8 items-center justify-center rounded-[5px] hover:bg-light-200 dark:hover:bg-dark-200">
+        <Menu.Button className="flex h-7 w-7 items-center justify-center rounded-[5px] hover:bg-light-200 dark:hover:bg-dark-200">
           {children}
         </Menu.Button>
       </div>
@@ -24,14 +24,15 @@ export default function Dropdown({
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute right-0 z-30 mt-2 w-56 origin-top-right rounded-md border border-light-200 bg-light-50 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border-dark-400 dark:bg-dark-300">
-          <div className="flex">
+        <Menu.Items className="absolute right-0 z-30 mt-2 w-56 origin-top-right rounded-md border border-light-200 bg-light-50 p-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border-dark-400 dark:bg-dark-300">
+          <div className="flex flex-col">
             {items.map((item) => (
               <Menu.Item key={item.label}>
                 <button
                   onClick={item.action}
-                  className="m-1 w-full rounded-[5px] px-3 py-2 text-left text-sm text-neutral-900 hover:bg-light-200 dark:text-dark-1000 dark:hover:bg-dark-400"
+                  className="flex w-auto items-center gap-2 rounded-[5px] px-2.5 py-1.5 text-left text-sm text-neutral-900 hover:bg-light-200 dark:text-dark-950 dark:hover:bg-dark-400"
                 >
+                  {item.icon}
                   {item.label}
                 </button>
               </Menu.Item>

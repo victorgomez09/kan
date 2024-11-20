@@ -1,5 +1,5 @@
 import { WorkspaceProvider } from "~/providers/workspace";
-import Dashboard from "~/components/dashboard";
+import Dashboard from "~/components/Dashboard";
 import Popup from "~/components/Popup";
 import MembersView from "~/views/members";
 

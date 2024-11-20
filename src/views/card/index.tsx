@@ -175,7 +175,7 @@ export default function CardPage() {
                 </div>
               </form>
             </div>
-            <div className="border-t-[1px] border-light-600 pt-12 dark:border-dark-600">
+            <div className="border-t-[1px] border-light-600 pt-12 dark:border-dark-400">
               <h2 className="text-md pb-4 font-medium text-light-900 dark:text-dark-1000">
                 Activity
               </h2>

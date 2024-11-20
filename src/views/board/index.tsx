@@ -16,7 +16,6 @@ import { formatToArray } from "~/utils/helpers";
 import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
-
 import { PageHead } from "~/components/PageHead";
 import Modal from "~/components/modal";
 import PatternedBackground from "~/components/PatternedBackground";
@@ -147,7 +146,7 @@ export default function BoardPage() {
         <div className="z-10 flex w-full justify-between p-8">
           {isLoading ? (
             <div className="flex space-x-2">
-              <div className="h-[2.3rem] w-[150px] animate-pulse rounded-[5px] bg-light-200 dark:bg-dark-200" />
+              <div className="h-[2.3rem] w-[150px] animate-pulse rounded-[5px] bg-light-200 dark:bg-dark-100" />
             </div>
           ) : (
             <form
@@ -184,9 +183,9 @@ export default function BoardPage() {
         <div className="scrollbar-w-none z-0 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300">
           {isLoading ? (
             <div className="ml-[2rem] flex">
-              <div className="0 mr-5 h-[500px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-200" />
-              <div className="0 mr-5 h-[275px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-200" />
-              <div className="0 mr-5 h-[375px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-200" />
+              <div className="0 mr-5 h-[500px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-100" />
+              <div className="0 mr-5 h-[275px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-100" />
+              <div className="0 mr-5 h-[375px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-100" />
             </div>
           ) : (
             <DragDropContext onDragEnd={onDragEnd}>
@@ -236,7 +235,7 @@ export default function BoardPage() {
                                       }}
                                       key={card.publicId}
                                       href={`/cards/${card.publicId}`}
-                                      className={`mb-2 flex !cursor-pointer flex-col rounded-md border border-light-200 bg-light-50 px-3 py-2 text-sm text-neutral-900 dark:border-dark-200 dark:bg-dark-300 dark:text-dark-1000 dark:hover:bg-dark-400 ${
+                                      className={`mb-2 flex !cursor-pointer flex-col rounded-md border border-light-200 bg-light-50 px-3 py-2 text-sm text-neutral-900 dark:border-dark-200 dark:bg-dark-200 dark:text-dark-1000 dark:hover:bg-dark-300 ${
                                         card.publicId.startsWith("PLACEHOLDER")
                                           ? "pointer-events-none"
                                           : ""

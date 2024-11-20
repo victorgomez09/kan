@@ -19,7 +19,7 @@ const FeedbackButton: React.FC = () => {
     <button
       type="button"
       onMouseEnter={handleMouseEnter}
-      className="flex items-center rounded-md border-[1px] border-light-600 bg-light-50 px-2.5 py-1.5 text-sm font-normal text-neutral-900 shadow-sm dark:border-dark-600 dark:bg-dark-50 dark:text-dark-1000"
+      className="flex items-center rounded-md border-[1px] border-light-600 bg-light-50 px-2.5 py-1.5 text-sm font-normal text-neutral-900 shadow-sm dark:border-dark-400 dark:bg-dark-50 dark:text-dark-1000"
     >
       <LottieIcon
         index={index}

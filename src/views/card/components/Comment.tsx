@@ -9,7 +9,7 @@ import { usePopup } from "~/providers/popup";
 import Avatar from "~/components/Avatar";
 import Button from "~/components/Button";
 import Dropdown from "~/components/Dropdown";
-import { HiEllipsisHorizontal } from "react-icons/hi2";
+import { HiEllipsisHorizontal, HiPencil } from "react-icons/hi2";
 
 interface FormValues {
   comment: string;
@@ -69,7 +69,7 @@ const Comment = ({
   return (
     <div
       key={publicId}
-      className="group relative flex w-full flex-col rounded-xl border border-light-600 bg-light-200 p-5 text-light-900 focus-visible:outline-none dark:border-dark-600 dark:bg-dark-100 dark:text-dark-1000 sm:text-sm sm:leading-6"
+      className="group relative flex w-full flex-col rounded-xl border border-light-600 bg-light-200 p-4 text-light-900 focus-visible:outline-none dark:border-dark-400 dark:bg-dark-100 dark:text-dark-1000 sm:text-sm sm:leading-6"
     >
       <div className="flex justify-between">
         <div className="flex items-center space-x-2">
@@ -96,16 +96,19 @@ const Comment = ({
           </p>
         </div>
 
-        <Dropdown
-          items={[
-            {
-              label: "Edit",
-              action: () => setIsEditing(true),
-            },
-          ]}
-        >
-          <HiEllipsisHorizontal className="h-5 w-5" />
-        </Dropdown>
+        <div className="absolute right-4 top-4">
+          <Dropdown
+            items={[
+              {
+                label: "Edit comment",
+                action: () => setIsEditing(true),
+                icon: <HiPencil className="h-[18px] w-[18px] text-dark-900" />,
+              },
+            ]}
+          >
+            <HiEllipsisHorizontal className="h-5 w-5 text-light-900 dark:text-dark-800" />
+          </Dropdown>
+        </div>
       </div>
       {!isEditing ? (
         <p className="mt-2 text-sm">{comment}</p>

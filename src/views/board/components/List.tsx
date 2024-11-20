@@ -1,12 +1,17 @@
 import { type ReactNode } from "react";
-import { HiOutlinePlusSmall } from "react-icons/hi2";
+import {
+  HiOutlinePlusSmall,
+  HiEllipsisHorizontal,
+  HiOutlineTrash,
+  HiOutlineSquaresPlus,
+} from "react-icons/hi2";
 import { Draggable } from "react-beautiful-dnd";
 import { useForm } from "react-hook-form";
 
 import { api } from "~/utils/api";
 import { useModal } from "~/providers/modal";
 
-import ListDropdown from "./ListDropdown";
+import Dropdown from "~/components/Dropdown";
 
 interface ListProps {
   children: ReactNode;
@@ -60,6 +65,11 @@ export default function List({
     });
   };
 
+  const handleOpenDeleteListConfirmation = () => {
+    setSelectedPublicListId(list.publicId);
+    openModal("DELETE_LIST");
+  };
+
   return (
     <Draggable key={list.publicId} draggableId={list.publicId} index={index}>
       {(provided) => (
@@ -85,7 +95,7 @@ export default function List({
             </form>
             <div>
               <button
-                className="mx-1 inline-flex h-fit items-center rounded-md p-1 px-1 text-sm font-semibold text-dark-50 hover:bg-light-400 dark:hover:bg-dark-400"
+                className="mx-1 inline-flex h-fit items-center rounded-md p-1 px-1 text-sm font-semibold text-dark-50 hover:bg-light-400 dark:hover:bg-dark-200"
                 onClick={() => openNewCardForm(list.publicId)}
               >
                 <HiOutlinePlusSmall
@@ -93,11 +103,28 @@ export default function List({
                   aria-hidden="true"
                 />
               </button>
-              <ListDropdown
-                setSelectedPublicListId={() =>
-                  setSelectedPublicListId(list.publicId)
-                }
-              />
+              <div className="relative mr-1 inline-block">
+                <Dropdown
+                  items={[
+                    {
+                      label: "Add a card",
+                      action: () => openNewCardForm(list.publicId),
+                      icon: (
+                        <HiOutlineSquaresPlus className="h-[18px] w-[18px] text-dark-900" />
+                      ),
+                    },
+                    {
+                      label: "Delete list",
+                      action: handleOpenDeleteListConfirmation,
+                      icon: (
+                        <HiOutlineTrash className="h-[18px] w-[18px] text-dark-900" />
+                      ),
+                    },
+                  ]}
+                >
+                  <HiEllipsisHorizontal className="h-5 w-5 text-dark-900" />
+                </Dropdown>
+              </div>
             </div>
           </div>
           {children}
