@@ -1,14 +1,18 @@
 import Link from "next/link";
+import Image from "next/image";
+import Cookies from "js-cookie";
+
 import Button from "~/components/Button";
 import PatternedBackground from "~/components/PatternedBackground";
 import { api } from "~/utils/api";
+import { env } from "~/env.mjs";
 
 import { IoLogoGithub } from "react-icons/io";
 
 export default function HomeView() {
   const token =
     typeof window !== "undefined"
-      ? localStorage.getItem("sb-bbgbpnfcmvrpinklkgqq-auth-token.0")
+      ? Cookies.get(env.NEXT_PUBLIC_SUPABASE_AUTH_COOKIE_NAME)
       : null;
 
   const { data } = api.auth.getUser.useQuery(undefined, {
@@ -98,7 +102,19 @@ export default function HomeView() {
               </p>
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center">
+          <div className="mb-10 rounded-[24px] border border-light-300 bg-light-50 p-2 shadow-md">
+            <div className="rounded-[16px] border border-light-300 bg-light-200 p-2">
+              <div className="overflow-hidden rounded-[16px] shadow-sm">
+                <Image
+                  src="/hero.png"
+                  alt="kanban"
+                  width={1100}
+                  height={1000}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col items-center justify-center pb-10">
             <div className="flex items-center gap-2 rounded-full border bg-light-50 px-4 py-1 text-center text-sm text-light-1000 dark:bg-dark-50 dark:text-dark-1000">
               <p>
                 We are currently building the product and will be launching
