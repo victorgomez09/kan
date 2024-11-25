@@ -27,8 +27,9 @@ const MyApp: AppType = ({ Component, pageProps }) => {
       <style jsx global>{`
         html {
           font-family: ${jakarta.style.fontFamily};
-          height: 100vh;
-          overflow: hidden;
+        }
+        body {
+          position: relative;
         }
       `}</style>
       <main className="font-sans">

@@ -117,7 +117,7 @@ const Filters = () => {
         handleSelect={handleSelect}
         menuSpacing="md"
       >
-        <Button variant="secondary" icon={<IoFilterOutline />}>
+        <Button variant="secondary" iconLeft={<IoFilterOutline />}>
           Filter
           {numOfFilters > 0 && (
             <button

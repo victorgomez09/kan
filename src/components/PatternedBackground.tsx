@@ -1,15 +1,6 @@
 const PatternedBackground = () => (
-  <div>
-    <svg
-      style={{
-        position: "absolute",
-        width: "100%",
-        height: "100%",
-        top: "0px",
-        left: "0px",
-        color: "white",
-      }}
-    >
+  <div className="absolute inset-0 h-full w-full">
+    <svg className="h-full w-full">
       <pattern
         id="pattern"
         x="0.034759358288862785"

@@ -2,18 +2,28 @@ import { type Config } from "tailwindcss";
 
 export default {
   content: ["./src/**/*.tsx"],
-  darkMode: 'class',
+  darkMode: "class",
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-plus-jakarta-sans), Plus Jakarta Sans']
+        sans: ["var(--font-plus-jakarta-sans), Plus Jakarta Sans"],
       },
       fontSize: {
         sm: "0.8rem",
       },
       boxShadow: {
-        '3xl-dark': '0px 16px 70px rgba(0, 0, 0, 0.5)',
-        '3xl-light': 'rgba(0, 0, 0, 0.12) 0px 4px 30px, rgba(0, 0, 0, 0.04) 0px 3px 17px, rgba(0, 0, 0, 0.04) 0px 2px 8px, rgba(0, 0, 0, 0.04) 0px 1px 1px'
+        "3xl-dark": "0px 16px 70px rgba(0, 0, 0, 0.5)",
+        "3xl-light":
+          "rgba(0, 0, 0, 0.12) 0px 4px 30px, rgba(0, 0, 0, 0.04) 0px 3px 17px, rgba(0, 0, 0, 0.04) 0px 2px 8px, rgba(0, 0, 0, 0.04) 0px 1px 1px",
+      },
+      animation: {
+        "border-spin": "border-spin 4s linear infinite",
+      },
+      keyframes: {
+        "border-spin": {
+          from: { transform: "rotate(0deg)" },
+          to: { transform: "rotate(360deg)" },
+        },
       },
       colors: {
         "dark-50": "#161616",
@@ -39,13 +49,16 @@ export default {
         "light-800": "hsl(0deg 0% 56.1%)",
         "light-900": "hsl(0deg 0% 52.2%)",
         "light-950": "hsl(0deg 0% 43.5%)",
-        "light-1000": "hsl(0deg 0% 9%)"
+        "light-1000": "hsl(0deg 0% 9%)",
       },
       screens: {
-        xxl: '1600px'
-      }
+        xxl: "1600px",
+      },
     },
   },
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-var-requires
-  plugins: [require("@tailwindcss/forms"), require('tailwind-scrollbar')({ nocompatible: true })],
+  plugins: [
+    require("@tailwindcss/forms"),
+    require("tailwind-scrollbar")({ nocompatible: true }),
+  ],
 } satisfies Config;

@@ -7,3 +7,20 @@
   display: block;
   color: #707070;
 }
+
+.gradient-border::before {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 45deg,
+    rgba(244, 114, 182, 0.4) 85deg,
+    rgba(192, 132, 252, 0.4) 95deg,
+    transparent 110deg,
+    transparent 360deg
+  );
+  content: '';
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+}

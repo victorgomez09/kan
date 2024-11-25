@@ -74,7 +74,7 @@ export function Auth({ setIsMagicLinkSent }: AuthProps) {
             Please enter a valid email address
           </p>
         )}
-        {loginWithEmail.error ?? loginWithOAuth.error ? (
+        {(loginWithEmail.error ?? loginWithOAuth.error) ? (
           <p className="mt-2 text-xs text-red-400">
             Something went wrong, please try again later or contact customer
             support.

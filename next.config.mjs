@@ -8,25 +8,6 @@ await import("./src/env.mjs");
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: false,
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "storage.googleapis.com",
-        port: "",
-        pathname: "/**",
-      },
-    ],
-  },
-  redirects: async () => {
-    return [
-      {
-        source: "/",
-        destination: "/boards",
-        permanent: true,
-      },
-    ];
-  },
 };
 
 export default config;
