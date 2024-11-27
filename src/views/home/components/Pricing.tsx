@@ -44,7 +44,7 @@ const tiers = [
     id: "tier-teams",
     href: "signup",
     buttonText: "Get Started",
-    price: { monthly: "£8", annually: "£6" },
+    price: { monthly: "£7.50", annually: "£6" },
     description:
       "Kanban is better with a team. Perfect for small and growing teams looking to collaborate.",
     featureHeader: "Everything in the free plan, plus:",
