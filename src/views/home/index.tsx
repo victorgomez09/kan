@@ -5,6 +5,8 @@ import { IoLogoGithub } from "react-icons/io";
 
 import Button from "~/components/Button";
 import PatternedBackground from "~/components/PatternedBackground";
+
+import Pricing from "./components/Pricing";
 import { api } from "~/utils/api";
 import { env } from "~/env.mjs";
 
@@ -125,13 +127,8 @@ export default function HomeView() {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col items-center justify-center pb-10">
-              <div className="flex items-center gap-2 rounded-full border bg-light-50 px-4 py-1 text-center text-sm text-light-1000 dark:border-dark-300 dark:bg-dark-50 dark:text-dark-900">
-                <p>
-                  We are currently building the product and will be launching
-                  soon.
-                </p>
-              </div>
+            <div className="pt-10" id="pricing">
+              <Pricing />
             </div>
           </div>
         </div>
