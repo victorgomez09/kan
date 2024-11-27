@@ -6,7 +6,9 @@ import { IoLogoGithub } from "react-icons/io";
 import Button from "~/components/Button";
 import PatternedBackground from "~/components/PatternedBackground";
 
+import Header from "./components/Header";
 import Pricing from "./components/Pricing";
+
 import { api } from "~/utils/api";
 import { env } from "~/env.mjs";
 
@@ -38,40 +40,7 @@ export default function HomeView() {
       <div className="mx-auto flex h-full min-h-screen flex-col items-center bg-light-100 dark:bg-dark-50">
         <PatternedBackground />
         <div className="z-10 mx-auto h-full w-full max-w-[1100px]">
-          <div className="m-auto flex h-24 min-h-24 w-full items-center justify-between px-5 py-2 align-middle dark:border-dark-400">
-            <div className="my-auto flex items-center justify-between">
-              <h1 className="w-[100px] text-xl font-bold tracking-tight text-neutral-900 dark:text-dark-1000">
-                kan.bn
-              </h1>
-            </div>
-            <div className="flex w-full justify-center gap-10 dark:text-dark-1000">
-              <Link href="/roadmap" className="text-sm font-bold">
-                Roadmap
-              </Link>
-              <Link href="#features" className="text-sm font-bold">
-                Features
-              </Link>
-              <Link href="#pricing" className="text-sm font-bold">
-                Pricing
-              </Link>
-              <Link href="/docs" className="text-sm font-bold">
-                Docs
-              </Link>
-            </div>
-            <div className="flex w-[100px] gap-2">
-              {isLoggedIn ? (
-                <Button href="/boards">Go to app</Button>
-              ) : (
-                <>
-                  <Button href="/login" variant="ghost">
-                    Sign in
-                  </Button>
-                  <Button href="/signup">Get started</Button>
-                </>
-              )}
-            </div>
-          </div>
-
+          <Header isLoggedIn={isLoggedIn} />
           <div className="flex h-full w-full flex-col">
             <div className="w-full py-32">
               <div className="my-10 flex h-full w-full flex-col items-center justify-center ">
