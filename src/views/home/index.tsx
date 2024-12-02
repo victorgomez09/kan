@@ -7,6 +7,7 @@ import Button from "~/components/Button";
 import PatternedBackground from "~/components/PatternedBackground";
 
 import Header from "./components/Header";
+import Features from "./components/Features";
 import Pricing from "./components/Pricing";
 
 import { api } from "~/utils/api";
@@ -28,13 +29,16 @@ export default function HomeView() {
 
   const isLoggedIn = !!data;
 
+  const isDarkMode = theme.activeTheme === "dark";
+
   return (
     <>
       <style jsx global>{`
+        html {
+          scroll-behavior: smooth;
+        }
         body {
-          background-color: ${theme.theme === "light"
-            ? "hsl(0deg 0% 98.8%)"
-            : "#161616"};
+          background-color: ${!isDarkMode ? "hsl(0deg 0% 98.8%)" : "#161616"};
         }
       `}</style>
       <div className="mx-auto flex h-full min-h-screen flex-col items-center bg-light-100 dark:bg-dark-50">
@@ -84,11 +88,11 @@ export default function HomeView() {
                 </p>
               </div>
             </div>
-            <div className="mb-10 rounded-[24px] border border-light-300 bg-light-50 p-2 shadow-md dark:border-dark-300 dark:bg-dark-50">
+            <div className="mb-24 rounded-[24px] border border-light-300 bg-light-50 p-2 shadow-md dark:border-dark-300 dark:bg-dark-50">
               <div className="rounded-[16px] border border-light-300 bg-light-200 p-2 dark:border-dark-300 dark:bg-dark-200">
                 <div className="overflow-hidden rounded-[16px] shadow-sm">
                   <Image
-                    src={`/hero-${theme.theme}.png`}
+                    src={`/hero-${isDarkMode ? "dark" : "light"}.png`}
                     alt="kanban"
                     width={1100}
                     height={1000}
@@ -96,7 +100,12 @@ export default function HomeView() {
                 </div>
               </div>
             </div>
-            <div className="pt-10" id="pricing">
+            <div className="relative pt-10">
+              <div id="features" className="absolute -top-20" />
+              <Features theme={theme.activeTheme} />
+            </div>
+            <div className="relative pt-10">
+              <div id="pricing" className="absolute -top-20" />
               <Pricing />
             </div>
           </div>

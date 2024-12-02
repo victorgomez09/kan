@@ -7,8 +7,9 @@ import React, {
 } from "react";
 
 interface ThemeContextProps {
-  theme: string;
-  switchTheme: (theme: string) => void;
+  themePreference: "light" | "dark" | "system";
+  activeTheme: "light" | "dark";
+  switchTheme: (theme: "light" | "dark" | "system") => void;
 }
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
@@ -16,45 +17,45 @@ const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [theme, setTheme] = useState("");
+  const [themePreference, setThemePreference] = useState<
+    "light" | "dark" | "system"
+  >("system");
+  const [activeTheme, setActiveTheme] = useState<"light" | "dark">("light");
 
-  const switchTheme = (theme: string) => {
+  const switchTheme = (theme: "light" | "dark" | "system") => {
     if (theme === "system") {
       localStorage.removeItem("theme");
+      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setActiveTheme(isDark ? "dark" : "light");
+      document.documentElement.classList.toggle("dark", isDark);
     } else {
-      if (theme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-
+      const isDark = theme === "dark";
+      document.documentElement.classList.toggle("dark", isDark);
       localStorage.theme = theme;
+      setActiveTheme(isDark ? "dark" : "light");
     }
-    setTheme(theme);
+    setThemePreference(theme);
   };
 
   useEffect(() => {
     if (!("theme" in localStorage)) {
-      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-      setTheme("system");
+      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.classList.toggle("dark", isDark);
+      setActiveTheme(isDark ? "dark" : "light");
+      setThemePreference("system");
     } else {
-      if (localStorage.theme === "dark") {
-        document.documentElement.classList.add("dark");
-        setTheme("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-        setTheme("light");
-      }
+      const isDark = localStorage.theme === "dark";
+      document.documentElement.classList.toggle("dark", isDark);
+      setActiveTheme(isDark ? "dark" : "light");
+      setThemePreference(localStorage.theme as "light" | "dark");
     }
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ switchTheme, theme }}>
-      {theme.length ? children : null}
+    <ThemeContext.Provider
+      value={{ switchTheme, themePreference, activeTheme }}
+    >
+      {themePreference.length ? children : null}
     </ThemeContext.Provider>
   );
 };

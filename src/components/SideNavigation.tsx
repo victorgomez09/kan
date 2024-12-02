@@ -28,23 +28,25 @@ export default function SideNavigation({
   isLoading,
 }: SideNavigationProps) {
   const pathname = usePathname();
-  const { theme } = useTheme();
+  const { activeTheme } = useTheme();
+
+  const isDarkMode = activeTheme === "dark";
 
   const navigation = [
     {
       name: "Boards",
       href: "/boards",
-      icon: theme === "dark" ? boardsIconDark : boardsIconLight,
+      icon: isDarkMode ? boardsIconDark : boardsIconLight,
     },
     {
       name: "Members",
       href: "/members",
-      icon: theme === "dark" ? membersIconDark : membersIconLight,
+      icon: isDarkMode ? membersIconDark : membersIconLight,
     },
     {
       name: "Settings",
       href: "/settings",
-      icon: theme === "dark" ? settingsIconDark : settingsIconLight,
+      icon: isDarkMode ? settingsIconDark : settingsIconLight,
     },
   ];
 

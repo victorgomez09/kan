@@ -64,7 +64,7 @@ const Header = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
           </div>
         </div>
       </div>
-      {isScrolled && <div className="h-[4rem] min-h-[4rem]"></div>}
+      {isScrolled && <div className="h-[5rem] min-h-[5rem]"></div>}
     </>
   );
 };

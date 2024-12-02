@@ -20,7 +20,7 @@ export default function UserMenu({
   isLoading,
 }: UserMenuProps) {
   const router = useRouter();
-  const { theme, switchTheme } = useTheme();
+  const { themePreference, switchTheme } = useTheme();
 
   const handleLogout = async () => {
     const db = createClient();
@@ -86,7 +86,7 @@ export default function UserMenu({
                 >
                   <span
                     className={classNames(
-                      theme === "system" ? "visible" : "invisible",
+                      themePreference === "system" ? "visible" : "invisible",
                       "mr-4 h-[6px] w-[6px] rounded-full bg-light-900 dark:bg-dark-900",
                     )}
                   />
@@ -100,7 +100,7 @@ export default function UserMenu({
                 >
                   <span
                     className={classNames(
-                      theme === "dark" ? "visible" : "invisible",
+                      themePreference === "dark" ? "visible" : "invisible",
                       "mr-4 h-[6px] w-[6px] rounded-full bg-light-900 dark:bg-dark-900",
                     )}
                   />
@@ -114,7 +114,7 @@ export default function UserMenu({
                 >
                   <span
                     className={classNames(
-                      theme === "light" ? "visible" : "invisible",
+                      themePreference === "light" ? "visible" : "invisible",
                       "mr-4 h-[6px] w-[6px] rounded-full bg-light-900 dark:bg-dark-900",
                     )}
                   />

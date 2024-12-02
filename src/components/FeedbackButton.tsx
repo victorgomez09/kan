@@ -6,7 +6,7 @@ import chatIconLight from "~/assets/chat-light.json";
 import chatIconDark from "~/assets/chat-dark.json";
 
 const FeedbackButton: React.FC = () => {
-  const { theme } = useTheme();
+  const { activeTheme } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
   const [index, setIndex] = useState(0);
 
@@ -23,7 +23,7 @@ const FeedbackButton: React.FC = () => {
     >
       <LottieIcon
         index={index}
-        json={theme === "dark" ? chatIconDark : chatIconLight}
+        json={activeTheme === "dark" ? chatIconDark : chatIconLight}
         isPlaying={isHovered}
       />
       <span className="ml-1">Feedback</span>
