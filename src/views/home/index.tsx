@@ -9,6 +9,7 @@ import PatternedBackground from "~/components/PatternedBackground";
 import Header from "./components/Header";
 import Features from "./components/Features";
 import Pricing from "./components/Pricing";
+import Footer from "./components/Footer";
 
 import { api } from "~/utils/api";
 import { env } from "~/env.mjs";
@@ -88,16 +89,14 @@ export default function HomeView() {
                 </p>
               </div>
             </div>
-            <div className="mb-24 rounded-[24px] border border-light-300 bg-light-50 p-2 shadow-md dark:border-dark-300 dark:bg-dark-50">
-              <div className="rounded-[16px] border border-light-300 bg-light-200 p-2 dark:border-dark-300 dark:bg-dark-200">
-                <div className="overflow-hidden rounded-[16px] shadow-sm">
-                  <Image
-                    src={`/hero-${isDarkMode ? "dark" : "light"}.png`}
-                    alt="kanban"
-                    width={1100}
-                    height={1000}
-                  />
-                </div>
+            <div className="mb-24 rounded-[24px] border border-light-300 bg-light-50 p-2 shadow-md dark:border-dark-300 dark:bg-dark-100">
+              <div className="overflow-hidden rounded-[16px] border border-light-300 shadow-sm dark:border-dark-300">
+                <Image
+                  src={`/hero-${isDarkMode ? "dark" : "light"}.png`}
+                  alt="kanban"
+                  width={1100}
+                  height={1000}
+                />
               </div>
             </div>
             <div className="relative pt-10">
@@ -110,6 +109,7 @@ export default function HomeView() {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );
