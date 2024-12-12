@@ -1,0 +1,300 @@
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import {
+  HiOutlineBarsArrowDown,
+  HiOutlineBarsArrowUp,
+  HiXMark,
+} from "react-icons/hi2";
+
+import { type NewCardInput } from "@kan/api/types";
+
+import Button from "~/components/Button";
+import CheckboxDropdown from "~/components/CheckboxDropdown";
+import Input from "~/components/Input";
+import Toggle from "~/components/Toggle";
+import { useBoard } from "~/providers/board";
+import { useModal } from "~/providers/modal";
+import { usePopup } from "~/providers/popup";
+import { api } from "~/utils/api";
+
+type NewCardFormInput = NewCardInput & {
+  isCreateAnotherEnabled: boolean;
+};
+
+interface NewCardFormProps {
+  listPublicId: string;
+}
+
+export function NewCardForm({ listPublicId }: NewCardFormProps) {
+  const { boardData, addCard, refetchBoard } = useBoard();
+  const { showPopup } = usePopup();
+  const { closeModal } = useModal();
+
+  const { register, handleSubmit, reset, setValue, watch } =
+    useForm<NewCardFormInput>({
+      defaultValues: {
+        title: "",
+        description: "",
+        listPublicId,
+        labelPublicIds: [],
+        memberPublicIds: [],
+        isCreateAnotherEnabled: false,
+        position: "start",
+      },
+    });
+
+  const labelPublicIds = watch("labelPublicIds") || [];
+  const memberPublicIds = watch("memberPublicIds") || [];
+  const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
+  const position = watch("position");
+
+  const createCard = api.card.create.useMutation({
+    onSuccess: async () => {
+      await refetchBoard();
+    },
+    onError: async () => {
+      closeModal();
+      await refetchBoard();
+      showPopup({
+        header: "Unable to create card",
+        message: "Please try again later, or contact customer support.",
+      });
+    },
+  });
+
+  useEffect(() => {
+    const titleElement: HTMLElement | null =
+      document?.querySelector<HTMLElement>("#title");
+    if (titleElement) titleElement.focus();
+  }, []);
+
+  const formattedLabels =
+    boardData?.labels.map((label) => ({
+      key: label.publicId,
+      value: label.name,
+      selected: labelPublicIds.includes(label.publicId),
+    })) ?? [];
+
+  const formattedLists =
+    boardData?.lists.map((list) => ({
+      key: list.publicId,
+      value: list.name,
+      selected: list.publicId === watch("listPublicId"),
+    })) ?? [];
+
+  const formattedMembers =
+    boardData?.workspace?.members?.map((member) => ({
+      key: member.publicId,
+      value: member.user?.name ?? "",
+      selected: memberPublicIds.includes(member.publicId),
+    })) ?? [];
+
+  const onSubmit = (data: NewCardInput) => {
+    addCard(data);
+    const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
+    if (!isCreateAnotherEnabled) closeModal();
+    reset({
+      title: "",
+      description: "",
+      listPublicId: watch("listPublicId"),
+      labelPublicIds: [],
+      memberPublicIds: [],
+      isCreateAnotherEnabled,
+      position,
+    });
+
+    createCard.mutate({
+      title: data.title,
+      description: data.description,
+      listPublicId: data.listPublicId,
+      labelPublicIds: data.labelPublicIds,
+      memberPublicIds: data.memberPublicIds,
+      position: data.position,
+    });
+  };
+
+  const handleToggleCreateAnother = (): void => {
+    setValue("isCreateAnotherEnabled", !isCreateAnotherEnabled);
+  };
+
+  const handleSelectList = (listPublicId: string): void => {
+    setValue("listPublicId", listPublicId);
+  };
+
+  const handleSelectMembers = (memberPublicId: string): void => {
+    const currentIndex = memberPublicIds.indexOf(memberPublicId);
+    if (currentIndex === -1) {
+      setValue("memberPublicIds", [...memberPublicIds, memberPublicId]);
+    } else {
+      const newMemberPublicIds = [...memberPublicIds];
+      newMemberPublicIds.splice(currentIndex, 1);
+      setValue("memberPublicIds", newMemberPublicIds);
+    }
+  };
+
+  const handleSelectLabels = (labelPublicId: string): void => {
+    const currentIndex = labelPublicIds.indexOf(labelPublicId);
+    if (currentIndex === -1) {
+      setValue("labelPublicIds", [...labelPublicIds, labelPublicId]);
+    } else {
+      const newLabelPublicIds = [...labelPublicIds];
+      newLabelPublicIds.splice(currentIndex, 1);
+      setValue("labelPublicIds", newLabelPublicIds);
+    }
+  };
+
+  const selectedList = formattedLists.find((item) => item.selected);
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="px-5 pt-5">
+        <div className="flex w-full items-center justify-between pb-5">
+          <h2 className="text-sm font-bold text-neutral-900 dark:text-dark-1000">
+            New card
+          </h2>
+          <button
+            className="rounded p-1 hover:bg-light-200 focus:outline-none dark:hover:bg-dark-300"
+            onClick={(e) => {
+              closeModal();
+              e.preventDefault();
+            }}
+          >
+            <HiXMark size={18} className="text-light-900 dark:text-dark-900" />
+          </button>
+        </div>
+
+        <div>
+          <Input id="title" placeholder="Card title" {...register("title")} />
+        </div>
+        <div className="mt-2">
+          <Input
+            placeholder="Add description..."
+            onChange={(e) => setValue("description", e.target.value)}
+            value={watch("description")}
+            contentEditable
+          />
+        </div>
+        <div className="mt-2 flex space-x-1">
+          <div className="w-fit">
+            <CheckboxDropdown
+              items={formattedLists}
+              handleSelect={(_groupKey, item) => handleSelectList(item.key)}
+            >
+              <div className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-2 py-1 text-left text-xs text-light-800 hover:bg-light-300 dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500">
+                {selectedList?.value}
+              </div>
+            </CheckboxDropdown>
+          </div>
+          <div className="w-fit">
+            <CheckboxDropdown
+              items={formattedMembers}
+              handleSelect={(_groupKey, item) => handleSelectMembers(item.key)}
+            >
+              <div className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-2 py-1 text-left text-xs text-light-800 hover:bg-light-300 dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500">
+                {!memberPublicIds.length ? (
+                  "Members"
+                ) : (
+                  <div className="flex -space-x-1 overflow-hidden">
+                    {memberPublicIds.map((memberPublicId) => {
+                      const member = formattedMembers.find(
+                        (member) => member.key === memberPublicId,
+                      );
+
+                      return (
+                        <span
+                          key={member?.key}
+                          className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-gray-400 ring-1 ring-light-200 dark:ring-dark-500"
+                        >
+                          <span className="text-[8px] font-medium leading-none text-white">
+                            {member?.value
+                              ?.split(" ")
+                              .map((namePart) =>
+                                namePart.charAt(0).toUpperCase(),
+                              )
+                              .join("")}
+                          </span>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </CheckboxDropdown>
+          </div>
+          <div className="w-fit">
+            <CheckboxDropdown
+              items={formattedLabels}
+              handleSelect={(_groupKey, item) => handleSelectLabels(item.key)}
+            >
+              <div className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-2 py-1 text-left text-xs text-light-800 hover:bg-light-300 dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500">
+                {!labelPublicIds.length ? (
+                  "Labels"
+                ) : (
+                  <>
+                    <div
+                      className={
+                        labelPublicIds.length > 1
+                          ? "flex -space-x-[2px] overflow-hidden"
+                          : "flex items-center"
+                      }
+                    >
+                      {labelPublicIds.map((labelPublicId) => {
+                        const label = boardData?.labels.find(
+                          (label) => label.publicId === labelPublicId,
+                        );
+
+                        return (
+                          <>
+                            <svg
+                              fill={label?.colourCode ?? "#3730a3"}
+                              className="h-2 w-2"
+                              viewBox="0 0 6 6"
+                              aria-hidden="true"
+                            >
+                              <circle cx={3} cy={3} r={3} />
+                            </svg>
+                            {labelPublicIds.length === 1 && (
+                              <div className="ml-1">{label?.name}</div>
+                            )}
+                          </>
+                        );
+                      })}
+                    </div>
+                    {labelPublicIds.length > 1 && (
+                      <div className="ml-1">{`${labelPublicIds.length} labels`}</div>
+                    )}
+                  </>
+                )}
+              </div>
+            </CheckboxDropdown>
+          </div>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              setValue("position", position === "start" ? "end" : "start");
+            }}
+            className="flex h-auto items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-1.5 py-1 text-left text-xs text-light-800 hover:bg-light-300 focus-visible:outline-none dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500"
+          >
+            {position === "start" ? (
+              <HiOutlineBarsArrowUp size={14} />
+            ) : (
+              <HiOutlineBarsArrowDown size={14} />
+            )}
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-5 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
+        <Toggle
+          label="Create another"
+          isChecked={isCreateAnotherEnabled}
+          onChange={handleToggleCreateAnother}
+        />
+
+        <div>
+          <Button type="submit">Create card</Button>
+        </div>
+      </div>
+    </form>
+  );
+}
