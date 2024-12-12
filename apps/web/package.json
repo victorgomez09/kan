@@ -17,6 +17,7 @@
     "@headlessui/react": "^2.2.0",
     "@hookform/resolvers": "^3.3.4",
     "@kan/api": "workspace:*",
+    "@kan/db": "workspace:^",
     "@kan/supabase": "workspace:^",
     "@kan/utils": "workspace:^",
     "@t3-oss/env-nextjs": "^0.11.1",

@@ -78,6 +78,9 @@ importers:
       '@kan/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@kan/db':
+        specifier: workspace:^
+        version: link:../../packages/db
       '@kan/supabase':
         specifier: workspace:^
         version: link:../../packages/supabase
