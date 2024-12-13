@@ -1,4 +1,6 @@
-import Lottie from "react-lottie-player";
+import dynamic from "next/dynamic";
+
+const Lottie = dynamic(() => import("react-lottie-player"), { ssr: false });
 
 type IconProps = {
   isPlaying: boolean;
