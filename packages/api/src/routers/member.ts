@@ -4,8 +4,7 @@ import { z } from "zod";
 import * as memberRepo from "@kan/db/repository/member.repo";
 import * as userRepo from "@kan/db/repository/user.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
-
-// import { sendEmail } from "@kan/email";
+import { sendEmail } from "@kan/email";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -131,14 +130,14 @@ export const memberRouter = createTRPCRouter({
 
       const magicLoginUrl = `${process.env.WEBSITE_URL}/api/auth/confirm?token_hash=${hashedToken}&type=${verificationType}&memberPublicId=${invite.publicId}`;
 
-      // await sendEmail(
-      //   input.email,
-      //   "Invitation to join workspace",
-      //   "JOIN_WORKSPACE",
-      //   {
-      //     magicLoginUrl,
-      //   },
-      // );
+      await sendEmail(
+        input.email,
+        "Invitation to join workspace",
+        "JOIN_WORKSPACE",
+        {
+          magicLoginUrl,
+        },
+      );
 
       return invite;
     }),
