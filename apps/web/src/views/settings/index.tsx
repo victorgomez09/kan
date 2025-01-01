@@ -1,12 +1,11 @@
-import Modal from "~/components/modal";
 import Button from "~/components/Button";
-
+import Modal from "~/components/modal";
 import { PageHead } from "~/components/PageHead";
-import { DeleteWorkspaceConfirmation } from "./components/DeleteWorkspaceConfirmation";
-import UpdateWorkspaceNameForm from "./components/UpdateWorkspaceNameForm";
-
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
+import { DeleteWorkspaceConfirmation } from "./components/DeleteWorkspaceConfirmation";
+import UpdateWorkspaceNameForm from "./components/UpdateWorkspaceNameForm";
+import UpdateWorkspaceUrlForm from "./components/UpdateWorkspaceUrlForm";
 
 export default function SettingsPage() {
   const { modalContentType, openModal } = useModal();
@@ -14,7 +13,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <PageHead title={`Settings | ${workspace?.name ?? "Workspace"}`} />
+      <PageHead title={`Settings | ${workspace.name ?? "Workspace"}`} />
       <div className="px-28 py-12">
         <div className="mb-8 flex w-full justify-between">
           <h1 className="font-medium tracking-tight text-neutral-900 dark:text-dark-1000 sm:text-[1.2rem]">
@@ -27,8 +26,16 @@ export default function SettingsPage() {
             Workspace name
           </h2>
           <UpdateWorkspaceNameForm
-            workspacePublicId={workspace?.publicId}
-            workspaceName={workspace?.name}
+            workspacePublicId={workspace.publicId}
+            workspaceName={workspace.name}
+          />
+
+          <h2 className="mb-4 mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">
+            Workspace URL
+          </h2>
+          <UpdateWorkspaceUrlForm
+            workspacePublicId={workspace.publicId}
+            workspaceUrl={workspace.slug}
           />
         </div>
 

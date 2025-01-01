@@ -1,14 +1,8 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 import { api } from "~/utils/api";
-
-import { useRouter } from "next/navigation";
 
 interface WorkspaceContextProps {
   workspace: Workspace;
@@ -20,11 +14,13 @@ interface WorkspaceContextProps {
 interface Workspace {
   name: string;
   publicId: string;
+  slug: string;
 }
 
 const initialWorkspace: Workspace = {
   name: "",
   publicId: "",
+  slug: "",
 };
 
 const initialAvailableWorkspaces: Workspace[] = [];
@@ -58,7 +54,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
     const storedWorkspaceId: string | null =
       localStorage.getItem("workspacePublicId");
 
-    if (data?.length) {
+    if (data.length) {
       const workspaces = data
         .map(({ workspace }) => {
           if (!workspace) return;
@@ -66,6 +62,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
           return {
             publicId: workspace.publicId,
             name: workspace.name,
+            slug: workspace.slug,
           };
         })
         .filter((workspace) => workspace !== null) as Workspace[];
@@ -75,7 +72,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
 
     if (storedWorkspaceId !== null) {
       const newData = data;
-      const selectedWorkspace = newData?.find(
+      const selectedWorkspace = newData.find(
         ({ workspace }) => workspace?.publicId === storedWorkspaceId,
       );
 
@@ -84,14 +81,16 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
       setWorkspace({
         publicId: selectedWorkspace.workspace.publicId,
         name: selectedWorkspace.workspace.name,
+        slug: selectedWorkspace.workspace.slug,
       });
     } else {
-      const primaryWorkspace = data?.[0]?.workspace;
+      const primaryWorkspace = data[0]?.workspace;
       if (!primaryWorkspace) return;
-      localStorage.setItem("workspacePublicId", primaryWorkspace?.publicId);
+      localStorage.setItem("workspacePublicId", primaryWorkspace.publicId);
       setWorkspace({
-        publicId: primaryWorkspace?.publicId,
-        name: primaryWorkspace?.name,
+        publicId: primaryWorkspace.publicId,
+        name: primaryWorkspace.name,
+        slug: primaryWorkspace.slug,
       });
     }
   }, [data]);

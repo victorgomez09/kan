@@ -119,7 +119,8 @@ export const workspaceRouter = createTRPCRouter({
     .input(
       z.object({
         workspacePublicId: z.string().min(12),
-        name: z.string().min(3).max(24),
+        name: z.string().min(3).max(24).optional(),
+        slug: z.string().min(3).max(24).optional(),
       }),
     )
     .output(z.custom<Awaited<ReturnType<typeof workspaceRepo.update>>>())
@@ -128,6 +129,7 @@ export const workspaceRouter = createTRPCRouter({
         ctx.db,
         input.workspacePublicId,
         input.name,
+        input.slug,
       );
 
       return result;

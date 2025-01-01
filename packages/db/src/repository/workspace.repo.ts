@@ -42,11 +42,12 @@ export const create = async (
 export const update = async (
   db: SupabaseClient<Database>,
   workspacePublicId: string,
-  name: string,
+  name: string | undefined,
+  slug: string | undefined,
 ) => {
   const { data } = await db
     .from("workspace")
-    .update({ name })
+    .update({ name, slug })
     .eq("publicId", workspacePublicId)
     .is("deletedAt", null);
 
@@ -110,7 +111,8 @@ export const getAllByUserId = async (
         role,
         workspace (
           publicId,
-          name
+          name,
+          slug
         )
       `,
     )
