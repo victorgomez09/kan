@@ -24,6 +24,7 @@ export const authRouter = createTRPCRouter({
         id: z.string(),
         email: z.string(),
         name: z.string().nullable(),
+        stripeCustomerId: z.string().nullable(),
       }),
     )
     .query(async ({ ctx }) => {

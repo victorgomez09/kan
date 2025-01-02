@@ -4,6 +4,7 @@ import { PageHead } from "~/components/PageHead";
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { DeleteWorkspaceConfirmation } from "./components/DeleteWorkspaceConfirmation";
+import { PremiumUsernameConfirmation } from "./components/PremiumUsernameConfirmation";
 import UpdateWorkspaceNameForm from "./components/UpdateWorkspaceNameForm";
 import UpdateWorkspaceUrlForm from "./components/UpdateWorkspaceUrlForm";
 
@@ -31,7 +32,7 @@ export default function SettingsPage() {
           />
 
           <h2 className="mb-4 mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">
-            Workspace URL
+            Workspace username
           </h2>
           <UpdateWorkspaceUrlForm
             workspacePublicId={workspace.publicId}
@@ -58,6 +59,11 @@ export default function SettingsPage() {
         <Modal>
           {modalContentType === "DELETE_WORKSPACE" && (
             <DeleteWorkspaceConfirmation />
+          )}
+          {modalContentType === "PREMIUM_USERNAME" && (
+            <PremiumUsernameConfirmation
+              workspacePublicId={workspace.publicId}
+            />
           )}
         </Modal>
       </div>

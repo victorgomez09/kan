@@ -5,8 +5,10 @@ import { twMerge } from "tailwind-merge";
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   contentEditable?: boolean;
   prefix?: string;
+  iconRight?: React.ReactNode;
   value?: string;
   errorMessage?: string;
+  className?: string;
   onChange?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
@@ -14,7 +16,16 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    { contentEditable, errorMessage, prefix, value, onChange, ...props },
+    {
+      contentEditable,
+      errorMessage,
+      prefix,
+      value,
+      onChange,
+      iconRight,
+      className,
+      ...props
+    },
     ref,
   ) => {
     if (contentEditable) {
@@ -30,7 +41,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className="flex w-full flex-col gap-1">
-        <div className="flex">
+        <div className="relative flex">
           {prefix && (
             <div className="flex shrink-0 items-center rounded-l-md border border-r-0 border-light-600 px-3 text-base dark:border-dark-700 sm:text-sm/6">
               {prefix}
@@ -42,9 +53,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             className={twMerge(
               "block w-full rounded-md border-0 bg-dark-300 bg-white/5 py-1.5 shadow-sm ring-1 ring-inset ring-light-600 placeholder:text-dark-800 focus:ring-2 focus:ring-inset focus:ring-light-700 dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6",
               prefix && "rounded-l-none",
+              className && className,
             )}
             {...props}
           />
+          {iconRight && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {iconRight}
+            </div>
+          )}
         </div>
         {errorMessage && (
           <div className="text-xs text-red-500">{errorMessage}</div>

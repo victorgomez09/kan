@@ -2,8 +2,9 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
+import * as workspaceSlugRepo from "@kan/db/repository/workspaceSlug.repo";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const workspaceRouter = createTRPCRouter({
   all: protectedProcedure
@@ -160,5 +161,43 @@ export const workspaceRouter = createTRPCRouter({
         });
 
       return result;
+    }),
+  checkSlugAvailability: publicProcedure
+    .meta({
+      openapi: {
+        summary: "Check if a workspace slug is available",
+        method: "GET",
+        path: "/workspaces/check-slug-availability",
+        description: "Checks if a workspace slug is available",
+        tags: ["Workspaces"],
+        protect: true,
+      },
+    })
+    .input(z.object({ workspaceSlug: z.string().min(3).max(24) }))
+    .output(
+      z.object({
+        isAvailable: z.boolean(),
+        isReserved: z.boolean(),
+        isPremium: z.boolean(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const slug = input.workspaceSlug.toLowerCase();
+      // check list of reserved or premium slugs
+      const workspaceSlug = await workspaceSlugRepo.getWorkspaceSlug(
+        ctx.db,
+        slug,
+      );
+
+      // check slug is not taken already
+      const isWorkspaceSlugAvailable =
+        await workspaceRepo.isWorkspaceSlugAvailable(ctx.db, slug);
+
+      return {
+        isAvailable:
+          isWorkspaceSlugAvailable && workspaceSlug?.type !== "reserved",
+        isReserved: workspaceSlug?.type === "reserved",
+        isPremium: workspaceSlug?.type === "premium",
+      };
     }),
 });

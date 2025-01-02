@@ -1,15 +1,15 @@
 import { relations } from "drizzle-orm";
 import {
-  integer,
+  bigint,
   bigserial,
-  uuid,
+  integer,
   pgEnum,
   pgTable,
   primaryKey,
   text,
   timestamp,
+  uuid,
   varchar,
-  bigint,
 } from "drizzle-orm/pg-core";
 
 export const importSourceEnum = pgEnum("source", ["trello"]);
@@ -39,6 +39,7 @@ export const activityTypeEnum = pgEnum("card_activity_type", [
   "card.updated.comment.deleted",
   "card.archived",
 ]);
+export const slugTypeEnum = pgEnum("slug_type", ["reserved", "premium"]);
 
 export const boards = pgTable("board", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
@@ -272,6 +273,7 @@ export const users = pgTable("user", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: varchar("image", { length: 255 }),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -430,3 +432,8 @@ export const commentsRelations = relations(comments, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const slugs = pgTable("workspace_slugs", {
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  type: slugTypeEnum("type").notNull(),
+});

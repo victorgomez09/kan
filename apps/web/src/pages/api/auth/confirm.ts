@@ -1,10 +1,21 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { Stripe } from "stripe";
 
 import * as memberRepo from "@kan/db/repository/member.repo";
 import * as userRepo from "@kan/db/repository/user.repo";
 import { createNextClient } from "@kan/supabase/clients";
+
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+if (!stripeSecretKey) {
+  throw new Error("STRIPE_SECRET_KEY is not defined");
+}
+
+const stripe = new Stripe(stripeSecretKey, {
+  apiVersion: "2024-12-18.acacia",
+});
 
 export default async function handler(req: NextRequest) {
   if (req.method !== "GET") {
@@ -54,9 +65,17 @@ export default async function handler(req: NextRequest) {
       const existingUser = await userRepo.getById(db, user.id);
 
       if (!existingUser) {
+        const stripeCustomer = await stripe.customers.create({
+          email: user.email,
+          metadata: {
+            userId: user.id,
+          },
+        });
+
         await userRepo.create(db, {
           id: user.id,
           email: user.email,
+          stripeCustomerId: stripeCustomer.id,
         });
       }
     }

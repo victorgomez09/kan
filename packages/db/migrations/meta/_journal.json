@@ -1,68 +1,19 @@
 {
-  "version": "12",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1711571659259,
-      "tag": "0000_legal_quicksilver",
+      "version": "7",
+      "when": 1735766172233,
+      "tag": "0000_eager_krista_starr",
       "breakpoints": true
     },
     {
       "idx": 1,
-      "version": "5",
-      "when": 1713021051974,
-      "tag": "0001_stale_mattie_franklin",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1724967733894,
-      "tag": "0002_clever_robin_chapel",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1728246215706,
-      "tag": "0003_naive_secret_warriors",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1730205607613,
-      "tag": "0004_rainy_archangel",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1730813108528,
-      "tag": "0005_blue_marvex",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1730967400524,
-      "tag": "0006_neat_korg",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1731934769875,
-      "tag": "0007_adorable_crystal",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "5",
-      "when": 1731958265600,
-      "tag": "0008_nasty_bloodstorm",
+      "version": "7",
+      "when": 1735821726274,
+      "tag": "0001_little_red_hulk",
       "breakpoints": true
     }
   ]

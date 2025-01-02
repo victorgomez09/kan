@@ -8,7 +8,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       _card_labels: {
@@ -558,6 +558,7 @@ export type Database = {
           id: string;
           image: string | null;
           name: string | null;
+          stripeCustomerId: string | null;
         };
         Insert: {
           email: string;
@@ -565,6 +566,7 @@ export type Database = {
           id: string;
           image?: string | null;
           name?: string | null;
+          stripeCustomerId?: string | null;
         };
         Update: {
           email?: string;
@@ -572,6 +574,7 @@ export type Database = {
           id?: string;
           image?: string | null;
           name?: string | null;
+          stripeCustomerId?: string | null;
         };
         Relationships: [];
       };
@@ -690,10 +693,23 @@ export type Database = {
           },
         ];
       };
+      workspace_slugs: {
+        Row: {
+          slug: string;
+          type: Database["public"]["Enums"]["slug_type"];
+        };
+        Insert: {
+          slug: string;
+          type: Database["public"]["Enums"]["slug_type"];
+        };
+        Update: {
+          slug?: string;
+          type?: Database["public"]["Enums"]["slug_type"];
+        };
+        Relationships: [];
+      };
     };
-    Views: {
-      [_ in never]: never;
-    };
+    Views: Record<never, never>;
     Functions: {
       is_workspace_admin: {
         Args: {
@@ -717,7 +733,7 @@ export type Database = {
           current_index: number;
           new_index: number;
         };
-        Returns: undefined;
+        Returns: boolean;
       };
       reorder_lists: {
         Args: {
@@ -726,7 +742,7 @@ export type Database = {
           current_index: number;
           new_index: number;
         };
-        Returns: undefined;
+        Returns: boolean;
       };
       shift_card_index: {
         Args: {
@@ -760,15 +776,14 @@ export type Database = {
         | "card.updated.comment.deleted";
       member_status: "invited" | "active" | "removed";
       role: "admin" | "member" | "guest";
+      slug_type: "reserved" | "premium";
       source: "trello";
       status: "started" | "success" | "failed";
       workspace_invite_status: "pending" | "accepted" | "cancelled";
     };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
+    CompositeTypes: Record<never, never>;
   };
-};
+}
 
 type PublicSchema = Database[Extract<keyof Database, "public">];
 

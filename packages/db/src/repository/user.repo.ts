@@ -5,7 +5,7 @@ import type { Database } from "@kan/db/types/database.types";
 export const getById = async (db: SupabaseClient<Database>, userId: string) => {
   const { data } = await db
     .from("user")
-    .select(`id, name, email`)
+    .select(`id, name, email, stripeCustomerId`)
     .eq("id", userId)
     .limit(1)
     .single();
@@ -29,11 +29,15 @@ export const getByEmail = async (
 
 export const create = async (
   db: SupabaseClient<Database>,
-  user: { id: string; email: string },
+  user: { id: string; email: string; stripeCustomerId: string },
 ) => {
   const { data } = await db
     .from("user")
-    .insert({ id: user.id, email: user.email })
+    .insert({
+      id: user.id,
+      email: user.email,
+      stripeCustomerId: user.stripeCustomerId,
+    })
     .select()
     .limit(1)
     .single();

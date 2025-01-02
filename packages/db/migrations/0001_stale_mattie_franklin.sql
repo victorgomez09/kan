@@ -1,1 +1,0 @@
-ALTER TABLE "board" ALTER COLUMN "deletedAt" DROP DEFAULT;

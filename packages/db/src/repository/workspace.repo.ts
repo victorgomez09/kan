@@ -159,3 +159,18 @@ export const hardDelete = async (
 
   return result;
 };
+
+export const isWorkspaceSlugAvailable = async (
+  db: SupabaseClient<Database>,
+  workspaceSlug: string,
+) => {
+  const { data } = await db
+    .from("workspace")
+    .select("id")
+    .eq("slug", workspaceSlug)
+    .is("deletedAt", null)
+    .limit(1)
+    .single();
+
+  return data === null;
+};

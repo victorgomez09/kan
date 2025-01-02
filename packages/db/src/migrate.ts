@@ -10,6 +10,17 @@ if (!postgresUrl) {
 }
 
 const migrationClient = postgres(postgresUrl, { max: 1 });
+console.log("Starting database migration...");
+
 migrate(drizzle(migrationClient), {
-  migrationsFolder: "./src/server/db/migrations",
-}).catch((e) => console.log(e));
+  migrationsFolder: "./migrations",
+})
+  .then(() => {
+    console.log("✅ Database migration completed successfully");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("❌ Migration failed:");
+    console.error(error);
+    process.exit(1);
+  });

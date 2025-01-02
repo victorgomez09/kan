@@ -1,11 +1,18 @@
 import { type Config } from "drizzle-kit";
 
 export default {
-  schema: "./src/server/db/schema.ts",
-  out: "./src/server/db/migrations",
-  driver: "pg",
+  schema: "./src/schema.ts",
+  out: "./migrations",
+  dialect: "postgresql",
   dbCredentials: {
-    connectionString: process.env.POSTGRES_URL,
+    host: process.env.POSTGRES_HOST ?? "localhost",
+    port: process.env.POSTGRES_PORT
+      ? parseInt(process.env.POSTGRES_PORT)
+      : 5432,
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DATABASE ?? "postgres",
+    ssl: true,
   },
   // tablesFilter: ["kan_*"],
 } satisfies Config;

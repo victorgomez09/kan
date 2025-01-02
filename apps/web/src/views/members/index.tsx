@@ -1,19 +1,16 @@
-import { HiOutlinePlusSmall, HiEllipsisHorizontal } from "react-icons/hi2";
+import { HiEllipsisHorizontal, HiOutlinePlusSmall } from "react-icons/hi2";
 import { twMerge } from "tailwind-merge";
 
+import Dropdown from "~/components/Dropdown";
+import Modal from "~/components/modal";
+import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
+import { PageHead } from "~/components/PageHead";
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
-
-import { PageHead } from "~/components/PageHead";
-import Modal from "~/components/modal";
-
-import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
-import { InviteMemberForm } from "./components/InviteMemberForm";
-import { DeleteMemberConfirmation } from "./components/DeleteMemberConfirmation";
-import Dropdown from "~/components/Dropdown";
-
 import { api } from "~/utils/api";
 import { getInitialsFromName, inferInitialsFromEmail } from "~/utils/helpers";
+import { DeleteMemberConfirmation } from "./components/DeleteMemberConfirmation";
+import { InviteMemberForm } from "./components/InviteMemberForm";
 
 export default function MembersPage() {
   const { modalContentType, openModal } = useModal();
@@ -23,6 +20,25 @@ export default function MembersPage() {
     { workspacePublicId: workspace.publicId },
     // { enabled: workspace?.publicId ? true : false },
   );
+
+  const handleUpgrade = async () => {
+    try {
+      const response = await fetch("/api/stripe/create_checkout_session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const { url } = (await response.json()) as { url: string };
+
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+    }
+  };
 
   const TableRow = ({
     memberPublicId,
@@ -139,7 +155,7 @@ export default function MembersPage() {
 
   return (
     <>
-      <PageHead title={`Members | ${workspace?.name ?? "Workspace"}`} />
+      <PageHead title={`Members | ${workspace.name ?? "Workspace"}`} />
       <div className="px-28 py-12">
         <div className="mb-8 flex w-full justify-between">
           <h1 className="font-medium tracking-tight text-neutral-900 dark:text-dark-1000 sm:text-[1.2rem]">
@@ -149,7 +165,7 @@ export default function MembersPage() {
             <button
               type="button"
               className="flex items-center gap-x-1.5 rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-dark-1000 dark:text-dark-50"
-              onClick={() => openModal("INVITE_MEMBER")}
+              onClick={() => handleUpgrade()}
             >
               <div className="h-5 w-5 items-center">
                 <HiOutlinePlusSmall
@@ -189,8 +205,8 @@ export default function MembersPage() {
                         <TableRow
                           key={member.publicId}
                           memberPublicId={member.publicId}
-                          memberName={member?.user?.name}
-                          memberEmail={member?.user?.email}
+                          memberName={member.user?.name}
+                          memberEmail={member.user?.email}
                           memberRole={member.role}
                           memberStatus={member.status}
                           isLastRow={index === data.members.length - 1}
