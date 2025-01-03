@@ -3,16 +3,17 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { useForm } from "react-hook-form";
 import { HiOutlinePlusSmall } from "react-icons/hi2";
 
-import { type UpdateBoardInput } from "@kan/api/types";
+import type { UpdateBoardInput } from "@kan/api/types";
 
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
 import PatternedBackground from "~/components/PatternedBackground";
+import { StrictModeDroppable as Droppable } from "~/components/StrictModeDroppable";
 import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
@@ -29,7 +30,7 @@ import { NewListForm } from "./components/NewListForm";
 type PublicListId = string;
 
 export default function BoardPage() {
-  const params = useParams();
+  const params = useParams() as { boardId: string[] } | null;
   const router = useRouter();
   const { boardData, setBoardData, updateCard, updateList } = useBoard();
   const { workspace } = useWorkspace();
@@ -37,7 +38,7 @@ export default function BoardPage() {
   const [selectedPublicListId, setSelectedPublicListId] =
     useState<PublicListId>("");
 
-  const boardId = params?.boardId?.length ? params.boardId[0] : null;
+  const boardId = params?.boardId.length ? params.boardId[0] : null;
 
   const updateBoard = api.board.update.useMutation();
 
@@ -134,7 +135,7 @@ export default function BoardPage() {
   return (
     <>
       <PageHead
-        title={`${boardData?.name ?? "Board"} | ${workspace?.name ?? "Workspace"}`}
+        title={`${boardData.name ?? "Board"} | ${workspace.name ?? "Workspace"}`}
       />
       <div className="relative flex h-full flex-col">
         <PatternedBackground />
@@ -196,7 +197,7 @@ export default function BoardPage() {
                     {...provided.droppableProps}
                   >
                     <div className="min-w-[2rem]" />
-                    {boardData?.lists?.map((list, index) => (
+                    {boardData.lists.map((list, index) => (
                       <List
                         index={index}
                         key={index}
@@ -212,7 +213,7 @@ export default function BoardPage() {
                               {...provided.droppableProps}
                               className="scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-w-[8px] z-10 h-full max-h-[calc(100vh-265px)] min-h-[2rem] overflow-y-auto pr-1 scrollbar scrollbar-track-dark-100 scrollbar-thumb-dark-600"
                             >
-                              {list.cards?.map((card, index) => (
+                              {list.cards.map((card, index) => (
                                 <Draggable
                                   key={card.publicId}
                                   draggableId={card.publicId}
@@ -240,10 +241,10 @@ export default function BoardPage() {
                                       {...provided.dragHandleProps}
                                     >
                                       <div>{card.title}</div>
-                                      {(card.labels?.length ?? 0) ||
-                                      (card.members?.length ?? 0) ? (
+                                      {(card.labels.length ?? 0) ||
+                                      (card.members.length ?? 0) ? (
                                         <div className="mt-2 flex justify-end space-x-1">
-                                          {card.labels?.map((label) => (
+                                          {card.labels.map((label) => (
                                             <span
                                               key={label.publicId}
                                               className="inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[10px] font-medium text-neutral-600 ring-1 ring-inset ring-light-600 dark:text-dark-1000 dark:ring-dark-800"
@@ -262,13 +263,13 @@ export default function BoardPage() {
                                             </span>
                                           ))}
                                           <div className="isolate flex -space-x-1 overflow-hidden">
-                                            {card.members?.map((member) => (
+                                            {card.members.map((member) => (
                                               <span
                                                 key={member.publicId}
                                                 className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-light-900 ring-2 ring-light-50 dark:bg-gray-500 dark:ring-dark-500"
                                               >
                                                 <span className="text-[10px] font-medium leading-none text-white">
-                                                  {member?.user?.name
+                                                  {member.user?.name
                                                     ?.split(" ")
                                                     .map((namePart) =>
                                                       namePart
