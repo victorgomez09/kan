@@ -15,12 +15,14 @@ interface Workspace {
   name: string;
   publicId: string;
   slug: string;
+  plan: "free" | "pro" | "enterprise";
 }
 
 const initialWorkspace: Workspace = {
   name: "",
   publicId: "",
   slug: "",
+  plan: "free",
 };
 
 const initialAvailableWorkspaces: Workspace[] = [];
@@ -63,6 +65,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
             publicId: workspace.publicId,
             name: workspace.name,
             slug: workspace.slug,
+            plan: workspace.plan,
           };
         })
         .filter((workspace) => workspace !== null) as Workspace[];
@@ -82,6 +85,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
         publicId: selectedWorkspace.workspace.publicId,
         name: selectedWorkspace.workspace.name,
         slug: selectedWorkspace.workspace.slug,
+        plan: selectedWorkspace.workspace.plan,
       });
     } else {
       const primaryWorkspace = data[0]?.workspace;
@@ -91,6 +95,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
         publicId: primaryWorkspace.publicId,
         name: primaryWorkspace.name,
         slug: primaryWorkspace.slug,
+        plan: primaryWorkspace.plan,
       });
     }
   }, [data]);

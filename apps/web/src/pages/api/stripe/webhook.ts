@@ -60,6 +60,7 @@ export default async function handler(req: NextRequest) {
             metaData.workspacePublicId,
             undefined,
             metaData.username,
+            "pro",
           );
         }
         break;

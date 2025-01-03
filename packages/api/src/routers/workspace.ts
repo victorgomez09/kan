@@ -126,6 +126,31 @@ export const workspaceRouter = createTRPCRouter({
     )
     .output(z.custom<Awaited<ReturnType<typeof workspaceRepo.update>>>())
     .mutation(async ({ ctx, input }) => {
+      if (input.slug) {
+        const workspace = await workspaceRepo.getByPublicId(
+          ctx.db,
+          input.workspacePublicId,
+        );
+
+        const reservedOrPremiumWorkspaceSlug =
+          await workspaceSlugRepo.getWorkspaceSlug(ctx.db, input.slug);
+
+        const isWorkspaceSlugAvailable =
+          await workspaceRepo.isWorkspaceSlugAvailable(ctx.db, input.slug);
+
+        if (
+          reservedOrPremiumWorkspaceSlug?.type === "reserved" ||
+          (workspace?.plan !== "pro" &&
+            reservedOrPremiumWorkspaceSlug?.type === "premium") ||
+          !isWorkspaceSlugAvailable
+        ) {
+          throw new TRPCError({
+            message: `Workspace slug already taken`,
+            code: "CONFLICT",
+          });
+        }
+      }
+
       const result = await workspaceRepo.update(
         ctx.db,
         input.workspacePublicId,

@@ -40,6 +40,11 @@ export const activityTypeEnum = pgEnum("card_activity_type", [
   "card.archived",
 ]);
 export const slugTypeEnum = pgEnum("slug_type", ["reserved", "premium"]);
+export const workspacePlanEnum = pgEnum("workspace_plan", [
+  "free",
+  "pro",
+  "enterprise",
+]);
 
 export const boards = pgTable("board", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
@@ -289,6 +294,7 @@ export const workspaces = pgTable("workspace", {
   publicId: varchar("publicId", { length: 12 }).notNull().unique(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
+  plan: workspacePlanEnum("plan").notNull().default("free"),
   createdBy: uuid("createdBy")
     .notNull()
     .references(() => users.id),

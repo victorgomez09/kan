@@ -22,12 +22,17 @@ export default function WorkspaceMenu() {
           <Menu.Button className="mb-1 flex w-full items-center rounded-[5px] p-1.5 hover:bg-light-200 dark:hover:bg-dark-200">
             <span className="inline-flex h-6 w-6 items-center justify-center rounded-[5px] bg-indigo-700">
               <span className="text-xs font-bold leading-none text-white">
-                {workspace?.name.charAt(0).toUpperCase()}
+                {workspace.name.charAt(0).toUpperCase()}
               </span>
             </span>
             <span className="ml-2 text-sm font-bold text-neutral-900 dark:text-dark-1000">
-              {workspace?.name}
+              {workspace.name}
             </span>
+            {workspace.plan === "pro" && (
+              <span className="ml-2 inline-flex items-center rounded-md bg-indigo-100 px-2 py-1 text-[10px] font-medium text-indigo-700">
+                Pro
+              </span>
+            )}
           </Menu.Button>
         )}
       </div>
@@ -53,14 +58,14 @@ export default function WorkspaceMenu() {
                     <div>
                       <span className="inline-flex h-5 w-5 items-center justify-center rounded-[5px] bg-indigo-700">
                         <span className="text-xs font-medium leading-none text-white">
-                          {availableWorkspace?.name.charAt(0).toUpperCase()}
+                          {availableWorkspace.name.charAt(0).toUpperCase()}
                         </span>
                       </span>
                       <span className="ml-2 text-xs font-medium">
-                        {availableWorkspace?.name}
+                        {availableWorkspace.name}
                       </span>
                     </div>
-                    {workspace?.name === availableWorkspace?.name && (
+                    {workspace.name === availableWorkspace.name && (
                       <span>
                         <HiCheck className="h-4 w-4" aria-hidden="true" />
                       </span>

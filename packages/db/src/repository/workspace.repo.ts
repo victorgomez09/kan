@@ -44,10 +44,11 @@ export const update = async (
   workspacePublicId: string,
   name: string | undefined,
   slug: string | undefined,
+  plan?: "free" | "pro" | "enterprise",
 ) => {
   const { data } = await db
     .from("workspace")
-    .update({ name, slug })
+    .update({ name, slug, plan })
     .eq("publicId", workspacePublicId)
     .is("deletedAt", null);
 
@@ -60,7 +61,7 @@ export const getByPublicId = async (
 ) => {
   const { data } = await db
     .from("workspace")
-    .select(`id, publicId, name`)
+    .select(`id, publicId, name, plan`)
     .is("deletedAt", null)
     .eq("publicId", workspacePublicId)
     .limit(1)
@@ -112,7 +113,8 @@ export const getAllByUserId = async (
         workspace (
           publicId,
           name,
-          slug
+          slug,
+          plan
         )
       `,
     )

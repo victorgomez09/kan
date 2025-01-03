@@ -27,9 +27,11 @@ type FormValues = z.infer<typeof schema>;
 const UpdateWorkspaceUrlForm = ({
   workspacePublicId,
   workspaceUrl,
+  workspacePlan,
 }: {
   workspacePublicId: string;
   workspaceUrl: string;
+  workspacePlan: "free" | "pro" | "enterprise";
 }) => {
   const utils = api.useUtils();
   const { showPopup } = usePopup();
@@ -84,7 +86,7 @@ const UpdateWorkspaceUrlForm = ({
   const isWorkspaceSlugAvailable = checkWorkspaceSlugAvailability.data;
 
   const onSubmit = (data: FormValues) => {
-    if (isWorkspaceSlugAvailable?.isPremium)
+    if (isWorkspaceSlugAvailable?.isPremium && workspacePlan !== "pro")
       return openModal("PREMIUM_USERNAME", data.slug);
 
     updateWorkspaceSlug.mutate({
@@ -99,7 +101,10 @@ const UpdateWorkspaceUrlForm = ({
         <Input
           {...register("slug")}
           className={`${
-            isWorkspaceSlugAvailable?.isPremium ? "focus:ring-yellow-500" : ""
+            isWorkspaceSlugAvailable?.isPremium ||
+            (workspacePlan === "pro" && slug === workspaceUrl)
+              ? "focus:ring-yellow-500 dark:focus:ring-yellow-500"
+              : ""
           }`}
           errorMessage={
             errors.slug?.message ||
@@ -109,10 +114,11 @@ const UpdateWorkspaceUrlForm = ({
           }
           prefix="kan.bn/"
           iconRight={
-            isWorkspaceSlugAvailable?.isPremium ? (
+            isWorkspaceSlugAvailable?.isPremium ||
+            (workspacePlan === "pro" && slug === workspaceUrl) ? (
               <HiMiniStar className="h-4 w-4 text-yellow-500" />
             ) : isWorkspaceSlugAvailable?.isAvailable ? (
-              <HiCheck className="h-4 w-4" />
+              <HiCheck className="h-4 w-4 dark:text-dark-1000" />
             ) : null
           }
         />
