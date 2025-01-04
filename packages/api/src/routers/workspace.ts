@@ -66,6 +66,29 @@ export const workspaceRouter = createTRPCRouter({
 
       return result;
     }),
+  bySlug: publicProcedure
+    .meta({
+      openapi: {
+        summary: "Get a workspace by slug",
+        method: "GET",
+        path: "/workspaces/slug/{workspaceSlug}",
+        description: "Retrieves a workspace by its slug",
+        tags: ["Workspaces"],
+        protect: true,
+      },
+    })
+    .input(z.object({ workspaceSlug: z.string().min(3).max(24) }))
+    .output(
+      z.custom<Awaited<ReturnType<typeof workspaceRepo.getBySlugWithBoards>>>(),
+    )
+    .query(async ({ ctx, input }) => {
+      const result = await workspaceRepo.getBySlugWithBoards(
+        ctx.db,
+        input.workspaceSlug,
+      );
+
+      return result;
+    }),
   create: protectedProcedure
     .meta({
       openapi: {

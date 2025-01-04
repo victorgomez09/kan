@@ -101,6 +101,32 @@ export const getByPublicIdWithMembers = async (
   return data;
 };
 
+export const getBySlugWithBoards = async (
+  db: SupabaseClient<Database>,
+  workspaceSlug: string,
+) => {
+  const { data } = await db
+    .from("workspace")
+    .select(
+      `
+        publicId,
+        name,
+        slug,
+        boards: board (
+          publicId,
+          name
+        )
+      `,
+    )
+    .eq("slug", workspaceSlug)
+    .is("deletedAt", null)
+    .is("boards.deletedAt", null)
+    .limit(1)
+    .single();
+
+  return data;
+};
+
 export const getAllByUserId = async (
   db: SupabaseClient<Database>,
   userId: string,
