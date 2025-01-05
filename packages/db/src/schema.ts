@@ -293,6 +293,7 @@ export const workspaces = pgTable("workspace", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
   publicId: varchar("publicId", { length: 12 }).notNull().unique(),
   name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
   plan: workspacePlanEnum("plan").notNull().default("free"),
   createdBy: uuid("createdBy")

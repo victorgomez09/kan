@@ -55,13 +55,10 @@ export default async function handler(req: NextRequest) {
         const metaData = checkoutSession.metadata;
 
         if (metaData?.workspacePublicId && metaData.username) {
-          await workspaceRepo.update(
-            db,
-            metaData.workspacePublicId,
-            undefined,
-            metaData.username,
-            "pro",
-          );
+          await workspaceRepo.update(db, metaData.workspacePublicId, {
+            slug: metaData.username,
+            plan: "pro",
+          });
         }
         break;
       }

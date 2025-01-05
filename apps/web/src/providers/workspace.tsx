@@ -13,6 +13,7 @@ interface WorkspaceContextProps {
 
 interface Workspace {
   name: string;
+  description: string | null;
   publicId: string;
   slug: string;
   plan: "free" | "pro" | "enterprise";
@@ -20,6 +21,7 @@ interface Workspace {
 
 const initialWorkspace: Workspace = {
   name: "",
+  description: null,
   publicId: "",
   slug: "",
   plan: "free",
@@ -65,6 +67,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
             publicId: workspace.publicId,
             name: workspace.name,
             slug: workspace.slug,
+            description: workspace.description,
             plan: workspace.plan,
           };
         })
@@ -86,6 +89,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
         name: selectedWorkspace.workspace.name,
         slug: selectedWorkspace.workspace.slug,
         plan: selectedWorkspace.workspace.plan,
+        description: selectedWorkspace.workspace.description,
       });
     } else {
       const primaryWorkspace = data[0]?.workspace;
@@ -96,6 +100,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
         name: primaryWorkspace.name,
         slug: primaryWorkspace.slug,
         plan: primaryWorkspace.plan,
+        description: primaryWorkspace.description,
       });
     }
   }, [data]);

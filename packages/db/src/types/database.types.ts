@@ -582,6 +582,7 @@ export type Database = {
           createdBy: string
           deletedAt: string | null
           deletedBy: string | null
+          description: string | null
           id: number
           name: string
           plan: Database["public"]["Enums"]["workspace_plan"]
@@ -594,6 +595,7 @@ export type Database = {
           createdBy: string
           deletedAt?: string | null
           deletedBy?: string | null
+          description?: string | null
           id?: number
           name: string
           plan?: Database["public"]["Enums"]["workspace_plan"]
@@ -606,6 +608,7 @@ export type Database = {
           createdBy?: string
           deletedAt?: string | null
           deletedBy?: string | null
+          description?: string | null
           id?: number
           name?: string
           plan?: Database["public"]["Enums"]["workspace_plan"]

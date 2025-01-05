@@ -96,6 +96,7 @@ export const memberRouter = createTRPCRouter({
           const newUser = await userRepo.create(ctx.adminDb, {
             email: invitedUserEmail,
             id: invitedUserAuthId,
+            stripeCustomerId: "",
           });
 
           invitedUserId = newUser?.id;

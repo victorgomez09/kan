@@ -42,13 +42,21 @@ export const create = async (
 export const update = async (
   db: SupabaseClient<Database>,
   workspacePublicId: string,
-  name: string | undefined,
-  slug: string | undefined,
-  plan?: "free" | "pro" | "enterprise",
+  workspaceInput: {
+    name?: string;
+    slug?: string;
+    plan?: "free" | "pro" | "enterprise";
+    description?: string;
+  },
 ) => {
   const { data } = await db
     .from("workspace")
-    .update({ name, slug, plan })
+    .update({
+      name: workspaceInput.name,
+      slug: workspaceInput.slug,
+      plan: workspaceInput.plan,
+      description: workspaceInput.description,
+    })
     .eq("publicId", workspacePublicId)
     .is("deletedAt", null);
 
@@ -111,6 +119,7 @@ export const getBySlugWithBoards = async (
       `
         publicId,
         name,
+        description,
         slug,
         boards: board (
           publicId,
@@ -139,6 +148,7 @@ export const getAllByUserId = async (
         workspace (
           publicId,
           name,
+          description,
           slug,
           plan
         )

@@ -74,7 +74,7 @@ export default function WorkspaceSlugPage() {
           {data?.name}
         </h1>
         <p className="mb-6 text-light-1000 dark:text-dark-900">
-          The open source Trello alternative.
+          {data?.description}
         </p>
         <div className="mb-4 h-[400px] w-[600px] rounded-xl border border-light-400 bg-light-200 p-4 dark:border-dark-200 dark:bg-dark-100">
           {data?.boards && workspaceSlug && (

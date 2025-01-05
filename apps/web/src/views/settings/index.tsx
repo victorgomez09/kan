@@ -8,6 +8,7 @@ import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { DeleteWorkspaceConfirmation } from "./components/DeleteWorkspaceConfirmation";
 import { PremiumUsernameConfirmation } from "./components/PremiumUsernameConfirmation";
+import UpdateWorkspaceDescriptionForm from "./components/UpdateWorkspaceDescriptionForm";
 import UpdateWorkspaceNameForm from "./components/UpdateWorkspaceNameForm";
 import UpdateWorkspaceUrlForm from "./components/UpdateWorkspaceUrlForm";
 
@@ -62,6 +63,14 @@ export default function SettingsPage() {
                 workspacePublicId={workspace.publicId}
                 workspaceUrl={workspace.slug}
                 workspacePlan={workspace.plan}
+              />
+
+              <h2 className="mb-4 mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">
+                Workspace description
+              </h2>
+              <UpdateWorkspaceDescriptionForm
+                workspacePublicId={workspace.publicId}
+                workspaceDescription={workspace.description ?? ""}
               />
             </div>
 
