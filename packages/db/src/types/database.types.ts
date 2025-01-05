@@ -75,10 +75,12 @@ export type Database = {
           createdBy: string
           deletedAt: string | null
           deletedBy: string | null
+          description: string | null
           id: number
           importId: number | null
           name: string
           publicId: string
+          slug: string
           updatedAt: string | null
           workspaceId: number
         }
@@ -87,10 +89,12 @@ export type Database = {
           createdBy: string
           deletedAt?: string | null
           deletedBy?: string | null
+          description?: string | null
           id?: number
           importId?: number | null
           name: string
           publicId: string
+          slug: string
           updatedAt?: string | null
           workspaceId: number
         }
@@ -99,10 +103,12 @@ export type Database = {
           createdBy?: string
           deletedAt?: string | null
           deletedBy?: string | null
+          description?: string | null
           id?: number
           importId?: number | null
           name?: string
           publicId?: string
+          slug?: string
           updatedAt?: string | null
           workspaceId?: number
         }

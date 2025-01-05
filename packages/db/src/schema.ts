@@ -8,6 +8,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -46,22 +47,35 @@ export const workspacePlanEnum = pgEnum("workspace_plan", [
   "enterprise",
 ]);
 
-export const boards = pgTable("board", {
-  id: bigserial("id", { mode: "number" }).primaryKey(),
-  publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-  name: varchar("name", { length: 255 }).notNull(),
-  createdBy: uuid("createdBy")
-    .notNull()
-    .references(() => users.id),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt"),
-  deletedAt: timestamp("deletedAt"),
-  deletedBy: uuid("deletedBy").references(() => users.id),
-  importId: bigint("importId", { mode: "number" }).references(() => imports.id),
-  workspaceId: bigint("workspaceId", { mode: "number" })
-    .notNull()
-    .references(() => workspaces.id, { onDelete: "cascade" }),
-});
+export const boards = pgTable(
+  "board",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    publicId: varchar("publicId", { length: 12 }).notNull().unique(),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: text("description"),
+    slug: varchar("slug", { length: 255 }).notNull(),
+    createdBy: uuid("createdBy")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt"),
+    deletedAt: timestamp("deletedAt"),
+    deletedBy: uuid("deletedBy").references(() => users.id),
+    importId: bigint("importId", { mode: "number" }).references(
+      () => imports.id,
+    ),
+    workspaceId: bigint("workspaceId", { mode: "number" })
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+  },
+  (table) => ({
+    uniqueSlugPerWorkspace: uniqueIndex("unique_slug_per_workspace").on(
+      table.workspaceId,
+      table.slug,
+    ),
+  }),
+);
 
 export const boardsRelations = relations(boards, ({ one, many }) => ({
   createdBy: one(users, {

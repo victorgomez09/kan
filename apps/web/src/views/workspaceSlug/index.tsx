@@ -25,7 +25,7 @@ export default function WorkspaceSlugPage() {
     workspaceSlug,
   }: {
     isLoading: boolean;
-    boards: { publicId: string; name: string }[];
+    boards: { publicId: string; name: string; slug: string }[];
     workspaceSlug: string;
   }) => {
     if (isLoading)
@@ -45,7 +45,7 @@ export default function WorkspaceSlugPage() {
         {boards.map((board) => (
           <Link
             key={board.publicId}
-            href={`/${workspaceSlug}/${board.publicId}`}
+            href={`/${workspaceSlug}/${board.slug}`}
             className="h-full"
           >
             <div className="relative flex h-full w-full items-center justify-center rounded-md border border-dashed border-light-400 bg-light-50 shadow-sm hover:bg-light-200 dark:border-dark-600 dark:bg-dark-50 dark:hover:bg-dark-100">

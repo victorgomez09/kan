@@ -30,6 +30,7 @@ export const getByPublicId = async (
       `
         publicId,
         name,
+        slug,
         workspace (
           publicId,
           members:workspace_members (
@@ -151,14 +152,19 @@ export const create = async (
 
 export const update = async (
   db: SupabaseClient<Database>,
-  boardInput: { name: string; boardPublicId: string },
+  boardInput: {
+    name: string | undefined;
+    slug: string | undefined;
+    boardPublicId: string;
+  },
 ) => {
   const { data } = await db
     .from("board")
-    .update({ name: boardInput.name })
+    .update({ name: boardInput.name, slug: boardInput.slug })
     .eq("publicId", boardInput.boardPublicId)
     .select(`publicId, name`)
     .limit(1)
+    .order("id", { ascending: false })
     .single();
 
   return data;

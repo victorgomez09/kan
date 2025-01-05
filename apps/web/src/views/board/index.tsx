@@ -26,6 +26,7 @@ import Filters from "./components/Filters";
 import List from "./components/List";
 import { NewCardForm } from "./components/NewCardForm";
 import { NewListForm } from "./components/NewListForm";
+import { UpdateBoardSlugForm } from "./components/UpdateBoardSlugForm";
 
 type PublicListId = string;
 
@@ -313,6 +314,13 @@ export default function BoardPage() {
             <NewListForm boardPublicId={boardId} />
           )}
           {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
+          {modalContentType === "UPDATE_BOARD_SLUG" && (
+            <UpdateBoardSlugForm
+              boardPublicId={boardId}
+              workspaceSlug={workspace.slug}
+              boardSlug={boardData.slug}
+            />
+          )}
         </Modal>
       </div>
     </>

@@ -123,6 +123,7 @@ export const getBySlugWithBoards = async (
         slug,
         boards: board (
           publicId,
+          slug,
           name
         )
       `,

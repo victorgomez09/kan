@@ -77,7 +77,15 @@ export const workspaceRouter = createTRPCRouter({
         protect: true,
       },
     })
-    .input(z.object({ workspaceSlug: z.string().min(3).max(24) }))
+    .input(
+      z.object({
+        workspaceSlug: z
+          .string()
+          .min(3)
+          .max(24)
+          .regex(/^(?![-]+$)[a-zA-Z0-9-]+$/),
+      }),
+    )
     .output(
       z.custom<Awaited<ReturnType<typeof workspaceRepo.getBySlugWithBoards>>>(),
     )
@@ -144,7 +152,12 @@ export const workspaceRouter = createTRPCRouter({
       z.object({
         workspacePublicId: z.string().min(12),
         name: z.string().min(3).max(24).optional(),
-        slug: z.string().min(3).max(24).optional(),
+        slug: z
+          .string()
+          .min(3)
+          .max(24)
+          .regex(/^(?![-]+$)[a-zA-Z0-9-]+$/)
+          .optional(),
         description: z.string().min(3).max(280).optional(),
       }),
     )
@@ -225,7 +238,15 @@ export const workspaceRouter = createTRPCRouter({
         protect: true,
       },
     })
-    .input(z.object({ workspaceSlug: z.string().min(3).max(24) }))
+    .input(
+      z.object({
+        workspaceSlug: z
+          .string()
+          .min(3)
+          .max(24)
+          .regex(/^(?![-]+$)[a-zA-Z0-9-]+$/),
+      }),
+    )
     .output(
       z.object({
         isAvailable: z.boolean(),

@@ -138,13 +138,20 @@ export const boardRouter = createTRPCRouter({
     .input(
       z.object({
         boardPublicId: z.string().min(12),
-        name: z.string().min(1),
+        name: z.string().min(1).optional(),
+        slug: z
+          .string()
+          .min(3)
+          .max(60)
+          .regex(/^(?![-]+$)[a-zA-Z0-9-]+$/)
+          .optional(),
       }),
     )
     .output(z.custom<Awaited<ReturnType<typeof boardRepo.update>>>())
     .mutation(async ({ ctx, input }) => {
       const result = await boardRepo.update(ctx.db, {
         name: input.name,
+        slug: input.slug,
         boardPublicId: input.boardPublicId,
       });
 
