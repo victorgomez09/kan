@@ -161,7 +161,7 @@ export default function BoardPage() {
           )}
 
           <div className="flex items-center space-x-2">
-            <Filters />
+            <Filters boardData={boardData} position="left" />
             <button
               type="button"
               className="mr-2 inline-flex items-center gap-x-1.5 rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-dark-1000 dark:text-dark-50"

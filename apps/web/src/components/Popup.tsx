@@ -1,11 +1,16 @@
 import { Transition } from "@headlessui/react";
 import { useEffect } from "react";
-import { HiOutlineExclamationCircle, HiXMark } from "react-icons/hi2";
+import {
+  HiOutlineCheckCircle,
+  HiOutlineExclamationCircle,
+  HiXMark,
+} from "react-icons/hi2";
 
 import { usePopup } from "~/providers/popup";
 
 const Popup: React.FC = () => {
-  const { isOpen, popupHeader, popupMessage, hidePopup } = usePopup();
+  const { isOpen, popupHeader, popupMessage, popupIcon, hidePopup } =
+    usePopup();
 
   useEffect(() => {
     if (isOpen) {
@@ -20,7 +25,7 @@ const Popup: React.FC = () => {
   return (
     <div
       aria-live="assertive"
-      className="pointer-events-none fixed inset-0 z-10 flex items-end px-4 py-6 sm:items-end sm:p-6"
+      className="pointer-events-none fixed inset-0 z-10 flex items-end p-3 sm:items-end"
     >
       <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
         <Transition
@@ -36,10 +41,18 @@ const Popup: React.FC = () => {
             <div className="p-4">
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <HiOutlineExclamationCircle
-                    aria-hidden="true"
-                    className="h-6 w-6 text-red-400"
-                  />
+                  {popupIcon === "success" && (
+                    <HiOutlineCheckCircle
+                      aria-hidden="true"
+                      className="h-6 w-6 text-green-400"
+                    />
+                  )}
+                  {popupIcon === "error" && (
+                    <HiOutlineExclamationCircle
+                      aria-hidden="true"
+                      className="h-6 w-6 text-red-400"
+                    />
+                  )}
                 </div>
                 <div className="ml-3 w-0 flex-1 pt-0.5">
                   <p className="text-sm font-medium text-neutral-900 dark:text-dark-1000">

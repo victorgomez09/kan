@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 import React, { createContext, useContext, useState } from "react";
 
-import {
-  type GetBoardByIdOutput,
-  type NewCardInput,
-  type NewListInput,
-  type ReorderCardInput,
-  type ReorderListInput,
+import type {
+  GetBoardByIdOutput,
+  NewCardInput,
+  NewListInput,
+  ReorderCardInput,
+  ReorderListInput,
 } from "@kan/api/types";
 import { generateUID } from "@kan/utils";
 
@@ -55,6 +55,7 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
       showPopup({
         header: "Error fetching board",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     }
   };
@@ -68,6 +69,7 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
       showPopup({
         header: "Unable to update card",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     },
   });
@@ -81,6 +83,7 @@ export const BoardProvider: React.FC<{ children: ReactNode }> = ({
       showPopup({
         header: "Unable to update list",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     },
   });

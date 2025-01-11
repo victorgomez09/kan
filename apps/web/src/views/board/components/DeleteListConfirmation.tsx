@@ -1,9 +1,8 @@
-import { api } from "~/utils/api";
+import Button from "~/components/Button";
 import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
-
-import Button from "~/components/Button";
+import { api } from "~/utils/api";
 
 interface DeleteListConfirmationProps {
   listPublicId: string;
@@ -38,6 +37,7 @@ export function DeleteListConfirmation({
       showPopup({
         header: "Unable to delete list",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     },
   });

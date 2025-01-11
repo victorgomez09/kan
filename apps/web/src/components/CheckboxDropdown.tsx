@@ -21,7 +21,9 @@ interface CheckboxDropdownProps {
   items?: Item[];
   groups?: Group[];
   menuSpacing?: "sm" | "md" | "lg";
+  position?: "left" | "right";
   handleSelect: (groupKey: string | null, item: { key: string }) => void;
+  asChild?: boolean;
 }
 
 export default function CheckboxDropdown({
@@ -29,7 +31,9 @@ export default function CheckboxDropdown({
   items,
   groups,
   menuSpacing = "sm",
+  position = "left",
   handleSelect,
+  asChild = true,
 }: CheckboxDropdownProps) {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
 
@@ -45,7 +49,10 @@ export default function CheckboxDropdown({
       className="relative flex w-full flex-wrap items-center text-left"
     >
       <>
-        <Menu.Button className="focus-visible:outline-none">
+        <Menu.Button
+          as={asChild ? "div" : undefined}
+          className="focus-visible:outline-none"
+        >
           {children}
         </Menu.Button>
 
@@ -61,7 +68,8 @@ export default function CheckboxDropdown({
         >
           <Menu.Items
             className={twMerge(
-              "absolute left-0 z-50 mt-2 w-56 origin-top-left rounded-md border-[1px] border-light-200 bg-light-50 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border-dark-500 dark:bg-dark-200",
+              "absolute z-50 mt-2 w-56 origin-top-left rounded-md border-[1px] border-light-200 bg-light-50 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border-dark-500 dark:bg-dark-200",
+              position === "left" ? "left-0" : "right-0",
               menuSpacingClass[menuSpacing],
             )}
           >

@@ -1,15 +1,14 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import ContentEditable from "react-contenteditable";
 import { formatDistanceToNow } from "date-fns";
-
-import { api } from "~/utils/api";
-import { usePopup } from "~/providers/popup";
+import { useState } from "react";
+import ContentEditable from "react-contenteditable";
+import { useForm } from "react-hook-form";
+import { HiEllipsisHorizontal, HiPencil } from "react-icons/hi2";
 
 import Avatar from "~/components/Avatar";
 import Button from "~/components/Button";
 import Dropdown from "~/components/Dropdown";
-import { HiEllipsisHorizontal, HiPencil } from "react-icons/hi2";
+import { usePopup } from "~/providers/popup";
+import { api } from "~/utils/api";
 
 interface FormValues {
   comment: string;
@@ -54,6 +53,7 @@ const Comment = ({
       showPopup({
         header: "Unable to update comment",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     },
   });

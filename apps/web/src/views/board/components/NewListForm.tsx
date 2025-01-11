@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { HiXMark } from "react-icons/hi2";
 
-import { type NewListInput } from "@kan/api/types";
+import type { NewListInput } from "@kan/api/types";
 
 import Button from "~/components/Button";
 import Input from "~/components/Input";
@@ -42,13 +42,14 @@ export function NewListForm({ boardPublicId }: { boardPublicId: string }) {
       showPopup({
         header: "Unable to create list",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     },
   });
 
   useEffect(() => {
     const nameElement: HTMLElement | null =
-      document?.querySelector<HTMLElement>("#list-name");
+      document.querySelector<HTMLElement>("#list-name");
     if (nameElement) nameElement.focus();
   }, []);
 

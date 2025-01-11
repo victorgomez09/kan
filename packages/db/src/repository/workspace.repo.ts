@@ -19,7 +19,7 @@ export const create = async (
       slug: workspaceInput.name.toLowerCase(),
       createdBy: workspaceInput.createdBy,
     })
-    .select(`id, publicId, name`)
+    .select(`id, publicId, name, slug, description, plan`)
     .limit(1)
     .single();
 

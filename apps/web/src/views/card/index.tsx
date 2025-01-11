@@ -1,26 +1,24 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useForm } from "react-hook-form";
 import ContentEditable from "react-contenteditable";
+import { useForm } from "react-hook-form";
 import { IoChevronForwardSharp } from "react-icons/io5";
 
+import Modal from "~/components/modal";
+import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
+import { PageHead } from "~/components/PageHead";
+import { useModal } from "~/providers/modal";
+import { usePopup } from "~/providers/popup";
+import { api } from "~/utils/api";
 import ActivityList from "./components/ActivityList";
-import Dropdown from "./components/Dropdown";
 import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
 import { DeleteLabelConfirmation } from "./components/DeleteLabelConfirmation";
+import Dropdown from "./components/Dropdown";
+import { LabelForm } from "./components/LabelForm";
 import LabelSelector from "./components/LabelSelector";
 import ListSelector from "./components/ListSelector";
 import MemberSelector from "./components/MemberSelector";
-import { LabelForm } from "./components/LabelForm";
-import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import NewCommentForm from "./components/NewCommentForm";
-
-import { PageHead } from "~/components/PageHead";
-import Modal from "~/components/modal";
-import { useModal } from "~/providers/modal";
-import { usePopup } from "~/providers/popup";
-
-import { api } from "~/utils/api";
 
 interface FormValues {
   cardId: string;
@@ -34,9 +32,9 @@ export default function CardPage() {
   const { modalContentType, entityId } = useModal();
   const { showPopup } = usePopup();
 
-  const cardId = Array.isArray(params?.cardId)
+  const cardId = Array.isArray(params.cardId)
     ? params.cardId[0]
-    : params?.cardId;
+    : params.cardId;
 
   const { data, isLoading } = api.card.byId.useQuery({
     cardPublicId: cardId ?? "",
@@ -90,6 +88,7 @@ export default function CardPage() {
       showPopup({
         header: "Unable to update card",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     },
   });

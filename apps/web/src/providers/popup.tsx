@@ -1,12 +1,17 @@
 import { createContext, useContext, useState } from "react";
 
-type PopupContextType = {
+interface PopupContextType {
   isOpen: boolean;
-  showPopup: (params: { header: string; message: string }) => void;
+  showPopup: (params: {
+    header: string;
+    message: string;
+    icon: string;
+  }) => void;
   hidePopup: () => void;
   popupHeader: string;
   popupMessage: string;
-};
+  popupIcon: string;
+}
 
 interface Props {
   children: React.ReactNode;
@@ -18,17 +23,21 @@ export const PopupProvider: React.FC<Props> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [popupHeader, setPopupHeader] = useState("");
   const [popupMessage, setPopupMessage] = useState("");
+  const [popupIcon, setPopupIcon] = useState("");
 
   const showPopup = ({
     header,
     message,
+    icon,
   }: {
     header: string;
     message: string;
+    icon: string;
   }) => {
     setIsOpen(true);
     setPopupHeader(header);
     setPopupMessage(message);
+    setPopupIcon(icon);
   };
 
   const hidePopup = () => {
@@ -37,7 +46,14 @@ export const PopupProvider: React.FC<Props> = ({ children }) => {
 
   return (
     <PopupContext.Provider
-      value={{ isOpen, showPopup, hidePopup, popupHeader, popupMessage }}
+      value={{
+        isOpen,
+        showPopup,
+        hidePopup,
+        popupHeader,
+        popupMessage,
+        popupIcon,
+      }}
     >
       {children}
     </PopupContext.Provider>

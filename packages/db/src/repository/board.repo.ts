@@ -95,6 +95,88 @@ export const getByPublicId = async (
   return data;
 };
 
+export const getBySlug = async (
+  db: SupabaseClient<Database>,
+  boardSlug: string,
+  filters: {
+    members: string[];
+    labels: string[];
+  },
+) => {
+  let query = db
+    .from("board")
+    .select(
+      `
+        publicId,
+        name,
+        slug,
+        workspace (
+          publicId,
+          name,
+          slug,
+          description,
+          members:workspace_members (
+            publicId,
+            user!workspace_members_userId_user_id_fk (
+              name
+            )
+          )
+        ),
+        labels:label (
+          publicId,
+          name,
+          colourCode
+        ),
+        lists:list (
+          publicId,
+          name,
+          boardId,
+          index,
+          cards:card (
+            publicId,
+            title,
+            description,
+            listId,
+            index,
+            labels:label${filters.labels.length > 0 ? "!inner" : ""} (
+              publicId,
+              name,
+              colourCode
+            ),
+            members:workspace_members${filters.members.length > 0 ? "!inner" : ""} (
+              publicId,
+              user!workspace_members_userId_user_id_fk (
+                name
+              )
+            )
+          )
+        )
+      `,
+    )
+    .eq("slug", boardSlug)
+    .is("deletedAt", null)
+    .is("lists.deletedAt", null)
+    .is("lists.cards.deletedAt", null)
+    .is("workspace.members.deletedAt", null)
+    .is("lists.cards.members.deletedAt", null);
+
+  if (filters.labels.length > 0) {
+    query = query.in("lists.cards.labels.publicId", filters.labels);
+  }
+
+  if (filters.members.length > 0) {
+    query = query.in("lists.cards.members.publicId", filters.members);
+  }
+
+  const { data } = await query
+    .order("index", { foreignTable: "list", ascending: true })
+    .order("index", { foreignTable: "list.card", ascending: true })
+    .limit(1)
+    .single();
+
+  return data;
+};
+
 export const getWithListIdsByPublicId = async (
   db: SupabaseClient<Database>,
   boardPublicId: string,

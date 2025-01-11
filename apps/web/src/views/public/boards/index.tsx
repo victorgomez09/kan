@@ -5,7 +5,7 @@ import { PageHead } from "~/components/PageHead";
 import PatternedBackground from "~/components/PatternedBackground";
 import { api } from "~/utils/api";
 
-export default function WorkspaceSlugPage() {
+export default function PublicBoardsView() {
   const router = useRouter();
 
   const workspaceSlug = Array.isArray(router.query.workspaceSlug)

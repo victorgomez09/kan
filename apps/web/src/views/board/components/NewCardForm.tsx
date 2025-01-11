@@ -6,7 +6,7 @@ import {
   HiXMark,
 } from "react-icons/hi2";
 
-import { type NewCardInput } from "@kan/api/types";
+import type { NewCardInput } from "@kan/api/types";
 
 import Button from "~/components/Button";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
@@ -58,13 +58,14 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
       showPopup({
         header: "Unable to create card",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     },
   });
 
   useEffect(() => {
     const titleElement: HTMLElement | null =
-      document?.querySelector<HTMLElement>("#title");
+      document.querySelector<HTMLElement>("#title");
     if (titleElement) titleElement.focus();
   }, []);
 
@@ -83,7 +84,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
     })) ?? [];
 
   const formattedMembers =
-    boardData?.workspace?.members?.map((member) => ({
+    boardData?.workspace?.members.map((member) => ({
       key: member.publicId,
       value: member.user?.name ?? "",
       selected: memberPublicIds.includes(member.publicId),
@@ -207,7 +208,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
                         >
                           <span className="text-[8px] font-medium leading-none text-white">
                             {member?.value
-                              ?.split(" ")
+                              .split(" ")
                               .map((namePart) =>
                                 namePart.charAt(0).toUpperCase(),
                               )

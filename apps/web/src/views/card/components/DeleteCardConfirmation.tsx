@@ -1,8 +1,9 @@
 import { useRouter } from "next/navigation";
-import { api } from "~/utils/api";
-import { useModal } from "~/providers/modal";
+
 import { useBoard } from "~/providers/board";
+import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
+import { api } from "~/utils/api";
 
 interface DeleteCardConfirmationProps {
   cardPublicId: string;
@@ -24,6 +25,7 @@ export function DeleteCardConfirmation({
       showPopup({
         header: "Error deleting card",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       }),
   });
 

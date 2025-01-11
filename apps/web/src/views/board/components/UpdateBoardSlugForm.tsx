@@ -60,6 +60,7 @@ export function UpdateBoardSlugForm({
       showPopup({
         header: "Unable to update board URL",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     },
   });

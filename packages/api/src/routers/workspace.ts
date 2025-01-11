@@ -71,7 +71,7 @@ export const workspaceRouter = createTRPCRouter({
       openapi: {
         summary: "Get a workspace by slug",
         method: "GET",
-        path: "/workspaces/slug/{workspaceSlug}",
+        path: "/workspaces/{workspaceSlug}",
         description: "Retrieves a workspace by its slug",
         tags: ["Workspaces"],
         protect: true,

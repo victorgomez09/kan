@@ -1,8 +1,9 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-import Input from "~/components/Input";
+
 import Button from "~/components/Button";
+import Input from "~/components/Input";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 
@@ -48,6 +49,7 @@ const UpdateWorkspaceNameForm = ({
       showPopup({
         header: "Error updating workspace name",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     },
   });

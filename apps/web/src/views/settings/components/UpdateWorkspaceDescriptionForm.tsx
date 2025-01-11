@@ -53,6 +53,7 @@ const UpdateWorkspaceDescriptionForm = ({
       showPopup({
         header: "Error updating workspace description",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     },
   });

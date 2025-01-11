@@ -64,6 +64,7 @@ const UpdateWorkspaceUrlForm = ({
       showPopup({
         header: "Error updating workspace username",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     },
   });

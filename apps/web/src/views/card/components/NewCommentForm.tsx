@@ -1,11 +1,10 @@
-import { useForm } from "react-hook-form";
 import ContentEditable from "react-contenteditable";
+import { useForm } from "react-hook-form";
 import { HiOutlineArrowUp } from "react-icons/hi2";
 
 import LoadingSpinner from "~/components/LoadingSpinner";
-
-import { api } from "~/utils/api";
 import { usePopup } from "~/providers/popup";
+import { api } from "~/utils/api";
 
 interface FormValues {
   comment: string;
@@ -29,6 +28,7 @@ const NewCommentForm = ({ cardPublicId }: { cardPublicId: string }) => {
       showPopup({
         header: "Unable to add comment",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     },
   });

@@ -21,8 +21,14 @@ export function NewWorkspaceForm() {
 
   const createWorkspace = api.workspace.create.useMutation({
     onSuccess: (values) => {
-      if (values?.publicId && values.name) {
-        switchWorkspace({ publicId: values.publicId, name: values.name });
+      if (values.publicId && values.name) {
+        switchWorkspace({
+          publicId: values.publicId,
+          name: values.name,
+          // description: values.description,
+          // slug: values.slug,
+          // plan: values.plan,
+        });
         closeModal();
       }
     },
@@ -30,13 +36,14 @@ export function NewWorkspaceForm() {
       showPopup({
         header: "Unable to create workspace",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
     },
   });
 
   useEffect(() => {
     const nameElement: HTMLElement | null =
-      document?.querySelector<HTMLElement>("#workspace-name");
+      document.querySelector<HTMLElement>("#workspace-name");
     if (nameElement) nameElement.focus();
   }, []);
 

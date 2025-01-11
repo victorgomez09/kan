@@ -7,7 +7,7 @@ import * as activityRepo from "@kan/db/repository/cardActivity.repo";
 import * as listRepo from "@kan/db/repository/list.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const boardRouter = createTRPCRouter({
   all: protectedProcedure
@@ -69,6 +69,37 @@ export const boardRouter = createTRPCRouter({
           labels: input.labels ?? [],
         },
       );
+
+      return result;
+    }),
+  bySlug: publicProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/board/{boardSlug}",
+        summary: "Get board by slug",
+        description: "Retrieves a board by its slug",
+        tags: ["Boards"],
+        protect: true,
+      },
+    })
+    .input(
+      z.object({
+        boardSlug: z
+          .string()
+          .min(3)
+          .max(24)
+          .regex(/^(?![-]+$)[a-zA-Z0-9-]+$/),
+        members: z.array(z.string().min(12)).optional(),
+        labels: z.array(z.string().min(12)).optional(),
+      }),
+    )
+    .output(z.custom<Awaited<ReturnType<typeof boardRepo.getBySlug>>>())
+    .query(async ({ ctx, input }) => {
+      const result = await boardRepo.getBySlug(ctx.db, input.boardSlug, {
+        members: input.members ?? [],
+        labels: input.labels ?? [],
+      });
 
       return result;
     }),
