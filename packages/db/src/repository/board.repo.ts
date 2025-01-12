@@ -210,20 +210,23 @@ export const getWithLatestListIndexByPublicId = async (
 export const create = async (
   db: SupabaseClient<Database>,
   boardInput: {
+    publicId?: string;
     name: string;
     createdBy: string;
     workspaceId: number;
     importId?: number;
+    slug: string;
   },
 ) => {
   const { data } = await db
     .from("board")
     .insert({
-      publicId: generateUID(),
+      publicId: boardInput.publicId ?? generateUID(),
       name: boardInput.name,
       createdBy: boardInput.createdBy,
       workspaceId: boardInput.workspaceId,
       importId: boardInput.importId,
+      slug: boardInput.slug,
     })
     .select(`id, publicId, name`)
     .limit(1)
@@ -276,4 +279,20 @@ export const hardDelete = async (
   const result = db.from("board").delete().eq("workspaceId", workspaceId);
 
   return result;
+};
+
+export const isSlugUnique = async (
+  db: SupabaseClient<Database>,
+  args: { slug: string; workspaceId: number },
+) => {
+  const { data } = await db
+    .from("board")
+    .select("slug")
+    .eq("slug", args.slug)
+    .eq("workspaceId", args.workspaceId)
+    .is("deletedAt", null)
+    .limit(1)
+    .single();
+
+  return !data;
 };
