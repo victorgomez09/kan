@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useRouter } from "next/router";
 import ContentEditable from "react-contenteditable";
 import { useForm } from "react-hook-form";
 import { IoChevronForwardSharp } from "react-icons/io5";
@@ -27,14 +27,14 @@ interface FormValues {
 }
 
 export default function CardPage() {
-  const params = useParams();
+  const router = useRouter();
   const utils = api.useUtils();
   const { modalContentType, entityId } = useModal();
   const { showPopup } = usePopup();
 
-  const cardId = Array.isArray(params.cardId)
-    ? params.cardId[0]
-    : params.cardId;
+  const cardId = Array.isArray(router.query.cardId)
+    ? router.query.cardId[0]
+    : router.query.cardId;
 
   const { data, isLoading } = api.card.byId.useQuery({
     cardPublicId: cardId ?? "",
