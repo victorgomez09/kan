@@ -7,7 +7,7 @@ import * as cardActivityRepo from "@kan/db/repository/cardActivity.repo";
 import * as importRepo from "@kan/db/repository/import.repo";
 import * as listRepo from "@kan/db/repository/list.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
-import { generateUID } from "@kan/utils";
+import { generateSlug, generateUID } from "@kan/utils";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -159,8 +159,19 @@ export const importRouter = createTRPCRouter({
             })),
           };
 
+          let slug = generateSlug(input.name);
+
+          const isSlugUnique = await boardRepo.isSlugUnique(ctx.db, {
+            slug,
+            workspaceId: workspace.id,
+          });
+
+          if (!isSlugUnique) slug = `${slug}-${generateUID()}`;
+
           const newBoard = await boardRepo.create(ctx.db, {
+            publicId: generateUID(),
             name: formattedData.name,
+            slug,
             createdBy: userId,
             importId: newImportId,
             workspaceId: workspace.id,
