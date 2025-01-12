@@ -159,7 +159,7 @@ export const importRouter = createTRPCRouter({
             })),
           };
 
-          let slug = generateSlug(input.name);
+          let slug = generateSlug(formattedData.name);
 
           const isSlugUnique = await boardRepo.isSlugUnique(ctx.db, {
             slug,
