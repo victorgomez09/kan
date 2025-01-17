@@ -1,19 +1,25 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import { HiLink } from "react-icons/hi2";
 
+import Modal from "~/components/modal";
 import { PageHead } from "~/components/PageHead";
 import PatternedBackground from "~/components/PatternedBackground";
 import Popup from "~/components/Popup";
 import ThemeToggle from "~/components/ThemeToggle";
+import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 import { formatToArray } from "~/utils/helpers";
 import Filters from "~/views/board/components/Filters";
+import { CardModal } from "./CardModal";
 
 export default function PublicBoardView() {
   const router = useRouter();
   const { showPopup } = usePopup();
+  const [isRouteLoaded, setIsRouteLoaded] = useState(false);
+  const { openModal } = useModal();
 
   const boardSlug = Array.isArray(router.query.boardSlug)
     ? router.query.boardSlug[0]
@@ -52,6 +58,25 @@ export default function PublicBoardView() {
     );
   };
 
+  const splitPath = router.asPath.split("/");
+  const cardPublicId = splitPath.length > 3 ? splitPath[3] : null;
+
+  useEffect(() => {
+    if (!isRouteLoaded && router.isReady) {
+      setIsRouteLoaded(true);
+
+      if (cardPublicId) {
+        openModal("CARD");
+      }
+    }
+  }, [
+    router.isReady,
+    isRouteLoaded,
+    setIsRouteLoaded,
+    cardPublicId,
+    openModal,
+  ]);
+
   return (
     <>
       <PageHead
@@ -65,7 +90,7 @@ export default function PublicBoardView() {
       `}</style>
 
       <div className="relative flex h-screen flex-col bg-light-100 px-4 pt-4 dark:bg-dark-50">
-        <div className="relative overflow-hidden rounded-md border pb-8 dark:border-dark-200">
+        <div className="relative h-full overflow-hidden rounded-md border pb-8 dark:border-dark-200">
           <PatternedBackground />
           <div className="z-10 flex w-full justify-between p-8">
             {isLoading ? (
@@ -106,8 +131,12 @@ export default function PublicBoardView() {
                       {list.cards.map((card) => (
                         <Link
                           key={card.publicId}
-                          href={`/cards/${card.publicId}`}
+                          href={`/${data.workspace?.slug}/${data.slug}/${card.publicId}`}
                           className={`mb-2 flex !cursor-pointer flex-col rounded-md border border-light-200 bg-light-50 px-3 py-2 text-sm text-neutral-900 dark:border-dark-200 dark:bg-dark-200 dark:text-dark-1000 dark:hover:bg-dark-300`}
+                          shallow={true}
+                          onClick={() => {
+                            openModal("CARD");
+                          }}
                         >
                           <div>{card.title}</div>
                           {card.labels.length || card.members.length ? (
@@ -172,6 +201,13 @@ export default function PublicBoardView() {
         </div>
       </div>
       <Popup />
+      <Modal modalSize={"md"} positionFromTop={"12vh"}>
+        <CardModal
+          cardPublicId={cardPublicId}
+          workspaceSlug={data?.workspace?.slug}
+          boardSlug={data?.slug}
+        />
+      </Modal>
     </>
   );
 }
