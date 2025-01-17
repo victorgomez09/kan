@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   bigint,
   bigserial,
+  index,
   integer,
   pgEnum,
   pgTable,
@@ -46,6 +47,10 @@ export const workspacePlanEnum = pgEnum("workspace_plan", [
   "pro",
   "enterprise",
 ]);
+export const boardVisibilityEnum = pgEnum("board_visibility", [
+  "private",
+  "public",
+]);
 
 export const boards = pgTable(
   "board",
@@ -68,8 +73,10 @@ export const boards = pgTable(
     workspaceId: bigint("workspaceId", { mode: "number" })
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
+    visibility: boardVisibilityEnum("visibility").notNull().default("private"),
   },
   (table) => ({
+    visibilityIndex: index("board_visibility_idx").on(table.visibility),
     uniqueSlugPerWorkspace: uniqueIndex("unique_slug_per_workspace").on(
       table.workspaceId,
       table.slug,

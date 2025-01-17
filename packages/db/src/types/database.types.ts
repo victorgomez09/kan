@@ -82,6 +82,7 @@ export type Database = {
           publicId: string
           slug: string
           updatedAt: string | null
+          visibility: Database["public"]["Enums"]["board_visibility"]
           workspaceId: number
         }
         Insert: {
@@ -96,6 +97,7 @@ export type Database = {
           publicId: string
           slug: string
           updatedAt?: string | null
+          visibility?: Database["public"]["Enums"]["board_visibility"]
           workspaceId: number
         }
         Update: {
@@ -110,6 +112,7 @@ export type Database = {
           publicId?: string
           slug?: string
           updatedAt?: string | null
+          visibility?: Database["public"]["Enums"]["board_visibility"]
           workspaceId?: number
         }
         Relationships: [
@@ -772,6 +775,7 @@ export type Database = {
       }
     }
     Enums: {
+      board_visibility: "private" | "public"
       card_activity_type:
         | "card.created"
         | "card.updated.title"
