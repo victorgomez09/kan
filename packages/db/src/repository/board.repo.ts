@@ -31,6 +31,7 @@ export const getByPublicId = async (
         publicId,
         name,
         slug,
+        visibility,
         workspace (
           publicId,
           members:workspace_members (
@@ -222,12 +223,18 @@ export const update = async (
   boardInput: {
     name: string | undefined;
     slug: string | undefined;
+    visibility: "public" | "private" | undefined;
     boardPublicId: string;
   },
 ) => {
   const { data } = await db
     .from("board")
-    .update({ name: boardInput.name, slug: boardInput.slug })
+    .update({
+      name: boardInput.name,
+      slug: boardInput.slug,
+      visibility: boardInput.visibility,
+      updatedAt: new Date().toISOString(),
+    })
     .eq("publicId", boardInput.boardPublicId)
     .select(`publicId, name`)
     .limit(1)

@@ -9,6 +9,7 @@ import { HiOutlinePlusSmall } from "react-icons/hi2";
 
 import type { UpdateBoardInput } from "@kan/api/types";
 
+import Button from "~/components/Button";
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
@@ -27,6 +28,7 @@ import List from "./components/List";
 import { NewCardForm } from "./components/NewCardForm";
 import { NewListForm } from "./components/NewListForm";
 import { UpdateBoardSlugForm } from "./components/UpdateBoardSlugForm";
+import VisibilityButton from "./components/VisibilityButton";
 
 type PublicListId = string;
 
@@ -161,18 +163,22 @@ export default function BoardPage() {
           )}
 
           <div className="flex items-center space-x-2">
+            <VisibilityButton
+              visibility={boardData.visibility}
+              boardPublicId={boardId}
+            />
             <Filters boardData={boardData} position="left" />
-            <button
-              type="button"
-              className="mr-2 inline-flex items-center gap-x-1.5 rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-dark-1000 dark:text-dark-50"
+            <Button
+              iconLeft={
+                <HiOutlinePlusSmall
+                  className="-mr-0.5 h-5 w-5"
+                  aria-hidden="true"
+                />
+              }
               onClick={() => openNewListForm(boardId)}
             >
-              <HiOutlinePlusSmall
-                className="-mr-0.5 h-5 w-5"
-                aria-hidden="true"
-              />
               New list
-            </button>
+            </Button>
             <BoardDropdown />
           </div>
         </div>
