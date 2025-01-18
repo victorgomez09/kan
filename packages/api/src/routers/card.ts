@@ -8,7 +8,7 @@ import * as labelRepo from "@kan/db/repository/label.repo";
 import * as listRepo from "@kan/db/repository/list.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const cardRouter = createTRPCRouter({
   create: protectedProcedure
@@ -479,7 +479,7 @@ export const cardRouter = createTRPCRouter({
 
       return { newMember: true };
     }),
-  byId: protectedProcedure
+  byId: publicProcedure
     .meta({
       openapi: {
         summary: "Get a card by public ID",
@@ -487,7 +487,6 @@ export const cardRouter = createTRPCRouter({
         path: "/cards/{cardPublicId}",
         description: "Retrieves a card by its public ID",
         tags: ["Cards"],
-        protect: true,
       },
     })
     .input(z.object({ cardPublicId: z.string().min(12) }))

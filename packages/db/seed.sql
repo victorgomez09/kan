@@ -120,6 +120,8 @@ $$;
 
 alter table "_card_labels" enable row level security;
 alter table "_card_workspace_members" enable row level security;
+alter table "_card_activity" enable row level security;
+alter table "_card_comments" enable row level security;
 alter table "board" enable row level security;
 alter table "card" enable row level security;
 alter table "import" enable row level security;
@@ -128,11 +130,41 @@ alter table "user" enable row level security;
 alter table "list" enable row level security;
 alter table "workspace" enable row level security;
 alter table "workspace_members" enable row level security;
+alter table "workspace_slugs" enable row level security;
 
-CREATE POLICY "Allow access to boards in user's workspace"
+
+/* BOARD */
+CREATE POLICY "Allow access to boards in user's workspace or public boards"
 ON public.board
 AS PERMISSIVE
-FOR ALL
+FOR SELECT
+TO anon, authenticated
+USING (
+  "workspaceId" IN (
+    SELECT "workspaceId"
+    FROM workspace_members
+    WHERE "userId" = auth.uid()
+  )
+  OR visibility = 'public'
+);
+
+CREATE POLICY "Allow inserting boards in user's workspace"
+ON public.board
+AS PERMISSIVE
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  "workspaceId" IN (
+    SELECT "workspaceId"
+    FROM workspace_members
+    WHERE "userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow updating boards in user's workspace"
+ON public.board
+AS PERMISSIVE
+FOR UPDATE
 TO authenticated
 USING (
   "workspaceId" IN (
@@ -142,10 +174,66 @@ USING (
   )
 );
 
-CREATE POLICY "Allow access to lists in user's workspace"
+CREATE POLICY "Allow deleting boards in user's workspace"
+ON public.board
+AS PERMISSIVE
+FOR DELETE
+TO authenticated
+USING (
+  "workspaceId" IN (
+    SELECT "workspaceId"
+    FROM workspace_members
+    WHERE "userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow modifications to boards in user's workspace"
+ON public.board
+AS PERMISSIVE
+FOR INSERT 
+TO authenticated
+USING (
+  "workspaceId" IN (
+    SELECT "workspaceId"
+    FROM workspace_members
+    WHERE "userId" = auth.uid()
+  )
+);
+
+/* LIST */
+CREATE POLICY "Allow access to lists in user's workspace or public boards"
 ON public.list
 AS PERMISSIVE
-FOR ALL
+FOR SELECT
+TO anon, authenticated
+USING (
+  "boardId" IN (
+    SELECT b.id
+    FROM board b
+    LEFT JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+      OR b.visibility = 'public'
+  )
+);
+
+CREATE POLICY "Allow inserting lists in user's workspace"
+ON public.list
+AS PERMISSIVE
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  "boardId" IN (
+    SELECT b.id
+    FROM board b
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow updating lists in user's workspace"
+ON public.list
+AS PERMISSIVE
+FOR UPDATE
 TO authenticated
 USING (
   "boardId" IN (
@@ -156,25 +244,116 @@ USING (
   )
 );
 
-CREATE POLICY "Allow access to cards in user's workspace"
+CREATE POLICY "Allow deleting lists in user's workspace"
+ON public.list
+AS PERMISSIVE
+FOR DELETE
+TO authenticated
+USING (
+  "boardId" IN (
+    SELECT b.id
+    FROM board b
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+/* CARD */
+CREATE POLICY "Allow access to cards in user's workspace or public boards"
 ON public.card
 AS PERMISSIVE
-FOR ALL
+FOR SELECT
+TO anon, authenticated
+USING (
+  "listId" IN (
+    SELECT l.id
+    FROM list l
+    JOIN board b ON l."boardId" = b.id
+    LEFT JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+      OR b.visibility = 'public'
+  )
+);
+
+CREATE POLICY "Allow inserting cards in user's workspace"
+ON public.card
+AS PERMISSIVE
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  "listId" IN (
+    SELECT l.id
+    FROM list l
+    JOIN board b ON l."boardId" = b.id
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow updating cards in user's workspace"
+ON public.card
+AS PERMISSIVE
+FOR UPDATE
 TO authenticated
 USING (
   "listId" IN (
     SELECT l.id
     FROM list l
-    JOIN board b ON l."boardId" = b."id"
+    JOIN board b ON l."boardId" = b.id
     JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
     WHERE wm."userId" = auth.uid()
   )
 );
 
-CREATE POLICY "Allow access to labels in user's workspace"
+CREATE POLICY "Allow deleting cards in user's workspace"
+ON public.card
+AS PERMISSIVE
+FOR DELETE
+TO authenticated
+USING (
+  "listId" IN (
+    SELECT l.id
+    FROM list l
+    JOIN board b ON l."boardId" = b.id
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+/* LABEL */
+CREATE POLICY "Allow access to labels in user's workspace or public boards"
 ON public.label
 AS PERMISSIVE
-FOR ALL
+FOR SELECT
+TO anon, authenticated
+USING (
+  "boardId" IN (
+    SELECT b.id
+    FROM board b
+    LEFT JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+      OR b.visibility = 'public'
+  )
+);
+
+CREATE POLICY "Allow inserting labels in user's workspace"
+ON public.label
+AS PERMISSIVE
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  "boardId" IN (
+    SELECT b.id
+    FROM board b
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow updating labels in user's workspace"
+ON public.label
+AS PERMISSIVE
+FOR UPDATE
 TO authenticated
 USING (
   "boardId" IN (
@@ -185,10 +364,75 @@ USING (
   )
 );
 
-CREATE POLICY "Allow access to card labels in user's workspace"
+CREATE POLICY "Allow deleting labels in user's workspace"
+ON public.label
+AS PERMISSIVE
+FOR DELETE
+TO authenticated
+USING (
+  "boardId" IN (
+    SELECT b.id
+    FROM board b
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+/* CARD LABELS */
+CREATE POLICY "Allow access to card labels in user's workspace or public boards"
 ON public._card_labels
 AS PERMISSIVE
-FOR ALL
+FOR SELECT
+TO anon, authenticated
+USING (
+  "cardId" IN (
+    SELECT c.id
+    FROM card c
+    JOIN list l ON c."listId" = l.id
+    JOIN board b ON l."boardId" = b.id
+    LEFT JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId" AND wm."userId" = auth.uid()
+    WHERE wm."userId" = auth.uid()
+      OR b.visibility = 'public'
+  )
+  AND
+  "labelId" IN (
+    SELECT l.id
+    FROM label l
+    JOIN board b ON l."boardId" = b.id
+    LEFT JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId" AND wm."userId" = auth.uid()
+    WHERE wm."userId" = auth.uid()
+      OR b.visibility = 'public'
+  )
+);
+
+CREATE POLICY "Allow inserting card labels in user's workspace"
+ON public._card_labels
+AS PERMISSIVE
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  "cardId" IN (
+    SELECT c.id
+    FROM card c
+    JOIN list l ON c."listId" = l.id
+    JOIN board b ON l."boardId" = b.id
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+  AND
+  "labelId" IN (
+    SELECT l.id
+    FROM label l
+    JOIN board b ON l."boardId" = b.id
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow updating card labels in user's workspace"
+ON public._card_labels
+AS PERMISSIVE
+FOR UPDATE
 TO authenticated
 USING (
   "cardId" IN (
@@ -209,6 +453,117 @@ USING (
   )
 );
 
+CREATE POLICY "Allow deleting card labels in user's workspace"
+ON public._card_labels
+AS PERMISSIVE
+FOR DELETE
+TO authenticated
+USING (
+  "cardId" IN (
+    SELECT c.id
+    FROM card c
+    JOIN list l ON c."listId" = l.id
+    JOIN board b ON l."boardId" = b.id
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+  AND
+  "labelId" IN (
+    SELECT l.id
+    FROM label l
+    JOIN board b ON l."boardId" = b.id
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+/* CARD ACTIVITY */
+CREATE POLICY "Allow access to card activity in user's workspace or public boards"
+ON public.card_activity
+AS PERMISSIVE
+FOR SELECT
+TO anon, authenticated
+USING (
+  "cardId" IN (
+    SELECT c.id
+    FROM card c
+    JOIN list l ON c."listId" = l.id
+    JOIN board b ON l."boardId" = b.id
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+      OR b.visibility = 'public'
+  )
+);
+
+CREATE POLICY "Allow inserting card activity in user's workspace"
+ON public.card_activity
+AS PERMISSIVE
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  "cardId" IN (
+    SELECT c.id
+    FROM card c
+    JOIN list l ON c."listId" = l.id
+    JOIN board b ON l."boardId" = b.id
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+/* CARD COMMENTS */
+CREATE POLICY "Allow access to card comments in user's workspace or public boards"
+ON public.card_comments
+AS PERMISSIVE
+FOR SELECT
+TO anon, authenticated
+USING (
+  "cardId" IN (
+    SELECT c.id
+    FROM card c
+    JOIN list l ON c."listId" = l.id
+    JOIN board b ON l."boardId" = b.id
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+      OR b.visibility = 'public'
+  )
+);
+
+CREATE POLICY "Allow inserting comments on cards in user's workspace"
+ON public.card_comments
+AS PERMISSIVE
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  "cardId" IN (
+    SELECT c.id
+    FROM card c
+    JOIN list l ON c."listId" = l.id
+    JOIN board b ON l."boardId" = b.id
+    JOIN workspace_members wm ON b."workspaceId" = wm."workspaceId"
+    WHERE wm."userId" = auth.uid()
+  )
+);
+
+CREATE POLICY "Allow updating own comments"
+ON public.card_comments
+AS PERMISSIVE
+FOR UPDATE
+TO authenticated
+USING (
+  "createdBy" = auth.uid()
+);
+
+CREATE POLICY "Allow deleting own comments"
+ON public.card_comments
+AS PERMISSIVE
+FOR DELETE
+TO authenticated
+USING (
+  "createdBy" = auth.uid()
+);
+
+/* CARD WORKSPACE MEMBERS */
 CREATE POLICY "Allow access to card workspace members in user's workspace"
 ON public._card_workspace_members
 AS PERMISSIVE
@@ -233,6 +588,7 @@ USING (
   )
 );
 
+/* USER */
 CREATE POLICY "Allow viewing members in user's workspace"
 ON public.user
 AS PERMISSIVE
@@ -250,19 +606,31 @@ USING (
   )
 );
 
+/* WORKSPACE */
 CREATE POLICY "Allow viewing user's workspaces"
 ON public.workspace
 AS PERMISSIVE
 FOR SELECT
-TO authenticated
+TO anon, authenticated
 USING (
-  id IN (
-    SELECT "workspaceId"
-    FROM workspace_members
-    WHERE "userId" = auth.uid()
-  )
-  OR
-  "createdBy" = auth.uid()
+  CASE 
+    WHEN auth.uid() IS NULL THEN
+      -- For anonymous users, only allow access through public boards
+      EXISTS (
+        SELECT 1 
+        FROM board 
+        WHERE "workspaceId" = workspace.id 
+        AND visibility = 'public'
+      )
+    ELSE
+      -- For authenticated users, allow access to their workspaces
+      id IN (
+        SELECT "workspaceId"
+        FROM workspace_members
+        WHERE "userId" = auth.uid()
+      )
+      OR "createdBy" = auth.uid()
+  END
 );
 
 CREATE POLICY "Allow updating user's workspaces"
@@ -298,6 +666,7 @@ FOR INSERT
 TO authenticated
 USING (true);
 
+/* WORKSPACE MEMBERS */
 CREATE POLICY "Allow members to view workspace membership"
 ON public.workspace_members
 AS PERMISSIVE
@@ -334,6 +703,8 @@ TO authenticated
 USING (
   is_workspace_admin(auth.uid(), "workspaceId")
 );
+
+/* IMPORT */
 CREATE POLICY "Allow access to user's own imports"
 ON public.import
 AS PERMISSIVE
@@ -342,5 +713,3 @@ TO authenticated
 USING (
   "createdBy" = auth.uid()
 );
-
-

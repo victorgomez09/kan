@@ -139,7 +139,7 @@ export default function PublicBoardView() {
                           }}
                         >
                           <div>{card.title}</div>
-                          {card.labels.length || card.members.length ? (
+                          {card.labels.length ? (
                             <div className="mt-2 flex justify-end space-x-1">
                               {card.labels.map((label) => (
                                 <span
@@ -157,7 +157,7 @@ export default function PublicBoardView() {
                                   <div>{label.name}</div>
                                 </span>
                               ))}
-                              <div className="isolate flex -space-x-1 overflow-hidden">
+                              {/* <div className="isolate flex -space-x-1 overflow-hidden">
                                 {card.members.map((member) => (
                                   <span
                                     key={member.publicId}
@@ -173,7 +173,7 @@ export default function PublicBoardView() {
                                     </span>
                                   </span>
                                 ))}
-                              </div>
+                              </div> */}
                             </div>
                           ) : null}
                         </Link>

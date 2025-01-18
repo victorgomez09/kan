@@ -6,11 +6,53 @@ import {
 } from "react-icons/hi2";
 import { IoFilterOutline } from "react-icons/io5";
 
-import type { GetBoardByIdOutput } from "@kan/api/types";
-
 import Button from "~/components/Button";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
 import { formatToArray } from "~/utils/helpers";
+
+interface BoardData {
+  publicId: string;
+  name: string;
+  slug: string;
+  workspace: {
+    publicId: string;
+    members?: {
+      publicId: string;
+      user: {
+        name: string | null;
+      } | null;
+    }[];
+  } | null;
+  labels: {
+    publicId: string;
+    name: string;
+    colourCode: string | null;
+  }[];
+  lists: {
+    publicId: string;
+    name: string;
+    boardId: number;
+    index: number;
+    cards: {
+      publicId: string;
+      title: string;
+      description: string | null;
+      listId: number;
+      index: number;
+      labels: {
+        publicId: string;
+        name: string;
+        colourCode: string | null;
+      }[];
+      members?: {
+        publicId: string;
+        user: {
+          name: string | null;
+        } | null;
+      }[];
+    }[];
+  }[];
+}
 
 const LabelIcon = ({ colourCode }: { colourCode: string | null }) => (
   <svg
@@ -39,7 +81,7 @@ const Filters = ({
   boardData,
 }: {
   position?: "left" | "right";
-  boardData: GetBoardByIdOutput;
+  boardData: BoardData | null;
 }) => {
   const router = useRouter();
 
@@ -58,7 +100,7 @@ const Filters = ({
   };
 
   const formattedMembers =
-    boardData?.workspace?.members.map((member) => ({
+    boardData?.workspace?.members?.map((member) => ({
       key: member.publicId,
       value: member.user?.name ?? "",
       selected: !!router.query.members?.includes(member.publicId),
@@ -74,12 +116,16 @@ const Filters = ({
     })) ?? [];
 
   const groups = [
-    {
-      key: "members",
-      label: "Members",
-      icon: <HiOutlineUserCircle size={16} />,
-      items: formattedMembers,
-    },
+    ...(formattedMembers.length
+      ? [
+          {
+            key: "members",
+            label: "Members",
+            icon: <HiOutlineUserCircle size={16} />,
+            items: formattedMembers,
+          },
+        ]
+      : []),
     {
       key: "labels",
       label: "Labels",

@@ -170,7 +170,7 @@ export const workspaceRouter = createTRPCRouter({
         );
 
         const reservedOrPremiumWorkspaceSlug =
-          await workspaceSlugRepo.getWorkspaceSlug(ctx.db, input.slug);
+          await workspaceSlugRepo.getWorkspaceSlug(ctx.adminDb, input.slug);
 
         const isWorkspaceSlugAvailable =
           await workspaceRepo.isWorkspaceSlugAvailable(ctx.db, input.slug);
@@ -258,7 +258,7 @@ export const workspaceRouter = createTRPCRouter({
       const slug = input.workspaceSlug.toLowerCase();
       // check list of reserved or premium slugs
       const workspaceSlug = await workspaceSlugRepo.getWorkspaceSlug(
-        ctx.db,
+        ctx.adminDb,
         slug,
       );
 
