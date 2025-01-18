@@ -1,23 +1,23 @@
-import { useState } from "react";
 import Link from "next/link";
-import LottieIcon from "~/components/LottieIcon";
+import { useState } from "react";
 
-import boardVisibilityIconLight from "~/assets/board-visibility-light.json";
-import boardVisibilityIconDark from "~/assets/board-visibility-dark.json";
-import membersIconLight from "~/assets/members-light.json";
-import membersIconDark from "~/assets/members-dark.json";
-import commentsIconLight from "~/assets/comments-light.json";
-import commentsIconDark from "~/assets/comments-dark.json";
-import integrationsIconLight from "~/assets/integrations-light.json";
-import integrationsIconDark from "~/assets/integrations-dark.json";
-import labelsIconLight from "~/assets/labels-light.json";
-import labelsIconDark from "~/assets/labels-dark.json";
-import importsIconLight from "~/assets/imports-light.json";
-import importsIconDark from "~/assets/imports-dark.json";
-import activityLogsIconLight from "~/assets/activity-logs-light.json";
 import activityLogsIconDark from "~/assets/activity-logs-dark.json";
-import templatesIconLight from "~/assets/templates-light.json";
+import activityLogsIconLight from "~/assets/activity-logs-light.json";
+import boardVisibilityIconDark from "~/assets/board-visibility-dark.json";
+import boardVisibilityIconLight from "~/assets/board-visibility-light.json";
+import commentsIconDark from "~/assets/comments-dark.json";
+import commentsIconLight from "~/assets/comments-light.json";
+import importsIconDark from "~/assets/imports-dark.json";
+import importsIconLight from "~/assets/imports-light.json";
+import integrationsIconDark from "~/assets/integrations-dark.json";
+import integrationsIconLight from "~/assets/integrations-light.json";
+import labelsIconDark from "~/assets/labels-dark.json";
+import labelsIconLight from "~/assets/labels-light.json";
+import membersIconDark from "~/assets/members-dark.json";
+import membersIconLight from "~/assets/members-light.json";
 import templatesIconDark from "~/assets/templates-dark.json";
+import templatesIconLight from "~/assets/templates-light.json";
+import LottieIcon from "~/components/LottieIcon";
 
 const FeatureItem = ({
   feature,
@@ -42,7 +42,7 @@ const FeatureItem = ({
       onMouseEnter={handleMouseEnter}
       className="group relative flex h-56 w-56 flex-col items-center justify-center overflow-hidden rounded-3xl border border-light-200 bg-light-50 dark:border-dark-200 dark:bg-dark-50"
     >
-      <div className="absolute left-8 top-8 h-2 w-2 rounded-full bg-light-200 dark:bg-dark-200  " />
+      <div className="absolute left-8 top-8 h-2 w-2 rounded-full bg-light-200 dark:bg-dark-200" />
       <div className="absolute right-8 top-8 h-2 w-2 rounded-full bg-light-200 dark:bg-dark-200" />
       <div className="absolute bottom-8 left-8 h-2 w-2 rounded-full bg-light-200 dark:bg-dark-200" />
       <div className="absolute bottom-8 right-8 h-2 w-2 rounded-full bg-light-200 dark:bg-dark-200" />
@@ -141,7 +141,7 @@ const Features = ({ theme }: { theme: "light" | "dark" }) => {
           <div className="mt-8 flex items-center gap-2 rounded-full border bg-light-50 px-4 py-1 text-center text-sm text-light-1000 dark:border-dark-300 dark:bg-dark-50 dark:text-dark-900">
             <p>
               {`We're just getting started. `}
-              <Link href="/roadmap" className="underline">
+              <Link href="/kan/roadmap" className="underline">
                 View our roadmap.
               </Link>
             </p>

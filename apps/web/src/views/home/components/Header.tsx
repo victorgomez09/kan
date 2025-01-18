@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
 import Link from "next/link";
-import Button from "~/components/Button";
+import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
+
+import Button from "~/components/Button";
 
 const Header = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -36,7 +37,7 @@ const Header = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
               </h1>
             </div>
             <div className="flex justify-center gap-10 dark:text-dark-1000">
-              <Link href="/roadmap" className="text-sm font-bold">
+              <Link href="/kan/roadmap" className="text-sm font-bold">
                 Roadmap
               </Link>
               <Link href="#features" className="text-sm font-bold">

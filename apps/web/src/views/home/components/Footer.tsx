@@ -8,7 +8,7 @@ const navigation = {
     { name: "API Reference", href: "#" },
   ],
   company: [
-    { name: "Roadmap", href: "/roadmap" },
+    { name: "Roadmap", href: "/kan/roadmap" },
     { name: "GitHub", href: "https://github.com/kanbn/kan" },
     { name: "Contact", href: "mailto:support@kan.bn" },
   ],
@@ -44,16 +44,16 @@ const StatusMarker = () => (
 
 const Footer = () => {
   return (
-    <footer className="z-10 mt-20 w-full border-t border-light-300 border-light-300 bg-light-50 py-8 dark:border-dark-300 dark:bg-dark-50">
+    <footer className="z-10 mt-20 w-full border-t border-light-300 bg-light-50 py-8 dark:border-dark-300 dark:bg-dark-50">
       <div className="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8 lg:py-24">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <div>
             <div className="mb-2 flex items-center gap-2">
               <Link href="https://github.com/kanbn/kan" target="_blank">
-                <FaGithub className="h-8 w-8 rounded-lg border border-light-300 border-light-300 p-1.5 text-light-1000 hover:bg-light-100 dark:border-dark-300 dark:text-dark-1000 dark:hover:bg-dark-100" />
+                <FaGithub className="h-8 w-8 rounded-lg border border-light-300 p-1.5 text-light-1000 hover:bg-light-100 dark:border-dark-300 dark:text-dark-1000 dark:hover:bg-dark-100" />
               </Link>
               <Link href="#" target="_blank">
-                <FaDiscord className="h-8 w-8 rounded-lg border border-light-300 border-light-300 p-1.5 text-light-1000 hover:bg-light-100 dark:border-dark-300 dark:text-dark-1000 dark:hover:bg-dark-100" />
+                <FaDiscord className="h-8 w-8 rounded-lg border border-light-300 p-1.5 text-light-1000 hover:bg-light-100 dark:border-dark-300 dark:text-dark-1000 dark:hover:bg-dark-100" />
               </Link>
             </div>
 
