@@ -21,16 +21,19 @@ export default function UserMenu({
   email,
   isLoading,
 }: UserMenuProps) {
+  const db = createClient();
   const router = useRouter();
   const { themePreference, switchTheme } = useTheme();
 
   const handleLogout = async () => {
-    const db = createClient();
-
     await db.auth.signOut();
 
     router.push("/login");
   };
+
+  const avatarUrl = imageUrl
+    ? db.storage.from("avatars").getPublicUrl(imageUrl).data.publicUrl
+    : null;
 
   return (
     <Menu as="div" className="relative inline-block w-full text-left">
@@ -42,9 +45,9 @@ export default function UserMenu({
           </div>
         ) : (
           <Menu.Button className="flex w-full items-center rounded-md p-1.5 text-neutral-900 hover:bg-light-200 dark:text-dark-900 dark:hover:bg-dark-200 dark:hover:text-dark-1000">
-            {imageUrl ? (
+            {avatarUrl ? (
               <Image
-                src={imageUrl ?? ""}
+                src={avatarUrl}
                 className="h-8 w-8 rounded-full bg-gray-50"
                 width={30}
                 height={30}

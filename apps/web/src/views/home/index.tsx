@@ -21,7 +21,7 @@ export default function HomeView() {
       ? Cookies.get(env.NEXT_PUBLIC_SUPABASE_AUTH_COOKIE_NAME)
       : null;
 
-  const { data } = api.auth.getUser.useQuery(undefined, {
+  const { data } = api.user.getUser.useQuery(undefined, {
     enabled: !!token,
   });
 

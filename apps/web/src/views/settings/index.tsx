@@ -6,6 +6,8 @@ import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
+import { api } from "~/utils/api";
+import Avatar from "./components/Avatar";
 import { DeleteWorkspaceConfirmation } from "./components/DeleteWorkspaceConfirmation";
 import { PremiumUsernameConfirmation } from "./components/PremiumUsernameConfirmation";
 import UpdateWorkspaceDescriptionForm from "./components/UpdateWorkspaceDescriptionForm";
@@ -15,6 +17,8 @@ import UpdateWorkspaceUrlForm from "./components/UpdateWorkspaceUrlForm";
 export default function SettingsPage() {
   const { modalContentType, openModal } = useModal();
   const { workspace } = useWorkspace();
+
+  const { data } = api.user.getUser.useQuery();
 
   const handleOpenBillingPortal = async () => {
     try {
@@ -45,6 +49,13 @@ export default function SettingsPage() {
               <h1 className="font-medium tracking-tight text-neutral-900 dark:text-dark-1000 sm:text-[1.2rem]">
                 Settings
               </h1>
+            </div>
+
+            <div className="mb-8 border-t border-light-300 dark:border-dark-300">
+              <h2 className="mb-4 mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">
+                Profile picture
+              </h2>
+              <Avatar userId={data?.id} userImage={data?.image} />
             </div>
 
             <div className="mb-8 border-t border-light-300 dark:border-dark-300">

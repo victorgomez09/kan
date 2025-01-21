@@ -58,7 +58,7 @@ export default function SideNavigation({
               <li key={item.name}>
                 <ReactiveButton
                   href={item.href}
-                  current={pathname?.includes(item.href)}
+                  current={pathname.includes(item.href)}
                   name={item.name}
                   json={item.icon}
                 />
@@ -67,8 +67,8 @@ export default function SideNavigation({
           </ul>
         </div>
         <UserMenu
-          email={user?.email ?? ""}
-          imageUrl={user?.image ?? undefined}
+          email={user.email ?? ""}
+          imageUrl={user.image ?? undefined}
           isLoading={isLoading}
         />
       </nav>

@@ -5,7 +5,7 @@ import type { Database } from "@kan/db/types/database.types";
 export const getById = async (db: SupabaseClient<Database>, userId: string) => {
   const { data } = await db
     .from("user")
-    .select(`id, name, email, stripeCustomerId`)
+    .select(`id, name, email, image, stripeCustomerId`)
     .eq("id", userId)
     .limit(1)
     .single();
@@ -40,6 +40,21 @@ export const create = async (
     })
     .select()
     .limit(1)
+    .single();
+
+  return data;
+};
+
+export const update = async (
+  db: SupabaseClient<Database>,
+  userId: string,
+  updates: { image: string | null },
+) => {
+  const { data } = await db
+    .from("user")
+    .update({ image: updates.image })
+    .eq("id", userId)
+    .select(`image`)
     .single();
 
   return data;

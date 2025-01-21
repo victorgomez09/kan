@@ -14,6 +14,10 @@ const config = {
   /** We already do linting and typechecking as separate tasks in CI */
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
+
+  images: {
+    domains: [process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL ?? ""],
+  },
 };
 
 export default config;

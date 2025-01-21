@@ -1,7 +1,9 @@
 import { useState } from "react";
+
 // import { useRouter } from "next/navigation";
 import { Auth } from "~/components/AuthForm";
 import { PageHead } from "~/components/PageHead";
+
 // import { api } from "~/utils/api";
 
 export default function SignupPage() {
@@ -18,7 +20,7 @@ export default function SignupPage() {
   //   .split("; ")
   //   .some((cookie) => cookie.includes("auth-token"));
 
-  // const { data } = api.auth.getUser.useQuery(undefined, {
+  // const { data } = api.user.getUser.useQuery(undefined, {
   //   enabled: authCookieExists ? true : false,
   // });
 

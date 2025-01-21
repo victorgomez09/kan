@@ -1,52 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import * as userRepo from "@kan/db/repository/user.repo";
-
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const authRouter = createTRPCRouter({
-  getUser: protectedProcedure
-    .meta({
-      openapi: {
-        method: "GET",
-        path: "/users/me",
-        summary: "Get user",
-        description:
-          "Retrieves the currently authenticated user's profile information",
-        tags: ["Users"],
-        protect: true,
-      },
-    })
-    .input(z.void())
-    .output(
-      z.object({
-        id: z.string(),
-        email: z.string(),
-        name: z.string().nullable(),
-        stripeCustomerId: z.string().nullable(),
-      }),
-    )
-    .query(async ({ ctx }) => {
-      const userId = ctx.user?.id;
-
-      if (!userId)
-        throw new TRPCError({
-          message: `User not authenticated`,
-          code: "UNAUTHORIZED",
-        });
-
-      const result = await userRepo.getById(ctx.db, userId);
-
-      if (!result?.name) {
-        throw new TRPCError({
-          message: `User not found`,
-          code: "NOT_FOUND",
-        });
-      }
-
-      return result;
-    }),
   loginWithEmail: publicProcedure
     .meta({
       openapi: {
