@@ -6,9 +6,11 @@ import {
 } from "react-icons/hi2";
 import { IoFilterOutline } from "react-icons/io5";
 
+import Avatar from "~/components/Avatar";
 import Button from "~/components/Button";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
 import { formatToArray } from "~/utils/helpers";
+import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 
 interface BoardData {
   publicId: string;
@@ -20,6 +22,8 @@ interface BoardData {
       publicId: string;
       user: {
         name: string | null;
+        image: string | null;
+        email: string;
       } | null;
     }[];
   } | null;
@@ -65,17 +69,6 @@ const LabelIcon = ({ colourCode }: { colourCode: string | null }) => (
   </svg>
 );
 
-const Avatar = ({ name }: { name: string }) => (
-  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-gray-400 ring-1 ring-light-200 dark:ring-dark-500">
-    <span className="text-[8px] font-medium leading-none text-white">
-      {name
-        .split(" ")
-        .map((namePart) => namePart.charAt(0).toUpperCase())
-        .join("")}
-    </span>
-  </span>
-);
-
 const Filters = ({
   position = "right",
   boardData,
@@ -104,7 +97,16 @@ const Filters = ({
       key: member.publicId,
       value: member.user?.name ?? "",
       selected: !!router.query.members?.includes(member.publicId),
-      leftIcon: <Avatar name={member.user?.name ?? ""} />,
+      leftIcon: (
+        <Avatar
+          size="xs"
+          name={member.user?.name ?? ""}
+          imageUrl={
+            member.user?.image ? getPublicUrl(member.user.image) : undefined
+          }
+          email={member.user?.email ?? ""}
+        />
+      ),
     })) ?? [];
 
   const formattedLabels =

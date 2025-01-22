@@ -37,7 +37,9 @@ export const getByPublicId = async (
           members:workspace_members (
             publicId,
             user!workspace_members_userId_user_id_fk (
-              name
+              name,
+              email,
+              image
             )
           )
         ),
@@ -65,7 +67,9 @@ export const getByPublicId = async (
             members:workspace_members${filters.members.length > 0 ? "!inner" : ""} (
               publicId,
               user!workspace_members_userId_user_id_fk (
-                name
+                name,
+                email,
+                image
               )
             )
           )

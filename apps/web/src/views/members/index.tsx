@@ -1,6 +1,7 @@
 import { HiEllipsisHorizontal, HiOutlinePlusSmall } from "react-icons/hi2";
 import { twMerge } from "tailwind-merge";
 
+import Avatar from "~/components/Avatar";
 import Dropdown from "~/components/Dropdown";
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
@@ -9,6 +10,7 @@ import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import { getInitialsFromName, inferInitialsFromEmail } from "~/utils/helpers";
+import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 import { DeleteMemberConfirmation } from "./components/DeleteMemberConfirmation";
 import { InviteMemberForm } from "./components/InviteMemberForm";
 
@@ -44,6 +46,7 @@ export default function MembersPage() {
     memberPublicId,
     memberName,
     memberEmail,
+    memberImage,
     memberRole,
     memberStatus,
     isLastRow,
@@ -52,6 +55,7 @@ export default function MembersPage() {
     memberPublicId?: string;
     memberName?: string | null | undefined;
     memberEmail?: string | null | undefined;
+    memberImage?: string | null | undefined;
     memberRole?: string;
     memberStatus?: string;
     isLastRow?: boolean;
@@ -66,16 +70,15 @@ export default function MembersPage() {
         <td className={twMerge("w-[65%]", isLastRow ? "rounded-bl-lg" : "")}>
           <div className="flex items-center p-4">
             <div className="flex-shrink-0">
-              <span
-                className={twMerge(
-                  "inline-flex h-9 w-9 items-center justify-center rounded-full bg-light-1000 dark:bg-dark-400",
-                  showSkeleton && "animate-pulse bg-light-200 dark:bg-dark-200",
-                )}
-              >
-                <span className="text-sm font-medium leading-none text-white">
-                  {initials}
-                </span>
-              </span>
+              {showSkeleton ? (
+                <div className="h-9 w-9 animate-pulse rounded-full bg-light-200 dark:bg-dark-200" />
+              ) : (
+                <Avatar
+                  name={memberName ?? ""}
+                  email={memberEmail ?? ""}
+                  imageUrl={memberImage ? getPublicUrl(memberImage) : undefined}
+                />
+              )}
             </div>
             <div className="ml-2 min-w-0 flex-1">
               <div>
@@ -207,6 +210,7 @@ export default function MembersPage() {
                           memberPublicId={member.publicId}
                           memberName={member.user?.name}
                           memberEmail={member.user?.email}
+                          memberImage={member.user?.image}
                           memberRole={member.role}
                           memberStatus={member.status}
                           isLastRow={index === data.members.length - 1}

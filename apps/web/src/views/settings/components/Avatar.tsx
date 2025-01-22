@@ -4,6 +4,7 @@ import { useState } from "react";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 import createClient from "~/utils/supabase/client";
+import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 
 export default function Avatar({
   userId,
@@ -35,9 +36,7 @@ export default function Avatar({
     },
   });
 
-  const avatarUrl = userImage
-    ? supabase.storage.from("avatars").getPublicUrl(userImage).data.publicUrl
-    : null;
+  const avatarUrl = userImage ? getPublicUrl(userImage) : undefined;
 
   const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {

@@ -9,6 +9,7 @@ import { HiOutlinePlusSmall } from "react-icons/hi2";
 
 import type { UpdateBoardInput } from "@kan/api/types";
 
+import Avatar from "~/components/Avatar";
 import Button from "~/components/Button";
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
@@ -20,6 +21,8 @@ import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import { formatToArray } from "~/utils/helpers";
+import createClient from "~/utils/supabase/client";
+import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 import BoardDropdown from "./components/BoardDropdown";
 import { DeleteBoardConfirmation } from "./components/DeleteBoardConfirmation";
 import { DeleteListConfirmation } from "./components/DeleteListConfirmation";
@@ -33,6 +36,7 @@ import VisibilityButton from "./components/VisibilityButton";
 type PublicListId = string;
 
 export default function BoardPage() {
+  const supabase = createClient();
   const params = useParams() as { boardId: string[] } | null;
   const router = useRouter();
   const { boardData, setBoardData, updateCard, updateList } = useBoard();
@@ -270,23 +274,26 @@ export default function BoardPage() {
                                             </span>
                                           ))}
                                           <div className="isolate flex -space-x-1 overflow-hidden">
-                                            {card.members.map((member) => (
-                                              <span
-                                                key={member.publicId}
-                                                className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-light-900 ring-2 ring-light-50 dark:bg-gray-500 dark:ring-dark-500"
-                                              >
-                                                <span className="text-[10px] font-medium leading-none text-white">
-                                                  {member.user?.name
-                                                    ?.split(" ")
-                                                    .map((namePart) =>
-                                                      namePart
-                                                        .charAt(0)
-                                                        .toUpperCase(),
-                                                    )
-                                                    .join("")}
-                                                </span>
-                                              </span>
-                                            ))}
+                                            {card.members.map((member) => {
+                                              const fileName =
+                                                member.user?.image;
+
+                                              const avatarUrl = fileName
+                                                ? getPublicUrl(fileName)
+                                                : undefined;
+
+                                              return (
+                                                <Avatar
+                                                  key={member.publicId}
+                                                  name={member.user?.name ?? ""}
+                                                  email={
+                                                    member.user?.email ?? ""
+                                                  }
+                                                  imageUrl={avatarUrl}
+                                                  size="sm"
+                                                />
+                                              );
+                                            })}
                                           </div>
                                         </div>
                                       ) : null}

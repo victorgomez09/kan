@@ -201,7 +201,7 @@ export default function PublicBoardView() {
         </div>
       </div>
       <Popup />
-      <Modal modalSize={"md"} positionFromTop={"12vh"}>
+      <Modal modalSize={"md"} positionFromTop={"sm"}>
         <CardModal
           cardPublicId={cardPublicId}
           workspaceSlug={data?.workspace?.slug}

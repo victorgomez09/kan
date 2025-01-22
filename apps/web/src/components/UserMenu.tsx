@@ -5,6 +5,7 @@ import { Fragment } from "react";
 
 import { useTheme } from "~/providers/theme";
 import createClient from "~/utils/supabase/client";
+import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 
 interface UserMenuProps {
   imageUrl: string | undefined;
@@ -31,9 +32,7 @@ export default function UserMenu({
     router.push("/login");
   };
 
-  const avatarUrl = imageUrl
-    ? db.storage.from("avatars").getPublicUrl(imageUrl).data.publicUrl
-    : null;
+  const avatarUrl = imageUrl ? getPublicUrl(imageUrl) : null;
 
   return (
     <Menu as="div" className="relative inline-block w-full text-left">
@@ -48,9 +47,9 @@ export default function UserMenu({
             {avatarUrl ? (
               <Image
                 src={avatarUrl}
-                className="h-8 w-8 rounded-full bg-gray-50"
-                width={30}
-                height={30}
+                className="rounded-full bg-gray-50"
+                width={24}
+                height={24}
                 alt=""
               />
             ) : (

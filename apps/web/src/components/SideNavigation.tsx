@@ -1,4 +1,4 @@
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/router";
 
 import boardsIconDark from "~/assets/boards-dark.json";
 import boardsIconLight from "~/assets/boards-light.json";
@@ -25,7 +25,10 @@ export default function SideNavigation({
   user,
   isLoading,
 }: SideNavigationProps) {
-  const pathname = usePathname();
+  const router = useRouter();
+
+  const { pathname } = router;
+
   const { activeTheme } = useTheme();
 
   const isDarkMode = activeTheme === "dark";

@@ -95,7 +95,8 @@ export const getByPublicIdWithMembers = async (
           user!workspace_members_userId_user_id_fk (
             id,
             name,
-            email
+            email,
+            image
           )
         )
       `,

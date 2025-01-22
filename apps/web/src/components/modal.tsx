@@ -6,13 +6,13 @@ import { useModal } from "~/providers/modal";
 interface Props {
   children: React.ReactNode;
   modalSize?: "sm" | "md" | "lg";
-  positionFromTop?: string;
+  positionFromTop?: "sm" | "md" | "lg";
 }
 
 const Modal: React.FC<Props> = ({
   children,
   modalSize = "sm",
-  positionFromTop = "25vh",
+  positionFromTop = "md",
 }) => {
   const { isOpen, closeModal } = useModal();
 
@@ -20,6 +20,12 @@ const Modal: React.FC<Props> = ({
     sm: "max-w-[400px]",
     md: "max-w-[550px]",
     lg: "max-w-[800px]",
+  };
+
+  const positionFromTopMap = {
+    sm: "mt-[12vh]",
+    md: "mt-[25vh]",
+    lg: "mt-[50vh]",
   };
 
   return (
@@ -49,7 +55,7 @@ const Modal: React.FC<Props> = ({
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel
-                className={`relative mt-[${positionFromTop}] w-full transform rounded-lg border border-light-600 bg-white/90 text-left shadow-3xl-light backdrop-blur-[6px] transition-all dark:border-dark-600 dark:bg-dark-100/90 dark:shadow-3xl-dark ${modalSizeMap[modalSize]}`}
+                className={`relative ${positionFromTopMap[positionFromTop]} w-full transform rounded-lg border border-light-600 bg-white/90 text-left shadow-3xl-light backdrop-blur-[6px] transition-all dark:border-dark-600 dark:bg-dark-100/90 dark:shadow-3xl-dark ${modalSizeMap[modalSize]}`}
               >
                 {children}
               </Dialog.Panel>
