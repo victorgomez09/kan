@@ -8,8 +8,8 @@ import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import Avatar from "./components/Avatar";
+import { CustomURLConfirmation } from "./components/CustomURLConfirmation";
 import { DeleteWorkspaceConfirmation } from "./components/DeleteWorkspaceConfirmation";
-import { PremiumUsernameConfirmation } from "./components/PremiumUsernameConfirmation";
 import UpdateWorkspaceDescriptionForm from "./components/UpdateWorkspaceDescriptionForm";
 import UpdateWorkspaceNameForm from "./components/UpdateWorkspaceNameForm";
 import UpdateWorkspaceUrlForm from "./components/UpdateWorkspaceUrlForm";
@@ -46,7 +46,7 @@ export default function SettingsPage() {
           <PageHead title={`Settings | ${workspace.name ?? "Workspace"}`} />
           <div className="px-28 py-12">
             <div className="mb-8 flex w-full justify-between">
-              <h1 className="font-medium tracking-tight text-neutral-900 dark:text-dark-1000 sm:text-[1.2rem]">
+              <h1 className="font-bold tracking-tight text-neutral-900 dark:text-dark-1000 sm:text-[1.2rem]">
                 Settings
               </h1>
             </div>
@@ -68,7 +68,7 @@ export default function SettingsPage() {
               />
 
               <h2 className="mb-4 mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">
-                Workspace username
+                Workspace URL
               </h2>
               <UpdateWorkspaceUrlForm
                 workspacePublicId={workspace.publicId}
@@ -123,10 +123,8 @@ export default function SettingsPage() {
             {modalContentType === "DELETE_WORKSPACE" && (
               <DeleteWorkspaceConfirmation />
             )}
-            {modalContentType === "PREMIUM_USERNAME" && (
-              <PremiumUsernameConfirmation
-                workspacePublicId={workspace.publicId}
-              />
+            {modalContentType === "UPDATE_WORKSPACE_URL" && (
+              <CustomURLConfirmation workspacePublicId={workspace.publicId} />
             )}
           </Modal>
         </div>

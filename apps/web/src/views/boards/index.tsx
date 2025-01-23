@@ -1,14 +1,13 @@
 import { HiArrowDownTray, HiOutlinePlusSmall } from "react-icons/hi2";
-import { BoardsList } from "./components/BoardsList";
 
+import Modal from "~/components/modal";
+import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
+import { PageHead } from "~/components/PageHead";
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
-import Modal from "~/components/modal";
-
-import { PageHead } from "~/components/PageHead";
+import { BoardsList } from "./components/BoardsList";
 import { ImportBoardsForm } from "./components/ImportBoardsForm";
 import { NewBoardForm } from "./components/NewBoardForm";
-import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 
 export default function BoardsPage() {
   const { openModal, modalContentType } = useModal();
@@ -16,10 +15,10 @@ export default function BoardsPage() {
 
   return (
     <>
-      <PageHead title={`Boards | ${workspace?.name ?? "Workspace"}`} />
+      <PageHead title={`Boards | ${workspace.name ?? "Workspace"}`} />
       <div className="p-8">
         <div className="mb-8 flex w-full justify-between">
-          <h1 className="font-medium tracking-tight text-neutral-900 dark:text-dark-1000 sm:text-[1.2rem]">
+          <h1 className="font-bold tracking-tight text-neutral-900 dark:text-dark-1000 sm:text-[1.2rem]">
             Boards
           </h1>
           <div className="flex">

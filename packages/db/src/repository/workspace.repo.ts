@@ -6,6 +6,7 @@ import { generateUID } from "@kan/utils";
 export const create = async (
   db: SupabaseClient<Database>,
   workspaceInput: {
+    publicId?: string;
     name: string;
     slug: string;
     createdBy: string;
@@ -14,9 +15,9 @@ export const create = async (
   const { data } = await db
     .from("workspace")
     .insert({
-      publicId: generateUID(),
+      publicId: workspaceInput.publicId ?? generateUID(),
       name: workspaceInput.name,
-      slug: workspaceInput.name.toLowerCase(),
+      slug: workspaceInput.slug,
       createdBy: workspaceInput.createdBy,
     })
     .select(`id, publicId, name, slug, description, plan`)
@@ -30,6 +31,7 @@ export const create = async (
       workspaceId: data.id,
       createdBy: workspaceInput.createdBy,
       role: "admin",
+      status: "active",
     });
 
   const newWorkspace = { ...data };

@@ -17,7 +17,7 @@ const stripe = new Stripe(stripeSecretKey, {
   apiVersion: "2024-12-18.acacia",
 });
 
-const usernameSchema = z
+const workspaceSlugSchema = z
   .string()
   .min(3)
   .max(24)
@@ -26,7 +26,7 @@ const usernameSchema = z
 interface CheckoutSessionRequest {
   successUrl: string;
   cancelUrl: string;
-  username: string;
+  slug: string;
   workspacePublicId: string;
   stripeCustomerId: string;
 }
@@ -63,9 +63,9 @@ export default async function handler(req: NextRequest) {
     }
 
     const body = (await req.json()) as CheckoutSessionRequest;
-    const { successUrl, cancelUrl, username, workspacePublicId } = body;
+    const { successUrl, cancelUrl, slug, workspacePublicId } = body;
 
-    if (!successUrl || !cancelUrl || !username || !workspacePublicId) {
+    if (!successUrl || !cancelUrl || !slug || !workspacePublicId) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         {
@@ -75,10 +75,10 @@ export default async function handler(req: NextRequest) {
       );
     }
 
-    const usernameResult = usernameSchema.safeParse(username);
+    const slugResult = workspaceSlugSchema.safeParse(slug);
 
-    if (!usernameResult.success) {
-      return new Response(JSON.stringify({ error: "Invalid username" }), {
+    if (!slugResult.success) {
+      return new Response(JSON.stringify({ error: "Invalid workspace slug" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
@@ -109,7 +109,7 @@ export default async function handler(req: NextRequest) {
       cancel_url: `${process.env.WEBSITE_URL}${cancelUrl}`,
       customer: user.stripeCustomerId ?? undefined,
       metadata: {
-        username,
+        workspaceSlug: slug,
         workspacePublicId,
       },
     });

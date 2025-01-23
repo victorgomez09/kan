@@ -25,9 +25,9 @@ export function NewWorkspaceForm() {
         switchWorkspace({
           publicId: values.publicId,
           name: values.name,
-          // description: values.description,
-          // slug: values.slug,
-          // plan: values.plan,
+          description: values.description,
+          slug: values.slug,
+          plan: values.plan,
         });
         closeModal();
       }

@@ -14,11 +14,11 @@ const schema = z.object({
   slug: z
     .string()
     .min(3, {
-      message: "Username must be at least 3 characters long",
+      message: "URL must be at least 3 characters long",
     })
-    .max(24, { message: "Username cannot exceed 24 characters" })
+    .max(24, { message: "URL cannot exceed 24 characters" })
     .regex(/^(?![-]+$)[a-zA-Z0-9-]+$/, {
-      message: "Username can only contain letters, numbers, and hyphens",
+      message: "URL can only contain letters, numbers, and hyphens",
     }),
 });
 
@@ -62,7 +62,7 @@ const UpdateWorkspaceUrlForm = ({
     },
     onError: () => {
       showPopup({
-        header: "Error updating workspace username",
+        header: "Error updating workspace URL",
         message: "Please try again later, or contact customer support.",
         icon: "error",
       });
@@ -87,8 +87,8 @@ const UpdateWorkspaceUrlForm = ({
   const isWorkspaceSlugAvailable = checkWorkspaceSlugAvailability.data;
 
   const onSubmit = (data: FormValues) => {
-    if (isWorkspaceSlugAvailable?.isPremium && workspacePlan !== "pro")
-      return openModal("PREMIUM_USERNAME", data.slug);
+    if (isWorkspaceSlugAvailable?.isAvailable && workspacePlan !== "pro")
+      return openModal("UPDATE_WORKSPACE_URL", data.slug);
 
     updateWorkspaceSlug.mutate({
       workspacePublicId,
@@ -115,7 +115,7 @@ const UpdateWorkspaceUrlForm = ({
           }
           prefix="kan.bn/"
           iconRight={
-            isWorkspaceSlugAvailable?.isPremium ||
+            isWorkspaceSlugAvailable?.isAvailable ||
             (workspacePlan === "pro" && slug === workspaceUrl) ? (
               <HiMiniStar className="h-4 w-4 text-yellow-500" />
             ) : isWorkspaceSlugAvailable?.isAvailable ? (

@@ -21,7 +21,6 @@ import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import { formatToArray } from "~/utils/helpers";
-import createClient from "~/utils/supabase/client";
 import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 import BoardDropdown from "./components/BoardDropdown";
 import { DeleteBoardConfirmation } from "./components/DeleteBoardConfirmation";
@@ -36,7 +35,6 @@ import VisibilityButton from "./components/VisibilityButton";
 type PublicListId = string;
 
 export default function BoardPage() {
-  const supabase = createClient();
   const params = useParams() as { boardId: string[] } | null;
   const router = useRouter();
   const { boardData, setBoardData, updateCard, updateList } = useBoard();

@@ -54,9 +54,9 @@ export default async function handler(req: NextRequest) {
 
         const metaData = checkoutSession.metadata;
 
-        if (metaData?.workspacePublicId && metaData.username) {
+        if (metaData?.workspacePublicId && metaData.workspaceSlug) {
           await workspaceRepo.update(db, metaData.workspacePublicId, {
-            slug: metaData.username,
+            slug: metaData.workspaceSlug,
             plan: "pro",
           });
         }

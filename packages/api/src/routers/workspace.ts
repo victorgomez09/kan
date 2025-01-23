@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
 import * as workspaceSlugRepo from "@kan/db/repository/workspaceSlug.repo";
+import { generateUID } from "@kan/utils";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
@@ -123,9 +124,12 @@ export const workspaceRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const result = await workspaceRepo.create(ctx.db, {
+      const workspacePublicId = generateUID();
+
+      const result = await workspaceRepo.create(ctx.adminDb, {
+        publicId: workspacePublicId,
         name: input.name,
-        slug: input.name,
+        slug: workspacePublicId,
         createdBy: userId,
       });
 
@@ -251,12 +255,11 @@ export const workspaceRouter = createTRPCRouter({
       z.object({
         isAvailable: z.boolean(),
         isReserved: z.boolean(),
-        isPremium: z.boolean(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const slug = input.workspaceSlug.toLowerCase();
-      // check list of reserved or premium slugs
+      // check slug is not reserved
       const workspaceSlug = await workspaceSlugRepo.getWorkspaceSlug(
         ctx.adminDb,
         slug,
@@ -270,7 +273,6 @@ export const workspaceRouter = createTRPCRouter({
         isAvailable:
           isWorkspaceSlugAvailable && workspaceSlug?.type !== "reserved",
         isReserved: workspaceSlug?.type === "reserved",
-        isPremium: workspaceSlug?.type === "premium",
       };
     }),
 });

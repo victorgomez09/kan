@@ -1,15 +1,15 @@
 import Link from "next/link";
 
-import { api } from "~/utils/api";
-import { useWorkspace } from "~/providers/workspace";
 import PatternedBackground from "~/components/PatternedBackground";
+import { useWorkspace } from "~/providers/workspace";
+import { api } from "~/utils/api";
 
 export function BoardsList() {
   const { workspace } = useWorkspace();
 
   const { data, isLoading } = api.board.all.useQuery(
-    { workspacePublicId: workspace?.publicId },
-    { enabled: workspace?.publicId ? true : false },
+    { workspacePublicId: workspace.publicId },
+    { enabled: workspace.publicId ? true : false },
   );
 
   if (isLoading)
@@ -29,7 +29,7 @@ export function BoardsList() {
         <Link key={board.publicId} href={`boards/${board.publicId}`}>
           <div className="align-center relative mr-5 flex h-[150px] w-full items-center justify-center rounded-md border border-dashed border-light-400 bg-light-50 shadow-sm hover:bg-light-200 dark:border-dark-600 dark:bg-dark-50 dark:hover:bg-dark-100">
             <PatternedBackground />
-            <p className="text-md px-4 font-medium text-neutral-900 dark:text-dark-1000">
+            <p className="text-md px-4 font-bold text-neutral-900 dark:text-dark-1000">
               {board.name}
             </p>
           </div>

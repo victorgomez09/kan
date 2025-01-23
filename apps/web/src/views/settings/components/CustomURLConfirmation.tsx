@@ -1,7 +1,7 @@
 import Button from "~/components/Button";
 import { useModal } from "~/providers/modal";
 
-export function PremiumUsernameConfirmation({
+export function CustomURLConfirmation({
   workspacePublicId,
 }: {
   workspacePublicId: string;
@@ -16,7 +16,7 @@ export function PremiumUsernameConfirmation({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: entityId,
+          slug: entityId,
           workspacePublicId: workspacePublicId,
           cancelUrl: "/settings",
           successUrl: "/settings",
@@ -37,11 +37,11 @@ export function PremiumUsernameConfirmation({
     <div className="p-5">
       <div className="flex w-full flex-col justify-between pb-4">
         <h2 className="text-md pb-4 font-medium text-neutral-900 dark:text-dark-1000">
-          {`Confirm username change`}
+          {`Confirm URL change`}
         </h2>
         <p className="text-sm font-medium text-light-900 dark:text-dark-900">
           {
-            "As you are changing from a standard to a premium username, you will be taken to the checkout to upgrade."
+            "Custom URLs are a premium feature. You'll be directed to upgrade your account."
           }
         </p>
       </div>

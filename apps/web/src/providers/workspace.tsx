@@ -13,10 +13,10 @@ interface WorkspaceContextProps {
 
 interface Workspace {
   name: string;
-  description: string | null;
+  description: string | null | undefined;
   publicId: string;
-  slug: string;
-  plan: "free" | "pro" | "enterprise";
+  slug: string | undefined;
+  plan: "free" | "pro" | "enterprise" | undefined;
 }
 
 const initialWorkspace: Workspace = {

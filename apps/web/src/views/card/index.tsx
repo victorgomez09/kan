@@ -128,7 +128,7 @@ export default function CardPage() {
               ) : (
                 <>
                   <Link
-                    className="whitespace-nowrap font-medium leading-[2.3rem] tracking-tight text-light-900 dark:text-dark-900 sm:text-[1.2rem]"
+                    className="whitespace-nowrap font-bold leading-[2.3rem] tracking-tight text-light-900 dark:text-dark-900 sm:text-[1.2rem]"
                     href={`/boards/${board?.publicId}`}
                   >
                     {board?.name}
@@ -147,7 +147,7 @@ export default function CardPage() {
                         id="title"
                         {...register("title")}
                         onBlur={handleSubmit(onSubmit)}
-                        className="block w-full border-0 bg-transparent p-0 py-0 font-medium tracking-tight text-neutral-900 focus:ring-0 dark:text-dark-1000 sm:text-[1.2rem]"
+                        className="block w-full border-0 bg-transparent p-0 py-0 font-bold tracking-tight text-neutral-900 focus:ring-0 dark:text-dark-1000 sm:text-[1.2rem]"
                       />
                     </div>
                   </form>
