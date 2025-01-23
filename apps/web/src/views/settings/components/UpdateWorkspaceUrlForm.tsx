@@ -102,7 +102,7 @@ const UpdateWorkspaceUrlForm = ({
         <Input
           {...register("slug")}
           className={`${
-            isWorkspaceSlugAvailable?.isPremium ||
+            isWorkspaceSlugAvailable?.isAvailable ||
             (workspacePlan === "pro" && slug === workspaceUrl)
               ? "focus:ring-yellow-500 dark:focus:ring-yellow-500"
               : ""
