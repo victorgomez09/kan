@@ -6,12 +6,14 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   contentEditable?: boolean;
   prefix?: string;
   iconRight?: React.ReactNode;
+  minHeight?: number;
   value?: string;
   errorMessage?: string;
   className?: string;
   onChange?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -22,6 +24,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       prefix,
       value,
       onChange,
+      onKeyDown,
       iconRight,
       className,
       ...props
@@ -34,7 +37,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           placeholder={props.placeholder}
           html={value ?? ""}
           onChange={onChange}
-          className="block min-h-[70px] w-full cursor-text rounded-md border-0 bg-dark-300 bg-white/5 px-3 py-1.5 text-light-900 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 focus-visible:outline-none dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6"
+          onKeyDown={onKeyDown}
+          className={twMerge(
+            "block min-h-[70px] w-full cursor-text overflow-y-auto rounded-md border-0 bg-dark-300 bg-white/5 px-3 py-1.5 text-light-900 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 focus-visible:outline-none dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6",
+            className && className,
+          )}
         />
       );
     }

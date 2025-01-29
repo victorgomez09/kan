@@ -43,6 +43,13 @@
       "when": 1737130330536,
       "tag": "0005_modern_gideon",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1738149668712,
+      "tag": "0006_spicy_mach_iv",
+      "breakpoints": true
     }
   ]
 }

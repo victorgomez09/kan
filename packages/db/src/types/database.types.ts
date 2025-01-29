@@ -394,6 +394,44 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          createdAt: string
+          createdBy: string
+          feedback: string
+          id: number
+          reviewed: boolean
+          updatedAt: string | null
+          url: string
+        }
+        Insert: {
+          createdAt?: string
+          createdBy: string
+          feedback: string
+          id?: number
+          reviewed?: boolean
+          updatedAt?: string | null
+          url: string
+        }
+        Update: {
+          createdAt?: string
+          createdBy?: string
+          feedback?: string
+          id?: number
+          reviewed?: boolean
+          updatedAt?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_createdBy_user_id_fk"
+            columns: ["createdBy"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       import: {
         Row: {
           createdAt: string
