@@ -1,36 +1,26 @@
-import { Fragment } from "react";
-import { HiChevronUpDown, HiXMark } from "react-icons/hi2";
-import { useForm, Controller } from "react-hook-form";
 import { Listbox, Transition } from "@headlessui/react";
+import { Fragment } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { HiChevronUpDown, HiXMark } from "react-icons/hi2";
 
-import { api } from "~/utils/api";
-import { useModal } from "~/providers/modal";
+import { colours } from "@kan/shared/constants";
 
 import Button from "~/components/Button";
 import Input from "~/components/Input";
 import Toggle from "~/components/Toggle";
+import { useModal } from "~/providers/modal";
+import { api } from "~/utils/api";
 
-type LabelFormInput = {
+interface LabelFormInput {
   name: string;
   colour: Colour;
   isCreateAnotherEnabled?: boolean;
-};
+}
 
-type Colour = {
+interface Colour {
   name: string;
   code: string;
-};
-
-const colours = [
-  { name: "Teal", code: "#0d9488" },
-  { name: "Green", code: "#65a30d" },
-  { name: "Blue", code: "#0284c7" },
-  { name: "Purple", code: "#4f46e5" },
-  { name: "Yellow", code: "#ca8a04" },
-  { name: "Orange", code: "#ea580c" },
-  { name: "Red", code: "#dc2626" },
-  { name: "Pink", code: "#db2777" },
-];
+}
 
 export function LabelForm({
   cardPublicId,
@@ -54,9 +44,9 @@ export function LabelForm({
   const { control, register, reset, handleSubmit, setValue, watch } =
     useForm<LabelFormInput>({
       values: {
-        name: isEdit && label?.data?.name ? label?.data?.name : "",
-        colour: (isEdit && label?.data?.colourCode
-          ? colours.find((c) => c.code === label?.data?.colourCode)
+        name: isEdit && label.data?.name ? label.data.name : "",
+        colour: (isEdit && label.data?.colourCode
+          ? colours.find((c) => c.code === label.data?.colourCode)
           : colours[0]) as Colour,
         isCreateAnotherEnabled: false,
       },
@@ -97,7 +87,7 @@ export function LabelForm({
   });
 
   const onSubmit = (values: LabelFormInput) => {
-    if (!values.colour?.code) return;
+    if (!values.colour.code) return;
 
     if (isEdit) {
       updateLabel.mutate({
@@ -144,11 +134,11 @@ export function LabelForm({
                     <Listbox.Button className="block w-full rounded-md border-0 bg-white/5 px-4 py-1.5 shadow-sm ring-1 ring-inset ring-light-600 focus:ring-2 focus:ring-inset focus:ring-light-600 dark:bg-dark-300 dark:text-dark-1000 dark:ring-dark-700 dark:focus:ring-dark-700 sm:text-sm sm:leading-6">
                       <span className="flex items-center">
                         <span
-                          style={{ backgroundColor: field.value?.code }}
+                          style={{ backgroundColor: field.value.code }}
                           className={`inline-block h-2 w-2 flex-shrink-0 rounded-full`}
                         />
                         <span className="ml-3 block truncate">
-                          {field.value?.name}
+                          {field.value.name}
                         </span>
                       </span>
                       <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -170,7 +160,7 @@ export function LabelForm({
                         {colours.map((colour, index) => (
                           <Listbox.Option
                             key={`colours_${index}`}
-                            className="relative cursor-default select-none px-2 text-neutral-900 dark:text-dark-1000 "
+                            className="relative cursor-default select-none px-2 text-neutral-900 dark:text-dark-1000"
                             value={colour}
                           >
                             {() => (

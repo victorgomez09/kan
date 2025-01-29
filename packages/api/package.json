@@ -37,8 +37,8 @@
   "dependencies": {
     "@kan/db": "workspace:*",
     "@kan/email": "workspace:^",
+    "@kan/shared": "workspace:^",
     "@kan/supabase": "workspace:^",
-    "@kan/utils": "workspace:^",
     "@trpc/server": "catalog:",
     "superjson": "2.2.1",
     "trpc-to-openapi": "^2.1.0",

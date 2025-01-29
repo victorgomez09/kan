@@ -38,7 +38,7 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@kan/utils": "workspace:^",
+    "@kan/shared": "workspace:^",
     "@vercel/postgres": "^0.10.0",
     "drizzle-orm": "^0.36.4",
     "drizzle-zod": "^0.5.1",

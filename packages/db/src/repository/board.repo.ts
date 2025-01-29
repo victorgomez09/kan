@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@kan/db/types/database.types";
-import { generateUID } from "@kan/utils";
+import { generateUID } from "@kan/shared/utils";
 
 export const getAllByWorkspaceId = async (
   db: SupabaseClient<Database>,

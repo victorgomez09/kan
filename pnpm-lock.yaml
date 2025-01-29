@@ -87,12 +87,12 @@ importers:
       '@kan/db':
         specifier: workspace:^
         version: link:../../packages/db
+      '@kan/shared':
+        specifier: workspace:^
+        version: link:../../packages/shared
       '@kan/supabase':
         specifier: workspace:^
         version: link:../../packages/supabase
-      '@kan/utils':
-        specifier: workspace:^
-        version: link:../../packages/utils
       '@t3-oss/env-nextjs':
         specifier: ^0.11.1
         version: 0.11.1(typescript@5.7.2)(zod@3.24.0)
@@ -214,12 +214,12 @@ importers:
       '@kan/email':
         specifier: workspace:^
         version: link:../email
+      '@kan/shared':
+        specifier: workspace:^
+        version: link:../shared
       '@kan/supabase':
         specifier: workspace:^
         version: link:../supabase
-      '@kan/utils':
-        specifier: workspace:^
-        version: link:../utils
       '@trpc/server':
         specifier: 'catalog:'
         version: 11.0.0-rc.660(typescript@5.7.2)
@@ -254,9 +254,9 @@ importers:
 
   packages/db:
     dependencies:
-      '@kan/utils':
+      '@kan/shared':
         specifier: workspace:^
-        version: link:../utils
+        version: link:../shared
       '@vercel/postgres':
         specifier: ^0.10.0
         version: 0.10.0(utf-8-validate@6.0.3)
@@ -323,6 +323,31 @@ importers:
         specifier: 'catalog:'
         version: 5.7.2
 
+  packages/shared:
+    dependencies:
+      nanoid:
+        specifier: ^5.0.9
+        version: 5.0.9
+    devDependencies:
+      '@kan/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
+      '@kan/prettier-config':
+        specifier: workspace:*
+        version: link:../../tooling/prettier
+      '@kan/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      eslint:
+        specifier: 'catalog:'
+        version: 9.16.0(jiti@1.21.6)
+      prettier:
+        specifier: 'catalog:'
+        version: 3.4.2
+      typescript:
+        specifier: 'catalog:'
+        version: 5.7.2
+
   packages/supabase:
     dependencies:
       '@edge-runtime/cookies':
@@ -353,31 +378,6 @@ importers:
       next:
         specifier: ^14.2.15
         version: 14.2.20(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      prettier:
-        specifier: 'catalog:'
-        version: 3.4.2
-      typescript:
-        specifier: 'catalog:'
-        version: 5.7.2
-
-  packages/utils:
-    dependencies:
-      nanoid:
-        specifier: ^5.0.9
-        version: 5.0.9
-    devDependencies:
-      '@kan/eslint-config':
-        specifier: workspace:*
-        version: link:../../tooling/eslint
-      '@kan/prettier-config':
-        specifier: workspace:*
-        version: link:../../tooling/prettier
-      '@kan/tsconfig':
-        specifier: workspace:*
-        version: link:../../tooling/typescript
-      eslint:
-        specifier: 'catalog:'
-        version: 9.16.0(jiti@1.21.6)
       prettier:
         specifier: 'catalog:'
         version: 3.4.2

@@ -8,7 +8,7 @@ import type {
   ReorderCardInput,
   ReorderListInput,
 } from "@kan/api/types";
-import { generateUID } from "@kan/utils";
+import { generateUID } from "@kan/shared/utils";
 
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
