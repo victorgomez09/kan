@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@kan/db/types/database.types";
-import { generateUID } from "@kan/utils";
+import { generateUID } from "@kan/shared/utils";
 
 export const create = async (
   db: SupabaseClient<Database>,
@@ -31,6 +31,21 @@ export const create = async (
       cardId: labelInput.cardId,
       labelId: data.id,
     });
+
+  return data;
+};
+
+export const bulkCreate = async (
+  db: SupabaseClient<Database>,
+  labels: {
+    publicId: string;
+    name: string;
+    colourCode: string;
+    boardId: number;
+    createdBy: string;
+  }[],
+) => {
+  const { data } = await db.from("label").insert(labels).select(`id`);
 
   return data;
 };

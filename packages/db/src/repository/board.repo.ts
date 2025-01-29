@@ -284,8 +284,7 @@ export const isSlugUnique = async (
     .eq("slug", args.slug)
     .eq("workspaceId", args.workspaceId)
     .is("deletedAt", null)
-    .limit(1)
-    .single();
+    .limit(1);
 
-  return !data;
+  return data?.length === 0;
 };

@@ -161,6 +161,18 @@ export const createCardLabelRelationship = async (
   return data;
 };
 
+export const bulkCreateCardLabelRelationship = async (
+  db: SupabaseClient<Database>,
+  cardLabelRelationshipInput: { cardId: number; labelId: number }[],
+) => {
+  const { data } = await db
+    .from("_card_labels")
+    .insert(cardLabelRelationshipInput)
+    .select();
+
+  return data;
+};
+
 export const getCardMemberRelationship = async (
   db: SupabaseClient<Database>,
   args: { cardId: number; memberId: number },

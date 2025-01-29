@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   bigserial,
@@ -78,10 +78,9 @@ export const boards = pgTable(
   },
   (table) => ({
     visibilityIndex: index("board_visibility_idx").on(table.visibility),
-    uniqueSlugPerWorkspace: uniqueIndex("unique_slug_per_workspace").on(
-      table.workspaceId,
-      table.slug,
-    ),
+    uniqueSlugPerWorkspace: uniqueIndex("unique_slug_per_workspace")
+      .on(table.workspaceId, table.slug)
+      .where(sql`${table.deletedAt} IS NULL`),
   }),
 );
 

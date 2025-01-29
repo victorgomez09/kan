@@ -1,0 +1,2 @@
+DROP INDEX IF EXISTS "unique_slug_per_workspace";--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "unique_slug_per_workspace" ON "board" USING btree ("workspaceId","slug") WHERE "board"."deletedAt" IS NULL;

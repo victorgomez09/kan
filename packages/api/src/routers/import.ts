@@ -5,9 +5,11 @@ import * as boardRepo from "@kan/db/repository/board.repo";
 import * as cardRepo from "@kan/db/repository/card.repo";
 import * as cardActivityRepo from "@kan/db/repository/cardActivity.repo";
 import * as importRepo from "@kan/db/repository/import.repo";
+import * as labelRepo from "@kan/db/repository/label.repo";
 import * as listRepo from "@kan/db/repository/list.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
-import { generateSlug, generateUID } from "@kan/utils";
+import { colours } from "@kan/shared/constants";
+import { generateUID } from "@kan/shared/utils";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -16,8 +18,14 @@ const TRELLO_API_URL = "https://api.trello.com/1";
 interface TrelloBoard {
   id: string;
   name: string;
+  labels: TrelloLabel[];
   lists: TrelloList[];
   cards: TrelloCard[];
+}
+
+interface TrelloLabel {
+  id: string;
+  name: string;
 }
 
 interface TrelloList {
@@ -30,6 +38,7 @@ interface TrelloCard {
   name: string;
   desc: string;
   idList: string;
+  labels: TrelloLabel[];
 }
 
 interface MemberData {
@@ -66,16 +75,12 @@ export const importRouter = createTRPCRouter({
         const boardIds = member.idBoards;
 
         const fetchBoard = async (boardId: string) => {
-          try {
-            const response = await fetch(
-              `${TRELLO_API_URL}/boards/${boardId}?key=${input.apiKey}&token=${input.token}`,
-            );
-            const data = (await response.json()) as TrelloBoard;
+          const response = await fetch(
+            `${TRELLO_API_URL}/boards/${boardId}?key=${input.apiKey}&token=${input.token}`,
+          );
+          const data = (await response.json()) as TrelloBoard;
 
-            return data;
-          } catch (error) {
-            throw error;
-          }
+          return data;
         };
 
         const boards = [];
@@ -142,36 +147,40 @@ export const importRouter = createTRPCRouter({
 
         for (const boardId of input.boardIds) {
           const response = await fetch(
-            `${TRELLO_API_URL}/boards/${boardId}?key=${input.apiKey}&token=${input.token}&lists=open&cards=open`,
+            `${TRELLO_API_URL}/boards/${boardId}?key=${input.apiKey}&token=${input.token}&lists=open&cards=open&labels=all`,
           );
           const data = (await response.json()) as TrelloBoard;
 
           const formattedData = {
             name: data.name,
+            labels: data.labels
+              .map((label) => ({
+                sourceId: label.id,
+                name: label.name,
+              }))
+              .filter((_label) => !!_label.name),
             lists: data.lists.map((list) => ({
               name: list.name,
               cards: data.cards
                 .filter((card) => card.idList === list.id)
                 .map((_card) => ({
+                  sourceId: _card.id,
                   name: _card.name,
                   description: _card.desc,
+                  labels: _card.labels.map((label) => ({
+                    sourceId: label.id,
+                    name: label.name,
+                  })),
                 })),
             })),
           };
 
-          let slug = generateSlug(formattedData.name);
-
-          const isSlugUnique = await boardRepo.isSlugUnique(ctx.db, {
-            slug,
-            workspaceId: workspace.id,
-          });
-
-          if (!isSlugUnique) slug = `${slug}-${generateUID()}`;
+          const boardPublicId = generateUID();
 
           const newBoard = await boardRepo.create(ctx.db, {
-            publicId: generateUID(),
+            publicId: boardPublicId,
             name: formattedData.name,
-            slug,
+            slug: boardPublicId,
             createdBy: userId,
             importId: newImportId,
             workspaceId: workspace.id,
@@ -184,6 +193,30 @@ export const importRouter = createTRPCRouter({
               message: "Failed to create new board",
               code: "INTERNAL_SERVER_ERROR",
             });
+
+          let createdLabels: { id: number; sourceId: string }[] = [];
+          let createdCards: { id: number; sourceId: string }[] = [];
+
+          if (formattedData.labels.length) {
+            const labelsInsert = formattedData.labels.map((label, index) => ({
+              publicId: generateUID(),
+              name: label.name,
+              colourCode: colours[index % colours.length]?.code ?? "#0d9488",
+              createdBy: userId,
+              boardId: newBoardId,
+              importId: newImportId,
+            }));
+
+            const newLabels = await labelRepo.bulkCreate(ctx.db, labelsInsert);
+
+            if (newLabels?.length)
+              createdLabels = newLabels
+                .map((label, index) => ({
+                  id: label.id,
+                  sourceId: formattedData.labels[index]?.sourceId ?? "",
+                }))
+                .filter((label) => !!label.sourceId);
+          }
 
           let listIndex = 0;
 
@@ -209,30 +242,70 @@ export const importRouter = createTRPCRouter({
                 importId: newImportId,
               }));
 
-              const createdCards = await cardRepo.bulkCreate(
-                ctx.db,
-                cardsInsert,
-              );
+              const newCards = await cardRepo.bulkCreate(ctx.db, cardsInsert);
 
-              if (!createdCards?.length)
+              if (!newCards?.length)
                 throw new TRPCError({
                   message: "Failed to create new cards",
                   code: "INTERNAL_SERVER_ERROR",
                 });
 
-              const activities = createdCards.map((card) => ({
+              createdCards = createdCards.concat(
+                newCards
+                  .map((card, index) => ({
+                    id: card.id,
+                    sourceId: list.cards[index]?.sourceId ?? "",
+                  }))
+                  .filter((card) => !!card.sourceId),
+              );
+
+              const activities = newCards.map((card) => ({
                 type: "card.created" as const,
                 cardId: card.id,
                 createdBy: userId,
               }));
 
-              if (createdCards.length > 0) {
+              if (newCards.length > 0) {
                 await cardActivityRepo.bulkCreate(ctx.db, activities);
+              }
+
+              if (createdLabels.length && createdCards.length) {
+                const cardLabelRelations: {
+                  cardId: number;
+                  labelId: number;
+                }[] = [];
+
+                for (const card of list.cards) {
+                  const _card = createdCards.find(
+                    (c) => c.sourceId === card.sourceId,
+                  );
+
+                  for (const label of card.labels) {
+                    const _label = createdLabels.find(
+                      (l) => l.sourceId === label.sourceId,
+                    );
+
+                    if (_card && _label) {
+                      cardLabelRelations.push({
+                        cardId: _card.id,
+                        labelId: _label.id,
+                      });
+                    }
+                  }
+                }
+
+                if (cardLabelRelations.length) {
+                  await cardRepo.bulkCreateCardLabelRelationship(
+                    ctx.db,
+                    cardLabelRelations,
+                  );
+                }
               }
             }
 
             listIndex++;
           }
+
           boardsCreated++;
         }
 
