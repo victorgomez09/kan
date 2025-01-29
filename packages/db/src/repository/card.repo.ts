@@ -300,6 +300,7 @@ export const getWithListAndMembersByPublicId = async (
     .is("deletedAt", null)
     .is("list.board.lists.deletedAt", null)
     .is("list.board.workspace.members.deletedAt", null)
+    .order("index", { referencedTable: "list.board.lists", ascending: true })
     .is("members.deletedAt", null)
     .limit(1)
     .single();
