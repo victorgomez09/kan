@@ -1,8 +1,9 @@
 import { useForm } from "react-hook-form";
 import { HiXMark } from "react-icons/hi2";
 
-import { type InviteMemberInput } from "@kan/api/types";
+import type { InviteMemberInput } from "@kan/api/types";
 
+import Button from "~/components/Button";
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
@@ -15,7 +16,7 @@ export function InviteMemberForm() {
   const { register, handleSubmit } = useForm<InviteMemberInput>({
     defaultValues: {
       email: "",
-      workspacePublicId: workspace?.publicId || "",
+      workspacePublicId: workspace.publicId || "",
     },
   });
 
@@ -58,12 +59,13 @@ export function InviteMemberForm() {
 
       <div className="mt-12 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
         <div>
-          <button
+          <Button
             type="submit"
+            isLoading={createBoard.isPending}
             className="inline-flex w-full justify-center rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
           >
             Invite member
-          </button>
+          </Button>
         </div>
       </div>
     </form>

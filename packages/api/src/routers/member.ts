@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { Stripe } from "stripe";
 import { z } from "zod";
 
 import * as memberRepo from "@kan/db/repository/member.repo";
@@ -7,6 +8,16 @@ import * as workspaceRepo from "@kan/db/repository/workspace.repo";
 import { sendEmail } from "@kan/email";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+if (!stripeSecretKey) {
+  throw new Error("STRIPE_SECRET_KEY is not defined");
+}
+
+const stripe = new Stripe(stripeSecretKey, {
+  apiVersion: "2024-12-18.acacia",
+});
 
 export const memberRouter = createTRPCRouter({
   invite: protectedProcedure
@@ -93,10 +104,17 @@ export const memberRouter = createTRPCRouter({
         const invitedUserEmail = invite.data.user?.email;
 
         if (invitedUserAuthId && invitedUserEmail) {
+          const stripeCustomer = await stripe.customers.create({
+            email: invitedUserEmail,
+            metadata: {
+              userId: invitedUserAuthId,
+            },
+          });
+
           const newUser = await userRepo.create(ctx.adminDb, {
             email: invitedUserEmail,
             id: invitedUserAuthId,
-            stripeCustomerId: "",
+            stripeCustomerId: stripeCustomer.id,
           });
 
           invitedUserId = newUser?.id;

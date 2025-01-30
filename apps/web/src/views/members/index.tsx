@@ -23,25 +23,6 @@ export default function MembersPage() {
     // { enabled: workspace?.publicId ? true : false },
   );
 
-  const handleUpgrade = async () => {
-    try {
-      const response = await fetch("/api/stripe/create_checkout_session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const { url } = (await response.json()) as { url: string };
-
-      if (url) {
-        window.location.href = url;
-      }
-    } catch (error) {
-      console.error("Error creating checkout session:", error);
-    }
-  };
-
   const TableRow = ({
     memberPublicId,
     memberName,
@@ -168,7 +149,7 @@ export default function MembersPage() {
             <button
               type="button"
               className="flex items-center gap-x-1.5 rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-dark-1000 dark:text-dark-50"
-              onClick={() => handleUpgrade()}
+              onClick={() => openModal("INVITE_MEMBER")}
             >
               <div className="h-5 w-5 items-center">
                 <HiOutlinePlusSmall
