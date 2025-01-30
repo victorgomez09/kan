@@ -143,10 +143,13 @@ export const getBySlug = async (
             description,
             listId,
             index,
-            labels:label${filters.labels.length > 0 ? "!inner" : ""} (
+            labels:label(
               publicId,
               name,
               colourCode
+            ),
+            _filteredLabels:label${filters.labels.length > 0 ? "!inner" : ""} (
+              publicId
             )
           )
         )
@@ -158,7 +161,7 @@ export const getBySlug = async (
     .is("lists.cards.deletedAt", null);
 
   if (filters.labels.length > 0) {
-    query = query.in("lists.cards.labels.publicId", filters.labels);
+    query = query.in("lists.cards._filteredLabels.publicId", filters.labels);
   }
 
   const { data } = await query
