@@ -59,18 +59,24 @@ export const getByPublicId = async (
             description,
             listId,
             index,
-            labels:label${filters.labels.length > 0 ? "!inner" : ""} (
+            labels:label(
               publicId,
               name,
               colourCode
             ),
-            members:workspace_members${filters.members.length > 0 ? "!inner" : ""} (
+            _filteredLabels:label${filters.labels.length > 0 ? "!inner" : ""} (
+              publicId
+            ),
+            members:workspace_members (
               publicId,
               user!workspace_members_userId_user_id_fk (
                 name,
                 email,
                 image
               )
+            ),
+            _filteredMembers:workspace_members${filters.members.length > 0 ? "!inner" : ""} (
+              publicId
             )
           )
         )
@@ -84,11 +90,11 @@ export const getByPublicId = async (
     .is("lists.cards.members.deletedAt", null);
 
   if (filters.labels.length > 0) {
-    query = query.in("lists.cards.labels.publicId", filters.labels);
+    query = query.in("lists.cards._filteredLabels.publicId", filters.labels);
   }
 
   if (filters.members.length > 0) {
-    query = query.in("lists.cards.members.publicId", filters.members);
+    query = query.in("lists.cards._filteredMembers.publicId", filters.members);
   }
 
   const { data } = await query
