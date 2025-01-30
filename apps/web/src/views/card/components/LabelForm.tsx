@@ -167,7 +167,7 @@ export function LabelForm({
                               <>
                                 <div className="flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-400">
                                   <span
-                                    style={{ backgroundColor: colour?.code }}
+                                    style={{ backgroundColor: colour.code }}
                                     className="ml-2 inline-block h-2 w-2 flex-shrink-0 rounded-full"
                                     aria-hidden="true"
                                   />
@@ -209,7 +209,10 @@ export function LabelForm({
               Delete
             </Button>
           )}
-          <Button type="submit">
+          <Button
+            type="submit"
+            isLoading={updateLabel.isPending || createLabel.isPending}
+          >
             {isEdit ? "Update label" : "Create label"}
           </Button>
         </div>
