@@ -1,8 +1,12 @@
-import { Fragment } from "react";
-import { api } from "~/utils/api";
 import { Menu, Transition } from "@headlessui/react";
-import { HiMiniPlus } from "react-icons/hi2";
+import { Fragment } from "react";
 import { useForm } from "react-hook-form";
+import { HiMiniPlus } from "react-icons/hi2";
+
+import Avatar from "~/components/Avatar";
+import { api } from "~/utils/api";
+import { formatMemberDisplayName } from "~/utils/helpers";
+import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 
 interface MemberSelectorProps {
   cardPublicId: string;
@@ -11,6 +15,8 @@ interface MemberSelectorProps {
     user: {
       id: string;
       name: string | null;
+      image: string | null;
+      email: string | null;
     };
     selected: boolean;
   }[];
@@ -34,7 +40,7 @@ export default function MemberSelector({
 
   const { register, handleSubmit, setValue, watch } = useForm({
     values: Object.fromEntries(
-      members?.map((member) => [member.publicId, member.selected]) ?? [],
+      members.map((member) => [member.publicId, member.selected]) ?? [],
     ),
   });
 
@@ -64,8 +70,8 @@ export default function MemberSelector({
                     className="relative z-30 inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-500 ring-1 ring-light-200 dark:ring-dark-100"
                   >
                     <span className="text-[10px] font-medium leading-none text-white">
-                      {member.user?.name
-                        ? member.user?.name
+                      {member.user.name
+                        ? member.user.name
                             .split(" ")
                             .map((namePart) => namePart.charAt(0).toUpperCase())
                             .join("")
@@ -94,7 +100,7 @@ export default function MemberSelector({
             <Menu.Items className="absolute right-[200px] top-[30px] z-10 mt-2 w-56 origin-top-right rounded-md border-[1px] border-light-600 bg-light-50 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border-dark-500 dark:bg-dark-200">
               <div className="p-2">
                 <form onSubmit={handleSubmit(onSubmit)}>
-                  {members?.map((member) => (
+                  {members.map((member) => (
                     <Menu.Item key={member.publicId}>
                       {() => (
                         <div
@@ -120,12 +126,29 @@ export default function MemberSelector({
                             {...register(member.publicId)}
                             checked={watch(member.publicId)}
                           />
-                          <label
-                            htmlFor={member.publicId}
-                            className="ml-3 text-sm"
-                          >
-                            {member?.user?.name}
-                          </label>
+                          <div className="flex items-center">
+                            <span className="ml-3 flex items-center">
+                              <Avatar
+                                size="xs"
+                                name={member.user.name ?? ""}
+                                imageUrl={
+                                  member.user.image
+                                    ? getPublicUrl(member.user.image)
+                                    : undefined
+                                }
+                                email={member.user.email ?? ""}
+                              />
+                            </span>
+                            <label
+                              htmlFor={member.publicId}
+                              className="ml-3 text-sm"
+                            >
+                              {formatMemberDisplayName(
+                                member.user.name,
+                                member.user.email,
+                              )}
+                            </label>
+                          </div>
                         </div>
                       )}
                     </Menu.Item>

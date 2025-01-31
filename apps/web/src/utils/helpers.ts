@@ -28,3 +28,17 @@ export const getInitialsFromName = (name: string) => {
     .map((namePart) => namePart.charAt(0).toUpperCase())
     .join("");
 };
+
+export const formatMemberDisplayName = (
+  name: string | null,
+  email: string | null,
+) => {
+  if (name) return name;
+  if (!email) return "";
+
+  const localPart = email.split("@")[0];
+
+  if (!localPart) return "";
+
+  return localPart.replace(/[_-]/g, ".");
+};

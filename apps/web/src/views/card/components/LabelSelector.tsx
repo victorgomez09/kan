@@ -1,12 +1,11 @@
-import { Fragment } from "react";
-import { api } from "~/utils/api";
 import { Menu, Transition } from "@headlessui/react";
-import { HiMiniPlus } from "react-icons/hi2";
+import { Fragment } from "react";
 import { useForm } from "react-hook-form";
+import { HiEllipsisHorizontal, HiMiniPlus } from "react-icons/hi2";
 
+import LabelIcon from "~/components/LabelIcon";
 import { useModal } from "~/providers/modal";
-
-import { HiEllipsisHorizontal } from "react-icons/hi2";
+import { api } from "~/utils/api";
 
 interface LabelSelectorProps {
   cardPublicId: string;
@@ -37,7 +36,7 @@ export default function LabelSelector({
 
   const { register, handleSubmit, setValue, watch } = useForm({
     values: Object.fromEntries(
-      labels?.map((label) => [label.publicId, label.selected]) ?? [],
+      labels.map((label) => [label.publicId, label.selected]) ?? [],
     ),
   });
 
@@ -100,7 +99,7 @@ export default function LabelSelector({
             <Menu.Items className="absolute right-[200px] top-[30px] z-10 mt-2 w-56 origin-top-right rounded-md border-[1px] border-light-600 bg-light-50 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border-dark-500 dark:bg-dark-200">
               <div className="p-2">
                 <form onSubmit={handleSubmit(onSubmit)}>
-                  {labels?.map((label) => (
+                  {labels.map((label) => (
                     <Menu.Item key={label.publicId}>
                       {() => (
                         <div
@@ -127,12 +126,18 @@ export default function LabelSelector({
                             checked={watch(label.publicId)}
                           />
                           <div className="flex w-full items-center justify-between">
-                            <label
-                              htmlFor={label.publicId}
-                              className="ml-3 text-sm"
-                            >
-                              {label.name}
-                            </label>
+                            <div className="flex items-center">
+                              <span className="ml-3 flex items-center">
+                                <LabelIcon colourCode={label.colourCode} />
+                              </span>
+                              <label
+                                htmlFor={label.publicId}
+                                className="ml-3 text-sm"
+                              >
+                                {label.name}
+                              </label>
+                            </div>
+
                             <button
                               className="invisible group-hover:visible"
                               onClick={(event) => {

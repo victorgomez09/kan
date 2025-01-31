@@ -9,7 +9,8 @@ import { IoFilterOutline } from "react-icons/io5";
 import Avatar from "~/components/Avatar";
 import Button from "~/components/Button";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
-import { formatToArray } from "~/utils/helpers";
+import LabelIcon from "~/components/LabelIcon";
+import { formatMemberDisplayName, formatToArray } from "~/utils/helpers";
 import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 
 interface BoardData {
@@ -58,17 +59,6 @@ interface BoardData {
   }[];
 }
 
-const LabelIcon = ({ colourCode }: { colourCode: string | null }) => (
-  <svg
-    fill={colourCode ?? "#3730a3"}
-    className="h-2 w-2"
-    viewBox="0 0 6 6"
-    aria-hidden="true"
-  >
-    <circle cx={3} cy={3} r={3} />
-  </svg>
-);
-
 const Filters = ({
   position = "right",
   boardData,
@@ -95,7 +85,10 @@ const Filters = ({
   const formattedMembers =
     boardData?.workspace?.members?.map((member) => ({
       key: member.publicId,
-      value: member.user?.name ?? "",
+      value: formatMemberDisplayName(
+        member.user?.name ?? null,
+        member.user?.email ?? null,
+      ),
       selected: !!router.query.members?.includes(member.publicId),
       leftIcon: (
         <Avatar
