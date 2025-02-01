@@ -113,7 +113,7 @@ export default function CheckboxDropdown({
       <>
         <Menu.Button
           as={asChild ? "div" : undefined}
-          className="focus-visible:outline-none"
+          className="w-full focus-visible:outline-none"
         >
           {children}
         </Menu.Button>

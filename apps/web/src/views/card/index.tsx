@@ -4,6 +4,7 @@ import ContentEditable from "react-contenteditable";
 import { useForm } from "react-hook-form";
 import { IoChevronForwardSharp } from "react-icons/io5";
 
+import Avatar from "~/components/Avatar";
 import LabelIcon from "~/components/LabelIcon";
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
@@ -11,6 +12,8 @@ import { PageHead } from "~/components/PageHead";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
+import { formatMemberDisplayName } from "~/utils/helpers";
+import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 import ActivityList from "./components/ActivityList";
 import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
 import { DeleteLabelConfirmation } from "./components/DeleteLabelConfirmation";
@@ -76,9 +79,25 @@ export default function CardPage() {
       );
 
       return {
-        ...member,
-        user: member.user ?? { id: "", name: null },
+        key: member.publicId,
+        value: formatMemberDisplayName(
+          member.user?.name ?? null,
+          member.user?.email ?? null,
+        ),
+        imageUrl: member.user?.image
+          ? getPublicUrl(member.user.image)
+          : undefined,
         selected: isSelected ?? false,
+        leftIcon: (
+          <Avatar
+            size="xs"
+            name={member.user?.name ?? ""}
+            imageUrl={
+              member.user?.image ? getPublicUrl(member.user.image) : undefined
+            }
+            email={member.user?.email ?? ""}
+          />
+        ),
       };
     }) ?? [];
 
