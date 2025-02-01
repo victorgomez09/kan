@@ -41,6 +41,7 @@ const Card = ({
                   name={user.name ?? ""}
                   email={user.email}
                   imageUrl={avatarUrl}
+                  size="sm"
                 />
               );
             })}
