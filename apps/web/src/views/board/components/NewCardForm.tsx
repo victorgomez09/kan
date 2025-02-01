@@ -78,6 +78,7 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
       key: label.publicId,
       value: label.name,
       leftIcon: <LabelIcon colourCode={label.colourCode} />,
+      selected: labelPublicIds.includes(label.publicId),
     })) ?? [];
 
   const formattedLists =
