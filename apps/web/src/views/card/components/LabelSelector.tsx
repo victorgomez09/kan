@@ -3,6 +3,7 @@ import { Fragment } from "react";
 import { useForm } from "react-hook-form";
 import { HiEllipsisHorizontal, HiMiniPlus } from "react-icons/hi2";
 
+import Badge from "~/components/Badge";
 import LabelIcon from "~/components/LabelIcon";
 import { useModal } from "~/providers/modal";
 import { api } from "~/utils/api";
@@ -58,28 +59,19 @@ export default function LabelSelector({
           className="relative flex w-full flex-wrap items-center text-left"
         >
           {selectedLabels.length ? (
-            <>
+            <div className="flex flex-wrap gap-x-0.5">
               {selectedLabels.map((label) => (
-                <Menu.Button
-                  key={label.publicId}
-                  className="my-1 mr-2 inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[12px] font-medium text-light-800 ring-1 ring-inset ring-light-600 dark:text-dark-1000 dark:ring-dark-800"
-                >
-                  <svg
-                    fill={label.colourCode}
-                    className="h-2 w-2"
-                    viewBox="0 0 6 6"
-                    aria-hidden="true"
-                  >
-                    <circle cx={3} cy={3} r={3} />
-                  </svg>
-                  <div>{label.name}</div>
+                <Menu.Button key={label.publicId}>
+                  <Badge
+                    value={label.name}
+                    iconLeft={<LabelIcon colourCode={label.colourCode} />}
+                  />
                 </Menu.Button>
               ))}
-              <Menu.Button className="my-1 inline-flex w-fit items-center gap-x-1.5 rounded-full py-1 pl-2 pr-4 text-[12px] font-medium text-dark-800 ring-inset ring-dark-800 hover:bg-light-400 dark:hover:bg-dark-200">
-                <HiMiniPlus size={16} />
-                Add label
+              <Menu.Button>
+                <Badge value="Add label" iconLeft={<HiMiniPlus size={14} />} />
               </Menu.Button>
-            </>
+            </div>
           ) : (
             <Menu.Button className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-200 pl-2 text-left text-sm text-neutral-900 hover:bg-light-300 dark:border-dark-100 dark:text-dark-1000 dark:hover:border-dark-300 dark:hover:bg-dark-200">
               <HiMiniPlus size={22} className="pr-2" />

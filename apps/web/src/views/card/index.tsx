@@ -191,7 +191,7 @@ export default function CardPage() {
             </div>
           </div>
         </div>
-        <div className="min-w-[325px] border-l-[1px] border-light-600 bg-light-200 p-8 text-light-900 dark:border-dark-400 dark:bg-dark-100 dark:text-dark-900">
+        <div className="w-[475px] border-l-[1px] border-light-600 bg-light-200 p-8 text-light-900 dark:border-dark-400 dark:bg-dark-100 dark:text-dark-900">
           <div className="mb-4 flex w-full">
             <p className="my-2 w-[100px] text-sm">List</p>
             <ListSelector

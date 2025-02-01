@@ -12,6 +12,7 @@ import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 import { formatToArray } from "~/utils/helpers";
+import Card from "~/views/board/components/Card";
 import Filters from "~/views/board/components/Filters";
 import { CardModal } from "./CardModal";
 
@@ -132,50 +133,17 @@ export default function PublicBoardView() {
                         <Link
                           key={card.publicId}
                           href={`/${data.workspace?.slug}/${data.slug}/${card.publicId}`}
-                          className={`mb-2 flex !cursor-pointer flex-col rounded-md border border-light-200 bg-light-50 px-3 py-2 text-sm text-neutral-900 dark:border-dark-200 dark:bg-dark-200 dark:text-dark-1000 dark:hover:bg-dark-300`}
+                          className={`mb-2 flex !cursor-pointer flex-col`}
                           shallow={true}
                           onClick={() => {
                             openModal("CARD");
                           }}
                         >
-                          <div>{card.title}</div>
-                          {card.labels.length ? (
-                            <div className="mt-2 flex justify-end space-x-1">
-                              {card.labels.map((label) => (
-                                <span
-                                  key={label.publicId}
-                                  className="inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[10px] font-medium text-neutral-600 ring-1 ring-inset ring-light-600 dark:text-dark-1000 dark:ring-dark-800"
-                                >
-                                  <svg
-                                    fill={label.colourCode ?? undefined}
-                                    className="h-2 w-2"
-                                    viewBox="0 0 6 6"
-                                    aria-hidden="true"
-                                  >
-                                    <circle cx={3} cy={3} r={3} />
-                                  </svg>
-                                  <div>{label.name}</div>
-                                </span>
-                              ))}
-                              {/* <div className="isolate flex -space-x-1 overflow-hidden">
-                                {card.members.map((member) => (
-                                  <span
-                                    key={member.publicId}
-                                    className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-light-900 ring-2 ring-light-50 dark:bg-gray-500 dark:ring-dark-500"
-                                  >
-                                    <span className="text-[10px] font-medium leading-none text-white">
-                                      {member.user?.name
-                                        ?.split(" ")
-                                        .map((namePart) =>
-                                          namePart.charAt(0).toUpperCase(),
-                                        )
-                                        .join("")}
-                                    </span>
-                                  </span>
-                                ))}
-                              </div> */}
-                            </div>
-                          ) : null}
+                          <Card
+                            title={card.title}
+                            labels={card.labels}
+                            members={[]}
+                          />
                         </Link>
                       ))}
                     </div>

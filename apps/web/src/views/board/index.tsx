@@ -9,7 +9,6 @@ import { HiOutlinePlusSmall } from "react-icons/hi2";
 
 import type { UpdateBoardInput } from "@kan/api/types";
 
-import Avatar from "~/components/Avatar";
 import Button from "~/components/Button";
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
@@ -21,8 +20,8 @@ import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import { formatToArray } from "~/utils/helpers";
-import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 import BoardDropdown from "./components/BoardDropdown";
+import Card from "./components/Card";
 import { DeleteBoardConfirmation } from "./components/DeleteBoardConfirmation";
 import { DeleteListConfirmation } from "./components/DeleteListConfirmation";
 import Filters from "./components/Filters";
@@ -240,7 +239,7 @@ export default function BoardPage() {
                                       }}
                                       key={card.publicId}
                                       href={`/cards/${card.publicId}`}
-                                      className={`mb-2 flex !cursor-pointer flex-col rounded-md border border-light-200 bg-light-50 px-3 py-2 text-sm text-neutral-900 dark:border-dark-200 dark:bg-dark-200 dark:text-dark-1000 dark:hover:bg-dark-300 ${
+                                      className={`mb-2 flex !cursor-pointer flex-col ${
                                         card.publicId.startsWith("PLACEHOLDER")
                                           ? "pointer-events-none"
                                           : ""
@@ -249,52 +248,11 @@ export default function BoardPage() {
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
                                     >
-                                      <div>{card.title}</div>
-                                      {(card.labels.length ?? 0) ||
-                                      (card.members.length ?? 0) ? (
-                                        <div className="mt-2 flex justify-end space-x-1">
-                                          {card.labels.map((label) => (
-                                            <span
-                                              key={label.publicId}
-                                              className="inline-flex w-fit items-center gap-x-1.5 rounded-full px-2 py-1 text-[10px] font-medium text-neutral-600 ring-1 ring-inset ring-light-600 dark:text-dark-1000 dark:ring-dark-800"
-                                            >
-                                              <svg
-                                                fill={
-                                                  label.colourCode ?? undefined
-                                                }
-                                                className="h-2 w-2"
-                                                viewBox="0 0 6 6"
-                                                aria-hidden="true"
-                                              >
-                                                <circle cx={3} cy={3} r={3} />
-                                              </svg>
-                                              <div>{label.name}</div>
-                                            </span>
-                                          ))}
-                                          <div className="isolate flex -space-x-1 overflow-hidden">
-                                            {card.members.map((member) => {
-                                              const fileName =
-                                                member.user?.image;
-
-                                              const avatarUrl = fileName
-                                                ? getPublicUrl(fileName)
-                                                : undefined;
-
-                                              return (
-                                                <Avatar
-                                                  key={member.publicId}
-                                                  name={member.user?.name ?? ""}
-                                                  email={
-                                                    member.user?.email ?? ""
-                                                  }
-                                                  imageUrl={avatarUrl}
-                                                  size="sm"
-                                                />
-                                              );
-                                            })}
-                                          </div>
-                                        </div>
-                                      ) : null}
+                                      <Card
+                                        title={card.title}
+                                        labels={card.labels}
+                                        members={card.members}
+                                      />
                                     </Link>
                                   )}
                                 </Draggable>
