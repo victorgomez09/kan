@@ -10,6 +10,7 @@ import { api } from "~/utils/api";
 import Avatar from "./components/Avatar";
 import { CustomURLConfirmation } from "./components/CustomURLConfirmation";
 import { DeleteWorkspaceConfirmation } from "./components/DeleteWorkspaceConfirmation";
+import UpdateDisplayNameForm from "./components/UpdateDisplayNameForm";
 import UpdateWorkspaceDescriptionForm from "./components/UpdateWorkspaceDescriptionForm";
 import UpdateWorkspaceNameForm from "./components/UpdateWorkspaceNameForm";
 import UpdateWorkspaceUrlForm from "./components/UpdateWorkspaceUrlForm";
@@ -56,6 +57,11 @@ export default function SettingsPage() {
                 Profile picture
               </h2>
               <Avatar userId={data?.id} userImage={data?.image} />
+
+              <h2 className="mb-4 mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">
+                Display name
+              </h2>
+              <UpdateDisplayNameForm displayName={data?.name ?? ""} />
             </div>
 
             <div className="mb-8 border-t border-light-300 dark:border-dark-300">

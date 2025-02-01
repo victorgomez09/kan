@@ -38,6 +38,11 @@ const UpdateWorkspaceNameForm = ({
 
   const updateWorkspaceName = api.workspace.update.useMutation({
     onSuccess: async () => {
+      showPopup({
+        header: "Workspace name updated",
+        message: "Your workspace name has been updated.",
+        icon: "success",
+      });
       try {
         await utils.workspace.all.refetch();
       } catch (e) {

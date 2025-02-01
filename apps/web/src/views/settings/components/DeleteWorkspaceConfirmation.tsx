@@ -18,6 +18,11 @@ export function DeleteWorkspaceConfirmation() {
   const deleteWorkspaceMutation = api.workspace.delete.useMutation({
     onSuccess: () => {
       closeModal();
+      showPopup({
+        header: "Workspace deleted",
+        message: "Your workspace has been deleted.",
+        icon: "success",
+      });
       const filteredWorkspaces = availableWorkspaces.filter(
         (ws) => ws.publicId !== workspace.publicId,
       );

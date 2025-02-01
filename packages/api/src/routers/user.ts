@@ -62,11 +62,13 @@ export const userRouter = createTRPCRouter({
     })
     .input(
       z.object({
-        image: z.string(),
+        name: z.string().optional(),
+        image: z.string().optional(),
       }),
     )
     .output(
       z.object({
+        name: z.string().nullable(),
         image: z.string().nullable(),
       }),
     )

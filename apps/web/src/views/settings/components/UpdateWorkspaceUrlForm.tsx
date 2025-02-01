@@ -53,6 +53,11 @@ const UpdateWorkspaceUrlForm = ({
 
   const updateWorkspaceSlug = api.workspace.update.useMutation({
     onSuccess: async () => {
+      showPopup({
+        header: "Workspace slug updated",
+        message: "Your workspace slug has been updated.",
+        icon: "success",
+      });
       try {
         await utils.workspace.all.refetch();
       } catch (e) {

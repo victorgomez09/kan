@@ -48,13 +48,13 @@ export const create = async (
 export const update = async (
   db: SupabaseClient<Database>,
   userId: string,
-  updates: { image: string | null },
+  updates: { image?: string; name?: string },
 ) => {
   const { data } = await db
     .from("user")
-    .update({ image: updates.image })
+    .update({ image: updates.image, name: updates.name })
     .eq("id", userId)
-    .select(`image`)
+    .select(`image, name`)
     .single();
 
   return data;

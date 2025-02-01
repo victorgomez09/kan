@@ -8,25 +8,19 @@ import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 
 const schema = z.object({
-  description: z
+  name: z
     .string()
     .min(3, {
-      message: "Workspace description must be at least 3 characters long",
+      message: "Display namemust be at least 3 characters long",
     })
     .max(280, {
-      message: "Workspace description cannot exceed 280 characters",
+      message: "Display name cannot exceed 280 characters",
     }),
 });
 
 type FormValues = z.infer<typeof schema>;
 
-const UpdateWorkspaceDescriptionForm = ({
-  workspacePublicId,
-  workspaceDescription,
-}: {
-  workspacePublicId: string;
-  workspaceDescription: string;
-}) => {
+const UpdateDisplayNameForm = ({ displayName }: { displayName: string }) => {
   const utils = api.useUtils();
   const { showPopup } = usePopup();
   const {
@@ -36,19 +30,19 @@ const UpdateWorkspaceDescriptionForm = ({
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     values: {
-      description: workspaceDescription,
+      name: displayName,
     },
   });
 
-  const updateWorkspaceDescription = api.workspace.update.useMutation({
+  const updateDisplayName = api.user.update.useMutation({
     onSuccess: async () => {
       showPopup({
-        header: "Workspace description updated",
-        message: "Your workspace description has been updated.",
+        header: "Display name updated",
+        message: "Your display name has been updated.",
         icon: "success",
       });
       try {
-        await utils.workspace.all.refetch();
+        await utils.user.getUser.refetch();
       } catch (e) {
         console.error(e);
         throw e;
@@ -56,7 +50,7 @@ const UpdateWorkspaceDescriptionForm = ({
     },
     onError: () => {
       showPopup({
-        header: "Error updating workspace description",
+        header: "Error updating display name",
         message: "Please try again later, or contact customer support.",
         icon: "error",
       });
@@ -64,25 +58,21 @@ const UpdateWorkspaceDescriptionForm = ({
   });
 
   const onSubmit = (data: FormValues) => {
-    updateWorkspaceDescription.mutate({
-      workspacePublicId,
-      description: data.description,
+    updateDisplayName.mutate({
+      name: data.name,
     });
   };
 
   return (
     <>
       <div className="mb-4 flex max-w-[350px] items-center gap-2">
-        <Input
-          {...register("description")}
-          errorMessage={errors.description?.message}
-        />
+        <Input {...register("name")} errorMessage={errors.name?.message} />
       </div>
       <Button
         onClick={handleSubmit(onSubmit)}
         variant="primary"
-        disabled={!isDirty || updateWorkspaceDescription.isPending}
-        isLoading={updateWorkspaceDescription.isPending}
+        disabled={!isDirty || updateDisplayName.isPending}
+        isLoading={updateDisplayName.isPending}
       >
         Update
       </Button>
@@ -90,4 +80,4 @@ const UpdateWorkspaceDescriptionForm = ({
   );
 };
 
-export default UpdateWorkspaceDescriptionForm;
+export default UpdateDisplayNameForm;

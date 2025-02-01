@@ -20,6 +20,11 @@ export default function Avatar({
 
   const updateUser = api.user.update.useMutation({
     onSuccess: async () => {
+      showPopup({
+        header: "Profile image updated",
+        message: "Your profile image has been updated.",
+        icon: "success",
+      });
       try {
         await utils.user.getUser.refetch();
       } catch (e) {
