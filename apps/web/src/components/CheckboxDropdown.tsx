@@ -1,5 +1,6 @@
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
+import { HiEllipsisHorizontal, HiMiniPlus } from "react-icons/hi2";
 import { twMerge } from "tailwind-merge";
 
 interface Item {
@@ -20,9 +21,12 @@ interface CheckboxDropdownProps {
   children: React.ReactNode;
   items?: Item[];
   groups?: Group[];
+  createNewItemLabel?: string;
   menuSpacing?: "sm" | "md" | "lg";
   position?: "left" | "right";
   handleSelect: (groupKey: string | null, item: { key: string }) => void;
+  handleEdit?: (key: string) => void;
+  handleCreate?: () => void;
   asChild?: boolean;
 }
 
@@ -30,9 +34,12 @@ export default function CheckboxDropdown({
   children,
   items,
   groups,
+  createNewItemLabel = "Create new",
   menuSpacing = "sm",
   position = "left",
   handleSelect,
+  handleEdit,
+  handleCreate,
   asChild = true,
 }: CheckboxDropdownProps) {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
@@ -42,6 +49,61 @@ export default function CheckboxDropdown({
     md: "top-[32px]",
     lg: "top-[38px]",
   };
+
+  const renderMenuItems = (items: Item[], groupKey: string | null) => (
+    <>
+      {items.map((item) => (
+        <Menu.Item key={item.key}>
+          <div
+            className="group flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-300"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSelect(groupKey, { key: item.key });
+            }}
+          >
+            <input
+              id={item.key}
+              name={item.key}
+              type="checkbox"
+              className="h-[14px] w-[14px] rounded bg-transparent"
+              onClick={(event) => event.stopPropagation()}
+              onChange={() => handleSelect(groupKey, { key: item.key })}
+              checked={item.selected}
+            />
+            {item.leftIcon && (
+              <span className="ml-3 flex items-center">{item.leftIcon}</span>
+            )}
+            <label
+              htmlFor={item.key}
+              className="ml-3 text-[12px] text-dark-900"
+            >
+              {item.value}
+            </label>
+            {handleEdit && (
+              <button
+                className="invisible ml-auto group-hover:visible"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleEdit(item.key);
+                }}
+              >
+                <HiEllipsisHorizontal size={20} />
+              </button>
+            )}
+          </div>
+        </Menu.Item>
+      ))}
+      {handleCreate && (
+        <button
+          className="flex w-full items-center rounded-[5px] p-2 px-2 text-[12px] hover:bg-light-200 dark:hover:bg-dark-300"
+          onClick={() => handleCreate()}
+        >
+          <HiMiniPlus size={20} className="pr-1.5" />
+          {createNewItemLabel}
+        </button>
+      )}
+    </>
+  );
 
   return (
     <Menu
@@ -76,38 +138,8 @@ export default function CheckboxDropdown({
             <div className="p-1">
               {!selectedGroup ? (
                 <>
-                  {items?.map((item) => (
-                    <Menu.Item key={item.key}>
-                      <div
-                        className="flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-300"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleSelect(null, { key: item.key });
-                        }}
-                      >
-                        <input
-                          id={item.key}
-                          name={item.key}
-                          type="checkbox"
-                          className="h-[14px] w-[14px] rounded bg-transparent"
-                          onClick={(event) => event.stopPropagation()}
-                          onChange={() => handleSelect(null, { key: item.key })}
-                          checked={item.selected}
-                        />
-                        {item.leftIcon && (
-                          <span className="ml-3 flex items-center">
-                            {item.leftIcon}
-                          </span>
-                        )}
-                        <label
-                          htmlFor={item.key}
-                          className="ml-3 text-[12px] text-dark-900"
-                        >
-                          {item.value}
-                        </label>
-                      </div>
-                    </Menu.Item>
-                  ))}
+                  {items && renderMenuItems(items, null)}
+
                   {groups?.map((group) => (
                     <Menu.Item key={group.key}>
                       <div
@@ -127,42 +159,11 @@ export default function CheckboxDropdown({
                 </>
               ) : (
                 <>
-                  {groups
-                    ?.find((g) => g.key === selectedGroup)
-                    ?.items.map((item) => (
-                      <Menu.Item key={item.key}>
-                        <div
-                          className="flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-300"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleSelect(selectedGroup, { key: item.key });
-                          }}
-                        >
-                          <input
-                            id={item.key}
-                            name={item.key}
-                            type="checkbox"
-                            className="h-[14px] w-[14px] rounded bg-transparent"
-                            onClick={(event) => event.stopPropagation()}
-                            onChange={() =>
-                              handleSelect(selectedGroup, { key: item.key })
-                            }
-                            checked={item.selected}
-                          />
-                          {item.leftIcon && (
-                            <span className="ml-3 flex items-center">
-                              {item.leftIcon}
-                            </span>
-                          )}
-                          <label
-                            htmlFor={item.key}
-                            className="ml-3 text-[12px] text-dark-900"
-                          >
-                            {item.value}
-                          </label>
-                        </div>
-                      </Menu.Item>
-                    ))}
+                  {groups?.find((g) => g.key === selectedGroup)?.items &&
+                    renderMenuItems(
+                      groups.find((g) => g.key === selectedGroup)?.items || [],
+                      selectedGroup,
+                    )}
                 </>
               )}
             </div>

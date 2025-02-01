@@ -4,6 +4,7 @@ import ContentEditable from "react-contenteditable";
 import { useForm } from "react-hook-form";
 import { IoChevronForwardSharp } from "react-icons/io5";
 
+import LabelIcon from "~/components/LabelIcon";
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
@@ -55,9 +56,10 @@ export default function CardPage() {
       );
 
       return {
-        ...label,
+        key: label.publicId,
+        value: label.name,
         selected: isSelected ?? false,
-        colourCode: label.colourCode ?? "",
+        leftIcon: <LabelIcon colourCode={label.colourCode} />,
       };
     }) ?? [];
 
