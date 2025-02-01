@@ -71,22 +71,24 @@ const UpdateWorkspaceDescriptionForm = ({
   };
 
   return (
-    <>
-      <div className="mb-4 flex max-w-[350px] items-center gap-2">
+    <div className="flex gap-2">
+      <div className="mb-4 flex w-full max-w-[325px] items-center gap-2">
         <Input
           {...register("description")}
           errorMessage={errors.description?.message}
         />
       </div>
-      <Button
-        onClick={handleSubmit(onSubmit)}
-        variant="primary"
-        disabled={!isDirty || updateWorkspaceDescription.isPending}
-        isLoading={updateWorkspaceDescription.isPending}
-      >
-        Update
-      </Button>
-    </>
+      <div>
+        <Button
+          onClick={handleSubmit(onSubmit)}
+          variant="primary"
+          disabled={!isDirty || updateWorkspaceDescription.isPending}
+          isLoading={updateWorkspaceDescription.isPending}
+        >
+          Update
+        </Button>
+      </div>
+    </div>
   );
 };
 

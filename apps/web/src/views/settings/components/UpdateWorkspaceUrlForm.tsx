@@ -102,8 +102,8 @@ const UpdateWorkspaceUrlForm = ({
   };
 
   return (
-    <>
-      <div className="mb-4 flex max-w-[350px] items-center gap-2">
+    <div className="flex gap-2">
+      <div className="mb-4 flex w-full max-w-[325px] items-center gap-2">
         <Input
           {...register("slug")}
           className={`${
@@ -129,21 +129,23 @@ const UpdateWorkspaceUrlForm = ({
           }
         />
       </div>
-      <Button
-        onClick={handleSubmit(onSubmit)}
-        variant="primary"
-        disabled={
-          !isDirty ||
-          updateWorkspaceSlug.isPending ||
-          checkWorkspaceSlugAvailability.isPending ||
-          isWorkspaceSlugAvailable?.isAvailable === false ||
-          isTyping
-        }
-        isLoading={updateWorkspaceSlug.isPending}
-      >
-        Update
-      </Button>
-    </>
+      <div>
+        <Button
+          onClick={handleSubmit(onSubmit)}
+          variant="primary"
+          disabled={
+            !isDirty ||
+            updateWorkspaceSlug.isPending ||
+            checkWorkspaceSlugAvailability.isPending ||
+            isWorkspaceSlugAvailable?.isAvailable === false ||
+            isTyping
+          }
+          isLoading={updateWorkspaceSlug.isPending}
+        >
+          Update
+        </Button>
+      </div>
+    </div>
   );
 };
 

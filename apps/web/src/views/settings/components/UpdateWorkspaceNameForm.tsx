@@ -67,19 +67,21 @@ const UpdateWorkspaceNameForm = ({
   };
 
   return (
-    <>
-      <div className="mb-4 flex max-w-[350px] items-center gap-2">
+    <div className="flex gap-2">
+      <div className="mb-4 flex w-full max-w-[325px] items-center gap-2">
         <Input {...register("name")} errorMessage={errors.name?.message} />
       </div>
-      <Button
-        onClick={handleSubmit(onSubmit)}
-        variant="primary"
-        disabled={!isDirty || updateWorkspaceName.isPending}
-        isLoading={updateWorkspaceName.isPending}
-      >
-        Update
-      </Button>
-    </>
+      <div>
+        <Button
+          onClick={handleSubmit(onSubmit)}
+          variant="primary"
+          disabled={!isDirty || updateWorkspaceName.isPending}
+          isLoading={updateWorkspaceName.isPending}
+        >
+          Update
+        </Button>
+      </div>
+    </div>
   );
 };
 
