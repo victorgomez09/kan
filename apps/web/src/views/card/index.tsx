@@ -68,7 +68,8 @@ export default function CardPage() {
 
   const formattedLists =
     board?.lists.map((list) => ({
-      ...list,
+      key: list.publicId,
+      value: list.name,
       selected: list.publicId === data?.list?.publicId,
     })) ?? [];
 

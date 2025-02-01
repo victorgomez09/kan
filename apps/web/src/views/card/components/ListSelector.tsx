@@ -1,13 +1,13 @@
-import { Fragment } from "react";
+import { Menu } from "@headlessui/react";
+
+import CheckboxDropdown from "~/components/CheckboxDropdown";
 import { api } from "~/utils/api";
-import { Menu, Transition } from "@headlessui/react";
-import { useForm } from "react-hook-form";
 
 interface ListSelectorProps {
   cardPublicId: string;
   lists: {
-    publicId: string;
-    name: string;
+    key: string;
+    value: string;
     selected: boolean;
   }[];
   isLoading: boolean;
@@ -28,16 +28,6 @@ export default function ListSelector({
     },
   });
 
-  const { register, handleSubmit, setValue, watch } = useForm({
-    values: Object.fromEntries(
-      lists?.map((list) => [list.publicId, list.selected]) ?? [],
-    ),
-  });
-
-  const onSubmit = (values: Record<string, boolean>) => {
-    console.log({ values });
-  };
-
   const selectedList = lists.find((list) => list.selected);
 
   return (
@@ -47,67 +37,20 @@ export default function ListSelector({
           <div className="h-full w-[150px] animate-pulse rounded-[5px] bg-light-300 dark:bg-dark-300" />
         </div>
       ) : (
-        <Menu
-          as="div"
-          className="relative flex w-full flex-wrap items-center text-left"
+        <CheckboxDropdown
+          items={lists}
+          handleSelect={(_, member) =>
+            updateCardList.mutate({
+              cardPublicId,
+              newListPublicId: member.key,
+            })
+          }
+          asChild
         >
-          <Menu.Button className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-200 pl-2 text-left text-sm text-neutral-900 hover:border-light-300 hover:bg-light-300 dark:border-dark-100 dark:text-dark-1000 dark:hover:border-dark-300 dark:hover:bg-dark-200">
-            {selectedList?.name}
+          <Menu.Button className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-200 py-1 pl-2 text-left text-sm text-neutral-900 hover:border-light-300 hover:bg-light-300 dark:border-dark-100 dark:text-dark-1000 dark:hover:border-dark-300 dark:hover:bg-dark-200">
+            {selectedList?.value}
           </Menu.Button>
-
-          <Transition
-            as={Fragment}
-            enter="transition ease-out duration-100"
-            enterFrom="transform opacity-0 scale-95"
-            enterTo="transform opacity-100 scale-100"
-            leave="transition ease-in duration-75"
-            leaveFrom="transform opacity-100 scale-100"
-            leaveTo="transform opacity-0 scale-95"
-          >
-            <Menu.Items className="absolute right-[200px] top-[30px] z-10 mt-2 w-56 origin-top-right rounded-md border-[1px] border-light-600 bg-light-50 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:border-dark-500 dark:bg-dark-200">
-              <div className="p-2">
-                <form onSubmit={handleSubmit(onSubmit)}>
-                  {lists?.map((list) => (
-                    <Menu.Item key={list.publicId}>
-                      {() => (
-                        <div
-                          key={list.publicId}
-                          className="flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-300"
-                          onClick={() => {
-                            const newValue = !watch(list.publicId);
-                            setValue(list.publicId, newValue);
-
-                            updateCardList.mutate({
-                              cardPublicId,
-                              newListPublicId: list.publicId,
-                            });
-
-                            handleSubmit(onSubmit);
-                          }}
-                        >
-                          <input
-                            id={list.publicId}
-                            type="checkbox"
-                            className="h-[14px] w-[14px] rounded bg-transparent"
-                            onClick={(event) => event.stopPropagation()}
-                            {...register(list.publicId)}
-                            checked={watch(list.publicId)}
-                          />
-                          <label
-                            htmlFor={list.publicId}
-                            className="ml-3 text-sm"
-                          >
-                            {list.name}
-                          </label>
-                        </div>
-                      )}
-                    </Menu.Item>
-                  ))}
-                </form>
-              </div>
-            </Menu.Items>
-          </Transition>
-        </Menu>
+        </CheckboxDropdown>
       )}
     </>
   );
