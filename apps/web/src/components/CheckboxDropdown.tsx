@@ -24,7 +24,10 @@ interface CheckboxDropdownProps {
   createNewItemLabel?: string;
   menuSpacing?: "sm" | "md" | "lg";
   position?: "left" | "right";
-  handleSelect: (groupKey: string | null, item: { key: string }) => void;
+  handleSelect: (
+    groupKey: string | null,
+    item: { key: string; value: string },
+  ) => void;
   handleEdit?: (key: string) => void;
   handleCreate?: () => void;
   asChild?: boolean;
@@ -58,7 +61,7 @@ export default function CheckboxDropdown({
             className="group flex items-center rounded-[5px] p-2 hover:bg-light-200 dark:hover:bg-dark-300"
             onClick={(e) => {
               e.preventDefault();
-              handleSelect(groupKey, { key: item.key });
+              handleSelect(groupKey, { key: item.key, value: item.value });
             }}
           >
             <input
@@ -67,7 +70,9 @@ export default function CheckboxDropdown({
               type="checkbox"
               className="h-[14px] w-[14px] rounded bg-transparent"
               onClick={(event) => event.stopPropagation()}
-              onChange={() => handleSelect(groupKey, { key: item.key })}
+              onChange={() =>
+                handleSelect(groupKey, { key: item.key, value: item.value })
+              }
               checked={item.selected}
             />
             {item.leftIcon && (

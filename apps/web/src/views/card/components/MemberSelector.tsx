@@ -5,6 +5,7 @@ import { HiMiniPlus } from "react-icons/hi2";
 import Avatar from "~/components/Avatar";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
 import { useModal } from "~/providers/modal";
+import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 
 interface MemberSelectorProps {
@@ -16,16 +17,19 @@ interface MemberSelectorProps {
     leftIcon: React.ReactNode;
     imageUrl: string | undefined;
   }[];
+  handleSelectMember: (memberPublicId: string) => void;
   isLoading: boolean;
 }
 
 export default function MemberSelector({
   cardPublicId,
   members,
+  handleSelectMember,
   isLoading,
 }: MemberSelectorProps) {
   const router = useRouter();
   const { openModal } = useModal();
+  const { showPopup } = usePopup();
   const utils = api.useUtils();
 
   const refetchCard = () => utils.card.byId.refetch({ cardPublicId });
@@ -33,6 +37,14 @@ export default function MemberSelector({
   const addOrRemoveMember = api.card.addOrRemoveMember.useMutation({
     onSuccess: async () => {
       await refetchCard();
+    },
+    onError: async () => {
+      await refetchCard();
+      showPopup({
+        header: "Unable to update members",
+        message: "Please try again later, or contact customer support.",
+        icon: "error",
+      });
     },
   });
 
@@ -52,12 +64,13 @@ export default function MemberSelector({
       ) : (
         <CheckboxDropdown
           items={members}
-          handleSelect={(_, member) =>
+          handleSelect={(_, member) => {
+            handleSelectMember(member.key);
             addOrRemoveMember.mutate({
               cardPublicId,
               workspaceMemberPublicId: member.key,
-            })
-          }
+            });
+          }}
           handleCreate={handleInviteMember}
           createNewItemLabel="Invite member"
           asChild

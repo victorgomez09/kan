@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import ContentEditable from "react-contenteditable";
 import { useForm } from "react-hook-form";
 import { IoChevronForwardSharp } from "react-icons/io5";
+
+import type { GetCardByIdOutput } from "@kan/api/types";
 
 import Avatar from "~/components/Avatar";
 import LabelIcon from "~/components/LabelIcon";
@@ -35,6 +38,7 @@ export default function CardPage() {
   const utils = api.useUtils();
   const { modalContentType, entityId } = useModal();
   const { showPopup } = usePopup();
+  const [card, setCard] = useState<GetCardByIdOutput>();
 
   const cardId = Array.isArray(router.query.cardId)
     ? router.query.cardId[0]
@@ -44,13 +48,85 @@ export default function CardPage() {
     cardPublicId: cardId ?? "",
   });
 
-  const board = data?.list?.board;
+  useEffect(() => {
+    setCard(data);
+  }, [data]);
+
+  const board = card?.list?.board;
   const boardId = board?.publicId;
   const labels = board?.labels;
-  const activities = data?.activities;
+  const activities = card?.activities;
   const workspaceMembers = board?.workspace?.members;
-  const selectedLabels = data?.labels;
-  const selectedMembers = data?.members;
+  const selectedLabels = card?.labels;
+  const selectedMembers = card?.members;
+
+  const handleChangeList = (newListPublicId: string) => {
+    if (!card) return;
+
+    setCard({
+      ...card,
+      list: {
+        ...card.list,
+        publicId: newListPublicId,
+        name: card.list?.name ?? "",
+        board: card.list?.board ?? null,
+      },
+    });
+  };
+
+  const handleSelectLabel = (labelPublicId: string) => {
+    if (!card) return;
+
+    const isSelected = card.labels.some(
+      (label) => label.publicId === labelPublicId,
+    );
+
+    const updatedLabels = isSelected
+      ? card.labels.filter((label) => label.publicId !== labelPublicId)
+      : [
+          ...(card.labels ?? []),
+          labels?.find((label) => label.publicId === labelPublicId),
+        ].filter(Boolean);
+
+    setCard({
+      ...card,
+      labels: updatedLabels as {
+        publicId: string;
+        name: string;
+        colourCode: string | null;
+      }[],
+    });
+  };
+
+  const handleSelectMember = (memberPublicId: string) => {
+    if (!card) return;
+
+    const isSelected = card.members.some(
+      (member) => member.publicId === memberPublicId,
+    );
+
+    const updatedMembers = isSelected
+      ? card.members.filter((member) => member.publicId !== memberPublicId)
+      : [
+          ...(card.members ?? []),
+          workspaceMembers?.find(
+            (member) => member.publicId === memberPublicId,
+          ),
+        ];
+
+    setCard({
+      ...card,
+      members: updatedMembers.filter(Boolean) as {
+        publicId: string;
+        user: {
+          id: string;
+          name: string | null;
+          email: string;
+          image: string | null;
+        } | null;
+      }[],
+    });
+  };
 
   const formattedLabels =
     labels?.map((label) => {
@@ -70,7 +146,7 @@ export default function CardPage() {
     board?.lists.map((list) => ({
       key: list.publicId,
       value: list.name,
-      selected: list.publicId === data?.list?.publicId,
+      selected: list.publicId === card?.list?.publicId,
     })) ?? [];
 
   const formattedMembers =
@@ -219,6 +295,7 @@ export default function CardPage() {
             <ListSelector
               cardPublicId={cardId}
               lists={formattedLists}
+              handleChangeList={handleChangeList}
               isLoading={isLoading}
             />
           </div>
@@ -227,6 +304,7 @@ export default function CardPage() {
             <LabelSelector
               cardPublicId={cardId}
               labels={formattedLabels}
+              handleSelectLabel={handleSelectLabel}
               isLoading={isLoading}
             />
           </div>
@@ -235,6 +313,7 @@ export default function CardPage() {
             <MemberSelector
               cardPublicId={cardId}
               members={formattedMembers}
+              handleSelectMember={handleSelectMember}
               isLoading={isLoading}
             />
           </div>

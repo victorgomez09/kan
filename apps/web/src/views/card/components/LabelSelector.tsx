@@ -14,12 +14,14 @@ interface LabelSelectorProps {
     selected: boolean;
     leftIcon: React.ReactNode;
   }[];
+  handleSelectLabel: (labelPublicId: string) => void;
   isLoading: boolean;
 }
 
 export default function LabelSelector({
   cardPublicId,
   labels,
+  handleSelectLabel,
   isLoading,
 }: LabelSelectorProps) {
   const { openModal } = useModal();
@@ -44,9 +46,10 @@ export default function LabelSelector({
       ) : (
         <CheckboxDropdown
           items={labels}
-          handleSelect={(_, label) =>
-            addOrRemoveLabel.mutate({ cardPublicId, labelPublicId: label.key })
-          }
+          handleSelect={(_, label) => {
+            handleSelectLabel(label.key);
+            addOrRemoveLabel.mutate({ cardPublicId, labelPublicId: label.key });
+          }}
           handleEdit={(labelPublicId) => openModal("EDIT_LABEL", labelPublicId)}
           handleCreate={() => openModal("NEW_LABEL")}
           createNewItemLabel="Create new label"

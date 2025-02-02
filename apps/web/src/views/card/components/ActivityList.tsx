@@ -9,7 +9,7 @@ import {
   HiOutlineUserPlus,
 } from "react-icons/hi2";
 
-import { type GetCardByIdOutput } from "@kan/api/types";
+import type { GetCardByIdOutput } from "@kan/api/types";
 
 import Avatar from "~/components/Avatar";
 import Comment from "./Comment";
@@ -148,7 +148,7 @@ const ActivityList = ({
 }) => {
   return (
     <div className="flex flex-col space-y-4 pt-4">
-      {activities?.map((activity, index) => {
+      {activities.map((activity, index) => {
         const activityText = getActivityText({
           type: activity.type,
           toTitle: activity.toTitle,
