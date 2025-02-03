@@ -4,6 +4,7 @@ import { HiMiniPlus } from "react-icons/hi2";
 import Badge from "~/components/Badge";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
 import { useModal } from "~/providers/modal";
+import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 
 interface LabelSelectorProps {
@@ -14,6 +15,7 @@ interface LabelSelectorProps {
     selected: boolean;
     leftIcon: React.ReactNode;
   }[];
+  refetchCard: () => Promise<void>;
   handleSelectLabel: (labelPublicId: string) => void;
   isLoading: boolean;
 }
@@ -21,17 +23,24 @@ interface LabelSelectorProps {
 export default function LabelSelector({
   cardPublicId,
   labels,
+  refetchCard,
   handleSelectLabel,
   isLoading,
 }: LabelSelectorProps) {
   const { openModal } = useModal();
-  const utils = api.useUtils();
-
-  const refetchCard = () => utils.card.byId.refetch({ cardPublicId });
+  const { showPopup } = usePopup();
 
   const addOrRemoveLabel = api.card.addOrRemoveLabel.useMutation({
     onSuccess: async () => {
       await refetchCard();
+    },
+    onError: async () => {
+      await refetchCard();
+      showPopup({
+        header: "Unable to update labels",
+        message: "Please try again later, or contact customer support.",
+        icon: "error",
+      });
     },
   });
 

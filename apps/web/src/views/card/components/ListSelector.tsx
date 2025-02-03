@@ -1,6 +1,7 @@
 import { Menu } from "@headlessui/react";
 
 import CheckboxDropdown from "~/components/CheckboxDropdown";
+import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 
 interface ListSelectorProps {
@@ -10,6 +11,7 @@ interface ListSelectorProps {
     value: string;
     selected: boolean;
   }[];
+  refetchCard: () => Promise<void>;
   handleChangeList: (newListPublicId: string, newListName: string) => void;
   isLoading: boolean;
 }
@@ -18,15 +20,22 @@ export default function ListSelector({
   cardPublicId,
   lists,
   handleChangeList,
+  refetchCard,
   isLoading,
 }: ListSelectorProps) {
-  const utils = api.useUtils();
-
-  const refetchCard = () => utils.card.byId.refetch({ cardPublicId });
+  const { showPopup } = usePopup();
 
   const updateCardList = api.card.reorder.useMutation({
     onSuccess: async () => {
       await refetchCard();
+    },
+    onError: async () => {
+      await refetchCard();
+      showPopup({
+        header: "Unable to update list",
+        message: "Please try again later, or contact customer support.",
+        icon: "error",
+      });
     },
   });
 

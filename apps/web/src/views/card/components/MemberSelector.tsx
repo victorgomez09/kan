@@ -18,6 +18,7 @@ interface MemberSelectorProps {
     imageUrl: string | undefined;
   }[];
   handleSelectMember: (memberPublicId: string) => void;
+  refetchCard: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -25,14 +26,12 @@ export default function MemberSelector({
   cardPublicId,
   members,
   handleSelectMember,
+  refetchCard,
   isLoading,
 }: MemberSelectorProps) {
   const router = useRouter();
   const { openModal } = useModal();
   const { showPopup } = usePopup();
-  const utils = api.useUtils();
-
-  const refetchCard = () => utils.card.byId.refetch({ cardPublicId });
 
   const addOrRemoveMember = api.card.addOrRemoveMember.useMutation({
     onSuccess: async () => {

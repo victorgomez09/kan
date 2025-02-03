@@ -126,7 +126,6 @@ const getActivityIcon = (
   fromIndex?: number | null,
   toIndex?: number | null,
 ): React.ReactNode | null => {
-  console.log({ fromIndex, toIndex });
   if (type === "card.updated.list" && fromIndex != null && toIndex != null) {
     return fromIndex > toIndex ? (
       <HiOutlineArrowLeft />

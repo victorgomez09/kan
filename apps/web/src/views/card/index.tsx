@@ -44,9 +44,19 @@ export default function CardPage() {
     ? router.query.cardId[0]
     : router.query.cardId;
 
-  const { data, isLoading } = api.card.byId.useQuery({
+  const { data, isLoading, refetch } = api.card.byId.useQuery({
     cardPublicId: cardId ?? "",
   });
+
+  const refetchCard = async () => {
+    try {
+      const { data: updatedCard } = await refetch();
+
+      if (updatedCard) setCard(updatedCard);
+    } catch (error) {
+      console.error({ error });
+    }
+  };
 
   useEffect(() => {
     setCard(data);
@@ -180,9 +190,11 @@ export default function CardPage() {
 
   const updateCard = api.card.update.useMutation({
     onSuccess: async () => {
-      await utils.card.byId.refetch();
+      await refetchCard();
     },
-    onError: () => {
+    onError: async () => {
+      await refetchCard();
+
       showPopup({
         header: "Unable to update card",
         message: "Please try again later, or contact customer support.",
@@ -295,6 +307,7 @@ export default function CardPage() {
             <ListSelector
               cardPublicId={cardId}
               lists={formattedLists}
+              refetchCard={refetchCard}
               handleChangeList={handleChangeList}
               isLoading={isLoading}
             />
@@ -304,6 +317,7 @@ export default function CardPage() {
             <LabelSelector
               cardPublicId={cardId}
               labels={formattedLabels}
+              refetchCard={refetchCard}
               handleSelectLabel={handleSelectLabel}
               isLoading={isLoading}
             />
@@ -313,6 +327,7 @@ export default function CardPage() {
             <MemberSelector
               cardPublicId={cardId}
               members={formattedMembers}
+              refetchCard={refetchCard}
               handleSelectMember={handleSelectMember}
               isLoading={isLoading}
             />

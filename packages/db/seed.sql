@@ -582,9 +582,11 @@ USING (
   "workspaceMemberId" IN (
     SELECT wm.id
     FROM workspace_members wm
-    JOIN workspace w ON wm."workspaceId" = w.id
-    JOIN board b ON w.id = b."workspaceId"
-    WHERE wm."userId" = auth.uid()
+    WHERE wm."workspaceId" IN (
+      SELECT "workspaceId"
+      FROM workspace_members
+      WHERE "userId" = auth.uid()
+    )
   )
 );
 
