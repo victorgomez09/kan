@@ -15,32 +15,66 @@ interface LabelSelectorProps {
     selected: boolean;
     leftIcon: React.ReactNode;
   }[];
-  refetchCard: () => Promise<void>;
-  handleSelectLabel: (labelPublicId: string) => void;
   isLoading: boolean;
 }
 
 export default function LabelSelector({
   cardPublicId,
   labels,
-  refetchCard,
-  handleSelectLabel,
   isLoading,
 }: LabelSelectorProps) {
+  const utils = api.useUtils();
   const { openModal } = useModal();
   const { showPopup } = usePopup();
 
   const addOrRemoveLabel = api.card.addOrRemoveLabel.useMutation({
-    onSuccess: async () => {
-      await refetchCard();
+    onMutate: async (update) => {
+      await utils.card.byId.cancel();
+
+      const previousCard = utils.card.byId.getData({ cardPublicId });
+
+      utils.card.byId.setData({ cardPublicId }, (oldCard) => {
+        if (!oldCard) return oldCard;
+
+        const hasLabel = oldCard.labels.some(
+          (label) => label.publicId === update.labelPublicId,
+        );
+
+        const labelToAdd = oldCard.labels.find(
+          (label) => label.publicId === update.labelPublicId,
+        );
+
+        const updatedLabels = hasLabel
+          ? oldCard.labels.filter(
+              (label) => label.publicId !== update.labelPublicId,
+            )
+          : [
+              ...oldCard.labels,
+              {
+                publicId: update.labelPublicId,
+                name: labelToAdd?.name ?? "",
+                colourCode: labelToAdd?.colourCode ?? "",
+              },
+            ];
+
+        return {
+          ...oldCard,
+          labels: updatedLabels,
+        };
+      });
+
+      return { previousCard };
     },
-    onError: async () => {
-      await refetchCard();
+    onError: (_error, _newList, context) => {
+      utils.card.byId.setData({ cardPublicId }, context?.previousCard);
       showPopup({
         header: "Unable to update labels",
         message: "Please try again later, or contact customer support.",
         icon: "error",
       });
+    },
+    onSettled: async () => {
+      await utils.card.byId.invalidate({ cardPublicId });
     },
   });
 
@@ -56,7 +90,6 @@ export default function LabelSelector({
         <CheckboxDropdown
           items={labels}
           handleSelect={(_, label) => {
-            handleSelectLabel(label.key);
             addOrRemoveLabel.mutate({ cardPublicId, labelPublicId: label.key });
           }}
           handleEdit={(labelPublicId) => openModal("EDIT_LABEL", labelPublicId)}

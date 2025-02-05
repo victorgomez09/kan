@@ -11,31 +11,50 @@ interface ListSelectorProps {
     value: string;
     selected: boolean;
   }[];
-  refetchCard: () => Promise<void>;
-  handleChangeList: (newListPublicId: string, newListName: string) => void;
   isLoading: boolean;
 }
 
 export default function ListSelector({
   cardPublicId,
   lists,
-  handleChangeList,
-  refetchCard,
   isLoading,
 }: ListSelectorProps) {
+  const utils = api.useUtils();
+
   const { showPopup } = usePopup();
 
   const updateCardList = api.card.reorder.useMutation({
-    onSuccess: async () => {
-      await refetchCard();
+    onMutate: async (newList) => {
+      await utils.card.byId.cancel();
+
+      const previousCard = utils.card.byId.getData({ cardPublicId });
+
+      utils.card.byId.setData({ cardPublicId }, (oldCard) => {
+        if (!oldCard) return oldCard;
+
+        return {
+          ...oldCard,
+          list: {
+            ...oldCard.list,
+            publicId: newList.newListPublicId,
+            name: oldCard.list?.name ?? "",
+            board: oldCard.list?.board ?? null,
+          },
+        };
+      });
+
+      return { previousCard };
     },
-    onError: async () => {
-      await refetchCard();
+    onError: (_error, _newList, context) => {
+      utils.card.byId.setData({ cardPublicId }, context?.previousCard);
       showPopup({
         header: "Unable to update list",
         message: "Please try again later, or contact customer support.",
         icon: "error",
       });
+    },
+    onSettled: async () => {
+      await utils.card.byId.invalidate({ cardPublicId });
     },
   });
 
@@ -51,7 +70,6 @@ export default function ListSelector({
         <CheckboxDropdown
           items={lists}
           handleSelect={(_, member) => {
-            handleChangeList(member.key, member.value);
             updateCardList.mutate({
               cardPublicId,
               newListPublicId: member.key,

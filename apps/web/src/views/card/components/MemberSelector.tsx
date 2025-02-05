@@ -17,33 +17,69 @@ interface MemberSelectorProps {
     leftIcon: React.ReactNode;
     imageUrl: string | undefined;
   }[];
-  handleSelectMember: (memberPublicId: string) => void;
-  refetchCard: () => Promise<void>;
   isLoading: boolean;
 }
 
 export default function MemberSelector({
   cardPublicId,
   members,
-  handleSelectMember,
-  refetchCard,
   isLoading,
 }: MemberSelectorProps) {
   const router = useRouter();
+  const utils = api.useUtils();
   const { openModal } = useModal();
   const { showPopup } = usePopup();
 
   const addOrRemoveMember = api.card.addOrRemoveMember.useMutation({
-    onSuccess: async () => {
-      await refetchCard();
+    onMutate: async (update) => {
+      await utils.card.byId.cancel();
+
+      const previousCard = utils.card.byId.getData({ cardPublicId });
+
+      utils.card.byId.setData({ cardPublicId }, (oldCard) => {
+        if (!oldCard) return oldCard;
+
+        const hasMember = oldCard.members.some(
+          (member) => member.publicId === update.workspaceMemberPublicId,
+        );
+
+        const memberToAdd = oldCard.members.find(
+          (member) => member.publicId === update.workspaceMemberPublicId,
+        );
+
+        const updatedMembers = hasMember
+          ? oldCard.members.filter(
+              (member) => member.publicId !== update.workspaceMemberPublicId,
+            )
+          : [
+              ...oldCard.members,
+              {
+                publicId: update.workspaceMemberPublicId,
+                user: {
+                  id: memberToAdd?.user?.id ?? "",
+                  name: memberToAdd?.user?.name ?? "",
+                },
+              },
+            ];
+
+        return {
+          ...oldCard,
+          members: updatedMembers,
+        };
+      });
+
+      return { previousCard };
     },
-    onError: async () => {
-      await refetchCard();
+    onError: (_error, _newList, context) => {
+      utils.card.byId.setData({ cardPublicId }, context?.previousCard);
       showPopup({
         header: "Unable to update members",
         message: "Please try again later, or contact customer support.",
         icon: "error",
       });
+    },
+    onSettled: async () => {
+      await utils.card.byId.invalidate({ cardPublicId });
     },
   });
 
@@ -64,7 +100,6 @@ export default function MemberSelector({
         <CheckboxDropdown
           items={members}
           handleSelect={(_, member) => {
-            handleSelectMember(member.key);
             addOrRemoveMember.mutate({
               cardPublicId,
               workspaceMemberPublicId: member.key,

@@ -408,10 +408,7 @@ export const hardDeleteCardMemberRelationship = async (
     .delete()
     .eq("cardId", args.cardId)
     .eq("workspaceMemberId", args.memberId)
-    .select()
-    .order("cardId", { ascending: true })
-    .limit(1)
-    .single();
+    .select();
 
   return { success: !error };
 };

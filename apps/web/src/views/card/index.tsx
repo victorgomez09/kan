@@ -1,11 +1,8 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
 import ContentEditable from "react-contenteditable";
 import { useForm } from "react-hook-form";
 import { IoChevronForwardSharp } from "react-icons/io5";
-
-import type { GetCardByIdOutput } from "@kan/api/types";
 
 import Avatar from "~/components/Avatar";
 import LabelIcon from "~/components/LabelIcon";
@@ -38,29 +35,14 @@ export default function CardPage() {
   const utils = api.useUtils();
   const { modalContentType, entityId } = useModal();
   const { showPopup } = usePopup();
-  const [card, setCard] = useState<GetCardByIdOutput>();
 
   const cardId = Array.isArray(router.query.cardId)
     ? router.query.cardId[0]
     : router.query.cardId;
 
-  const { data, isLoading, refetch } = api.card.byId.useQuery({
+  const { data: card, isLoading } = api.card.byId.useQuery({
     cardPublicId: cardId ?? "",
   });
-
-  const refetchCard = async () => {
-    try {
-      const { data: updatedCard } = await refetch();
-
-      if (updatedCard) setCard(updatedCard);
-    } catch (error) {
-      console.error({ error });
-    }
-  };
-
-  useEffect(() => {
-    setCard(data);
-  }, [data]);
 
   const board = card?.list?.board;
   const boardId = board?.publicId;
@@ -69,74 +51,6 @@ export default function CardPage() {
   const workspaceMembers = board?.workspace?.members;
   const selectedLabels = card?.labels;
   const selectedMembers = card?.members;
-
-  const handleChangeList = (newListPublicId: string) => {
-    if (!card) return;
-
-    setCard({
-      ...card,
-      list: {
-        ...card.list,
-        publicId: newListPublicId,
-        name: card.list?.name ?? "",
-        board: card.list?.board ?? null,
-      },
-    });
-  };
-
-  const handleSelectLabel = (labelPublicId: string) => {
-    if (!card) return;
-
-    const isSelected = card.labels.some(
-      (label) => label.publicId === labelPublicId,
-    );
-
-    const updatedLabels = isSelected
-      ? card.labels.filter((label) => label.publicId !== labelPublicId)
-      : [
-          ...(card.labels ?? []),
-          labels?.find((label) => label.publicId === labelPublicId),
-        ].filter(Boolean);
-
-    setCard({
-      ...card,
-      labels: updatedLabels as {
-        publicId: string;
-        name: string;
-        colourCode: string | null;
-      }[],
-    });
-  };
-
-  const handleSelectMember = (memberPublicId: string) => {
-    if (!card) return;
-
-    const isSelected = card.members.some(
-      (member) => member.publicId === memberPublicId,
-    );
-
-    const updatedMembers = isSelected
-      ? card.members.filter((member) => member.publicId !== memberPublicId)
-      : [
-          ...(card.members ?? []),
-          workspaceMembers?.find(
-            (member) => member.publicId === memberPublicId,
-          ),
-        ];
-
-    setCard({
-      ...card,
-      members: updatedMembers.filter(Boolean) as {
-        publicId: string;
-        user: {
-          id: string;
-          name: string | null;
-          email: string;
-          image: string | null;
-        } | null;
-      }[],
-    });
-  };
 
   const formattedLabels =
     labels?.map((label) => {
@@ -189,25 +103,23 @@ export default function CardPage() {
     }) ?? [];
 
   const updateCard = api.card.update.useMutation({
-    onSuccess: async () => {
-      await refetchCard();
-    },
-    onError: async () => {
-      await refetchCard();
-
+    onError: () => {
       showPopup({
         header: "Unable to update card",
         message: "Please try again later, or contact customer support.",
         icon: "error",
       });
     },
+    onSettled: async () => {
+      await utils.card.byId.invalidate({ cardPublicId: cardId });
+    },
   });
 
   const { register, handleSubmit, setValue, watch } = useForm<FormValues>({
     values: {
       cardId: cardId ?? "",
-      title: data?.title ?? "",
-      description: data?.description ?? "",
+      title: card?.title ?? "",
+      description: card?.description ?? "",
     },
   });
 
@@ -224,7 +136,7 @@ export default function CardPage() {
   return (
     <>
       <PageHead
-        title={`${data?.title ?? "Card"} | ${board?.name ?? "Board"}`}
+        title={`${card?.title ?? "Card"} | ${board?.name ?? "Board"}`}
       />
       <div className="flex h-full flex-1 flex-row">
         <div className="flex h-full w-full flex-col overflow-hidden">
@@ -307,8 +219,6 @@ export default function CardPage() {
             <ListSelector
               cardPublicId={cardId}
               lists={formattedLists}
-              refetchCard={refetchCard}
-              handleChangeList={handleChangeList}
               isLoading={isLoading}
             />
           </div>
@@ -317,8 +227,6 @@ export default function CardPage() {
             <LabelSelector
               cardPublicId={cardId}
               labels={formattedLabels}
-              refetchCard={refetchCard}
-              handleSelectLabel={handleSelectLabel}
               isLoading={isLoading}
             />
           </div>
@@ -327,8 +235,6 @@ export default function CardPage() {
             <MemberSelector
               cardPublicId={cardId}
               members={formattedMembers}
-              refetchCard={refetchCard}
-              handleSelectMember={handleSelectMember}
               isLoading={isLoading}
             />
           </div>

@@ -1,11 +1,12 @@
-import type { CreateTRPCClientOptions, TRPCLink } from "@trpc/client";
+import type { TRPCLink } from "@trpc/client";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import { QueryClient } from "@tanstack/react-query";
 import { httpBatchLink, loggerLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
-import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import { observable } from "@trpc/server/observable";
 import superjson from "superjson";
 
-import { type AppRouter } from "@kan/api/root";
+import type { AppRouter } from "@kan/api/root";
 
 /**
  * This is the client-side entrypoint for your tRPC API. It is used to create the `api` object which
@@ -42,6 +43,8 @@ const getBaseUrl = () => {
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
 
+const queryClient = new QueryClient();
+
 // @ts-expect-error
 export const api = createTRPCNext<AppRouter>({
   config() {
@@ -58,6 +61,7 @@ export const api = createTRPCNext<AppRouter>({
           transformer: superjson,
         }),
       ],
+      queryClient: queryClient,
     };
   },
   ssr: false,
