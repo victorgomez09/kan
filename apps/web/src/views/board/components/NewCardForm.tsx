@@ -7,6 +7,7 @@ import {
 } from "react-icons/hi2";
 
 import type { NewCardInput } from "@kan/api/types";
+import { generateUID } from "@kan/shared/utils";
 
 import Avatar from "~/components/Avatar";
 import Button from "~/components/Button";
@@ -14,7 +15,6 @@ import CheckboxDropdown from "~/components/CheckboxDropdown";
 import Input from "~/components/Input";
 import LabelIcon from "~/components/LabelIcon";
 import Toggle from "~/components/Toggle";
-import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
@@ -25,14 +25,27 @@ type NewCardFormInput = NewCardInput & {
   isCreateAnotherEnabled: boolean;
 };
 
-interface NewCardFormProps {
-  listPublicId: string;
+interface QueryParams {
+  boardPublicId: string;
+  members: string[];
+  labels: string[];
 }
 
-export function NewCardForm({ listPublicId }: NewCardFormProps) {
-  const { boardData, addCard, refetchBoard } = useBoard();
+interface NewCardFormProps {
+  boardPublicId: string;
+  listPublicId: string;
+  queryParams: QueryParams;
+}
+
+export function NewCardForm({
+  boardPublicId,
+  listPublicId,
+  queryParams,
+}: NewCardFormProps) {
   const { showPopup } = usePopup();
   const { closeModal } = useModal();
+
+  const utils = api.useUtils();
 
   const { register, handleSubmit, reset, setValue, watch } =
     useForm<NewCardFormInput>({
@@ -52,18 +65,62 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
   const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
   const position = watch("position");
 
+  const { data: boardData } = api.board.byId.useQuery(queryParams, {
+    enabled: !!boardPublicId,
+  });
+
   const createCard = api.card.create.useMutation({
-    onSuccess: async () => {
-      await refetchBoard();
+    onMutate: async (args) => {
+      await utils.board.byId.cancel();
+
+      const currentState = utils.board.byId.getData(queryParams);
+
+      utils.board.byId.setData(queryParams, (oldBoard) => {
+        if (!oldBoard) return oldBoard;
+
+        const updatedLists = oldBoard.lists.map((list) => {
+          if (list.publicId === listPublicId) {
+            const newCard = {
+              publicId: `PLACEHOLDER_${generateUID()}`,
+              title: args.title,
+              listId: 2,
+              description: "",
+              labels: oldBoard.labels.filter((label) =>
+                labelPublicIds.includes(label.publicId),
+              ),
+              members:
+                oldBoard.workspace?.members.filter((member) =>
+                  memberPublicIds.includes(member.publicId),
+                ) ?? [],
+              _filteredLabels: labelPublicIds.map((id) => ({ publicId: id })),
+              _filteredMembers: memberPublicIds.map((id) => ({ publicId: id })),
+              index: position === "start" ? 0 : list.cards.length,
+            };
+
+            const updatedCards =
+              position === "start"
+                ? [newCard, ...list.cards]
+                : [...list.cards, newCard];
+            return { ...list, cards: updatedCards };
+          }
+          return list;
+        });
+
+        return { ...oldBoard, lists: updatedLists };
+      });
+
+      return { previousState: currentState };
     },
-    onError: async () => {
-      closeModal();
-      await refetchBoard();
+    onError: (_error, _newList, context) => {
+      utils.board.byId.setData(queryParams, context?.previousState);
       showPopup({
         header: "Unable to create card",
         message: "Please try again later, or contact customer support.",
         icon: "error",
       });
+    },
+    onSettled: async () => {
+      await utils.board.byId.invalidate(queryParams);
     },
   });
 
@@ -108,7 +165,6 @@ export function NewCardForm({ listPublicId }: NewCardFormProps) {
     })) ?? [];
 
   const onSubmit = (data: NewCardInput) => {
-    addCard(data);
     const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
     if (!isCreateAnotherEnabled) closeModal();
     reset({

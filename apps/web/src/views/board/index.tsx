@@ -15,8 +15,8 @@ import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
 import PatternedBackground from "~/components/PatternedBackground";
 import { StrictModeDroppable as Droppable } from "~/components/StrictModeDroppable";
-import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
+import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import { formatToArray } from "~/utils/helpers";
@@ -36,7 +36,8 @@ type PublicListId = string;
 export default function BoardPage() {
   const params = useParams() as { boardId: string[] } | null;
   const router = useRouter();
-  const { boardData, setBoardData, updateCard, updateList } = useBoard();
+  const utils = api.useUtils();
+  const { showPopup } = usePopup();
   const { workspace } = useWorkspace();
   const { openModal, modalContentType } = useModal();
   const [selectedPublicListId, setSelectedPublicListId] =
@@ -60,23 +61,110 @@ export default function BoardPage() {
     });
   };
 
-  const { data, isSuccess, isLoading } = api.board.byId.useQuery(
-    {
-      boardPublicId: boardId ?? "",
-      members: formatToArray(router.query.members),
-      labels: formatToArray(router.query.labels),
+  const queryParams = {
+    boardPublicId: boardId ?? "",
+    members: formatToArray(router.query.members),
+    labels: formatToArray(router.query.labels),
+  };
+
+  const {
+    data: boardData,
+    isSuccess,
+    isLoading,
+  } = api.board.byId.useQuery(queryParams, {
+    enabled: !!boardId,
+  });
+
+  const updateListMutation = api.list.reorder.useMutation({
+    onMutate: async (args) => {
+      await utils.board.byId.cancel();
+
+      const currentState = utils.board.byId.getData(queryParams);
+
+      utils.board.byId.setData(queryParams, (oldBoard) => {
+        if (!oldBoard) return oldBoard;
+
+        const updatedLists = Array.from(oldBoard.lists);
+        const removedList = updatedLists.splice(args.currentIndex, 1)[0];
+
+        if (removedList) {
+          updatedLists.splice(args.newIndex, 0, removedList);
+
+          return {
+            ...oldBoard,
+            lists: updatedLists,
+          };
+        }
+      });
+
+      return { previousState: currentState };
     },
-    {
-      enabled: !!boardId,
+    onError: (_error, _newList, context) => {
+      utils.board.byId.setData(queryParams, context?.previousState);
+      showPopup({
+        header: "Unable to update list",
+        message: "Please try again later, or contact customer support.",
+        icon: "error",
+      });
     },
-  );
+    onSettled: async () => {
+      await utils.board.byId.invalidate(queryParams);
+    },
+  });
+
+  const updateCardMutation = api.card.reorder.useMutation({
+    onMutate: async (args) => {
+      await utils.board.byId.cancel();
+
+      const currentState = utils.board.byId.getData(queryParams);
+
+      utils.board.byId.setData(queryParams, (oldBoard) => {
+        if (!oldBoard) return oldBoard;
+
+        const updatedLists = Array.from(oldBoard.lists);
+        const sourceList = updatedLists.find(
+          (list) => list.publicId === args.currentListPublicId,
+        );
+        const destinationList = updatedLists.find(
+          (list) => list.publicId === args.newListPublicId,
+        );
+        const removedCard = sourceList?.cards.splice(args.currentIndex, 1)[0];
+
+        if (
+          sourceList &&
+          destinationList &&
+          removedCard &&
+          args.newIndex !== undefined
+        ) {
+          destinationList.cards.splice(args.newIndex, 0, removedCard);
+
+          return {
+            ...oldBoard,
+            lists: updatedLists,
+          };
+        }
+      });
+
+      return { previousState: currentState };
+    },
+    onError: (_error, _newList, context) => {
+      utils.board.byId.setData(queryParams, context?.previousState);
+      showPopup({
+        header: "Unable to update card",
+        message: "Please try again later, or contact customer support.",
+        icon: "error",
+      });
+    },
+    onSettled: async () => {
+      await utils.board.byId.invalidate(queryParams);
+    },
+  });
 
   useEffect(() => {
-    if (isSuccess && data) {
-      setBoardData(data);
-      setValue("name", data.name || "");
+    if (isSuccess && boardData) {
+      setValue("name", boardData.name || "");
     }
-  }, [isSuccess, data, setBoardData, setValue]);
+  }, [isSuccess, boardData, setValue]);
 
   if (!boardId || !boardData) return <></>;
 
@@ -96,16 +184,7 @@ export default function BoardPage() {
     }
 
     if (type === "LIST") {
-      const updatedLists = Array.from(boardData.lists);
-      const removedList = updatedLists.splice(source.index, 1)[0];
-
-      if (removedList) {
-        updatedLists.splice(destination.index, 0, removedList);
-
-        setBoardData({ ...boardData, lists: updatedLists });
-      }
-
-      updateList({
+      updateListMutation.mutate({
         listPublicId: draggableId,
         currentIndex: source.index,
         newIndex: destination.index,
@@ -113,24 +192,11 @@ export default function BoardPage() {
     }
 
     if (type === "CARD") {
-      const updatedLists = Array.from(boardData.lists);
-      const sourceList = updatedLists.find(
-        (list) => list.publicId === source.droppableId,
-      );
-      const destinationList = updatedLists.find(
-        (list) => list.publicId === destination.droppableId,
-      );
-      const removedCard = sourceList?.cards.splice(source.index, 1)[0];
-
-      if (sourceList && destinationList && removedCard) {
-        destinationList.cards.splice(destination.index, 0, removedCard);
-
-        setBoardData({ ...boardData, lists: updatedLists });
-      }
-
-      updateCard({
+      updateCardMutation.mutate({
         cardPublicId: draggableId,
+        currentListPublicId: source.droppableId,
         newListPublicId: destination.droppableId,
+        currentIndex: source.index,
         newIndex: destination.index,
       });
     }
@@ -277,7 +343,11 @@ export default function BoardPage() {
             <DeleteListConfirmation listPublicId={selectedPublicListId} />
           )}
           {modalContentType === "NEW_CARD" && (
-            <NewCardForm listPublicId={selectedPublicListId} />
+            <NewCardForm
+              boardPublicId={boardId}
+              listPublicId={selectedPublicListId}
+              queryParams={queryParams}
+            />
           )}
           {modalContentType === "NEW_LIST" && (
             <NewListForm boardPublicId={boardId} />
