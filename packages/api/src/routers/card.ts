@@ -667,9 +667,9 @@ export const cardRouter = createTRPCRouter({
     .input(
       z.object({
         cardPublicId: z.string().min(12),
-        currentListPublicId: z.string().min(12),
+        currentListPublicId: z.string().min(12).optional(),
         newListPublicId: z.string().min(12),
-        currentIndex: z.number(),
+        currentIndex: z.number().optional(),
         newIndex: z.number().optional(),
       }),
     )
