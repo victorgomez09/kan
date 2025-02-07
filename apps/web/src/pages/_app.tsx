@@ -1,13 +1,11 @@
 import "~/styles/globals.css";
 
-import { type AppType } from "next/app";
+import type { AppType } from "next/app";
 import { Plus_Jakarta_Sans } from "next/font/google";
 
 import { ModalProvider } from "~/providers/modal";
-import { BoardProvider } from "~/providers/board";
 import { PopupProvider } from "~/providers/popup";
 import { ThemeProvider } from "~/providers/theme";
-
 import { api } from "~/utils/api";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -36,9 +34,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
         <ThemeProvider>
           <ModalProvider>
             <PopupProvider>
-              <BoardProvider>
-                <Component {...pageProps} />
-              </BoardProvider>
+              <Component {...pageProps} />
             </PopupProvider>
           </ModalProvider>
         </ThemeProvider>

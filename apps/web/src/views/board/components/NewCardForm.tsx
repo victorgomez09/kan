@@ -86,11 +86,11 @@ export function NewCardForm({
               listId: 2,
               description: "",
               labels: oldBoard.labels.filter((label) =>
-                labelPublicIds.includes(label.publicId),
+                args.labelPublicIds.includes(label.publicId),
               ),
               members:
                 oldBoard.workspace?.members.filter((member) =>
-                  memberPublicIds.includes(member.publicId),
+                  args.memberPublicIds.includes(member.publicId),
                 ) ?? [],
               _filteredLabels: labelPublicIds.map((id) => ({ publicId: id })),
               _filteredMembers: memberPublicIds.map((id) => ({ publicId: id })),

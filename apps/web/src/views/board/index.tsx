@@ -42,6 +42,7 @@ export default function BoardPage() {
   const { openModal, modalContentType } = useModal();
   const [selectedPublicListId, setSelectedPublicListId] =
     useState<PublicListId>("");
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const boardId = params?.boardId.length ? params.boardId[0] : null;
 
@@ -70,10 +71,18 @@ export default function BoardPage() {
   const {
     data: boardData,
     isSuccess,
-    isLoading,
+    isLoading: isQueryLoading,
   } = api.board.byId.useQuery(queryParams, {
     enabled: !!boardId,
   });
+
+  useEffect(() => {
+    if (boardId) {
+      setIsInitialLoading(false);
+    }
+  }, [boardId]);
+
+  const isLoading = isInitialLoading || isQueryLoading;
 
   const updateListMutation = api.list.reorder.useMutation({
     onMutate: async (args) => {
@@ -166,8 +175,6 @@ export default function BoardPage() {
     }
   }, [isSuccess, boardData, setValue]);
 
-  if (!boardId || !boardData) return <></>;
-
   const openNewListForm = (publicBoardId: string) => {
     openModal("NEW_LIST");
     setSelectedPublicListId(publicBoardId);
@@ -205,7 +212,7 @@ export default function BoardPage() {
   return (
     <>
       <PageHead
-        title={`${boardData.name ?? "Board"} | ${workspace.name ?? "Workspace"}`}
+        title={`${boardData?.name ?? "Board"} | ${workspace.name ?? "Workspace"}`}
       />
       <div className="relative flex h-full flex-col">
         <PatternedBackground />
@@ -231,10 +238,16 @@ export default function BoardPage() {
 
           <div className="flex items-center space-x-2">
             <VisibilityButton
-              visibility={boardData.visibility}
-              boardPublicId={boardId}
+              visibility={boardData?.visibility ?? "private"}
+              boardPublicId={boardId ?? ""}
+              queryParams={queryParams}
+              isLoading={isLoading}
             />
-            <Filters boardData={boardData} position="left" />
+            <Filters
+              boardData={boardData ?? null}
+              position="left"
+              isLoading={isLoading}
+            />
             <Button
               iconLeft={
                 <HiOutlinePlusSmall
@@ -242,11 +255,14 @@ export default function BoardPage() {
                   aria-hidden="true"
                 />
               }
-              onClick={() => openNewListForm(boardId)}
+              onClick={() => {
+                if (boardId) openNewListForm(boardId);
+              }}
+              disabled={isLoading}
             >
               New list
             </Button>
-            <BoardDropdown />
+            <BoardDropdown isLoading={isLoading} />
           </div>
         </div>
 
@@ -271,7 +287,7 @@ export default function BoardPage() {
                     {...provided.droppableProps}
                   >
                     <div className="min-w-[2rem]" />
-                    {boardData.lists.map((list, index) => (
+                    {boardData?.lists.map((list, index) => (
                       <List
                         index={index}
                         key={index}
@@ -338,26 +354,35 @@ export default function BoardPage() {
           )}
         </div>
         <Modal modalSize={modalContentType === "NEW_CARD" ? "md" : "sm"}>
-          {modalContentType === "DELETE_BOARD" && <DeleteBoardConfirmation />}
+          {modalContentType === "DELETE_BOARD" && (
+            <DeleteBoardConfirmation boardPublicId={boardId ?? ""} />
+          )}
           {modalContentType === "DELETE_LIST" && (
-            <DeleteListConfirmation listPublicId={selectedPublicListId} />
+            <DeleteListConfirmation
+              listPublicId={selectedPublicListId}
+              queryParams={queryParams}
+            />
           )}
           {modalContentType === "NEW_CARD" && (
             <NewCardForm
-              boardPublicId={boardId}
+              boardPublicId={boardId ?? ""}
               listPublicId={selectedPublicListId}
               queryParams={queryParams}
             />
           )}
           {modalContentType === "NEW_LIST" && (
-            <NewListForm boardPublicId={boardId} />
+            <NewListForm
+              boardPublicId={boardId ?? ""}
+              queryParams={queryParams}
+            />
           )}
           {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
           {modalContentType === "UPDATE_BOARD_SLUG" && (
             <UpdateBoardSlugForm
-              boardPublicId={boardId}
-              workspaceSlug={workspace.slug}
-              boardSlug={boardData.slug}
+              boardPublicId={boardId ?? ""}
+              workspaceSlug={workspace.slug ?? ""}
+              boardSlug={boardData?.slug ?? ""}
+              queryParams={queryParams}
             />
           )}
         </Modal>

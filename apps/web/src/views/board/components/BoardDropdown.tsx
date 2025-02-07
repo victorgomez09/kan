@@ -3,11 +3,12 @@ import { HiEllipsisHorizontal, HiLink, HiOutlineTrash } from "react-icons/hi2";
 import Dropdown from "~/components/Dropdown";
 import { useModal } from "~/providers/modal";
 
-export default function BoardDropdown() {
+export default function BoardDropdown({ isLoading }: { isLoading: boolean }) {
   const { openModal } = useModal();
 
   return (
     <Dropdown
+      disabled={isLoading}
       items={[
         {
           label: "Edit board URL",

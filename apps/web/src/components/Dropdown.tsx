@@ -4,14 +4,19 @@ import { Fragment } from "react";
 export default function Dropdown({
   items,
   children,
+  disabled,
 }: {
   items: { label: string; action: () => void; icon?: React.ReactNode }[];
   children: React.ReactNode;
+  disabled?: boolean;
 }) {
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <Menu.Button className="flex h-7 w-7 items-center justify-center rounded-[5px] hover:bg-light-200 dark:hover:bg-dark-200">
+        <Menu.Button
+          disabled={disabled}
+          className="flex h-7 w-7 items-center justify-center rounded-[5px] hover:bg-light-200 dark:hover:bg-dark-200"
+        >
           {children}
         </Menu.Button>
       </div>

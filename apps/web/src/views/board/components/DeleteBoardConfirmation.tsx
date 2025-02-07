@@ -1,14 +1,15 @@
 import { useRouter } from "next/navigation";
 
-import { api } from "~/utils/api";
-import { useBoard } from "~/providers/board";
-import { useModal } from "~/providers/modal";
-
 import Button from "~/components/Button";
+import { useModal } from "~/providers/modal";
+import { api } from "~/utils/api";
 
-export function DeleteBoardConfirmation() {
+export function DeleteBoardConfirmation({
+  boardPublicId,
+}: {
+  boardPublicId: string;
+}) {
   const router = useRouter();
-  const { boardData } = useBoard();
   const { closeModal } = useModal();
 
   const deleteBoard = api.board.delete.useMutation({
@@ -19,9 +20,9 @@ export function DeleteBoardConfirmation() {
   });
 
   const handleDeleteBoard = () => {
-    if (boardData?.publicId)
+    if (boardPublicId)
       deleteBoard.mutate({
-        boardPublicId: boardData.publicId,
+        boardPublicId: boardPublicId,
       });
   };
 
@@ -39,7 +40,9 @@ export function DeleteBoardConfirmation() {
         <Button onClick={() => closeModal()} variant="secondary">
           Cancel
         </Button>
-        <Button onClick={handleDeleteBoard}>Delete</Button>
+        <Button onClick={handleDeleteBoard} isLoading={deleteBoard.isPending}>
+          Delete
+        </Button>
       </div>
     </div>
   );

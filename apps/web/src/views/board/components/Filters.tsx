@@ -62,9 +62,11 @@ interface BoardData {
 const Filters = ({
   position = "right",
   boardData,
+  isLoading,
 }: {
   position?: "left" | "right";
   boardData: BoardData | null;
+  isLoading: boolean;
 }) => {
   const router = useRouter();
 
@@ -166,7 +168,11 @@ const Filters = ({
         menuSpacing="md"
         position={position}
       >
-        <Button variant="secondary" iconLeft={<IoFilterOutline />}>
+        <Button
+          variant="secondary"
+          disabled={isLoading}
+          iconLeft={<IoFilterOutline />}
+        >
           Filter
         </Button>
         {numOfFilters > 0 && (

@@ -2,19 +2,28 @@ import { useEffect, useState } from "react";
 import { HiOutlineEye, HiOutlineEyeSlash } from "react-icons/hi2";
 
 import Button from "~/components/Button";
-import { useBoard } from "~/providers/board";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
+
+interface QueryParams {
+  boardPublicId: string;
+  members: string[];
+  labels: string[];
+}
 
 const VisibilityButton = ({
   visibility,
   boardPublicId,
+  queryParams,
+  isLoading,
 }: {
   visibility: "public" | "private";
   boardPublicId: string;
+  queryParams: QueryParams;
+  isLoading: boolean;
 }) => {
-  const { refetchBoard } = useBoard();
   const { showPopup } = usePopup();
+  const utils = api.useUtils();
   const [stateVisibility, setStateVisibility] = useState<"public" | "private">(
     visibility,
   );
@@ -26,8 +35,7 @@ const VisibilityButton = ({
   const isPublic = stateVisibility === "public";
 
   const updateBoardVisibility = api.board.update.useMutation({
-    onSuccess: async () => {
-      await refetchBoard();
+    onSuccess: () => {
       setStateVisibility(isPublic ? "private" : "public");
     },
     onError: () => {
@@ -36,6 +44,9 @@ const VisibilityButton = ({
         message: "Please try again later, or contact customer support.",
         icon: "error",
       });
+    },
+    onSettled: async () => {
+      await utils.board.byId.invalidate(queryParams);
     },
   });
 
@@ -52,6 +63,7 @@ const VisibilityButton = ({
       onClick={handleUpdateBoardVisibility}
       iconLeft={isPublic ? <HiOutlineEye /> : <HiOutlineEyeSlash />}
       isLoading={updateBoardVisibility.isPending}
+      disabled={isLoading}
     >
       {isPublic ? "Public" : "Private"}
     </Button>

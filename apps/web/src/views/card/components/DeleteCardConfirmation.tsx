@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
 
-import { useBoard } from "~/providers/board";
+import Button from "~/components/Button";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
@@ -15,26 +15,53 @@ export function DeleteCardConfirmation({
   boardPublicId,
 }: DeleteCardConfirmationProps) {
   const { closeModal } = useModal();
+  const utils = api.useUtils();
   const router = useRouter();
-  const { removeCard, refetchBoard } = useBoard();
   const { showPopup } = usePopup();
 
+  const queryParams = {
+    boardPublicId,
+  };
+
   const deleteCardMutation = api.card.delete.useMutation({
-    onSuccess: () => refetchBoard(),
-    onError: () =>
+    onMutate: async (args) => {
+      await utils.board.byId.cancel();
+
+      const currentState = utils.board.byId.getData(queryParams);
+
+      utils.board.byId.setData(queryParams, (oldBoard) => {
+        if (!oldBoard) return oldBoard;
+
+        const updatedLists = oldBoard.lists.map((list) => {
+          const updatedCards = list.cards.filter(
+            (card) => card.publicId !== args.cardPublicId,
+          );
+          return { ...list, cards: updatedCards };
+        });
+
+        return { ...oldBoard, lists: updatedLists };
+      });
+
+      return { previousState: currentState };
+    },
+    onError: (_error, _newList, context) => {
+      utils.board.byId.setData(queryParams, context?.previousState);
       showPopup({
-        header: "Error deleting card",
+        header: "Unable to delete card",
         message: "Please try again later, or contact customer support.",
         icon: "error",
-      }),
+      });
+    },
+    onSuccess: () => {
+      router.push(`/boards/${boardPublicId}`);
+    },
+    onSettled: async () => {
+      closeModal();
+      await utils.board.byId.invalidate(queryParams);
+    },
   });
 
   const handleDeleteCard = () => {
-    removeCard({
-      cardPublicId,
-    });
-    closeModal();
-    router.push(`/boards/${boardPublicId}`);
     deleteCardMutation.mutate({
       cardPublicId,
     });
@@ -57,12 +84,12 @@ export function DeleteCardConfirmation({
         >
           Cancel
         </button>
-        <button
+        <Button
           onClick={handleDeleteCard}
-          className="inline-flex justify-center rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 shadow-sm focus-visible:outline-none dark:bg-dark-1000 dark:text-dark-50"
+          isLoading={deleteCardMutation.isPending}
         >
           Delete
-        </button>
+        </Button>
       </div>
     </div>
   );

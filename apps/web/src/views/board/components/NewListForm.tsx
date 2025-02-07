@@ -3,11 +3,11 @@ import { useForm } from "react-hook-form";
 import { HiXMark } from "react-icons/hi2";
 
 import type { NewListInput } from "@kan/api/types";
+import { generateUID } from "@kan/shared/utils";
 
 import Button from "~/components/Button";
 import Input from "~/components/Input";
 import Toggle from "~/components/Toggle";
-import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
@@ -16,10 +16,23 @@ type NewListFormInput = NewListInput & {
   isCreateAnotherEnabled: boolean;
 };
 
-export function NewListForm({ boardPublicId }: { boardPublicId: string }) {
-  const { refetchBoard, addList } = useBoard();
+interface QueryParams {
+  boardPublicId: string;
+  members: string[];
+  labels: string[];
+}
+
+export function NewListForm({
+  boardPublicId,
+  queryParams,
+}: {
+  boardPublicId: string;
+  queryParams: QueryParams;
+}) {
   const { closeModal } = useModal();
   const { showPopup } = usePopup();
+
+  const utils = api.useUtils();
 
   const { register, handleSubmit, reset, setValue, watch } =
     useForm<NewListFormInput>({
@@ -33,17 +46,40 @@ export function NewListForm({ boardPublicId }: { boardPublicId: string }) {
   const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
 
   const createList = api.list.create.useMutation({
-    onSuccess: async () => {
-      await refetchBoard();
+    onMutate: async (args) => {
+      await utils.board.byId.cancel();
+
+      const currentState = utils.board.byId.getData(queryParams);
+
+      utils.board.byId.setData(queryParams, (oldBoard) => {
+        if (!oldBoard) return oldBoard;
+
+        const newList = {
+          publicId: generateUID(),
+          name: args.name,
+          boardId: 1,
+          boardPublicId,
+          cards: [],
+          index: oldBoard.lists.length,
+        };
+
+        const updatedLists = [...oldBoard.lists, newList];
+
+        return { ...oldBoard, lists: updatedLists };
+      });
+
+      return { previousState: currentState };
     },
-    onError: async () => {
-      closeModal();
-      await refetchBoard();
+    onError: (_error, _newList, context) => {
+      utils.board.byId.setData(queryParams, context?.previousState);
       showPopup({
         header: "Unable to create list",
         message: "Please try again later, or contact customer support.",
         icon: "error",
       });
+    },
+    onSettled: async () => {
+      await utils.board.byId.invalidate(queryParams);
     },
   });
 
@@ -54,7 +90,6 @@ export function NewListForm({ boardPublicId }: { boardPublicId: string }) {
   }, []);
 
   const onSubmit = (data: NewListInput) => {
-    addList(data);
     const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
     if (!isCreateAnotherEnabled) closeModal();
     reset({

@@ -1,44 +1,38 @@
 import Button from "~/components/Button";
-import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 
 interface DeleteListConfirmationProps {
   listPublicId: string;
+  queryParams: QueryParams;
+}
+
+interface QueryParams {
+  boardPublicId: string;
+  members: string[];
+  labels: string[];
 }
 
 export function DeleteListConfirmation({
   listPublicId,
+  queryParams,
 }: DeleteListConfirmationProps) {
   const utils = api.useUtils();
-  const { boardData } = useBoard();
   const { closeModal } = useModal();
   const { showPopup } = usePopup();
 
-  const refetchBoard = async () => {
-    if (boardData?.publicId) {
-      try {
-        await utils.board.byId.refetch();
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  };
-
   const deleteList = api.list.delete.useMutation({
-    onSuccess: () => {
-      closeModal();
-      return refetchBoard();
-    },
-    onError: async () => {
-      closeModal();
-      await refetchBoard();
+    onError: () => {
       showPopup({
         header: "Unable to delete list",
         message: "Please try again later, or contact customer support.",
         icon: "error",
       });
+    },
+    onSettled: async () => {
+      closeModal();
+      await utils.board.byId.invalidate(queryParams);
     },
   });
 

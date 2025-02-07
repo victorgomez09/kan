@@ -6,7 +6,6 @@ import { z } from "zod";
 
 import Button from "~/components/Button";
 import Input from "~/components/Input";
-import { useBoard } from "~/providers/board";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
@@ -25,18 +24,26 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+interface QueryParams {
+  boardPublicId: string;
+  members: string[];
+  labels: string[];
+}
+
 export function UpdateBoardSlugForm({
   boardPublicId,
   workspaceSlug,
   boardSlug,
+  queryParams,
 }: {
   boardPublicId: string;
   workspaceSlug: string;
   boardSlug: string;
+  queryParams: QueryParams;
 }) {
   const { closeModal } = useModal();
   const { showPopup } = usePopup();
-  const { refetchBoard } = useBoard();
+  const utils = api.useUtils();
 
   const {
     register,
@@ -51,17 +58,16 @@ export function UpdateBoardSlugForm({
   });
 
   const updateBoardSlug = api.board.update.useMutation({
-    onSuccess: async () => {
-      await refetchBoard();
-      closeModal();
-    },
     onError: () => {
-      closeModal();
       showPopup({
         header: "Unable to update board URL",
         message: "Please try again later, or contact customer support.",
         icon: "error",
       });
+    },
+    onSettled: async () => {
+      closeModal();
+      await utils.board.byId.invalidate(queryParams);
     },
   });
 
