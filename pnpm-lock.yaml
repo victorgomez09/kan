@@ -257,15 +257,18 @@ importers:
       '@kan/shared':
         specifier: workspace:^
         version: link:../shared
+      '@neondatabase/serverless':
+        specifier: ^0.10.4
+        version: 0.10.4
       '@vercel/postgres':
         specifier: ^0.10.0
         version: 0.10.0(utf-8-validate@6.0.3)
       drizzle-orm:
         specifier: ^0.36.4
-        version: 0.36.4(@types/pg@8.11.6)(@types/react@18.3.15)(@vercel/postgres@0.10.0(utf-8-validate@6.0.3))(pg@8.13.1)(postgres@3.4.5)(react@18.3.1)
+        version: 0.36.4(@neondatabase/serverless@0.10.4)(@types/pg@8.11.6)(@types/react@18.3.15)(@vercel/postgres@0.10.0(utf-8-validate@6.0.3))(pg@8.13.1)(postgres@3.4.5)(react@18.3.1)
       drizzle-zod:
         specifier: ^0.5.1
-        version: 0.5.1(drizzle-orm@0.36.4(@types/pg@8.11.6)(@types/react@18.3.15)(@vercel/postgres@0.10.0(utf-8-validate@6.0.3))(pg@8.13.1)(postgres@3.4.5)(react@18.3.1))(zod@3.24.0)
+        version: 0.5.1(drizzle-orm@0.36.4(@neondatabase/serverless@0.10.4)(@types/pg@8.11.6)(@types/react@18.3.15)(@vercel/postgres@0.10.0(utf-8-validate@6.0.3))(pg@8.13.1)(postgres@3.4.5)(react@18.3.1))(zod@3.24.0)
       zod:
         specifier: 'catalog:'
         version: 3.24.0
@@ -1299,6 +1302,9 @@ packages:
     peerDependencies:
       '@mintlify/models': 0.0.25
       openapi-types: 12.x
+
+  '@neondatabase/serverless@0.10.4':
+    resolution: {integrity: sha512-2nZuh3VUO9voBauuh+IGYRhGU/MskWHt1IuZvHcJw6GLjDgtqj/KViKo7SIrLdGLdot7vFbiRRw+BgEy3wT9HA==}
 
   '@neondatabase/serverless@0.9.5':
     resolution: {integrity: sha512-siFas6gItqv6wD/pZnvdu34wEqgG3nSE6zWZdq5j2DEsa+VvX8i/5HXJOo06qrw5axPXn+lGCxeR+NLaSPIXug==}
@@ -5912,6 +5918,10 @@ snapshots:
       zod: 3.24.0
       zod-to-json-schema: 3.24.1(zod@3.24.0)
 
+  '@neondatabase/serverless@0.10.4':
+    dependencies:
+      '@types/pg': 8.11.6
+
   '@neondatabase/serverless@0.9.5':
     dependencies:
       '@types/pg': 8.11.6
@@ -7221,8 +7231,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.36.4(@types/pg@8.11.6)(@types/react@18.3.15)(@vercel/postgres@0.10.0(utf-8-validate@6.0.3))(pg@8.13.1)(postgres@3.4.5)(react@18.3.1):
+  drizzle-orm@0.36.4(@neondatabase/serverless@0.10.4)(@types/pg@8.11.6)(@types/react@18.3.15)(@vercel/postgres@0.10.0(utf-8-validate@6.0.3))(pg@8.13.1)(postgres@3.4.5)(react@18.3.1):
     optionalDependencies:
+      '@neondatabase/serverless': 0.10.4
       '@types/pg': 8.11.6
       '@types/react': 18.3.15
       '@vercel/postgres': 0.10.0(utf-8-validate@6.0.3)
@@ -7230,9 +7241,9 @@ snapshots:
       postgres: 3.4.5
       react: 18.3.1
 
-  drizzle-zod@0.5.1(drizzle-orm@0.36.4(@types/pg@8.11.6)(@types/react@18.3.15)(@vercel/postgres@0.10.0(utf-8-validate@6.0.3))(pg@8.13.1)(postgres@3.4.5)(react@18.3.1))(zod@3.24.0):
+  drizzle-zod@0.5.1(drizzle-orm@0.36.4(@neondatabase/serverless@0.10.4)(@types/pg@8.11.6)(@types/react@18.3.15)(@vercel/postgres@0.10.0(utf-8-validate@6.0.3))(pg@8.13.1)(postgres@3.4.5)(react@18.3.1))(zod@3.24.0):
     dependencies:
-      drizzle-orm: 0.36.4(@types/pg@8.11.6)(@types/react@18.3.15)(@vercel/postgres@0.10.0(utf-8-validate@6.0.3))(pg@8.13.1)(postgres@3.4.5)(react@18.3.1)
+      drizzle-orm: 0.36.4(@neondatabase/serverless@0.10.4)(@types/pg@8.11.6)(@types/react@18.3.15)(@vercel/postgres@0.10.0(utf-8-validate@6.0.3))(pg@8.13.1)(postgres@3.4.5)(react@18.3.1)
       zod: 3.24.0
 
   dunder-proto@1.0.0:

@@ -1,5 +1,7 @@
+import type { Pool } from "@neondatabase/serverless";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import type { NeonDatabase as DrizzleClient } from "drizzle-orm/neon-serverless";
 import type { OpenApiMeta } from "trpc-to-openapi";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
@@ -7,6 +9,7 @@ import { ZodError } from "zod";
 
 import type { Database } from "@kan/db/types/database.types";
 import type { SupabaseClient } from "@kan/supabase";
+// import { createDrizzleClient } from "@kan/db/client";
 import {
   createNextApiClient,
   createTRPCAdminClient,
@@ -21,6 +24,13 @@ interface CreateContextOptions {
   user: User | null;
   db: SupabaseClient<Database>;
   adminDb: SupabaseClient<Database>;
+  drizzleDb:
+    | (DrizzleClient<
+        typeof import("/Users/henryball/kan/packages/db/dist/schema")
+      > & {
+        $client: Pool;
+      })
+    | null;
 }
 
 export const createInnerTRPCContext = (opts: CreateContextOptions) => {
@@ -28,6 +38,7 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
     user: opts.user,
     db: opts.db,
     adminDb: opts.adminDb,
+    drizzleDb: opts.drizzleDb,
   };
 };
 
@@ -42,7 +53,9 @@ export const createTRPCContext = async ({
     data: { user },
   } = await db.auth.getUser();
 
-  return createInnerTRPCContext({ db, adminDb, user });
+  // const drizzleDb = createDrizzleClient();
+
+  return createInnerTRPCContext({ db, adminDb, user, drizzleDb: null });
 };
 
 export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
@@ -55,14 +68,16 @@ export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
     : null;
 
   if (!accessToken) {
-    return createInnerTRPCContext({ db, adminDb, user: null });
+    return createInnerTRPCContext({ db, adminDb, user: null, drizzleDb: null });
   }
 
   const {
     data: { user },
   } = await db.auth.getUser(accessToken);
 
-  return createInnerTRPCContext({ db, adminDb, user });
+  // const drizzleDb = createDrizzleClient();
+
+  return createInnerTRPCContext({ db, adminDb, user, drizzleDb: null });
 };
 
 const t = initTRPC

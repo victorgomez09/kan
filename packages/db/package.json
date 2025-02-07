@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@kan/shared": "workspace:^",
+    "@neondatabase/serverless": "^0.10.4",
     "@vercel/postgres": "^0.10.0",
     "drizzle-orm": "^0.36.4",
     "drizzle-zod": "^0.5.1",
