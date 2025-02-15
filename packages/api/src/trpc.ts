@@ -1,7 +1,7 @@
-import type { Pool } from "@neondatabase/serverless";
+// import type { Pool } from "@neondatabase/serverless";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import type { NeonDatabase as DrizzleClient } from "drizzle-orm/neon-serverless";
+// import type { NeonDatabase as DrizzleClient } from "drizzle-orm/neon-serverless";
 import type { OpenApiMeta } from "trpc-to-openapi";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
@@ -24,13 +24,13 @@ interface CreateContextOptions {
   user: User | null;
   db: SupabaseClient<Database>;
   adminDb: SupabaseClient<Database>;
-  drizzleDb:
-    | (DrizzleClient<
-        typeof import("/Users/henryball/kan/packages/db/dist/schema")
-      > & {
-        $client: Pool;
-      })
-    | null;
+  // drizzleDb:
+  //   | (DrizzleClient<
+  //       typeof import("/Users/henryball/kan/packages/db/dist/schema")
+  //     > & {
+  //       $client: Pool;
+  //     })
+  //   | null;
 }
 
 export const createInnerTRPCContext = (opts: CreateContextOptions) => {
@@ -38,7 +38,7 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
     user: opts.user,
     db: opts.db,
     adminDb: opts.adminDb,
-    drizzleDb: opts.drizzleDb,
+    // drizzleDb: opts.drizzleDb,
   };
 };
 
@@ -55,7 +55,7 @@ export const createTRPCContext = async ({
 
   // const drizzleDb = createDrizzleClient();
 
-  return createInnerTRPCContext({ db, adminDb, user, drizzleDb: null });
+  return createInnerTRPCContext({ db, adminDb, user });
 };
 
 export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
@@ -68,7 +68,7 @@ export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
     : null;
 
   if (!accessToken) {
-    return createInnerTRPCContext({ db, adminDb, user: null, drizzleDb: null });
+    return createInnerTRPCContext({ db, adminDb, user: null });
   }
 
   const {
@@ -77,7 +77,7 @@ export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
 
   // const drizzleDb = createDrizzleClient();
 
-  return createInnerTRPCContext({ db, adminDb, user, drizzleDb: null });
+  return createInnerTRPCContext({ db, adminDb, user });
 };
 
 const t = initTRPC
