@@ -1,8 +1,8 @@
-import { useState } from "react";
 import Link from "next/link";
-import { twMerge } from "tailwind-merge";
 import { Radio, RadioGroup } from "@headlessui/react";
+import { useState } from "react";
 import { HiCheckCircle } from "react-icons/hi2";
+import { twMerge } from "tailwind-merge";
 
 type Frequency = "monthly" | "annually";
 
@@ -44,7 +44,7 @@ const tiers = [
     id: "tier-teams",
     href: "signup",
     buttonText: "Get Started",
-    price: { monthly: "£7.50", annually: "£6" },
+    price: { monthly: "$10.00", annually: "$8.00" },
     description:
       "Kanban is better with a team. Perfect for small and growing teams looking to collaborate.",
     featureHeader: "Everything in the free plan, plus:",
@@ -83,15 +83,15 @@ const Pricing = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center pb-10">
-        <div className="flex items-center gap-2 rounded-full border bg-light-50 px-4 py-1 text-center text-sm text-light-1000 dark:border-dark-300 dark:bg-dark-50 dark:text-dark-900">
+      <div className="flex flex-col items-center justify-center px-4 pb-10">
+        <div className="flex items-center gap-2 rounded-full border bg-light-50 px-4 py-1 text-center text-xs text-light-1000 dark:border-dark-300 dark:bg-dark-50 dark:text-dark-900 lg:text-sm">
           <p>Pricing</p>
         </div>
 
-        <p className="mt-2 text-center text-4xl font-bold text-light-1000 dark:text-dark-1000">
+        <p className="mt-2 text-center text-3xl font-bold text-light-1000 dark:text-dark-1000 lg:text-4xl">
           Simple pricing to fit your needs
         </p>
-        <p className="mt-3 max-w-[600px] text-center text-lg text-dark-900">
+        <p className="text:md mt-3 max-w-[600px] text-center text-dark-900 lg:text-lg">
           Get started for free, with no usage limits. For collaboration, upgrade
           to a plan that fits the size of your team.
         </p>
@@ -106,7 +106,7 @@ const Pricing = () => {
                 <Radio
                   key={option.value}
                   value={option}
-                  className="cursor-pointer rounded-full px-2.5 py-1 text-light-900 data-[checked]:bg-dark-50 data-[checked]:text-white dark:data-[checked]:bg-light-50 dark:data-[checked]:text-dark-50"
+                  className="cursor-pointer rounded-full px-2.5 py-1 text-xs text-light-900 data-[checked]:bg-dark-50 data-[checked]:text-white dark:data-[checked]:bg-light-50 dark:data-[checked]:text-dark-50 lg:text-sm"
                 >
                   {option.label}
                 </Radio>
@@ -116,7 +116,7 @@ const Pricing = () => {
         </div>
       </div>
 
-      <div className="isolate mx-auto mb-20 grid max-w-md grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+      <div className="isolate mx-auto mb-20 grid max-w-md grid-cols-1 gap-8 px-4 lg:mx-0 lg:max-w-none lg:grid-cols-3">
         {tiers.map((tier) => (
           <div
             key={tier.id}
@@ -139,7 +139,7 @@ const Pricing = () => {
               >
                 {tier.name}
               </h3>
-              {tier.highlighted && frequency?.value === "annually" ? (
+              {tier.highlighted && frequency.value === "annually" ? (
                 <p className="rounded-full bg-light-50 px-2.5 py-1 text-xs/5 font-semibold text-dark-500 dark:bg-dark-50 dark:text-dark-1000">
                   -20%
                 </p>

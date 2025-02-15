@@ -40,7 +40,7 @@ const FeatureItem = ({
   return (
     <div
       onMouseEnter={handleMouseEnter}
-      className="group relative flex h-56 w-56 flex-col items-center justify-center overflow-hidden rounded-3xl border border-light-200 bg-light-50 dark:border-dark-200 dark:bg-dark-50"
+      className="group relative flex aspect-square h-auto w-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-light-200 bg-light-50 dark:border-dark-200 dark:bg-dark-50 md:h-56 md:w-56"
     >
       <div className="absolute left-8 top-8 h-2 w-2 rounded-full bg-light-200 dark:bg-dark-200" />
       <div className="absolute right-8 top-8 h-2 w-2 rounded-full bg-light-200 dark:bg-dark-200" />
@@ -52,10 +52,10 @@ const FeatureItem = ({
       </div>
 
       <div className="relative mt-2 w-full px-4 text-center">
-        <p className="text-sm font-bold text-light-1000 transition-opacity duration-200 group-hover:opacity-0 dark:text-dark-1000">
+        <p className="text-sm font-bold text-light-1000 dark:text-dark-1000 sm:transition-opacity sm:duration-200 sm:group-hover:opacity-0">
           {feature.title}
         </p>
-        <p className="absolute inset-0 px-4 text-sm text-light-950 opacity-0 transition-opacity duration-200 group-hover:opacity-100 dark:text-dark-900">
+        <p className="mt-2 text-sm text-light-950 dark:text-dark-900 sm:absolute sm:inset-0 sm:mt-0 sm:opacity-0 sm:transition-opacity sm:duration-200 sm:group-hover:opacity-100">
           {feature.description}
         </p>
       </div>
@@ -119,27 +119,31 @@ const Features = ({ theme }: { theme: "light" | "dark" }) => {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center pb-24">
-        <div className="flex items-center gap-2 rounded-full border bg-light-50 px-4 py-1 text-center text-sm text-light-1000 dark:border-dark-300 dark:bg-dark-50 dark:text-dark-900">
+      <div className="flex flex-col items-center justify-center px-4 pb-24">
+        <div className="flex items-center gap-2 rounded-full border bg-light-50 px-4 py-1 text-center text-xs text-light-1000 dark:border-dark-300 dark:bg-dark-50 dark:text-dark-900 lg:text-sm">
           <p>Features</p>
         </div>
 
-        <p className="mt-2 text-center text-4xl font-bold text-light-1000 dark:text-dark-1000">
+        <p className="mt-2 text-center text-3xl font-bold text-light-1000 dark:text-dark-1000 lg:text-4xl">
           Kanban simplified
         </p>
-        <p className="mt-3 max-w-[600px] text-center text-lg text-dark-900">
+        <p className="text-md mt-3 max-w-[600px] text-center text-dark-900 lg:text-lg">
           Simple, visual task management that just works. Drag and drop cards,
           collaborate with your team, and get more done.
         </p>
-        <div className="mt-16 grid grid-cols-4 gap-6 [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]">
+        <div className="mt-16 grid w-full grid-cols-1 gap-6 [mask-image:linear-gradient(to_bottom,black_92%,transparent_100%)] sm:grid-cols-2 md:grid-cols-3 md:[mask-image:linear-gradient(to_bottom,black_85%,transparent_100%)] lg:grid-cols-4 lg:[mask-image:linear-gradient(to_bottom,black_85%,transparent_100%)]">
           {features.map((feature, index) => {
-            return <FeatureItem key={`feature-${index}`} feature={feature} />;
+            return (
+              <div className="aspect-square w-full" key={`feature-${index}`}>
+                <FeatureItem feature={feature} />
+              </div>
+            );
           })}
         </div>
 
         <div>
           <div className="mt-8 flex items-center gap-2 rounded-full border bg-light-50 px-4 py-1 text-center text-sm text-light-1000 dark:border-dark-300 dark:bg-dark-50 dark:text-dark-900">
-            <p>
+            <p className="text-xs lg:text-sm">
               {`We're just getting started. `}
               <Link href="/kan/roadmap" className="underline">
                 View our roadmap.

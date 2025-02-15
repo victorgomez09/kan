@@ -80,7 +80,7 @@ const Footer = () => {
                 </ul>
               </div>
               <div>
-                <h3 className="text-sm/6 font-semibold text-light-1000 dark:text-dark-1000">
+                <h3 className="mt-10 text-sm/6 font-semibold text-light-1000 dark:text-dark-1000 md:mt-0">
                   Company
                 </h3>
                 <ul role="list" className="mt-6 space-y-4">
@@ -116,7 +116,7 @@ const Footer = () => {
                 </ul>
               </div>
               <div>
-                <h3 className="text-sm/6 font-semibold text-light-1000 dark:text-dark-1000">
+                <h3 className="mt-10 text-sm/6 font-semibold text-light-1000 dark:text-dark-1000 md:mt-0">
                   Legal
                 </h3>
                 <ul role="list" className="mt-6 space-y-4">
