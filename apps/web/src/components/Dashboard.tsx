@@ -15,7 +15,7 @@ export default function Dashboard(props: { children: React.ReactNode }) {
           overflow: hidden;
         }
       `}</style>
-      <div className="flex h-screen flex-col items-center bg-light-100 dark:bg-dark-50">
+      <div className="flex h-screen min-w-[800px] flex-col items-center bg-light-100 dark:bg-dark-50">
         <div className="m-auto flex h-16 min-h-16 w-full justify-between border-b border-light-600 px-5 py-2 align-middle dark:border-dark-400">
           <div className="my-auto flex w-full items-center justify-between">
             <Link href="/">

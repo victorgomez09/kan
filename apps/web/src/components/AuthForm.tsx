@@ -3,7 +3,8 @@ import { useForm } from "react-hook-form";
 import { FaGoogle } from "react-icons/fa";
 import { z } from "zod";
 
-import LoadingSpinner from "~/components/LoadingSpinner";
+import Button from "~/components/Button";
+import Input from "~/components/Input";
 import { api } from "~/utils/api";
 
 interface FormValues {
@@ -36,7 +37,7 @@ export function Auth({ setIsMagicLinkSent }: AuthProps) {
 
   const loginWithOAuth = api.auth.loginWithOAuth.useMutation({
     onSuccess: (data) => {
-      if (data?.url) window.open(data.url);
+      if (data.url) window.open(data.url);
     },
   });
 
@@ -53,21 +54,24 @@ export function Auth({ setIsMagicLinkSent }: AuthProps) {
   return (
     <div className="space-y-6">
       <div>
-        <button
-          type="button"
+        <Button
           onClick={() => loginWithOAuth.mutate({ provider: "google" })}
-          className="flex w-full items-center justify-center rounded-md bg-dark-1000 px-3 py-2 text-sm font-semibold leading-6 text-dark-50 shadow-sm focus-visible:outline focus-visible:outline-2"
+          iconLeft={<FaGoogle />}
+          fullWidth
+          size="lg"
         >
-          <FaGoogle className="mr-2" /> Continue with Google
-        </button>
+          Continue with Google
+        </Button>
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="mb-[1.5rem] h-[1px] w-full bg-dark-600" />
-        <input
+        <div className="mb-[1.5rem] flex w-full items-center gap-4">
+          <div className="h-[1px] w-full bg-light-600 dark:bg-dark-600" />
+          <span className="text-sm text-light-900 dark:text-dark-900">or</span>
+          <div className="h-[1px] w-full bg-light-600 dark:bg-dark-600" />
+        </div>
+        <Input
           {...register("email", { required: true })}
           placeholder="Enter your email address"
-          autoComplete="email"
-          className="block w-full rounded-md border-0 bg-dark-500 bg-white/5 py-2 text-dark-1000 shadow-sm ring-1 ring-inset ring-dark-600 focus:ring-inset focus:ring-dark-800 sm:text-sm sm:leading-6"
         />
         {!loginWithEmail.error && !loginWithOAuth.error && errors.email && (
           <p className="mt-2 text-xs text-red-400">
@@ -82,17 +86,14 @@ export function Auth({ setIsMagicLinkSent }: AuthProps) {
         ) : null}
 
         <div className="mt-[1.5rem]">
-          <button
-            type="submit"
-            disabled={loginWithEmail.isPending}
-            className="flex w-full items-center justify-center rounded-md bg-dark-600 px-3 py-2 text-sm font-semibold leading-6 text-dark-1000 shadow-sm focus-visible:outline focus-visible:outline-2"
+          <Button
+            isLoading={loginWithEmail.isPending}
+            fullWidth
+            size="lg"
+            variant="secondary"
           >
-            {loginWithEmail.isPending ? (
-              <LoadingSpinner />
-            ) : (
-              "Continue with email"
-            )}
-          </button>
+            Continue with email
+          </Button>
         </div>
       </form>
     </div>

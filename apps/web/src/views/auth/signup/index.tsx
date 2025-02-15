@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { useState } from "react";
 
 // import { useRouter } from "next/navigation";
 import { Auth } from "~/components/AuthForm";
 import { PageHead } from "~/components/PageHead";
+import PatternedBackground from "~/components/PatternedBackground";
 
 // import { api } from "~/utils/api";
 
@@ -28,28 +30,37 @@ export default function SignupPage() {
 
   return (
     <>
-      <PageHead title="Signup | kan.bn" />
-      <main className="h-screen bg-dark-50">
-        <div className="flex h-full flex-col items-center justify-center">
-          <h1 className="mb-6 text-lg font-bold tracking-tight text-dark-1000">
-            kan.bn
-          </h1>
-          <p className="mb-10 text-3xl text-dark-1000">
-            {isMagicLinkSent ? "Check your inbox" : "Get started"}
-          </p>
-          {isMagicLinkSent ? (
-            <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-              <p className="text-md mt-2 text-center text-dark-1000">
-                {`Click on the link we've sent to ${magicLinkRecipient} to sign in.`}
-              </p>
-            </div>
-          ) : (
-            <div className="w-full rounded-lg border border-dark-400 bg-dark-200 px-10 py-10 sm:max-w-md">
+      <PageHead title="Login | kan.bn" />
+      <main className="h-screen bg-light-100 pt-20 dark:bg-dark-50 sm:pt-0">
+        <div className="justify-top flex h-full flex-col items-center px-4 sm:justify-center">
+          <div className="z-10 flex w-full flex-col items-center">
+            <h1 className="mb-6 text-lg font-bold tracking-tight text-light-1000 dark:text-dark-1000">
+              kan.bn
+            </h1>
+            <p className="mb-10 text-3xl font-bold tracking-tight text-light-1000 dark:text-dark-1000">
+              {isMagicLinkSent ? "Check your inbox" : "Create your account"}
+            </p>
+            {isMagicLinkSent ? (
               <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                <Auth setIsMagicLinkSent={handleMagicLinkSent} />
+                <p className="text-md mt-2 text-center text-light-1000 dark:text-dark-1000">
+                  {`Click on the link we've sent to ${magicLinkRecipient} to sign in.`}
+                </p>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="w-full rounded-lg border border-light-500 bg-light-300 px-4 py-10 dark:border-dark-400 dark:bg-dark-200 sm:max-w-md lg:px-10">
+                <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+                  <Auth setIsMagicLinkSent={handleMagicLinkSent} />
+                </div>
+              </div>
+            )}
+            <p className="mt-4 text-sm text-light-1000 dark:text-dark-1000">
+              Already have an account?{" "}
+              <span className="underline">
+                <Link href="/login">Sign in</Link>
+              </span>
+            </p>
+          </div>
+          <PatternedBackground />
         </div>
       </main>
     </>
