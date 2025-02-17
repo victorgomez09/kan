@@ -1,4 +1,4 @@
-import { type Config } from "tailwindcss";
+import type { Config } from "tailwindcss";
 import forms from "@tailwindcss/forms";
 import scrollbar from "tailwind-scrollbar";
 
@@ -20,11 +20,32 @@ export default {
       },
       animation: {
         "border-spin": "border-spin 4s linear infinite",
+        "fade-down": "fade-down 0.5s ease-out",
+        "fade-in": "fade-in 0.5s ease-out",
       },
+
       keyframes: {
         "border-spin": {
           from: { transform: "rotate(0deg)" },
           to: { transform: "rotate(360deg)" },
+        },
+        "fade-down": {
+          "0%": {
+            opacity: "0",
+            transform: "translateY(-20px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
+        "fade-in": {
+          "0%": {
+            opacity: "0",
+          },
+          "100%": {
+            opacity: "1",
+          },
         },
       },
       colors: {

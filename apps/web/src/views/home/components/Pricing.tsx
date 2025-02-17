@@ -63,9 +63,9 @@ const tiers = [
     id: "tier-self-host",
     href: "https://github.com/kanbn/kan",
     buttonText: "View docs",
-    price: { monthly: "Free", annually: "Free" },
+    price: { monthly: "-", annually: "-" },
     description:
-      "Spin up a self hosted version of Kan on your own infrastructure. Ideal for organisations that need complete control over their data.",
+      "Host Kan on your own infrastructure. Ideal for organisations that need complete control over their data.",
     featureHeader: "Complete control and ownership:",
     features: [
       "Run on your own infrastructure",
@@ -122,7 +122,7 @@ const Pricing = () => {
             key={tier.id}
             className={twMerge(
               tier.highlighted
-                ? "bg-dark-100 dark:bg-light-50"
+                ? "bg-dark-50 ring-1 dark:ring-dark-800"
                 : "bg-light-50 ring-1 ring-light-300 dark:bg-dark-50 dark:ring-dark-300",
               "rounded-3xl p-8 xl:p-10",
             )}
@@ -132,7 +132,7 @@ const Pricing = () => {
                 id={tier.id}
                 className={twMerge(
                   tier.highlighted
-                    ? "text-dark-1000 dark:text-dark-100"
+                    ? "text-dark-1000 dark:text-dark-1000"
                     : "text-dark-50 dark:text-dark-1000",
                   "text-lg/8 font-semibold",
                 )}
@@ -140,17 +140,15 @@ const Pricing = () => {
                 {tier.name}
               </h3>
               {tier.highlighted && frequency.value === "annually" ? (
-                <p className="rounded-full bg-light-50 px-2.5 py-1 text-xs/5 font-semibold text-dark-500 dark:bg-dark-50 dark:text-dark-1000">
+                <p className="rounded-full bg-light-50 px-2.5 py-1 text-[12px] font-semibold text-dark-500 dark:bg-dark-1000 dark:text-dark-50">
                   -20%
                 </p>
               ) : null}
             </div>
             <p
               className={twMerge(
-                "mt-4 text-sm/6 text-dark-950",
-                tier.highlighted
-                  ? "text-light-100 dark:text-dark-100"
-                  : "text-dark-50 dark:text-dark-1000",
+                "mt-4 text-sm/6 text-dark-950 dark:text-dark-900",
+                tier.highlighted ? "text-light-100" : "text-dark-50",
               )}
             >
               {tier.description}
@@ -160,7 +158,7 @@ const Pricing = () => {
                 className={twMerge(
                   "text-4xl font-semibold tracking-tight text-light-100",
                   tier.highlighted
-                    ? "text-light-50 dark:text-dark-100"
+                    ? "text-light-50 dark:text-dark-1000"
                     : "text-gray-900 dark:text-dark-1000",
                   !tier.showPrice && "opacity-0",
                 )}
@@ -178,8 +176,8 @@ const Pricing = () => {
               aria-describedby={tier.id}
               className={twMerge(
                 tier.highlighted
-                  ? "bg-light-50 text-dark-50 shadow-sm dark:bg-dark-50 dark:text-dark-1000"
-                  : "bg-dark-50 text-light-50 dark:bg-light-50 dark:text-dark-50",
+                  ? "bg-light-50 text-dark-50 shadow-sm dark:bg-dark-1000 dark:text-dark-50"
+                  : "bg-dark-50 text-light-50 dark:bg-dark-200 dark:text-dark-1000",
                 "mt-6 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600",
               )}
             >
@@ -189,7 +187,7 @@ const Pricing = () => {
               className={twMerge(
                 "mt-8 text-sm/6 font-bold",
                 tier.highlighted
-                  ? "text-light-100 dark:text-dark-100"
+                  ? "text-light-100 dark:text-dark-1000"
                   : "text-dark-50 dark:text-dark-1000",
               )}
             >
@@ -200,7 +198,7 @@ const Pricing = () => {
               className={twMerge(
                 "mt-2 space-y-3 text-sm/6 text-light-600",
                 tier.highlighted
-                  ? "text-light-100 dark:text-dark-100"
+                  ? "text-light-100 dark:text-dark-1000"
                   : "text-dark-50 dark:text-dark-1000",
               )}
             >

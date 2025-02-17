@@ -34,9 +34,7 @@ export default function HomeView() {
       <style jsx global>{`
         html {
           scroll-behavior: smooth;
-        }
-        body {
-          background-color: ${!isDarkMode ? "hsl(0deg 0% 98.8%)" : "#161616"};
+          background-color: ${!isDarkMode ? "hsl(0deg 0% 97.3%)" : "#161616"};
         }
       `}</style>
       <div className="mx-auto flex h-full min-h-screen min-w-[375px] flex-col items-center bg-light-100 dark:bg-dark-50">
@@ -45,8 +43,8 @@ export default function HomeView() {
           <Header isLoggedIn={isLoggedIn} />
           <div className="flex h-full w-full flex-col lg:pt-[5rem]">
             <div className="w-full pb-10 pt-32 lg:py-32">
-              <div className="my-10 flex h-full w-full flex-col items-center justify-center px-4">
-                <div className="relative overflow-hidden rounded-full bg-gradient-to-b from-light-300 to-light-400 p-[2px] dark:from-dark-300 dark:to-dark-400">
+              <div className="animate-fade-down my-10 flex h-full w-full flex-col items-center justify-center px-4">
+                <div className="animate-fade-in relative overflow-hidden rounded-full bg-gradient-to-b from-light-300 to-light-400 p-[2px] dark:from-dark-300 dark:to-dark-400">
                   <div className="gradient-border absolute inset-0 animate-border-spin" />
                   <div className="relative z-10 rounded-full bg-light-50 dark:bg-dark-50">
                     <Link

@@ -71,20 +71,20 @@ const Header = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
             >
               <div
                 className={twMerge(
-                  "my-[5px] h-[1.5px] w-4 bg-current bg-light-1000 transition-all dark:bg-dark-1000",
-                  isMenuOpen ? "translate-y-[6.5px] rotate-45" : "",
+                  "my-[5px] h-[2px] w-4 bg-current bg-light-1000 transition-all dark:bg-dark-1000",
+                  isMenuOpen ? "translate-y-[7px] rotate-45" : "",
                 )}
               />
               <div
                 className={twMerge(
-                  "my-[5px] h-[1.5px] w-3 bg-current bg-light-1000 transition-all dark:bg-dark-1000",
+                  "my-[5px] ml-[4px] h-[2px] w-3 bg-current bg-light-1000 transition-all dark:bg-dark-1000",
                   isMenuOpen ? "opacity-0" : "",
                 )}
               />
               <div
                 className={twMerge(
-                  "my-[5px] h-[1.5px] w-4 bg-current bg-light-1000 transition-all dark:bg-dark-1000",
-                  isMenuOpen ? "-translate-y-[6.5px] -rotate-45" : "",
+                  "my-[5px] h-[2px] w-4 bg-current bg-light-1000 transition-all dark:bg-dark-1000",
+                  isMenuOpen ? "-translate-y-[7px] -rotate-45" : "",
                 )}
               />
             </button>
