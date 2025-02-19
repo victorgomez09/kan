@@ -8,6 +8,7 @@ import PatternedBackground from "~/components/PatternedBackground";
 import { env } from "~/env";
 import { useTheme } from "~/providers/theme";
 import { api } from "~/utils/api";
+import FAQs from "./components/Faqs";
 import Features from "./components/Features";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
@@ -103,6 +104,10 @@ export default function HomeView() {
             <div className="relative pt-10">
               <div id="pricing" className="absolute -top-20" />
               <Pricing />
+            </div>
+            <div className="relative pt-10">
+              <div id="faq" className="absolute -top-20" />
+              <FAQs />
             </div>
           </div>
         </div>

@@ -40,7 +40,7 @@ const FeatureItem = ({
   return (
     <div
       onMouseEnter={handleMouseEnter}
-      className="group relative flex aspect-square h-auto w-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-light-200 bg-light-50 dark:border-dark-200 dark:bg-dark-50 md:h-56 md:w-56"
+      className="group relative flex aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-light-200 bg-light-50 p-2 dark:border-dark-200 dark:bg-dark-50"
     >
       <div className="absolute left-8 top-8 h-2 w-2 rounded-full bg-light-200 dark:bg-dark-200" />
       <div className="absolute right-8 top-8 h-2 w-2 rounded-full bg-light-200 dark:bg-dark-200" />
@@ -55,7 +55,7 @@ const FeatureItem = ({
         <p className="text-sm font-bold text-light-1000 dark:text-dark-1000 sm:transition-opacity sm:duration-200 sm:group-hover:opacity-0">
           {feature.title}
         </p>
-        <p className="mt-2 text-sm text-light-950 dark:text-dark-900 sm:absolute sm:inset-0 sm:mt-0 sm:opacity-0 sm:transition-opacity sm:duration-200 sm:group-hover:opacity-100">
+        <p className="max mt-2 text-sm text-light-950 dark:text-dark-900 sm:absolute sm:inset-0 sm:mt-0 sm:opacity-0 sm:transition-opacity sm:duration-200 sm:group-hover:opacity-100">
           {feature.description}
         </p>
       </div>
@@ -125,20 +125,18 @@ const Features = ({ theme }: { theme: "light" | "dark" }) => {
         </div>
 
         <p className="mt-2 text-center text-3xl font-bold text-light-1000 dark:text-dark-1000 lg:text-4xl">
-          Kanban simplified
+          Kanban reimagined
         </p>
         <p className="text-md mt-3 max-w-[600px] text-center text-dark-900 lg:text-lg">
           Simple, visual task management that just works. Drag and drop cards,
           collaborate with your team, and get more done.
         </p>
-        <div className="mt-16 grid w-full grid-cols-1 gap-6 [mask-image:linear-gradient(to_bottom,black_92%,transparent_100%)] sm:grid-cols-2 md:grid-cols-3 md:[mask-image:linear-gradient(to_bottom,black_85%,transparent_100%)] lg:grid-cols-4 lg:[mask-image:linear-gradient(to_bottom,black_85%,transparent_100%)]">
-          {features.map((feature, index) => {
-            return (
-              <div className="aspect-square w-full" key={`feature-${index}`}>
-                <FeatureItem feature={feature} />
-              </div>
-            );
-          })}
+        <div className="mx-auto mt-16 w-full max-w-7xl">
+          <div className="grid w-full grid-cols-1 gap-4 [mask-image:linear-gradient(to_bottom,black_92%,transparent_100%)] sm:grid-cols-2 md:grid-cols-3 md:[mask-image:linear-gradient(to_bottom,black_85%,transparent_100%)] lg:grid-cols-4 lg:[mask-image:linear-gradient(to_bottom,black_85%,transparent_100%)]">
+            {features.map((feature, index) => (
+              <FeatureItem key={`feature-${index}`} feature={feature} />
+            ))}
+          </div>
         </div>
 
         <div>
