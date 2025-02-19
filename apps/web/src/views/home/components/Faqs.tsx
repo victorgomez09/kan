@@ -50,7 +50,7 @@ const faqs = [
 
 const Faqs = () => {
   return (
-    <div className="mx-auto max-w-[900px] px-4 pb-12">
+    <div className="mx-auto max-w-[900px] px-4">
       <div className="flex flex-col items-center justify-center pb-12">
         <div className="flex items-center gap-2 rounded-full border bg-light-50 px-4 py-1 text-center text-xs text-light-1000 dark:border-dark-300 dark:bg-dark-50 dark:text-dark-900 lg:text-sm">
           <p>FAQs</p>
@@ -59,7 +59,7 @@ const Faqs = () => {
         <p className="mt-2 text-center text-3xl font-bold text-light-1000 dark:text-dark-1000 lg:text-4xl">
           Questions?
         </p>
-        <p className="text:md mt-3 max-w-[600px] text-center text-dark-900 lg:text-lg">
+        <p className="text:md lg:text-md mt-3 max-w-[500px] text-center text-dark-900">
           Find answers to common questions about the project. Can't find what
           you're looking for? Feel free to{" "}
           <Link href="mailto:support@kan.bn" className="underline">

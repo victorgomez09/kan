@@ -44,7 +44,7 @@ const StatusMarker = () => (
 
 const Footer = () => {
   return (
-    <footer className="z-10 mt-20 w-full border-t border-light-300 bg-light-50 py-8 dark:border-dark-300 dark:bg-dark-50">
+    <footer className="z-10 w-full border-t border-light-300 bg-light-50 py-8 dark:border-dark-300 dark:bg-dark-50">
       <div className="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8 lg:py-24">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <div>
