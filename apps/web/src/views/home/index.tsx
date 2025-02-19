@@ -87,8 +87,8 @@ export default function HomeView() {
               </div>
             </div>
             <div className="px-4">
-              <div className="mb-24 rounded-[24px] border border-light-300 bg-light-50 p-2 shadow-md dark:border-dark-300 dark:bg-dark-100">
-                <div className="overflow-hidden rounded-[16px] border border-light-300 shadow-sm dark:border-dark-300">
+              <div className="mb-24 rounded-[16px] border border-light-300 bg-light-50 p-1 shadow-md dark:border-dark-300 dark:bg-dark-100 lg:rounded-[24px] lg:p-2">
+                <div className="overflow-hidden rounded-[12px] border border-light-300 shadow-sm dark:border-dark-300 lg:rounded-[16px]">
                   <Image
                     src={`/hero-${isDarkMode ? "dark" : "light"}.png`}
                     alt="kanban"
