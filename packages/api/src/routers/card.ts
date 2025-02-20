@@ -300,6 +300,71 @@ export const cardRouter = createTRPCRouter({
 
       return updatedComment;
     }),
+  deleteComment: protectedProcedure
+    .meta({
+      openapi: {
+        summary: "Delete a comment",
+        method: "DELETE",
+        path: "/cards/{cardPublicId}/comments/{commentPublicId}",
+        description: "Deletes a comment",
+        tags: ["Cards"],
+      },
+    })
+    .input(
+      z.object({
+        cardPublicId: z.string().min(12),
+        commentPublicId: z.string().min(12),
+      }),
+    )
+    .output(z.custom<Awaited<ReturnType<typeof cardCommentRepo.softDelete>>>())
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
+      const card = await cardRepo.getByPublicId(ctx.db, input.cardPublicId);
+      const existingComment = await cardCommentRepo.getByPublicId(
+        ctx.db,
+        input.commentPublicId,
+      );
+
+      if (!card)
+        throw new TRPCError({
+          message: `Card with public ID ${input.cardPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      if (!existingComment)
+        throw new TRPCError({
+          message: `Comment with public ID ${input.commentPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      const deletedComment = await cardCommentRepo.softDelete(ctx.db, {
+        commentId: existingComment.id,
+        deletedAt: new Date().toISOString(),
+        deletedBy: userId,
+      });
+
+      if (!deletedComment)
+        throw new TRPCError({
+          message: `Failed to delete comment`,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+
+      await cardActivityRepo.create(ctx.db, {
+        type: "card.updated.comment.deleted" as const,
+        cardId: card.id,
+        commentId: existingComment.id,
+        createdBy: userId,
+      });
+
+      return deletedComment;
+    }),
   addOrRemoveLabel: protectedProcedure
     .meta({
       openapi: {

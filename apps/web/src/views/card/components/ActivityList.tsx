@@ -12,6 +12,7 @@ import {
 import type { GetCardByIdOutput } from "@kan/api/types";
 
 import Avatar from "~/components/Avatar";
+import { useWorkspace } from "~/providers/workspace";
 import Comment from "./Comment";
 
 type ActivityType =
@@ -145,6 +146,8 @@ const ActivityList = ({
   cardPublicId: string;
   isLoading: boolean;
 }) => {
+  const { workspace } = useWorkspace();
+
   return (
     <div className="flex flex-col space-y-4 pt-4">
       {activities.map((activity, index) => {
@@ -170,6 +173,8 @@ const ActivityList = ({
               createdAt={activity.createdAt}
               comment={activity.comment?.comment}
               isEdited={!!activity.comment?.updatedAt}
+              isAuthor={activity.comment?.createdBy === activity.user?.id}
+              isAdmin={workspace.role === "admin"}
             />
           );
 

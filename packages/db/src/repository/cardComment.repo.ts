@@ -61,3 +61,23 @@ export const update = async (
 
   return data;
 };
+
+export const softDelete = async (
+  db: SupabaseClient<Database>,
+  args: {
+    commentId: number;
+    deletedAt: string;
+    deletedBy: string;
+  },
+) => {
+  const { data } = await db
+    .from("card_comments")
+    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
+    .eq("id", args.commentId)
+    .select(`id`)
+    .order("id", { ascending: true })
+    .limit(1)
+    .single();
+
+  return data;
+};

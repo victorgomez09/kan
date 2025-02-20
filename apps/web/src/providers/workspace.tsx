@@ -17,6 +17,7 @@ interface Workspace {
   publicId: string;
   slug: string | undefined;
   plan: "free" | "pro" | "enterprise" | undefined;
+  role: "admin" | "member" | "guest";
 }
 
 const initialWorkspace: Workspace = {
@@ -25,6 +26,7 @@ const initialWorkspace: Workspace = {
   publicId: "",
   slug: "",
   plan: "free",
+  role: "member",
 };
 
 const initialAvailableWorkspaces: Workspace[] = [];
@@ -60,10 +62,11 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
 
     if (data.length) {
       const workspaces = data
-        .map(({ workspace }) => {
+        .map(({ workspace, role }) => {
           if (!workspace) return;
 
           return {
+            role,
             publicId: workspace.publicId,
             name: workspace.name,
             slug: workspace.slug,
@@ -90,10 +93,13 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
         slug: selectedWorkspace.workspace.slug,
         plan: selectedWorkspace.workspace.plan,
         description: selectedWorkspace.workspace.description,
+        role: selectedWorkspace.role,
       });
     } else {
       const primaryWorkspace = data[0]?.workspace;
-      if (!primaryWorkspace) return;
+      const primaryWorkspaceRole = data[0]?.role;
+
+      if (!primaryWorkspace || !primaryWorkspaceRole) return;
       localStorage.setItem("workspacePublicId", primaryWorkspace.publicId);
       setWorkspace({
         publicId: primaryWorkspace.publicId,
@@ -101,6 +107,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
         slug: primaryWorkspace.slug,
         plan: primaryWorkspace.plan,
         description: primaryWorkspace.description,
+        role: primaryWorkspaceRole,
       });
     }
   }, [data]);

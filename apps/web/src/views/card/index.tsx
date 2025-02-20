@@ -16,6 +16,7 @@ import { formatMemberDisplayName } from "~/utils/helpers";
 import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 import ActivityList from "./components/ActivityList";
 import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
+import { DeleteCommentConfirmation } from "./components/DeleteCommentConfirmation";
 import { DeleteLabelConfirmation } from "./components/DeleteLabelConfirmation";
 import Dropdown from "./components/Dropdown";
 import { LabelForm } from "./components/LabelForm";
@@ -257,6 +258,12 @@ export default function CardPage() {
             <DeleteCardConfirmation
               boardPublicId={boardId ?? ""}
               cardPublicId={cardId}
+            />
+          )}
+          {modalContentType === "DELETE_COMMENT" && (
+            <DeleteCommentConfirmation
+              cardPublicId={cardId}
+              commentPublicId={entityId}
             />
           )}
           {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}

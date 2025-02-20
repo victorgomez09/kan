@@ -2,11 +2,12 @@ import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import ContentEditable from "react-contenteditable";
 import { useForm } from "react-hook-form";
-import { HiEllipsisHorizontal, HiPencil } from "react-icons/hi2";
+import { HiEllipsisHorizontal, HiPencil, HiTrash } from "react-icons/hi2";
 
 import Avatar from "~/components/Avatar";
 import Button from "~/components/Button";
 import Dropdown from "~/components/Dropdown";
+import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 
@@ -22,6 +23,8 @@ const Comment = ({
   isLoading,
   createdAt,
   comment,
+  isAuthor,
+  isAdmin,
   isEdited = false,
 }: {
   publicId: string | undefined;
@@ -31,11 +34,14 @@ const Comment = ({
   isLoading: boolean;
   createdAt: string;
   comment: string | undefined;
+  isAuthor: boolean;
+  isAdmin: boolean;
   isEdited: boolean;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const utils = api.useUtils();
   const { showPopup } = usePopup();
+  const { openModal } = useModal();
   const { handleSubmit, setValue, watch } = useForm<FormValues>({
     defaultValues: {
       comment,
@@ -65,6 +71,27 @@ const Comment = ({
       commentPublicId: publicId,
     });
   };
+
+  const dropdownItems = [
+    ...(isAuthor
+      ? [
+          {
+            label: "Edit comment",
+            action: () => setIsEditing(true),
+            icon: <HiPencil className="h-[16px] w-[16px] text-dark-900" />,
+          },
+        ]
+      : []),
+    ...(isAuthor || isAdmin
+      ? [
+          {
+            label: "Delete comment",
+            action: () => openModal("DELETE_COMMENT", publicId),
+            icon: <HiTrash className="h-[16px] w-[16px] text-dark-900" />,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <div
@@ -96,19 +123,13 @@ const Comment = ({
           </p>
         </div>
 
-        <div className="absolute right-4 top-4">
-          <Dropdown
-            items={[
-              {
-                label: "Edit comment",
-                action: () => setIsEditing(true),
-                icon: <HiPencil className="h-[18px] w-[18px] text-dark-900" />,
-              },
-            ]}
-          >
-            <HiEllipsisHorizontal className="h-5 w-5 text-light-900 dark:text-dark-800" />
-          </Dropdown>
-        </div>
+        {dropdownItems.length > 0 && (
+          <div className="absolute right-4 top-4">
+            <Dropdown items={dropdownItems}>
+              <HiEllipsisHorizontal className="h-5 w-5 text-light-900 dark:text-dark-800" />
+            </Dropdown>
+          </div>
+        )}
       </div>
       {!isEditing ? (
         <p className="mt-2 text-sm">{comment}</p>

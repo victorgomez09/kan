@@ -19,17 +19,24 @@ const NewCommentForm = ({ cardPublicId }: { cardPublicId: string }) => {
     },
   });
 
+  const queryParams = {
+    cardPublicId,
+  };
+
   const addCommentMutation = api.card.addComment.useMutation({
-    onSuccess: async () => {
-      await utils.card.byId.refetch();
-      reset();
-    },
-    onError: () => {
+    onError: (_error, _newList) => {
       showPopup({
         header: "Unable to add comment",
         message: "Please try again later, or contact customer support.",
         icon: "error",
       });
+    },
+    onSettled: async () => {
+      reset();
+      await utils.card.byId.invalidate(queryParams);
+    },
+    onSuccess: async () => {
+      await utils.card.byId.refetch();
     },
   });
 
