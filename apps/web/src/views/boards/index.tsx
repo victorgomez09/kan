@@ -16,7 +16,7 @@ export default function BoardsPage() {
   return (
     <>
       <PageHead title={`Boards | ${workspace.name ?? "Workspace"}`} />
-      <div className="p-8">
+      <div className="h-full p-8">
         <div className="mb-8 flex w-full justify-between">
           <h1 className="font-bold tracking-tight text-neutral-900 dark:text-dark-1000 sm:text-[1.2rem]">
             Boards
@@ -57,7 +57,7 @@ export default function BoardsPage() {
           {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
         </Modal>
 
-        <div className="flex flex-row">
+        <div className="flex h-full flex-row">
           <BoardsList />
         </div>
       </div>
