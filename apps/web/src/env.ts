@@ -25,6 +25,7 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_SUPABASE_AUTH_COOKIE_NAME: z.string(),
     NEXT_PUBLIC_SUPABASE_STORAGE_URL: z.string(),
+    NEXT_PUBLIC_UMAMI_ID: z.string().optional(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
@@ -35,6 +36,7 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_SUPABASE_AUTH_COOKIE_NAME,
     NEXT_PUBLIC_SUPABASE_STORAGE_URL:
       process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL,
+    NEXT_PUBLIC_UMAMI_ID: process.env.NEXT_PUBLIC_UMAMI_ID,
   },
   skipValidation:
     !!process.env.CI || process.env.npm_lifecycle_event === "lint",

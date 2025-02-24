@@ -45,9 +45,11 @@ const Header = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
         >
           <div className="flex w-full items-center justify-between lg:px-4">
             <div className="my-auto flex items-center justify-between">
-              <h1 className="w-[200px] text-lg font-bold tracking-tight text-neutral-900 dark:text-dark-1000">
-                kan.bn
-              </h1>
+              <Link href="/">
+                <h1 className="w-[200px] text-lg font-bold tracking-tight text-neutral-900 dark:text-dark-1000">
+                  kan.bn
+                </h1>
+              </Link>
             </div>
             {/* Desktop Menu */}
             <div className="hidden justify-center gap-10 dark:text-dark-1000 lg:flex">

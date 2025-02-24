@@ -3,6 +3,7 @@ import "~/styles/globals.css";
 import type { AppType } from "next/app";
 import { Plus_Jakarta_Sans } from "next/font/google";
 
+import { env } from "~/env";
 import { ModalProvider } from "~/providers/modal";
 import { PopupProvider } from "~/providers/popup";
 import { ThemeProvider } from "~/providers/theme";
@@ -30,6 +31,13 @@ const MyApp: AppType = ({ Component, pageProps }) => {
           position: relative;
         }
       `}</style>
+      {env.NEXT_PUBLIC_UMAMI_ID && (
+        <script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id={env.NEXT_PUBLIC_UMAMI_ID}
+        />
+      )}
       <main className="font-sans">
         <ThemeProvider>
           <ModalProvider>
