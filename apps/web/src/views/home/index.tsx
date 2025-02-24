@@ -3,6 +3,7 @@ import Link from "next/link";
 import { IoLogoGithub } from "react-icons/io";
 
 import Button from "~/components/Button";
+import { PageHead } from "~/components/PageHead";
 import { useTheme } from "~/providers/theme";
 import Cta from "./components/Cta";
 import FAQs from "./components/Faqs";
@@ -16,6 +17,7 @@ export default function HomeView() {
   const isDarkMode = theme.activeTheme === "dark";
   return (
     <Layout>
+      <PageHead title="Kan.bn | The open source alternative to Trello" />
       <div className="flex h-full w-full flex-col lg:pt-[5rem]">
         <div className="w-full pb-10 pt-32 lg:py-32">
           <div className="my-10 flex h-full w-full animate-fade-down flex-col items-center justify-center px-4">
