@@ -91,7 +91,7 @@ export default async function handler(req: NextRequest) {
     if (authRes?.error) {
       console.error(authRes.error);
     } else {
-      next = queryParams.next ?? "/";
+      next = queryParams.next ?? "/boards";
     }
   }
 
