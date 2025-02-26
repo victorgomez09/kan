@@ -26,7 +26,7 @@ export default function PrivacyView() {
     </li>
   );
 
-  const NAME = "Kan.bn";
+  const NAME = "Open Engineering";
 
   return (
     <Layout>
