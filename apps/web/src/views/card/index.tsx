@@ -11,6 +11,7 @@ import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
+import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import { formatMemberDisplayName } from "~/utils/helpers";
 import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
@@ -36,6 +37,7 @@ export default function CardPage() {
   const utils = api.useUtils();
   const { modalContentType, entityId } = useModal();
   const { showPopup } = usePopup();
+  const { workspace } = useWorkspace();
 
   const cardId = Array.isArray(router.query.cardId)
     ? router.query.cardId[0]
@@ -206,6 +208,7 @@ export default function CardPage() {
                   cardPublicId={cardId}
                   activities={activities ?? []}
                   isLoading={isLoading}
+                  isAdmin={workspace.role === "admin"}
                 />
               </div>
               <div className="mt-6">
