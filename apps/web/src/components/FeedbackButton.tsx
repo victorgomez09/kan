@@ -111,7 +111,7 @@ const FeedbackButton: React.FC = () => {
                     Need help?{" "}
                     <Link
                       href="mailto:support@kanbn.com"
-                      className="text-blue-600 underline"
+                      className="text-blue-600 underline dark:text-blue-300"
                     >
                       Contact us
                     </Link>
@@ -120,7 +120,7 @@ const FeedbackButton: React.FC = () => {
                       href="https://docs.kanbn.com"
                       target="_blank"
                       rel="noreferrer"
-                      className="text-blue-600 underline"
+                      className="text-blue-600 underline dark:text-blue-300"
                     >
                       docs
                     </Link>

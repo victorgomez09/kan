@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import Button from "~/components/Button";
@@ -55,9 +56,11 @@ const Cta = ({ theme }: { theme: string }) => {
             Unlimited boards, unlimited lists, unlimited cards. No credit card
             required.
           </p>
-          <div className="mt-10 flex items-center justify-center gap-x-6">
-            <Button size="lg">Get started</Button>
-          </div>
+          <Link href="/signup">
+            <div className="mt-10 flex items-center justify-center gap-x-6">
+              <Button size="lg">Get started</Button>
+            </div>
+          </Link>
         </div>
       </div>
       <svg

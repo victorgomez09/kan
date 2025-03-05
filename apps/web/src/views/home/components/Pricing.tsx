@@ -122,7 +122,7 @@ const Pricing = () => {
             key={tier.id}
             className={twMerge(
               tier.highlighted
-                ? "bg-dark-50 ring-1 dark:ring-dark-800"
+                ? "bg-dark-50 ring-1 ring-dark-50 dark:ring-dark-800"
                 : "bg-light-50 ring-1 ring-light-300 dark:bg-dark-50 dark:ring-dark-300",
               "rounded-3xl p-8 xl:p-10",
             )}
