@@ -17,4 +17,15 @@
 
 <div align="center">
   <a href="https://github.com/kanbn/kan/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-AGPLv3-purple"></a>
-<br/>
+</div>
+
+### Made With 🛠️
+
+- [Next.js](https://nextjs.org/?ref=kan.bn)
+- [tRPC](https://trpc.io/?ref=kan.bn)
+- [Supabase](https://supabase.com/?ref=kan.bn)
+- [Tailwind CSS](https://tailwindcss.com/?ref=kan.bn)
+- [Drizzle ORM](https://orm.drizzle.team/?ref=kan.bn)
+- [React Email](https://react.email/?ref=kan.bn)
+
+
