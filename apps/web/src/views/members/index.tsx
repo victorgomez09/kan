@@ -2,6 +2,7 @@ import { HiEllipsisHorizontal, HiOutlinePlusSmall } from "react-icons/hi2";
 import { twMerge } from "tailwind-merge";
 
 import Avatar from "~/components/Avatar";
+import Button from "~/components/Button";
 import Dropdown from "~/components/Dropdown";
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
@@ -111,7 +112,12 @@ export default function MembersPage() {
                 </span>
               )}
             </div>
-            <div className={twMerge("relative", showSkeleton && "hidden")}>
+            <div
+              className={twMerge(
+                "relative",
+                (workspace.role !== "admin" || showSkeleton) && "hidden",
+              )}
+            >
               <Dropdown
                 items={[
                   {
@@ -146,19 +152,13 @@ export default function MembersPage() {
             Members
           </h1>
           <div className="flex">
-            <button
-              type="button"
-              className="flex items-center gap-x-1.5 rounded-md bg-light-1000 px-3 py-2 text-sm font-semibold text-light-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-dark-1000 dark:text-dark-50"
+            <Button
               onClick={() => openModal("INVITE_MEMBER")}
+              iconLeft={<HiOutlinePlusSmall className="h-4 w-4" />}
+              disabled={workspace.role !== "admin"}
             >
-              <div className="h-5 w-5 items-center">
-                <HiOutlinePlusSmall
-                  className="-mr-0.5 h-5 w-5"
-                  aria-hidden="true"
-                />
-              </div>
               Invite
-            </button>
+            </Button>
           </div>
         </div>
 

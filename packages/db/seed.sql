@@ -118,6 +118,17 @@ AS $$
   );
 $$;
 
+CREATE OR REPLACE FUNCTION is_workspace_member(user_id UUID, workspace_id BIGINT) 
+RETURNS BOOLEAN
+LANGUAGE SQL
+AS $$
+  SELECT EXISTS (
+    SELECT 1 
+    FROM workspace_members 
+    WHERE "userId" = user_id AND "workspaceId" = workspace_id
+  );
+$$;
+
 alter table "_card_labels" enable row level security;
 alter table "_card_workspace_members" enable row level security;
 alter table "_card_activity" enable row level security;
@@ -676,7 +687,7 @@ FOR SELECT
 TO authenticated
 USING (
   "userId" = auth.uid() OR
-  is_workspace_admin(auth.uid(), "workspaceId")
+  is_workspace_member(auth.uid(), "workspaceId")
 );
 
 CREATE POLICY "Allow admins to add workspace members"
