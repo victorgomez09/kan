@@ -242,6 +242,7 @@ export default function BoardPage() {
               boardPublicId={boardId ?? ""}
               queryParams={queryParams}
               isLoading={isLoading}
+              isAdmin={workspace.role === "admin"}
             />
             <Filters
               boardData={boardData ?? null}

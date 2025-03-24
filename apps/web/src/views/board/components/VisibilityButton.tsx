@@ -16,11 +16,13 @@ const VisibilityButton = ({
   boardPublicId,
   queryParams,
   isLoading,
+  isAdmin,
 }: {
   visibility: "public" | "private";
   boardPublicId: string;
   queryParams: QueryParams;
   isLoading: boolean;
+  isAdmin: boolean;
 }) => {
   const { showPopup } = usePopup();
   const utils = api.useUtils();
@@ -63,7 +65,7 @@ const VisibilityButton = ({
       onClick={handleUpdateBoardVisibility}
       iconLeft={isPublic ? <HiOutlineEye /> : <HiOutlineEyeSlash />}
       isLoading={updateBoardVisibility.isPending}
-      disabled={isLoading}
+      disabled={isLoading || !isAdmin}
     >
       {isPublic ? "Public" : "Private"}
     </Button>
