@@ -140,7 +140,7 @@ export default function MembersPage() {
   return (
     <>
       <PageHead title={`Members | ${workspace.name ?? "Workspace"}`} />
-      <div className="px-28 py-12">
+      <div className="m-auto max-w-[1600px] px-28 py-12">
         <div className="mb-8 flex w-full justify-between">
           <h1 className="font-bold tracking-tight text-neutral-900 dark:text-dark-1000 sm:text-[1.2rem]">
             Members

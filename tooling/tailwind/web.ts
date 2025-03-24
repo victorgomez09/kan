@@ -75,7 +75,7 @@ export default {
         "light-1000": "hsl(0deg 0% 9%)",
       },
       screens: {
-        xxl: "1600px",
+        "2xl": "1600px",
       },
     },
   },
