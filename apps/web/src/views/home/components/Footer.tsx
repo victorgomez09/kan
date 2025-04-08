@@ -29,7 +29,7 @@ const navigation = {
 
 const StatusMarker = () => (
   <Link
-    href="https://openstatus.dev"
+    href="https://kan.openstatus.dev"
     target="_blank"
     rel="noopener noreferrer"
     className="flex w-fit items-center gap-1.5 rounded-full border border-light-300 py-2 pl-3 pr-4 text-xs text-light-950 hover:bg-light-100 dark:border-dark-300 dark:text-dark-800 dark:hover:bg-dark-100"
