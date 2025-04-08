@@ -7,7 +7,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const feedbackRouter = createTRPCRouter({
   create: protectedProcedure
-    .meta({ enabled: false })
+    .meta({ enabled: false, openApi: false })
     .input(
       z.object({
         feedback: z.string().min(1),

@@ -81,7 +81,7 @@ export const boardRouter = createTRPCRouter({
         summary: "Get board by slug",
         description: "Retrieves a board by its slug",
         tags: ["Boards"],
-        protect: true,
+        protect: false,
       },
     })
     .input(

@@ -75,7 +75,7 @@ export const workspaceRouter = createTRPCRouter({
         path: "/workspaces/{workspaceSlug}",
         description: "Retrieves a workspace by its slug",
         tags: ["Workspaces"],
-        protect: true,
+        protect: false,
       },
     })
     .input(
