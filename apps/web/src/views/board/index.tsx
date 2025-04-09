@@ -2,6 +2,7 @@ import type { DropResult } from "react-beautiful-dnd";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/router";
+import { keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { useForm } from "react-hook-form";
@@ -74,6 +75,7 @@ export default function BoardPage() {
     isLoading: isQueryLoading,
   } = api.board.byId.useQuery(queryParams, {
     enabled: !!boardId,
+    placeholderData: keepPreviousData,
   });
 
   useEffect(() => {
@@ -245,7 +247,8 @@ export default function BoardPage() {
               isAdmin={workspace.role === "admin"}
             />
             <Filters
-              boardData={boardData ?? null}
+              labels={boardData?.labels ?? []}
+              members={boardData?.workspace?.members ?? []}
               position="left"
               isLoading={isLoading}
             />

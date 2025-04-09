@@ -13,59 +13,30 @@ import LabelIcon from "~/components/LabelIcon";
 import { formatMemberDisplayName, formatToArray } from "~/utils/helpers";
 import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 
-interface BoardData {
+interface Member {
+  publicId: string;
+  user: {
+    name: string | null;
+    image: string | null;
+    email: string;
+  } | null;
+}
+
+interface Label {
   publicId: string;
   name: string;
-  slug: string;
-  workspace: {
-    publicId: string;
-    members?: {
-      publicId: string;
-      user: {
-        name: string | null;
-        image: string | null;
-        email: string;
-      } | null;
-    }[];
-  } | null;
-  labels: {
-    publicId: string;
-    name: string;
-    colourCode: string | null;
-  }[];
-  lists: {
-    publicId: string;
-    name: string;
-    boardId: number;
-    index: number;
-    cards: {
-      publicId: string;
-      title: string;
-      description: string | null;
-      listId: number;
-      index: number;
-      labels: {
-        publicId: string;
-        name: string;
-        colourCode: string | null;
-      }[];
-      members?: {
-        publicId: string;
-        user: {
-          name: string | null;
-        } | null;
-      }[];
-    }[];
-  }[];
+  colourCode: string | null;
 }
 
 const Filters = ({
   position = "right",
-  boardData,
+  labels,
+  members,
   isLoading,
 }: {
   position?: "left" | "right";
-  boardData: BoardData | null;
+  labels: Label[];
+  members: Member[];
   isLoading: boolean;
 }) => {
   const router = useRouter();
@@ -84,33 +55,31 @@ const Filters = ({
     }
   };
 
-  const formattedMembers =
-    boardData?.workspace?.members?.map((member) => ({
-      key: member.publicId,
-      value: formatMemberDisplayName(
-        member.user?.name ?? null,
-        member.user?.email ?? null,
-      ),
-      selected: !!router.query.members?.includes(member.publicId),
-      leftIcon: (
-        <Avatar
-          size="xs"
-          name={member.user?.name ?? ""}
-          imageUrl={
-            member.user?.image ? getPublicUrl(member.user.image) : undefined
-          }
-          email={member.user?.email ?? ""}
-        />
-      ),
-    })) ?? [];
+  const formattedMembers = members.map((member) => ({
+    key: member.publicId,
+    value: formatMemberDisplayName(
+      member.user?.name ?? null,
+      member.user?.email ?? null,
+    ),
+    selected: !!router.query.members?.includes(member.publicId),
+    leftIcon: (
+      <Avatar
+        size="xs"
+        name={member.user?.name ?? ""}
+        imageUrl={
+          member.user?.image ? getPublicUrl(member.user.image) : undefined
+        }
+        email={member.user?.email ?? ""}
+      />
+    ),
+  }));
 
-  const formattedLabels =
-    boardData?.labels.map((label) => ({
-      key: label.publicId,
-      value: label.name,
-      selected: !!router.query.labels?.includes(label.publicId),
-      leftIcon: <LabelIcon colourCode={label.colourCode} />,
-    })) ?? [];
+  const formattedLabels = labels.map((label) => ({
+    key: label.publicId,
+    value: label.name,
+    selected: !!router.query.labels?.includes(label.publicId),
+    leftIcon: <LabelIcon colourCode={label.colourCode} />,
+  }));
 
   const groups = [
     ...(formattedMembers.length

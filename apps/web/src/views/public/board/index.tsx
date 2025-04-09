@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { HiLink } from "react-icons/hi2";
 
@@ -32,7 +33,7 @@ export default function PublicBoardView() {
       members: formatToArray(router.query.members),
       labels: formatToArray(router.query.labels),
     },
-    { enabled: !!boardSlug },
+    { enabled: !!boardSlug, placeholderData: keepPreviousData },
   );
 
   const CopyBoardLink = () => {
@@ -104,7 +105,11 @@ export default function PublicBoardView() {
               </h1>
             )}
             <div className="flex items-center space-x-2">
-              <Filters boardData={data ?? null} />
+              <Filters
+                labels={data?.labels ?? []}
+                members={[]}
+                isLoading={isLoading}
+              />
             </div>
           </div>
 
