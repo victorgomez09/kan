@@ -3,9 +3,15 @@ import { FaDiscord, FaGithub } from "react-icons/fa";
 
 const navigation = {
   documentation: [
-    { name: "Getting started", href: "#" },
-    { name: "Importing from Trello", href: "#" },
-    { name: "API Reference", href: "#" },
+    { name: "Getting started", href: "https://docs.kan.bn/introduction" },
+    {
+      name: "Importing from Trello",
+      href: "https://docs.kan.bn/imports/trello",
+    },
+    {
+      name: "API Reference",
+      href: "https://docs.kan.bn/api-reference/introduction",
+    },
   ],
   company: [
     { name: "Roadmap", href: "/kan/roadmap" },
