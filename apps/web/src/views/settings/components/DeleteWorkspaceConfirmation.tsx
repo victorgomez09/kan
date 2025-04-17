@@ -77,7 +77,10 @@ export function DeleteWorkspaceConfirmation() {
           />
         </div>
         <div className="ml-3 text-sm leading-6">
-          <p id="comments-description" className="text-dark-1000">
+          <p
+            id="comments-description"
+            className="text-light-900 dark:text-dark-1000"
+          >
             I acknowledge that all of the workspace data will be permanently
             deleted and want to proceed.
           </p>
