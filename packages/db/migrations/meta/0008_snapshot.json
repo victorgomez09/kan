@@ -1,0 +1,2004 @@
+{
+  "id": "164a9145-d0f6-4651-b25c-ecc713054951",
+  "prevId": "cd98372e-e781-4864-8813-eee66f5e5568",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.board": {
+      "name": "board",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "publicId": {
+          "name": "publicId",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deletedAt": {
+          "name": "deletedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deletedBy": {
+          "name": "deletedBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "importId": {
+          "name": "importId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "workspaceId": {
+          "name": "workspaceId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "visibility": {
+          "name": "visibility",
+          "type": "board_visibility",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'private'"
+        }
+      },
+      "indexes": {
+        "board_visibility_idx": {
+          "name": "board_visibility_idx",
+          "columns": [
+            {
+              "expression": "visibility",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "unique_slug_per_workspace": {
+          "name": "unique_slug_per_workspace",
+          "columns": [
+            {
+              "expression": "workspaceId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"board\".\"deletedAt\" IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "board_createdBy_user_id_fk": {
+          "name": "board_createdBy_user_id_fk",
+          "tableFrom": "board",
+          "tableTo": "user",
+          "columnsFrom": [
+            "createdBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "board_deletedBy_user_id_fk": {
+          "name": "board_deletedBy_user_id_fk",
+          "tableFrom": "board",
+          "tableTo": "user",
+          "columnsFrom": [
+            "deletedBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "board_importId_import_id_fk": {
+          "name": "board_importId_import_id_fk",
+          "tableFrom": "board",
+          "tableTo": "import",
+          "columnsFrom": [
+            "importId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "board_workspaceId_workspace_id_fk": {
+          "name": "board_workspaceId_workspace_id_fk",
+          "tableFrom": "board",
+          "tableTo": "workspace",
+          "columnsFrom": [
+            "workspaceId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "board_publicId_unique": {
+          "name": "board_publicId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "publicId"
+          ]
+        }
+      },
+      "policies": {
+        "Allow access to boards in user's workspace or public boards": {
+          "name": "Allow access to boards in user's workspace or public boards",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "\n        \"workspaceId\" IN (\n          SELECT \"workspaceId\"\n          FROM workspace_members\n          WHERE \"userId\" = auth.uid()\n        )\n        OR visibility = 'public'\n      "
+        },
+        "Allow inserting boards in user's workspace": {
+          "name": "Allow inserting boards in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "\n        \"workspaceId\" IN (\n          SELECT \"workspaceId\"\n          FROM workspace_members\n          WHERE \"userId\" = auth.uid()\n        )\n      "
+        },
+        "Allow updating boards in user's workspace": {
+          "name": "Allow updating boards in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"workspaceId\" IN (\n          SELECT \"workspaceId\"\n          FROM workspace_members\n          WHERE \"userId\" = auth.uid()\n        )\n      "
+        },
+        "Allow deleting boards in user's workspace": {
+          "name": "Allow deleting boards in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"workspaceId\" IN (\n          SELECT \"workspaceId\"\n          FROM workspace_members\n          WHERE \"userId\" = auth.uid()\n        )\n      "
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.card_activity": {
+      "name": "card_activity",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "publicId": {
+          "name": "publicId",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "card_activity_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cardId": {
+          "name": "cardId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fromIndex": {
+          "name": "fromIndex",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "toIndex": {
+          "name": "toIndex",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fromListId": {
+          "name": "fromListId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "toListId": {
+          "name": "toListId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "labelId": {
+          "name": "labelId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "workspaceMemberId": {
+          "name": "workspaceMemberId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fromTitle": {
+          "name": "fromTitle",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "toTitle": {
+          "name": "toTitle",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fromDescription": {
+          "name": "fromDescription",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "toDescription": {
+          "name": "toDescription",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "commentId": {
+          "name": "commentId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fromComment": {
+          "name": "fromComment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "toComment": {
+          "name": "toComment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "card_activity_cardId_card_id_fk": {
+          "name": "card_activity_cardId_card_id_fk",
+          "tableFrom": "card_activity",
+          "tableTo": "card",
+          "columnsFrom": [
+            "cardId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "card_activity_fromListId_list_id_fk": {
+          "name": "card_activity_fromListId_list_id_fk",
+          "tableFrom": "card_activity",
+          "tableTo": "list",
+          "columnsFrom": [
+            "fromListId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "card_activity_toListId_list_id_fk": {
+          "name": "card_activity_toListId_list_id_fk",
+          "tableFrom": "card_activity",
+          "tableTo": "list",
+          "columnsFrom": [
+            "toListId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "card_activity_labelId_label_id_fk": {
+          "name": "card_activity_labelId_label_id_fk",
+          "tableFrom": "card_activity",
+          "tableTo": "label",
+          "columnsFrom": [
+            "labelId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "card_activity_workspaceMemberId_workspace_members_id_fk": {
+          "name": "card_activity_workspaceMemberId_workspace_members_id_fk",
+          "tableFrom": "card_activity",
+          "tableTo": "workspace_members",
+          "columnsFrom": [
+            "workspaceMemberId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "card_activity_createdBy_user_id_fk": {
+          "name": "card_activity_createdBy_user_id_fk",
+          "tableFrom": "card_activity",
+          "tableTo": "user",
+          "columnsFrom": [
+            "createdBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "card_activity_commentId_card_comments_id_fk": {
+          "name": "card_activity_commentId_card_comments_id_fk",
+          "tableFrom": "card_activity",
+          "tableTo": "card_comments",
+          "columnsFrom": [
+            "commentId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "card_activity_publicId_unique": {
+          "name": "card_activity_publicId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "publicId"
+          ]
+        }
+      },
+      "policies": {
+        "Allow access to card activity in user's workspace or public boards": {
+          "name": "Allow access to card activity in user's workspace or public boards",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "\n        \"cardId\" IN (\n          SELECT c.id\n          FROM card c\n          JOIN list l ON c.\"listId\" = l.id\n          JOIN board b ON l.\"boardId\" = b.id\n          JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n            OR b.visibility = 'public'\n        )\n      "
+        },
+        "Allow inserting card activity in user's workspace": {
+          "name": "Allow inserting card activity in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "\n        \"cardId\" IN (\n          SELECT c.id\n          FROM card c\n          JOIN list l ON c.\"listId\" = l.id\n          JOIN board b ON l.\"boardId\" = b.id\n          JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n        )\n      "
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public._card_workspace_members": {
+      "name": "_card_workspace_members",
+      "schema": "",
+      "columns": {
+        "cardId": {
+          "name": "cardId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "workspaceMemberId": {
+          "name": "workspaceMemberId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "_card_workspace_members_cardId_card_id_fk": {
+          "name": "_card_workspace_members_cardId_card_id_fk",
+          "tableFrom": "_card_workspace_members",
+          "tableTo": "card",
+          "columnsFrom": [
+            "cardId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "_card_workspace_members_workspaceMemberId_workspace_members_id_fk": {
+          "name": "_card_workspace_members_workspaceMemberId_workspace_members_id_fk",
+          "tableFrom": "_card_workspace_members",
+          "tableTo": "workspace_members",
+          "columnsFrom": [
+            "workspaceMemberId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "_card_workspace_members_cardId_workspaceMemberId_pk": {
+          "name": "_card_workspace_members_cardId_workspaceMemberId_pk",
+          "columns": [
+            "cardId",
+            "workspaceMemberId"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {
+        "Allow access to card workspace members in user's workspace": {
+          "name": "Allow access to card workspace members in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"cardId\" IN (\n          SELECT c.id\n          FROM card c\n          JOIN list l ON c.\"listId\" = l.id\n          JOIN board b ON l.\"boardId\" = b.id\n          JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n        )\n        AND\n        \"workspaceMemberId\" IN (\n          SELECT wm.id\n          FROM workspace_members wm\n          WHERE wm.\"workspaceId\" IN (\n            SELECT \"workspaceId\"\n            FROM workspace_members\n            WHERE \"userId\" = auth.uid()\n          )\n        )\n      "
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.card": {
+      "name": "card",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "publicId": {
+          "name": "publicId",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "index": {
+          "name": "index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deletedAt": {
+          "name": "deletedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deletedBy": {
+          "name": "deletedBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "listId": {
+          "name": "listId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "importId": {
+          "name": "importId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "card_createdBy_user_id_fk": {
+          "name": "card_createdBy_user_id_fk",
+          "tableFrom": "card",
+          "tableTo": "user",
+          "columnsFrom": [
+            "createdBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "card_deletedBy_user_id_fk": {
+          "name": "card_deletedBy_user_id_fk",
+          "tableFrom": "card",
+          "tableTo": "user",
+          "columnsFrom": [
+            "deletedBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "card_listId_list_id_fk": {
+          "name": "card_listId_list_id_fk",
+          "tableFrom": "card",
+          "tableTo": "list",
+          "columnsFrom": [
+            "listId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "card_importId_import_id_fk": {
+          "name": "card_importId_import_id_fk",
+          "tableFrom": "card",
+          "tableTo": "import",
+          "columnsFrom": [
+            "importId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "card_publicId_unique": {
+          "name": "card_publicId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "publicId"
+          ]
+        }
+      },
+      "policies": {
+        "Allow access to cards in user's workspace or public boards": {
+          "name": "Allow access to cards in user's workspace or public boards",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "\n        \"listId\" IN (\n          SELECT l.id\n          FROM list l\n          JOIN board b ON l.\"boardId\" = b.id\n          LEFT JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n            OR b.visibility = 'public'\n        )\n      "
+        },
+        "Allow inserting cards in user's workspace": {
+          "name": "Allow inserting cards in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "\n        \"listId\" IN (\n          SELECT l.id\n          FROM list l\n          JOIN board b ON l.\"boardId\" = b.id\n          JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n        )\n      "
+        },
+        "Allow updating cards in user's workspace": {
+          "name": "Allow updating cards in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"listId\" IN (\n          SELECT l.id\n          FROM list l\n          JOIN board b ON l.\"boardId\" = b.id\n          JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n        )\n      "
+        },
+        "Allow deleting cards in user's workspace": {
+          "name": "Allow deleting cards in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"listId\" IN (\n          SELECT l.id\n          FROM list l\n          JOIN board b ON l.\"boardId\" = b.id\n          JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n        )\n      "
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public._card_labels": {
+      "name": "_card_labels",
+      "schema": "",
+      "columns": {
+        "cardId": {
+          "name": "cardId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "labelId": {
+          "name": "labelId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "_card_labels_cardId_card_id_fk": {
+          "name": "_card_labels_cardId_card_id_fk",
+          "tableFrom": "_card_labels",
+          "tableTo": "card",
+          "columnsFrom": [
+            "cardId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "_card_labels_labelId_label_id_fk": {
+          "name": "_card_labels_labelId_label_id_fk",
+          "tableFrom": "_card_labels",
+          "tableTo": "label",
+          "columnsFrom": [
+            "labelId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "_card_labels_cardId_labelId_pk": {
+          "name": "_card_labels_cardId_labelId_pk",
+          "columns": [
+            "cardId",
+            "labelId"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {
+        "Allow access to card labels in user's workspace or public boards": {
+          "name": "Allow access to card labels in user's workspace or public boards",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "\n      \"cardId\" IN (\n        SELECT c.id\n        FROM card c\n        JOIN list l ON c.\"listId\" = l.id\n        JOIN board b ON l.\"boardId\" = b.id\n        LEFT JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\" AND wm.\"userId\" = auth.uid()\n        WHERE wm.\"userId\" = auth.uid()\n          OR b.visibility = 'public'\n      )\n      AND\n      \"labelId\" IN (\n        SELECT l.id\n        FROM label l\n        JOIN board b ON l.\"boardId\" = b.id\n        LEFT JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\" AND wm.\"userId\" = auth.uid()\n        WHERE wm.\"userId\" = auth.uid()\n          OR b.visibility = 'public'\n      )\n    "
+        },
+        "Allow inserting card labels in user's workspace": {
+          "name": "Allow inserting card labels in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "\n      \"cardId\" IN (\n        SELECT c.id\n        FROM card c\n        JOIN list l ON c.\"listId\" = l.id\n        JOIN board b ON l.\"boardId\" = b.id\n        JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n        WHERE wm.\"userId\" = auth.uid()\n      )\n      AND\n      \"labelId\" IN (\n        SELECT l.id\n        FROM label l\n        JOIN board b ON l.\"boardId\" = b.id\n        JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n        WHERE wm.\"userId\" = auth.uid()\n      )\n    "
+        },
+        "Allow updating card labels in user's workspace": {
+          "name": "Allow updating card labels in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n      \"cardId\" IN (\n        SELECT c.id\n        FROM card c\n        JOIN list l ON c.\"listId\" = l.id\n        JOIN board b ON l.\"boardId\" = b.id\n        JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n        WHERE wm.\"userId\" = auth.uid()\n      )\n      AND\n      \"labelId\" IN (\n        SELECT l.id\n        FROM label l\n        JOIN board b ON l.\"boardId\" = b.id\n        JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n        WHERE wm.\"userId\" = auth.uid()\n      )\n    "
+        },
+        "Allow deleting card labels in user's workspace": {
+          "name": "Allow deleting card labels in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n      \"cardId\" IN (\n        SELECT c.id\n        FROM card c\n        JOIN list l ON c.\"listId\" = l.id\n        JOIN board b ON l.\"boardId\" = b.id\n        JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n        WHERE wm.\"userId\" = auth.uid()\n      )\n      AND\n      \"labelId\" IN (\n        SELECT l.id\n        FROM label l\n        JOIN board b ON l.\"boardId\" = b.id\n        JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n        WHERE wm.\"userId\" = auth.uid()\n      )\n    "
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.card_comments": {
+      "name": "card_comments",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "publicId": {
+          "name": "publicId",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "comment": {
+          "name": "comment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cardId": {
+          "name": "cardId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deletedAt": {
+          "name": "deletedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deletedBy": {
+          "name": "deletedBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "card_comments_cardId_card_id_fk": {
+          "name": "card_comments_cardId_card_id_fk",
+          "tableFrom": "card_comments",
+          "tableTo": "card",
+          "columnsFrom": [
+            "cardId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "card_comments_createdBy_user_id_fk": {
+          "name": "card_comments_createdBy_user_id_fk",
+          "tableFrom": "card_comments",
+          "tableTo": "user",
+          "columnsFrom": [
+            "createdBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "card_comments_deletedBy_user_id_fk": {
+          "name": "card_comments_deletedBy_user_id_fk",
+          "tableFrom": "card_comments",
+          "tableTo": "user",
+          "columnsFrom": [
+            "deletedBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "card_comments_publicId_unique": {
+          "name": "card_comments_publicId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "publicId"
+          ]
+        }
+      },
+      "policies": {
+        "Allow access to card comments in user's workspace or public boards": {
+          "name": "Allow access to card comments in user's workspace or public boards",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "\n      \"cardId\" IN (\n        SELECT c.id\n        FROM card c\n        JOIN list l ON c.\"listId\" = l.id\n        JOIN board b ON l.\"boardId\" = b.id\n        JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n        WHERE wm.\"userId\" = auth.uid()\n          OR b.visibility = 'public'\n      )\n    "
+        },
+        "Allow inserting comments on cards in user's workspace": {
+          "name": "Allow inserting comments on cards in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "\n      \"cardId\" IN (\n        SELECT c.id\n        FROM card c\n        JOIN list l ON c.\"listId\" = l.id\n        JOIN board b ON l.\"boardId\" = b.id\n        JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n        WHERE wm.\"userId\" = auth.uid()\n      )\n    "
+        },
+        "Allow updating own comments": {
+          "name": "Allow updating own comments",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n      \"createdBy\" = auth.uid()\n    "
+        },
+        "Allow deleting own comments": {
+          "name": "Allow deleting own comments",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n      \"createdBy\" = auth.uid()\n    "
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.feedback": {
+      "name": "feedback",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "feedback": {
+          "name": "feedback",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reviewed": {
+          "name": "reviewed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "feedback_createdBy_user_id_fk": {
+          "name": "feedback_createdBy_user_id_fk",
+          "tableFrom": "feedback",
+          "tableTo": "user",
+          "columnsFrom": [
+            "createdBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.import": {
+      "name": "import",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "publicId": {
+          "name": "publicId",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source": {
+          "name": "source",
+          "type": "source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "import_createdBy_user_id_fk": {
+          "name": "import_createdBy_user_id_fk",
+          "tableFrom": "import",
+          "tableTo": "user",
+          "columnsFrom": [
+            "createdBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "import_publicId_unique": {
+          "name": "import_publicId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "publicId"
+          ]
+        }
+      },
+      "policies": {
+        "Allow access to user's own imports": {
+          "name": "Allow access to user's own imports",
+          "as": "PERMISSIVE",
+          "for": "ALL",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"createdBy\" = auth.uid()\n      "
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.label": {
+      "name": "label",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "publicId": {
+          "name": "publicId",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "colourCode": {
+          "name": "colourCode",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "boardId": {
+          "name": "boardId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "importId": {
+          "name": "importId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "label_createdBy_user_id_fk": {
+          "name": "label_createdBy_user_id_fk",
+          "tableFrom": "label",
+          "tableTo": "user",
+          "columnsFrom": [
+            "createdBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "label_boardId_board_id_fk": {
+          "name": "label_boardId_board_id_fk",
+          "tableFrom": "label",
+          "tableTo": "board",
+          "columnsFrom": [
+            "boardId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "label_importId_import_id_fk": {
+          "name": "label_importId_import_id_fk",
+          "tableFrom": "label",
+          "tableTo": "import",
+          "columnsFrom": [
+            "importId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "label_publicId_unique": {
+          "name": "label_publicId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "publicId"
+          ]
+        }
+      },
+      "policies": {
+        "Allow access to labels in user's workspace or public boards": {
+          "name": "Allow access to labels in user's workspace or public boards",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "\n        \"boardId\" IN (\n          SELECT b.id\n          FROM board b\n          LEFT JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n            OR b.visibility = 'public'\n        )\n      "
+        },
+        "Allow inserting labels in user's workspace": {
+          "name": "Allow inserting labels in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "\n        \"boardId\" IN (\n          SELECT b.id\n          FROM board b\n          JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n        )\n      "
+        },
+        "Allow updating labels in user's workspace": {
+          "name": "Allow updating labels in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"boardId\" IN (\n          SELECT b.id\n          FROM board b\n          JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n        )\n      "
+        },
+        "Allow deleting labels in user's workspace": {
+          "name": "Allow deleting labels in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"boardId\" IN (\n          SELECT b.id\n          FROM board b\n          JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n        )\n      "
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.list": {
+      "name": "list",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "publicId": {
+          "name": "publicId",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "index": {
+          "name": "index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deletedAt": {
+          "name": "deletedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deletedBy": {
+          "name": "deletedBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "boardId": {
+          "name": "boardId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "importId": {
+          "name": "importId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "list_createdBy_user_id_fk": {
+          "name": "list_createdBy_user_id_fk",
+          "tableFrom": "list",
+          "tableTo": "user",
+          "columnsFrom": [
+            "createdBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "list_deletedBy_user_id_fk": {
+          "name": "list_deletedBy_user_id_fk",
+          "tableFrom": "list",
+          "tableTo": "user",
+          "columnsFrom": [
+            "deletedBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "list_boardId_board_id_fk": {
+          "name": "list_boardId_board_id_fk",
+          "tableFrom": "list",
+          "tableTo": "board",
+          "columnsFrom": [
+            "boardId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "list_importId_import_id_fk": {
+          "name": "list_importId_import_id_fk",
+          "tableFrom": "list",
+          "tableTo": "import",
+          "columnsFrom": [
+            "importId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "list_publicId_unique": {
+          "name": "list_publicId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "publicId"
+          ]
+        }
+      },
+      "policies": {
+        "Allow access to lists in user's workspace or public boards": {
+          "name": "Allow access to lists in user's workspace or public boards",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "\n        \"boardId\" IN (\n          SELECT b.id\n          FROM board b\n          LEFT JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n            OR b.visibility = 'public'\n        )\n      "
+        },
+        "Allow inserting lists in user's workspace": {
+          "name": "Allow inserting lists in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "\n        \"boardId\" IN (\n          SELECT b.id\n          FROM board b\n          JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n        )\n      "
+        },
+        "Allow updating lists in user's workspace": {
+          "name": "Allow updating lists in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"boardId\" IN (\n          SELECT b.id\n          FROM board b\n          JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n        )\n      "
+        },
+        "Allow deleting lists in user's workspace": {
+          "name": "Allow deleting lists in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"boardId\" IN (\n          SELECT b.id\n          FROM board b\n          JOIN workspace_members wm ON b.\"workspaceId\" = wm.\"workspaceId\"\n          WHERE wm.\"userId\" = auth.uid()\n        )\n      "
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.user": {
+      "name": "user",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "emailVerified": {
+          "name": "emailVerified",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "image": {
+          "name": "image",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stripeCustomerId": {
+          "name": "stripeCustomerId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "user_email_unique": {
+          "name": "user_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {
+        "Allow viewing members in user's workspace": {
+          "name": "Allow viewing members in user's workspace",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        id IN (\n          SELECT wm.\"userId\"\n          FROM workspace_members wm\n          WHERE wm.\"workspaceId\" IN (\n            SELECT \"workspaceId\"\n            FROM workspace_members\n            WHERE \"userId\" = auth.uid()\n          )\n        )\n      "
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.workspace_slugs": {
+      "name": "workspace_slugs",
+      "schema": "",
+      "columns": {
+        "slug": {
+          "name": "slug",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "slug_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "workspace_slugs_slug_unique": {
+          "name": "workspace_slugs_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.workspace_members": {
+      "name": "workspace_members",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "publicId": {
+          "name": "publicId",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "workspaceId": {
+          "name": "workspaceId",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deletedAt": {
+          "name": "deletedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deletedBy": {
+          "name": "deletedBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "member_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'invited'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "workspace_members_userId_user_id_fk": {
+          "name": "workspace_members_userId_user_id_fk",
+          "tableFrom": "workspace_members",
+          "tableTo": "user",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "workspace_members_workspaceId_workspace_id_fk": {
+          "name": "workspace_members_workspaceId_workspace_id_fk",
+          "tableFrom": "workspace_members",
+          "tableTo": "workspace",
+          "columnsFrom": [
+            "workspaceId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "workspace_members_deletedBy_user_id_fk": {
+          "name": "workspace_members_deletedBy_user_id_fk",
+          "tableFrom": "workspace_members",
+          "tableTo": "user",
+          "columnsFrom": [
+            "deletedBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "workspace_members_publicId_unique": {
+          "name": "workspace_members_publicId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "publicId"
+          ]
+        }
+      },
+      "policies": {
+        "Allow members to view workspace membership": {
+          "name": "Allow members to view workspace membership",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        \"userId\" = auth.uid() OR\n        is_workspace_member(auth.uid(), \"workspaceId\")\n      "
+        },
+        "Allow admins to add workspace members": {
+          "name": "Allow admins to add workspace members",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "\n        is_workspace_admin(auth.uid(), \"workspaceId\")\n      "
+        },
+        "Allow admins to update workspace members": {
+          "name": "Allow admins to update workspace members",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        is_workspace_admin(auth.uid(), \"workspaceId\")\n      "
+        },
+        "Allow admins to remove workspace members": {
+          "name": "Allow admins to remove workspace members",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        is_workspace_admin(auth.uid(), \"workspaceId\")\n      "
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.workspace": {
+      "name": "workspace",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "publicId": {
+          "name": "publicId",
+          "type": "varchar(12)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "plan": {
+          "name": "plan",
+          "type": "workspace_plan",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'free'"
+        },
+        "createdBy": {
+          "name": "createdBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deletedAt": {
+          "name": "deletedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deletedBy": {
+          "name": "deletedBy",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "workspace_createdBy_user_id_fk": {
+          "name": "workspace_createdBy_user_id_fk",
+          "tableFrom": "workspace",
+          "tableTo": "user",
+          "columnsFrom": [
+            "createdBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "workspace_deletedBy_user_id_fk": {
+          "name": "workspace_deletedBy_user_id_fk",
+          "tableFrom": "workspace",
+          "tableTo": "user",
+          "columnsFrom": [
+            "deletedBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "workspace_publicId_unique": {
+          "name": "workspace_publicId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "publicId"
+          ]
+        },
+        "workspace_slug_unique": {
+          "name": "workspace_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {
+        "Allow viewing user's workspaces": {
+          "name": "Allow viewing user's workspaces",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "\n        CASE \n          WHEN auth.uid() IS NULL THEN\n            EXISTS (\n              SELECT 1 \n              FROM board \n              WHERE \"workspaceId\" = workspace.id \n              AND visibility = 'public'\n            )\n          ELSE\n            id IN (\n              SELECT \"workspaceId\"\n              FROM workspace_members\n              WHERE \"userId\" = auth.uid()\n            )\n            OR \"createdBy\" = auth.uid()\n        END\n      "
+        },
+        "Allow updating user's workspaces": {
+          "name": "Allow updating user's workspaces",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        id IN (\n          SELECT \"workspaceId\"\n          FROM workspace_members\n          WHERE \"userId\" = auth.uid()\n        )\n      "
+        },
+        "Allow deleting user's workspaces": {
+          "name": "Allow deleting user's workspaces",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "\n        id IN (\n          SELECT \"workspaceId\"\n          FROM workspace_members\n          WHERE \"userId\" = auth.uid()\n        )\n      "
+        },
+        "Allow authenticated users to create workspaces": {
+          "name": "Allow authenticated users to create workspaces",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "true"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    }
+  },
+  "enums": {
+    "public.board_visibility": {
+      "name": "board_visibility",
+      "schema": "public",
+      "values": [
+        "private",
+        "public"
+      ]
+    },
+    "public.card_activity_type": {
+      "name": "card_activity_type",
+      "schema": "public",
+      "values": [
+        "card.created",
+        "card.updated.title",
+        "card.updated.description",
+        "card.updated.index",
+        "card.updated.list",
+        "card.updated.label.added",
+        "card.updated.label.removed",
+        "card.updated.member.added",
+        "card.updated.member.removed",
+        "card.updated.comment.added",
+        "card.updated.comment.updated",
+        "card.updated.comment.deleted",
+        "card.archived"
+      ]
+    },
+    "public.source": {
+      "name": "source",
+      "schema": "public",
+      "values": [
+        "trello"
+      ]
+    },
+    "public.status": {
+      "name": "status",
+      "schema": "public",
+      "values": [
+        "started",
+        "success",
+        "failed"
+      ]
+    },
+    "public.role": {
+      "name": "role",
+      "schema": "public",
+      "values": [
+        "admin",
+        "member",
+        "guest"
+      ]
+    },
+    "public.member_status": {
+      "name": "member_status",
+      "schema": "public",
+      "values": [
+        "invited",
+        "active",
+        "removed"
+      ]
+    },
+    "public.slug_type": {
+      "name": "slug_type",
+      "schema": "public",
+      "values": [
+        "reserved",
+        "premium"
+      ]
+    },
+    "public.workspace_plan": {
+      "name": "workspace_plan",
+      "schema": "public",
+      "values": [
+        "free",
+        "pro",
+        "enterprise"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
