@@ -11,6 +11,8 @@ import { HiOutlinePlusSmall, HiOutlineSquare3Stack3D } from "react-icons/hi2";
 import type { UpdateBoardInput } from "@kan/api/types";
 
 import Button from "~/components/Button";
+import { DeleteLabelConfirmation } from "~/components/DeleteLabelConfirmation";
+import { LabelForm } from "~/components/LabelForm";
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
@@ -40,7 +42,7 @@ export default function BoardPage() {
   const utils = api.useUtils();
   const { showPopup } = usePopup();
   const { workspace } = useWorkspace();
-  const { openModal, modalContentType } = useModal();
+  const { openModal, modalContentType, entityId } = useModal();
   const [selectedPublicListId, setSelectedPublicListId] =
     useState<PublicListId>("");
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -77,6 +79,10 @@ export default function BoardPage() {
     enabled: !!boardId,
     placeholderData: keepPreviousData,
   });
+
+  const refetchBoard = async () => {
+    if (boardId) await utils.board.byId.refetch({ boardPublicId: boardId });
+  };
 
   useEffect(() => {
     if (boardId) {
@@ -409,6 +415,22 @@ export default function BoardPage() {
             />
           )}
           {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
+          {modalContentType === "NEW_LABEL" && (
+            <LabelForm boardPublicId={boardId ?? ""} refetch={refetchBoard} />
+          )}
+          {modalContentType === "EDIT_LABEL" && (
+            <LabelForm
+              boardPublicId={boardId ?? ""}
+              refetch={refetchBoard}
+              isEdit
+            />
+          )}
+          {modalContentType === "DELETE_LABEL" && (
+            <DeleteLabelConfirmation
+              refetch={refetchBoard}
+              labelPublicId={entityId}
+            />
+          )}
           {modalContentType === "UPDATE_BOARD_SLUG" && (
             <UpdateBoardSlugForm
               boardPublicId={boardId ?? ""}

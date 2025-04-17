@@ -4,20 +4,17 @@ import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 
 export function DeleteLabelConfirmation({
-  cardPublicId,
   labelPublicId,
+  refetch,
 }: {
-  cardPublicId: string;
   labelPublicId: string;
+  refetch: () => void;
 }) {
-  const utils = api.useUtils();
   const { closeModal } = useModal();
   const { showPopup } = usePopup();
 
-  const refetchCard = () => utils.card.byId.refetch({ cardPublicId });
-
   const deleteLabelMutation = api.label.delete.useMutation({
-    onSuccess: () => refetchCard(),
+    onSuccess: () => refetch(),
     onError: () =>
       showPopup({
         header: "Error deleting label",

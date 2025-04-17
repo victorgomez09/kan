@@ -23,13 +23,14 @@ interface Colour {
 }
 
 export function LabelForm({
-  cardPublicId,
+  boardPublicId,
+  refetch,
   isEdit,
 }: {
-  cardPublicId: string;
+  boardPublicId: string;
+  refetch: () => void;
   isEdit?: boolean;
 }) {
-  const utils = api.useUtils();
   const { closeModal, entityId, openModal } = useModal();
 
   const label = api.label.byPublicId.useQuery(
@@ -52,17 +53,15 @@ export function LabelForm({
       },
     });
 
-  const refetchCard = () => utils.card.byId.refetch({ cardPublicId });
-
   const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
 
   const createLabel = api.label.create.useMutation({
-    onSuccess: async () => {
+    onSuccess: () => {
       const currentColourIndex = colours.findIndex(
         (c) => c.code === watch("colour").code,
       );
       try {
-        await refetchCard();
+        refetch();
         if (!isCreateAnotherEnabled) closeModal();
         reset({
           name: "",
@@ -76,8 +75,8 @@ export function LabelForm({
   });
 
   const updateLabel = api.label.update.useMutation({
-    onSuccess: async () => {
-      await refetchCard();
+    onSuccess: () => {
+      refetch();
       closeModal();
       reset({
         name: "",
@@ -98,8 +97,8 @@ export function LabelForm({
     } else {
       createLabel.mutate({
         name: values.name,
-        cardPublicId,
         colourCode: values.colour.code,
+        boardPublicId,
       });
     }
   };

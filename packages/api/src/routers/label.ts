@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import * as boardRepo from "@kan/db/repository/board.repo";
 import * as cardRepo from "@kan/db/repository/card.repo";
 import * as labelRepo from "@kan/db/repository/label.repo";
 
@@ -45,7 +46,7 @@ export const labelRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(1).max(36),
-        cardPublicId: z.string().min(12),
+        boardPublicId: z.string().min(12),
         colourCode: z.string().length(7),
       }),
     )
@@ -59,14 +60,14 @@ export const labelRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const card = await cardRepo.getCardWithListByPublicId(
+      const board = await boardRepo.getIdByPublicId(
         ctx.db,
-        input.cardPublicId,
+        input.boardPublicId,
       );
 
-      if (!card?.list)
+      if (!board)
         throw new TRPCError({
-          message: `Card with public ID ${input.cardPublicId} not found`,
+          message: `Board with public ID ${input.boardPublicId} not found`,
           code: "NOT_FOUND",
         });
 
@@ -74,7 +75,7 @@ export const labelRouter = createTRPCRouter({
         name: input.name,
         colourCode: input.colourCode,
         createdBy: userId,
-        boardId: card.list.boardId,
+        boardId: board.id,
       });
 
       if (!result)

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { IoChevronForwardSharp } from "react-icons/io5";
 
 import Avatar from "~/components/Avatar";
+import { LabelForm } from "~/components/LabelForm";
 import LabelIcon from "~/components/LabelIcon";
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
@@ -15,12 +16,11 @@ import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import { formatMemberDisplayName } from "~/utils/helpers";
 import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
+import { DeleteLabelConfirmation } from "../../components/DeleteLabelConfirmation";
 import ActivityList from "./components/ActivityList";
 import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
 import { DeleteCommentConfirmation } from "./components/DeleteCommentConfirmation";
-import { DeleteLabelConfirmation } from "./components/DeleteLabelConfirmation";
 import Dropdown from "./components/Dropdown";
-import { LabelForm } from "./components/LabelForm";
 import LabelSelector from "./components/LabelSelector";
 import ListSelector from "./components/ListSelector";
 import MemberSelector from "./components/MemberSelector";
@@ -46,6 +46,10 @@ export default function CardPage() {
   const { data: card, isLoading } = api.card.byId.useQuery({
     cardPublicId: cardId ?? "",
   });
+
+  const refetchCard = async () => {
+    if (cardId) await utils.card.byId.refetch({ cardPublicId: cardId });
+  };
 
   const board = card?.list?.board;
   const boardId = board?.publicId;
@@ -246,14 +250,18 @@ export default function CardPage() {
 
         <Modal>
           {modalContentType === "NEW_LABEL" && (
-            <LabelForm cardPublicId={cardId} />
+            <LabelForm boardPublicId={boardId ?? ""} refetch={refetchCard} />
           )}
           {modalContentType === "EDIT_LABEL" && (
-            <LabelForm cardPublicId={cardId} isEdit />
+            <LabelForm
+              boardPublicId={boardId ?? ""}
+              refetch={refetchCard}
+              isEdit
+            />
           )}
           {modalContentType === "DELETE_LABEL" && (
             <DeleteLabelConfirmation
-              cardPublicId={cardId}
+              refetch={refetchCard}
               labelPublicId={entityId}
             />
           )}

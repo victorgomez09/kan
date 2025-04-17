@@ -43,7 +43,7 @@ export function NewCardForm({
   queryParams,
 }: NewCardFormProps) {
   const { showPopup } = usePopup();
-  const { closeModal } = useModal();
+  const { closeModal, openModal } = useModal();
 
   const utils = api.useUtils();
 
@@ -299,6 +299,11 @@ export function NewCardForm({
             <CheckboxDropdown
               items={formattedLabels}
               handleSelect={(_groupKey, item) => handleSelectLabels(item.key)}
+              handleEdit={(labelPublicId) =>
+                openModal("EDIT_LABEL", labelPublicId)
+              }
+              handleCreate={() => openModal("NEW_LABEL")}
+              createNewItemLabel="Create new label"
             >
               <div className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-2 py-1 text-left text-xs text-light-800 hover:bg-light-300 dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500">
                 {!labelPublicIds.length ? (

@@ -16,6 +16,20 @@ export const getAllByWorkspaceId = async (
   return data ?? [];
 };
 
+export const getIdByPublicId = async (
+  db: SupabaseClient<Database>,
+  boardPublicId: string,
+) => {
+  const { data } = await db
+    .from("board")
+    .select("id")
+    .eq("publicId", boardPublicId)
+    .limit(1)
+    .single();
+
+  return data;
+};
+
 export const getByPublicId = async (
   db: SupabaseClient<Database>,
   boardPublicId: string,
