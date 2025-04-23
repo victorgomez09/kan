@@ -37,7 +37,7 @@ export const userRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const result = await userRepo.getById(ctx.db, userId);
+      const result = await userRepo.getById(ctx.drizzleDb, userId);
 
       if (!result?.name) {
         throw new TRPCError({
@@ -81,7 +81,7 @@ export const userRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const result = await userRepo.update(ctx.adminDb, userId, input);
+      const result = await userRepo.update(ctx.db, userId, input);
 
       if (!result) {
         throw new TRPCError({

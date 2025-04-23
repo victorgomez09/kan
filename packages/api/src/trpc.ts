@@ -1,20 +1,15 @@
-// import type { Pool } from "@neondatabase/serverless";
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-// import type { NeonDatabase as DrizzleClient } from "drizzle-orm/neon-serverless";
 import type { OpenApiMeta } from "trpc-to-openapi";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import type { dbClient } from "@kan/db/client";
 import type { Database } from "@kan/db/types/database.types";
 import type { SupabaseClient } from "@kan/supabase";
-// import { createDrizzleClient } from "@kan/db/client";
-import {
-  createNextApiClient,
-  createTRPCAdminClient,
-  createTRPCClient,
-} from "@kan/supabase";
+import { createDrizzleClient } from "@kan/db/client";
+import { createNextApiClient, createTRPCClient } from "@kan/supabase";
 
 export interface User {
   id: string;
@@ -23,22 +18,14 @@ export interface User {
 interface CreateContextOptions {
   user: User | null;
   db: SupabaseClient<Database>;
-  adminDb: SupabaseClient<Database>;
-  // drizzleDb:
-  //   | (DrizzleClient<
-  //       typeof import("/Users/henryball/kan/packages/db/dist/schema")
-  //     > & {
-  //       $client: Pool;
-  //     })
-  //   | null;
+  drizzleDb: dbClient;
 }
 
 export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     user: opts.user,
     db: opts.db,
-    adminDb: opts.adminDb,
-    // drizzleDb: opts.drizzleDb,
+    drizzleDb: opts.drizzleDb,
   };
 };
 
@@ -47,37 +34,35 @@ export const createTRPCContext = async ({
   resHeaders,
 }: FetchCreateContextFnOptions) => {
   const db = createTRPCClient(req, resHeaders);
-  const adminDb = createTRPCAdminClient();
 
   const {
     data: { user },
   } = await db.auth.getUser();
 
-  // const drizzleDb = createDrizzleClient();
+  const drizzleDb = createDrizzleClient();
 
-  return createInnerTRPCContext({ db, adminDb, user });
+  return createInnerTRPCContext({ db, user, drizzleDb });
 };
 
 export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
   const db = createNextApiClient(req);
-  const adminDb = createTRPCAdminClient();
 
   const authHeader = req.headers.authorization;
   const accessToken = authHeader?.startsWith("Bearer ")
     ? authHeader.substring(7)
     : null;
 
+  const drizzleDb = createDrizzleClient();
+
   if (!accessToken) {
-    return createInnerTRPCContext({ db, adminDb, user: null });
+    return createInnerTRPCContext({ db, user: null, drizzleDb });
   }
 
   const {
     data: { user },
   } = await db.auth.getUser(accessToken);
 
-  // const drizzleDb = createDrizzleClient();
-
-  return createInnerTRPCContext({ db, adminDb, user });
+  return createInnerTRPCContext({ db, user, drizzleDb });
 };
 
 const t = initTRPC

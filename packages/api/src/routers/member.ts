@@ -73,12 +73,12 @@ export const memberRouter = createTRPCRouter({
       let hashedToken: string | undefined;
       let verificationType: string | undefined;
 
-      const existingUser = await userRepo.getByEmail(ctx.adminDb, input.email);
+      const existingUser = await userRepo.getByEmail(ctx.db, input.email);
 
       if (existingUser) {
         invitedUserId = existingUser.id;
 
-        const magicLink = await ctx.adminDb.auth.admin.generateLink({
+        const magicLink = await ctx.db.auth.admin.generateLink({
           type: "magiclink",
           email: input.email,
           options: {
@@ -89,7 +89,7 @@ export const memberRouter = createTRPCRouter({
         hashedToken = magicLink.data.properties?.hashed_token;
         verificationType = magicLink.data.properties?.verification_type;
       } else {
-        const invite = await ctx.adminDb.auth.admin.generateLink({
+        const invite = await ctx.db.auth.admin.generateLink({
           type: "invite",
           email: input.email,
           options: {
@@ -111,7 +111,7 @@ export const memberRouter = createTRPCRouter({
             },
           });
 
-          const newUser = await userRepo.create(ctx.adminDb, {
+          const newUser = await userRepo.create(ctx.db, {
             email: invitedUserEmail,
             id: invitedUserAuthId,
             stripeCustomerId: stripeCustomer.id,

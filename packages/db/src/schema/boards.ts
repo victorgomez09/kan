@@ -4,7 +4,6 @@ import {
   bigserial,
   index,
   pgEnum,
-  pgPolicy,
   pgTable,
   text,
   timestamp,
@@ -12,7 +11,6 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { anonRole, authenticatedRole } from "drizzle-orm/supabase";
 
 import { imports } from "./imports";
 import { labels } from "./labels";
@@ -53,55 +51,6 @@ export const boards = pgTable(
     uniqueIndex("unique_slug_per_workspace")
       .on(table.workspaceId, table.slug)
       .where(sql`${table.deletedAt} IS NULL`),
-    pgPolicy("Allow access to boards in user's workspace or public boards", {
-      for: "select",
-      as: "permissive",
-      to: [authenticatedRole, anonRole],
-      using: sql`
-        "workspaceId" IN (
-          SELECT "workspaceId"
-          FROM workspace_members
-          WHERE "userId" = auth.uid()
-        )
-        OR visibility = 'public'
-      `,
-    }),
-    pgPolicy("Allow inserting boards in user's workspace", {
-      for: "insert",
-      as: "permissive",
-      to: [authenticatedRole],
-      withCheck: sql`
-        "workspaceId" IN (
-          SELECT "workspaceId"
-          FROM workspace_members
-          WHERE "userId" = auth.uid()
-        )
-      `,
-    }),
-    pgPolicy("Allow updating boards in user's workspace", {
-      for: "update",
-      as: "permissive",
-      to: [authenticatedRole],
-      using: sql`
-        "workspaceId" IN (
-          SELECT "workspaceId"
-          FROM workspace_members
-          WHERE "userId" = auth.uid()
-        )
-      `,
-    }),
-    pgPolicy("Allow deleting boards in user's workspace", {
-      for: "delete",
-      as: "permissive",
-      to: [authenticatedRole],
-      using: sql`
-        "workspaceId" IN (
-          SELECT "workspaceId"
-          FROM workspace_members
-          WHERE "userId" = auth.uid()
-        )
-      `,
-    }),
   ],
 ).enableRLS();
 

@@ -24,7 +24,7 @@ export const feedbackRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const result = await feedbackRepo.create(ctx.adminDb, {
+      const result = await feedbackRepo.create(ctx.db, {
         feedback: input.feedback,
         createdBy: userId,
         url: input.url,

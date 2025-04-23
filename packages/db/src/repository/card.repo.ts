@@ -1,10 +1,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { and, eq, isNull, sql } from "drizzle-orm";
 
+import type { dbClient } from "@kan/db/client";
 import type { Database } from "@kan/db/types/database.types";
+import * as schema from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
 export const create = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   cardInput: {
     title: string;
     description: string;
@@ -13,21 +16,56 @@ export const create = async (
     index: number;
   },
 ) => {
-  const { data } = await db
-    .from("card")
-    .insert({
-      publicId: generateUID(),
-      title: cardInput.title,
-      description: cardInput.description,
-      createdBy: cardInput.createdBy,
-      listId: cardInput.listId,
-      index: cardInput.index,
-    })
-    .select(`id`)
-    .limit(1)
-    .single();
+  return db.transaction(async (tx) => {
+    const getExistingCardAtIndex = async () =>
+      tx.query.cards.findFirst({
+        columns: {
+          id: true,
+        },
+        where: and(
+          eq(schema.cards.listId, cardInput.listId),
+          eq(schema.cards.index, cardInput.index),
+          isNull(schema.cards.deletedAt),
+        ),
+      });
 
-  return data;
+    const existingCardAtIndex = await getExistingCardAtIndex();
+
+    if (existingCardAtIndex?.id) {
+      await tx.execute(sql`
+        UPDATE card
+        SET index = index + 1
+        WHERE "listId" = ${cardInput.listId} AND index >= ${cardInput.index} AND "deletedAt" IS NULL;
+      `);
+
+      const refetchedExistingCardAtIndex = await getExistingCardAtIndex();
+
+      if (refetchedExistingCardAtIndex?.id) return tx.rollback();
+    }
+
+    const result = await tx
+      .insert(schema.cards)
+      .values({
+        publicId: generateUID(),
+        title: cardInput.title,
+        description: cardInput.description,
+        createdBy: cardInput.createdBy,
+        listId: cardInput.listId,
+        index: cardInput.index,
+      })
+      .returning({ id: schema.cards.id });
+
+    if (!result[0]) return tx.rollback();
+
+    await tx.insert(schema.cardActivities).values({
+      publicId: generateUID(),
+      cardId: result[0].id,
+      type: "card.created",
+      createdBy: cardInput.createdBy,
+    });
+
+    return result[0];
+  });
 };
 
 export const bulkCreateCardLabelRelationships = async (

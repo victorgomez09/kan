@@ -74,15 +74,15 @@ export function createNextApiClient(req: NextApiRequest) {
 
 export function createTRPCClient(req: Request, resHeaders: Headers) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const serviceKey = process.env.SUPABASE_SERVICE_API_KEY;
 
-  if (!supabaseUrl || !supabaseKey) {
+  if (!supabaseUrl || !serviceKey) {
     throw new Error("Missing Supabase environment variables");
   }
 
   const supabase = createServerClient<Database, "public">(
     supabaseUrl,
-    supabaseKey,
+    serviceKey,
     {
       cookies: {
         get(name: string) {
@@ -95,30 +95,6 @@ export function createTRPCClient(req: Request, resHeaders: Headers) {
         remove(name: string, options: CookieOptions) {
           resHeaders.set("Set-Cookie", serialize(name, "", options));
         },
-      },
-    },
-  );
-
-  return supabase;
-}
-
-export function createTRPCAdminClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_API_KEY;
-
-  if (!supabaseUrl || !serviceKey) {
-    throw new Error("Missing Supabase environment variables");
-  }
-
-  const supabase = createServerClient<Database, "public">(
-    supabaseUrl,
-    serviceKey,
-    {
-      cookies: {
-        get: (_name: string) => "",
-        set: (_name: string, _value: string, _options: CookieOptions) =>
-          undefined,
-        remove: (_name: string, _options: CookieOptions) => undefined,
       },
     },
   );

@@ -1,14 +1,21 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { eq } from "drizzle-orm";
 
+import type { dbClient } from "@kan/db/client";
 import type { Database } from "@kan/db/types/database.types";
+import * as schema from "@kan/db/schema";
 
-export const getById = async (db: SupabaseClient<Database>, userId: string) => {
-  const { data } = await db
-    .from("user")
-    .select(`id, name, email, image, stripeCustomerId`)
-    .eq("id", userId)
-    .limit(1)
-    .single();
+export const getById = async (db: dbClient, userId: string) => {
+  const data = await db.query.users.findFirst({
+    columns: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      stripeCustomerId: true,
+    },
+    where: eq(schema.users.id, userId),
+  });
 
   return data;
 };

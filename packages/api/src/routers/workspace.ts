@@ -126,7 +126,7 @@ export const workspaceRouter = createTRPCRouter({
 
       const workspacePublicId = generateUID();
 
-      const result = await workspaceRepo.create(ctx.adminDb, {
+      const result = await workspaceRepo.create(ctx.db, {
         publicId: workspacePublicId,
         name: input.name,
         slug: workspacePublicId,
@@ -174,7 +174,7 @@ export const workspaceRouter = createTRPCRouter({
         );
 
         const reservedOrPremiumWorkspaceSlug =
-          await workspaceSlugRepo.getWorkspaceSlug(ctx.adminDb, input.slug);
+          await workspaceSlugRepo.getWorkspaceSlug(ctx.db, input.slug);
 
         const isWorkspaceSlugAvailable =
           await workspaceRepo.isWorkspaceSlugAvailable(ctx.db, input.slug);
@@ -261,7 +261,7 @@ export const workspaceRouter = createTRPCRouter({
       const slug = input.workspaceSlug.toLowerCase();
       // check slug is not reserved
       const workspaceSlug = await workspaceSlugRepo.getWorkspaceSlug(
-        ctx.adminDb,
+        ctx.db,
         slug,
       );
 

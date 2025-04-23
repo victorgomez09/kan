@@ -57,18 +57,11 @@ export const cardRouter = createTRPCRouter({
 
       let index = 0;
 
-      if (list.cards.length) {
-        if (input.position === "end" && lastCard) index = lastCard.index + 1;
-
-        if (input.position === "start") {
-          await cardRepo.pushIndex(ctx.db, {
-            listId: list.id,
-            cardIndex: 0,
-          });
-        }
+      if (list.cards.length && input.position === "end" && lastCard) {
+        index = lastCard.index + 1;
       }
 
-      const newCard = await cardRepo.create(ctx.db, {
+      const newCard = await cardRepo.create(ctx.drizzleDb, {
         title: input.title,
         description: input.description,
         createdBy: userId,
@@ -76,19 +69,13 @@ export const cardRouter = createTRPCRouter({
         index,
       });
 
-      const newCardId = newCard?.id;
+      const newCardId = newCard.id;
 
       if (!newCardId)
         throw new TRPCError({
           message: `Failed to create card`,
           code: "INTERNAL_SERVER_ERROR",
         });
-
-      await cardActivityRepo.create(ctx.db, {
-        type: "card.created",
-        cardId: newCard.id,
-        createdBy: userId,
-      });
 
       if (newCardId && input.labelPublicIds.length) {
         const labels = await labelRepo.getAllByPublicIds(
