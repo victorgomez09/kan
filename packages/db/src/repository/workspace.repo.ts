@@ -1,10 +1,11 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 
-import type { Database } from "@kan/db/types/database.types";
+import type { dbClient } from "@kan/db/client";
+import { boards, workspaceMembers, workspaces } from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
 export const create = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   workspaceInput: {
     publicId?: string;
     name: string;
@@ -12,37 +13,42 @@ export const create = async (
     createdBy: string;
   },
 ) => {
-  const { data } = await db
-    .from("workspace")
-    .insert({
+  const [workspace] = await db
+    .insert(workspaces)
+    .values({
       publicId: workspaceInput.publicId ?? generateUID(),
       name: workspaceInput.name,
       slug: workspaceInput.slug,
       createdBy: workspaceInput.createdBy,
     })
-    .select(`id, publicId, name, slug, description, plan`)
-    .limit(1)
-    .single();
+    .returning({
+      id: workspaces.id,
+      publicId: workspaces.publicId,
+      name: workspaces.name,
+      slug: workspaces.slug,
+      description: workspaces.description,
+      plan: workspaces.plan,
+    });
 
-  if (data)
-    await db.from("workspace_members").insert({
+  if (workspace) {
+    await db.insert(workspaceMembers).values({
       publicId: generateUID(),
       userId: workspaceInput.createdBy,
-      workspaceId: data.id,
+      workspaceId: workspace.id,
       createdBy: workspaceInput.createdBy,
       role: "admin",
       status: "active",
     });
+  }
 
-  const newWorkspace = { ...data };
-
+  const newWorkspace = { ...workspace };
   delete newWorkspace.id;
 
   return newWorkspace;
 };
 
 export const update = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   workspacePublicId: string,
   workspaceInput: {
     name?: string;
@@ -51,168 +57,162 @@ export const update = async (
     description?: string;
   },
 ) => {
-  const { data } = await db
-    .from("workspace")
-    .update({
+  const [result] = await db
+    .update(workspaces)
+    .set({
       name: workspaceInput.name,
       slug: workspaceInput.slug,
       plan: workspaceInput.plan,
       description: workspaceInput.description,
     })
-    .eq("publicId", workspacePublicId)
-    .is("deletedAt", null);
-
-  return data;
-};
-
-export const getByPublicId = async (
-  db: SupabaseClient<Database>,
-  workspacePublicId: string,
-) => {
-  const { data } = await db
-    .from("workspace")
-    .select(`id, publicId, name, plan`)
-    .is("deletedAt", null)
-    .eq("publicId", workspacePublicId)
-    .limit(1)
-    .single();
-
-  return data;
-};
-
-export const getByPublicIdWithMembers = async (
-  db: SupabaseClient<Database>,
-  workspacePublicId: string,
-) => {
-  const { data } = await db
-    .from("workspace")
-    .select(
-      `
-        id,
-        publicId,
-        members: workspace_members (
-          publicId,
-          role,
-          status,
-          user!workspace_members_userId_user_id_fk (
-            id,
-            name,
-            email,
-            image
-          )
-        )
-      `,
-    )
-    .eq("publicId", workspacePublicId)
-    .is("deletedAt", null)
-    .is("members.deletedAt", null)
-    .limit(1)
-    .single();
-
-  return data;
-};
-
-export const getBySlugWithBoards = async (
-  db: SupabaseClient<Database>,
-  workspaceSlug: string,
-) => {
-  const { data } = await db
-    .from("workspace")
-    .select(
-      `
-        publicId,
-        name,
-        description,
-        slug,
-        boards: board (
-          publicId,
-          slug,
-          name
-        )
-      `,
-    )
-    .eq("slug", workspaceSlug)
-    .is("deletedAt", null)
-    .is("boards.deletedAt", null)
-    .limit(1)
-    .single();
-
-  return data;
-};
-
-export const getAllByUserId = async (
-  db: SupabaseClient<Database>,
-  userId: string,
-) => {
-  const { data } = await db
-    .from("workspace_members")
-    .select(
-      `
-        role,
-        workspace (
-          publicId,
-          name,
-          description,
-          slug,
-          plan
-        )
-      `,
-    )
-    .eq("userId", userId)
-    .is("deletedAt", null);
-
-  return data ?? [];
-};
-
-export const getMemberByPublicId = async (
-  db: SupabaseClient<Database>,
-  memberPublicId: string,
-) => {
-  const { data } = await db
-    .from("workspace_members")
-    .select(`id`)
-    .eq("publicId", memberPublicId)
-    .limit(1)
-    .single();
-
-  return data;
-};
-
-export const getAllMembersByPublicIds = async (
-  db: SupabaseClient<Database>,
-  memberPublicIds: string[],
-) => {
-  const { data } = await db
-    .from("workspace_members")
-    .select(`id`)
-    .eq("publicId", memberPublicIds);
-
-  return data;
-};
-
-export const hardDelete = async (
-  db: SupabaseClient<Database>,
-  workspacePublicId: string,
-) => {
-  const result = db
-    .from("workspace")
-    .delete()
-    .eq("publicId", workspacePublicId);
+    .where(eq(workspaces.publicId, workspacePublicId))
+    .returning({
+      id: workspaces.id,
+      publicId: workspaces.publicId,
+      name: workspaces.name,
+      slug: workspaces.slug,
+      description: workspaces.description,
+      plan: workspaces.plan,
+    });
 
   return result;
 };
 
+export const getByPublicId = (db: dbClient, workspacePublicId: string) => {
+  return db.query.workspaces.findFirst({
+    columns: {
+      id: true,
+      publicId: true,
+      name: true,
+      plan: true,
+    },
+    where: eq(workspaces.publicId, workspacePublicId),
+  });
+};
+
+export const getByPublicIdWithMembers = (
+  db: dbClient,
+  workspacePublicId: string,
+) => {
+  return db.query.workspaces.findFirst({
+    columns: {
+      id: true,
+      publicId: true,
+    },
+    with: {
+      members: {
+        columns: {
+          publicId: true,
+          role: true,
+          status: true,
+        },
+        where: isNull(workspaceMembers.deletedAt),
+        with: {
+          user: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
+        },
+      },
+    },
+    where: and(
+      eq(workspaces.publicId, workspacePublicId),
+      isNull(workspaces.deletedAt),
+    ),
+  });
+};
+
+export const getBySlugWithBoards = (db: dbClient, workspaceSlug: string) => {
+  return db.query.workspaces.findFirst({
+    columns: {
+      publicId: true,
+      name: true,
+      description: true,
+      slug: true,
+    },
+    with: {
+      boards: {
+        columns: {
+          publicId: true,
+          slug: true,
+          name: true,
+        },
+        where: isNull(boards.deletedAt),
+      },
+    },
+    where: and(
+      eq(workspaces.slug, workspaceSlug),
+      isNull(workspaces.deletedAt),
+    ),
+  });
+};
+
+export const getAllByUserId = (db: dbClient, userId: string) => {
+  return db.query.workspaceMembers.findMany({
+    columns: {
+      role: true,
+    },
+    with: {
+      workspace: {
+        columns: {
+          publicId: true,
+          name: true,
+          description: true,
+          slug: true,
+          plan: true,
+        },
+        // https://github.com/drizzle-team/drizzle-orm/issues/2903
+        // where: isNull(workspaces.deletedAt),
+      },
+    },
+    where: and(
+      eq(workspaceMembers.userId, userId),
+      isNull(workspaceMembers.deletedAt),
+    ),
+  });
+};
+
+export const getMemberByPublicId = (db: dbClient, memberPublicId: string) => {
+  return db.query.workspaceMembers.findFirst({
+    columns: {
+      id: true,
+    },
+    where: eq(workspaceMembers.publicId, memberPublicId),
+  });
+};
+
+export const getAllMembersByPublicIds = (
+  db: dbClient,
+  memberPublicIds: string[],
+) => {
+  return db.query.workspaceMembers.findMany({
+    columns: {
+      id: true,
+    },
+    where: inArray(workspaceMembers.publicId, memberPublicIds),
+  });
+};
+
+export const hardDelete = (db: dbClient, workspacePublicId: string) => {
+  return db
+    .delete(workspaces)
+    .where(eq(workspaces.publicId, workspacePublicId));
+};
+
 export const isWorkspaceSlugAvailable = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   workspaceSlug: string,
 ) => {
-  const { data } = await db
-    .from("workspace")
-    .select("id")
-    .eq("slug", workspaceSlug)
-    .is("deletedAt", null)
-    .limit(1)
-    .single();
+  const result = await db.query.workspaces.findFirst({
+    columns: {
+      id: true,
+    },
+    where: eq(workspaces.slug, workspaceSlug),
+  });
 
-  return data === null;
+  return result === undefined;
 };

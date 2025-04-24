@@ -1,10 +1,11 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { eq, inArray } from "drizzle-orm";
 
-import type { Database } from "@kan/db/types/database.types";
+import type { dbClient } from "@kan/db/client";
+import { cardsToLabels, labels } from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
 export const create = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   labelInput: {
     name: string;
     colourCode: string;
@@ -13,31 +14,30 @@ export const create = async (
     cardId?: number;
   },
 ) => {
-  const { data } = await db
-    .from("label")
-    .insert({
+  const [result] = await db
+    .insert(labels)
+    .values({
       publicId: generateUID(),
       name: labelInput.name,
       colourCode: labelInput.colourCode,
       createdBy: labelInput.createdBy,
       boardId: labelInput.boardId,
     })
-    .select(`id`)
-    .limit(1)
-    .single();
+    .returning({ id: labels.id });
 
-  if (labelInput.cardId && data)
-    await db.from("_card_labels").insert({
+  if (labelInput.cardId && result) {
+    await db.insert(cardsToLabels).values({
       cardId: labelInput.cardId,
-      labelId: data.id,
+      labelId: result.id,
     });
+  }
 
-  return data;
+  return result;
 };
 
 export const bulkCreate = async (
-  db: SupabaseClient<Database>,
-  labels: {
+  db: dbClient,
+  labelsInput: {
     publicId: string;
     name: string;
     colourCode: string;
@@ -45,61 +45,64 @@ export const bulkCreate = async (
     createdBy: string;
   }[],
 ) => {
-  const { data } = await db.from("label").insert(labels).select(`id`);
+  const results = await db
+    .insert(labels)
+    .values(labelsInput)
+    .returning({ id: labels.id });
 
-  return data;
+  return results;
 };
 
-export const getAllByPublicIds = async (
-  db: SupabaseClient<Database>,
-  labelPublicIds: string[],
-) => {
-  const { data } = await db
-    .from("label")
-    .select(`id`)
-    .in("publicId", labelPublicIds);
-
-  return data;
+export const getAllByPublicIds = (db: dbClient, labelPublicIds: string[]) => {
+  return db.query.labels.findMany({
+    columns: {
+      id: true,
+    },
+    where: inArray(labels.publicId, labelPublicIds),
+  });
 };
 
-export const getByPublicId = async (
-  db: SupabaseClient<Database>,
-  labelPublicId: string,
-) => {
-  const { data } = await db
-    .from("label")
-    .select(`id, publicId, name, colourCode`)
-    .eq("publicId", labelPublicId)
-    .limit(1)
-    .single();
-
-  return data;
+export const getByPublicId = async (db: dbClient, labelPublicId: string) => {
+  return db.query.labels.findFirst({
+    columns: {
+      id: true,
+      publicId: true,
+      name: true,
+      colourCode: true,
+    },
+    where: eq(labels.publicId, labelPublicId),
+  });
 };
 
 export const update = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   labelInput: {
     labelPublicId: string;
     name: string;
     colourCode: string;
   },
 ) => {
-  const { data } = await db
-    .from("label")
-    .update({
+  const [result] = await db
+    .update(labels)
+    .set({
       name: labelInput.name,
       colourCode: labelInput.colourCode,
     })
-    .eq("publicId", labelInput.labelPublicId);
+    .where(eq(labels.publicId, labelInput.labelPublicId))
+    .returning({
+      id: labels.id,
+      name: labels.name,
+      colourCode: labels.colourCode,
+    });
 
-  return data;
+  return result;
 };
 
-export const hardDelete = async (
-  db: SupabaseClient<Database>,
-  labelId: number,
-) => {
-  const { data } = await db.from("label").delete().eq("id", labelId);
+export const hardDelete = async (db: dbClient, labelId: number) => {
+  const [result] = await db
+    .delete(labels)
+    .where(eq(labels.id, labelId))
+    .returning({ id: labels.id });
 
-  return data;
+  return result;
 };

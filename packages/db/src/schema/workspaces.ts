@@ -10,20 +10,24 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
+import { boards } from "./boards";
 import { users } from "./users";
 
-export const memberRoleEnum = pgEnum("role", ["admin", "member", "guest"]);
-export const memberStatusEnum = pgEnum("member_status", [
-  "invited",
-  "active",
-  "removed",
-]);
-export const slugTypeEnum = pgEnum("slug_type", ["reserved", "premium"]);
-export const workspacePlanEnum = pgEnum("workspace_plan", [
-  "free",
-  "pro",
-  "enterprise",
-]);
+export const memberRoles = ["admin", "member", "guest"] as const;
+export type MemberRole = (typeof memberRoles)[number];
+export const memberRoleEnum = pgEnum("role", memberRoles);
+
+export const memberStatuses = ["invited", "active", "removed"] as const;
+export type MemberStatus = (typeof memberStatuses)[number];
+export const memberStatusEnum = pgEnum("member_status", memberStatuses);
+
+export const slugTypes = ["reserved", "premium"] as const;
+export type SlugType = (typeof slugTypes)[number];
+export const slugTypeEnum = pgEnum("slug_type", slugTypes);
+
+export const workspacePlans = ["free", "pro", "enterprise"] as const;
+export type WorkspacePlan = (typeof workspacePlans)[number];
+export const workspacePlanEnum = pgEnum("workspace_plan", workspacePlans);
 
 export const workspaces = pgTable("workspace", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
@@ -44,6 +48,7 @@ export const workspaces = pgTable("workspace", {
 export const workspaceRelations = relations(workspaces, ({ one, many }) => ({
   user: one(users, { fields: [workspaces.createdBy], references: [users.id] }),
   members: many(workspaceMembers),
+  boards: many(boards),
 }));
 
 export const workspaceMembers = pgTable("workspace_members", {
@@ -63,6 +68,20 @@ export const workspaceMembers = pgTable("workspace_members", {
   role: memberRoleEnum("role").notNull(),
   status: memberStatusEnum("status").default("invited").notNull(),
 }).enableRLS();
+
+export const workspaceMembersRelations = relations(
+  workspaceMembers,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [workspaceMembers.userId],
+      references: [users.id],
+    }),
+    workspace: one(workspaces, {
+      fields: [workspaceMembers.workspaceId],
+      references: [workspaces.id],
+    }),
+  }),
+);
 
 export const slugs = pgTable("workspace_slugs", {
   slug: varchar("slug", { length: 255 }).notNull().unique(),

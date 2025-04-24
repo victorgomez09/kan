@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { Stripe } from "stripe";
 
+import { createDrizzleClient } from "@kan/db/client";
 import * as userRepo from "@kan/db/repository/user.repo";
 import { createNextClient } from "@kan/supabase/clients";
 
@@ -25,8 +26,8 @@ export default async function handler(req: NextRequest) {
 
   try {
     const response = NextResponse.next();
-    const db = createNextClient(req, response);
-    const { data } = await db.auth.getUser();
+    const supabaseClient = createNextClient(req, response);
+    const { data } = await supabaseClient.auth.getUser();
 
     if (!data.user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -34,6 +35,8 @@ export default async function handler(req: NextRequest) {
         headers: { "Content-Type": "application/json" },
       });
     }
+
+    const db = createDrizzleClient();
 
     const user = await userRepo.getById(db, data.user.id);
 

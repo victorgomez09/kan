@@ -1,38 +1,36 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { eq } from "drizzle-orm";
 
-import type { Database } from "@kan/db/types/database.types";
+import type { dbClient } from "@kan/db/client";
+import { imports } from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
 export const create = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   importInput: { source: string; createdBy: string },
 ) => {
-  const { data } = await db
-    .from("import")
-    .insert({
+  const [result] = await db
+    .insert(imports)
+    .values({
       publicId: generateUID(),
       source: "trello",
       createdBy: importInput.createdBy,
       status: "started",
     })
-    .select(`id`)
-    .limit(1)
-    .single();
+    .returning({ id: imports.id });
 
-  return data;
+  return result;
 };
 
 export const update = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   importInput: { status: "started" | "success" | "failed" },
   args: { importId: number },
 ) => {
-  const { data } = await db
-    .from("import")
-    .update({ status: importInput.status })
-    .eq("importId", args.importId)
-    .limit(1)
-    .single();
+  const [result] = await db
+    .update(imports)
+    .set({ status: importInput.status })
+    .where(eq(imports.id, args.importId))
+    .returning({ id: imports.id, status: imports.status });
 
-  return data;
+  return result;
 };

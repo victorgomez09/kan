@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { Stripe } from "stripe";
 import { z } from "zod";
 
+import { createDrizzleClient } from "@kan/db/client";
 import * as userRepo from "@kan/db/repository/user.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
 import { createNextClient } from "@kan/supabase/clients";
@@ -42,9 +43,9 @@ export default async function handler(req: NextRequest) {
   try {
     const response = NextResponse.next();
 
-    const db = createNextClient(req, response);
+    const supabaseClient = createNextClient(req, response);
 
-    const { data } = await db.auth.getUser();
+    const { data } = await supabaseClient.auth.getUser();
 
     if (!data.user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -52,6 +53,8 @@ export default async function handler(req: NextRequest) {
         headers: { "Content-Type": "application/json" },
       });
     }
+
+    const db = createDrizzleClient();
 
     const user = await userRepo.getById(db, data.user.id);
 
@@ -87,7 +90,7 @@ export default async function handler(req: NextRequest) {
     const workspace = await workspaceRepo.getAllByUserId(db, user.id);
 
     const isMemberOfWorkspace = workspace.some(
-      ({ workspace }) => workspace?.publicId === body.workspacePublicId,
+      ({ workspace }) => workspace.publicId === body.workspacePublicId,
     );
 
     if (!isMemberOfWorkspace) {

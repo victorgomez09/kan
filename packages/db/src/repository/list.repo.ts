@@ -1,10 +1,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { and, desc, eq, isNull } from "drizzle-orm";
 
+import type { dbClient } from "@kan/db/client";
 import type { Database } from "@kan/db/types/database.types";
+import { lists } from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
 export const create = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   listInput: {
     name: string;
     createdBy: string;
@@ -13,9 +16,9 @@ export const create = async (
     importId?: number;
   },
 ) => {
-  const { data } = await db
-    .from("list")
-    .insert({
+  const [result] = await db
+    .insert(lists)
+    .values({
       publicId: generateUID(),
       name: listInput.name,
       createdBy: listInput.createdBy,
@@ -23,48 +26,45 @@ export const create = async (
       index: listInput.index,
       importId: listInput.importId,
     })
-    .select(
-      `
-        id,
-        publicId,
-        name
-      `,
-    )
-    .limit(1)
-    .single();
+    .returning({
+      id: lists.id,
+      publicId: lists.publicId,
+      name: lists.name,
+    });
 
-  return data;
+  return result;
 };
 
-export const getByPublicId = async (
-  db: SupabaseClient<Database>,
-  listPublicId: string,
-) => {
-  const { data } = await db
-    .from("list")
-    .select(`id, boardId, index`)
-    .eq("publicId", listPublicId)
-    .limit(1)
-    .single();
-
-  return data;
+export const getByPublicId = async (db: dbClient, listPublicId: string) => {
+  return db.query.lists.findFirst({
+    columns: {
+      id: true,
+      boardId: true,
+      index: true,
+    },
+    where: eq(lists.publicId, listPublicId),
+  });
 };
 
 export const getWithCardsByPublicId = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   listPublicId: string,
 ) => {
-  const { data } = await db
-    .from("list")
-    .select(`id, cards:card (index)`)
-    .eq("publicId", listPublicId)
-    .is("deletedAt", null)
-    .is("card.deletedAt", null)
-    .order("index", { foreignTable: "card", ascending: false })
-    .limit(1)
-    .single();
-
-  return data;
+  return db.query.lists.findFirst({
+    columns: {
+      id: true,
+    },
+    with: {
+      cards: {
+        columns: {
+          index: true,
+        },
+        where: isNull(lists.deletedAt),
+        orderBy: [desc(lists.index)],
+      },
+    },
+    where: and(eq(lists.publicId, listPublicId), isNull(lists.deletedAt)),
+  });
 };
 
 export const update = async (
@@ -121,41 +121,37 @@ export const shiftIndex = async (
 };
 
 export const softDeleteAllByBoardId = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   args: {
     boardId: number;
-    deletedAt: string;
     deletedBy: string;
   },
 ) => {
-  const { data } = await db
-    .from("list")
-    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
-    .eq("boardId", args.boardId)
-    .is("deletedAt", null)
-    .select(`id`)
-    .order("id", { ascending: true });
+  const [result] = await db
+    .update(lists)
+    .set({ deletedAt: new Date(), deletedBy: args.deletedBy })
+    .where(and(eq(lists.boardId, args.boardId), isNull(lists.deletedAt)))
+    .returning({
+      id: lists.id,
+    });
 
-  return data;
+  return result;
 };
 
 export const softDeleteById = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   args: {
     listId: number;
-    deletedAt: string;
     deletedBy: string;
   },
 ) => {
-  const { data } = await db
-    .from("list")
-    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
-    .eq("id", args.listId)
-    .is("deletedAt", null)
-    .select(`id`)
-    .order("id", { ascending: true })
-    .limit(1)
-    .single();
+  const [updatedList] = await db
+    .update(lists)
+    .set({ deletedAt: new Date(), deletedBy: args.deletedBy })
+    .where(and(eq(lists.id, args.listId), isNull(lists.deletedAt)))
+    .returning({
+      id: lists.id,
+    });
 
-  return data;
+  return updatedList;
 };

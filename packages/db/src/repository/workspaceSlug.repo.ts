@@ -1,16 +1,14 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { eq } from "drizzle-orm";
 
-import type { Database } from "@kan/db/types/database.types";
+import type { dbClient } from "@kan/db/client";
+import { slugs } from "@kan/db/schema";
 
-export const getWorkspaceSlug = async (
-  db: SupabaseClient<Database>,
-  slug: string,
-) => {
-  const { data } = await db
-    .from("workspace_slugs")
-    .select(`slug, type`)
-    .eq("slug", slug)
-    .single();
-
-  return data;
+export const getWorkspaceSlug = (db: dbClient, slug: string) => {
+  return db.query.slugs.findFirst({
+    columns: {
+      slug: true,
+      type: true,
+    },
+    where: eq(slugs.slug, slug),
+  });
 };

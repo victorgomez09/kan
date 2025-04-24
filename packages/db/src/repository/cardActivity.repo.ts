@@ -1,12 +1,12 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-
-import type { Database } from "@kan/db/types/database.types";
+import type { dbClient } from "@kan/db/client";
+import type { ActivityType } from "@kan/db/schema";
+import { cardActivities } from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
 export const create = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   activityInput: {
-    type: Database["public"]["Enums"]["card_activity_type"];
+    type: ActivityType;
     cardId: number;
     fromIndex?: number;
     toIndex?: number;
@@ -24,9 +24,9 @@ export const create = async (
     toComment?: string;
   },
 ) => {
-  const { data } = await db
-    .from("card_activity")
-    .insert({
+  const [result] = await db
+    .insert(cardActivities)
+    .values({
       publicId: generateUID(),
       type: activityInput.type,
       cardId: activityInput.cardId,
@@ -45,17 +45,15 @@ export const create = async (
       fromComment: activityInput.fromComment,
       toComment: activityInput.toComment,
     })
-    .select(`id`)
-    .limit(1)
-    .single();
+    .returning({ id: cardActivities.id });
 
-  return data;
+  return result;
 };
 
 export const bulkCreate = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   activityInputs: {
-    type: Database["public"]["Enums"]["card_activity_type"];
+    type: ActivityType;
     cardId: number;
     fromIndex?: number;
     toIndex?: number;
@@ -75,10 +73,10 @@ export const bulkCreate = async (
     publicId: generateUID(),
   }));
 
-  const { data } = await db
-    .from("card_activity")
-    .insert(activitiesWithPublicIds)
-    .select("id");
+  const results = await db
+    .insert(cardActivities)
+    .values(activitiesWithPublicIds)
+    .returning({ id: cardActivities.id });
 
-  return data;
+  return results;
 };

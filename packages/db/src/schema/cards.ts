@@ -18,7 +18,7 @@ import { lists } from "./lists";
 import { users } from "./users";
 import { workspaceMembers } from "./workspaces";
 
-export const activityTypeEnum = pgEnum("card_activity_type", [
+export const activityTypes = [
   "card.created",
   "card.updated.title",
   "card.updated.description",
@@ -32,7 +32,11 @@ export const activityTypeEnum = pgEnum("card_activity_type", [
   "card.updated.comment.updated",
   "card.updated.comment.deleted",
   "card.archived",
-]);
+] as const;
+
+export type ActivityType = (typeof activityTypes)[number];
+
+export const activityTypeEnum = pgEnum("card_activity_type", activityTypes);
 
 export const cards = pgTable("card", {
   id: bigserial("id", { mode: "number" }).primaryKey(),

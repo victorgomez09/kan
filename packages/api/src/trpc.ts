@@ -17,15 +17,15 @@ export interface User {
 
 interface CreateContextOptions {
   user: User | null;
-  db: SupabaseClient<Database>;
-  drizzleDb: dbClient;
+  supabaseClient: SupabaseClient<Database>;
+  db: dbClient;
 }
 
 export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     user: opts.user,
     db: opts.db,
-    drizzleDb: opts.drizzleDb,
+    supabaseClient: opts.supabaseClient,
   };
 };
 
@@ -33,36 +33,36 @@ export const createTRPCContext = async ({
   req,
   resHeaders,
 }: FetchCreateContextFnOptions) => {
-  const db = createTRPCClient(req, resHeaders);
+  const supabaseClient = createTRPCClient(req, resHeaders);
 
   const {
     data: { user },
-  } = await db.auth.getUser();
+  } = await supabaseClient.auth.getUser();
 
-  const drizzleDb = createDrizzleClient();
+  const db = createDrizzleClient();
 
-  return createInnerTRPCContext({ db, user, drizzleDb });
+  return createInnerTRPCContext({ db, user, supabaseClient: supabaseClient });
 };
 
 export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
-  const db = createNextApiClient(req);
+  const supabaseClient = createNextApiClient(req);
 
   const authHeader = req.headers.authorization;
   const accessToken = authHeader?.startsWith("Bearer ")
     ? authHeader.substring(7)
     : null;
 
-  const drizzleDb = createDrizzleClient();
+  const db = createDrizzleClient();
 
   if (!accessToken) {
-    return createInnerTRPCContext({ db, user: null, drizzleDb });
+    return createInnerTRPCContext({ db, user: null, supabaseClient });
   }
 
   const {
     data: { user },
-  } = await db.auth.getUser(accessToken);
+  } = await supabaseClient.auth.getUser(accessToken);
 
-  return createInnerTRPCContext({ db, user, drizzleDb });
+  return createInnerTRPCContext({ db, user, supabaseClient });
 };
 
 const t = initTRPC

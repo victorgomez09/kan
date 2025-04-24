@@ -1,25 +1,22 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-
-import type { Database } from "@kan/db/types/database.types";
+import type { dbClient } from "@kan/db/client";
+import { feedback } from "@kan/db/schema";
 
 export const create = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   feedbackInput: {
     feedback: string;
     createdBy: string;
     url: string;
   },
 ) => {
-  const { data } = await db
-    .from("feedback")
-    .insert({
+  const [result] = await db
+    .insert(feedback)
+    .values({
       feedback: feedbackInput.feedback,
       createdBy: feedbackInput.createdBy,
       url: feedbackInput.url,
     })
-    .select(`id`)
-    .limit(1)
-    .single();
+    .returning({ id: feedback.id });
 
-  return data;
+  return result;
 };

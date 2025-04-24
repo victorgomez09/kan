@@ -1,19 +1,19 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 
+import type { dbClient } from "@kan/db/client";
 import type { Database } from "@kan/db/types/database.types";
+import { boards, cards, lists, workspaceMembers } from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
-export const getAllByWorkspaceId = async (
-  db: SupabaseClient<Database>,
-  workspaceId: number,
-) => {
-  const { data } = await db
-    .from("board")
-    .select(`publicId, name`)
-    .is("deletedAt", null)
-    .eq("workspaceId", workspaceId);
-
-  return data ?? [];
+export const getAllByWorkspaceId = (db: dbClient, workspaceId: number) => {
+  return db.query.boards.findMany({
+    columns: {
+      publicId: true,
+      name: true,
+    },
+    where: and(eq(boards.workspaceId, workspaceId), isNull(boards.deletedAt)),
+  });
 };
 
 export const getIdByPublicId = async (
@@ -31,93 +31,133 @@ export const getIdByPublicId = async (
 };
 
 export const getByPublicId = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   boardPublicId: string,
   filters: {
     members: string[];
     labels: string[];
   },
 ) => {
-  let query = db
-    .from("board")
-    .select(
-      `
-        publicId,
-        name,
-        slug,
-        visibility,
-        workspace (
-          publicId,
-          members:workspace_members (
-            publicId,
-            user!workspace_members_userId_user_id_fk (
-              name,
-              email,
-              image
-            )
-          )
-        ),
-        labels:label (
-          publicId,
-          name,
-          colourCode
-        ),
-        lists:list (
-          publicId,
-          name,
-          boardId,
-          index,
-          cards:card (
-            publicId,
-            title,
-            description,
-            listId,
-            index,
-            labels:label(
-              publicId,
-              name,
-              colourCode
-            ),
-            _filteredLabels:label${filters.labels.length > 0 ? "!inner" : ""} (
-              publicId
-            ),
-            members:workspace_members (
-              publicId,
-              user!workspace_members_userId_user_id_fk (
-                name,
-                email,
-                image
-              )
-            ),
-            _filteredMembers:workspace_members${filters.members.length > 0 ? "!inner" : ""} (
-              publicId
-            )
-          )
-        )
-      `,
-    )
-    .eq("publicId", boardPublicId)
-    .is("deletedAt", null)
-    .is("lists.deletedAt", null)
-    .is("lists.cards.deletedAt", null)
-    .is("workspace.members.deletedAt", null)
-    .is("lists.cards.members.deletedAt", null);
+  const board = await db.query.boards.findFirst({
+    columns: {
+      publicId: true,
+      name: true,
+      slug: true,
+      visibility: true,
+    },
+    with: {
+      workspace: {
+        columns: {
+          publicId: true,
+        },
+        with: {
+          members: {
+            columns: {
+              publicId: true,
+            },
+            with: {
+              user: {
+                columns: {
+                  name: true,
+                  email: true,
+                  image: true,
+                },
+              },
+            },
+            where: isNull(workspaceMembers.deletedAt),
+          },
+        },
+      },
+      labels: {
+        columns: {
+          publicId: true,
+          name: true,
+          colourCode: true,
+        },
+      },
+      lists: {
+        columns: {
+          publicId: true,
+          name: true,
+          boardId: true,
+          index: true,
+        },
+        with: {
+          cards: {
+            columns: {
+              publicId: true,
+              title: true,
+              description: true,
+              listId: true,
+              index: true,
+            },
+            with: {
+              labels: {
+                with: {
+                  label: {
+                    columns: {
+                      publicId: true,
+                      name: true,
+                      colourCode: true,
+                    },
+                    // where: inArray(label.publicId, filters.labels),
+                  },
+                },
+              },
+              members: {
+                with: {
+                  member: {
+                    columns: {
+                      publicId: true,
+                      deletedAt: true,
+                    },
+                    with: {
+                      user: {
+                        columns: {
+                          name: true,
+                          email: true,
+                          image: true,
+                        },
+                      },
+                    },
+                    // https://github.com/drizzle-team/drizzle-orm/issues/2903
+                    // where: isNull(workspaceMembers.deletedAt),
+                  },
+                },
+                where:
+                  filters.members.length > 0
+                    ? inArray(workspaceMembers, filters.members)
+                    : undefined,
+              },
+            },
+            where: isNull(cards.deletedAt),
+            orderBy: [asc(cards.index)],
+          },
+        },
+        where: isNull(lists.deletedAt),
+        orderBy: [asc(lists.index)],
+      },
+    },
+    where: and(eq(boards.publicId, boardPublicId), isNull(boards.deletedAt)),
+  });
 
-  if (filters.labels.length > 0) {
-    query = query.in("lists.cards._filteredLabels.publicId", filters.labels);
-  }
+  if (!board) return null;
 
-  if (filters.members.length > 0) {
-    query = query.in("lists.cards._filteredMembers.publicId", filters.members);
-  }
+  const formattedResult = {
+    ...board,
+    lists: board.lists.map((list) => ({
+      ...list,
+      cards: list.cards.map((card) => ({
+        ...card,
+        labels: card.labels.map((label) => label.label),
+        members: card.members
+          .map((member) => member.member)
+          .filter((member) => member.deletedAt === null),
+      })),
+    })),
+  };
 
-  const { data } = await query
-    .order("index", { foreignTable: "list", ascending: true })
-    .order("index", { foreignTable: "list.card", ascending: true })
-    .limit(1)
-    .single();
-
-  return data;
+  return formattedResult;
 };
 
 export const getBySlug = async (

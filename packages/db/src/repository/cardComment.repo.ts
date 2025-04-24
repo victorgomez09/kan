@@ -1,83 +1,82 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { eq } from "drizzle-orm";
 
-import type { Database } from "@kan/db/types/database.types";
+import type { dbClient } from "@kan/db/client";
+import { comments } from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
 export const create = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   commentInput: {
     cardId: number;
     comment: string;
     createdBy: string;
   },
 ) => {
-  const { data } = await db
-    .from("card_comments")
-    .insert({
+  const [result] = await db
+    .insert(comments)
+    .values({
       publicId: generateUID(),
       comment: commentInput.comment,
       createdBy: commentInput.createdBy,
       cardId: commentInput.cardId,
     })
-    .select(`id, publicId, comment`)
-    .limit(1)
-    .single();
+    .returning({
+      id: comments.id,
+      publicId: comments.publicId,
+      comment: comments.comment,
+    });
 
-  return data;
+  return result;
 };
 
-export const getByPublicId = async (
-  db: SupabaseClient<Database>,
-  publicId: string,
-) => {
-  const { data } = await db
-    .from("card_comments")
-    .select(`id, publicId, comment, createdBy`)
-    .eq("publicId", publicId)
-    .limit(1)
-    .single();
-
-  return data;
+export const getByPublicId = (db: dbClient, publicId: string) => {
+  return db.query.comments.findFirst({
+    columns: {
+      id: true,
+      publicId: true,
+      comment: true,
+      createdBy: true,
+    },
+    where: eq(comments.publicId, publicId),
+  });
 };
 
 export const update = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   commentInput: {
     id: number;
     comment: string;
   },
 ) => {
-  const { data } = await db
-    .from("card_comments")
-    .update({
+  const [result] = await db
+    .update(comments)
+    .set({
       comment: commentInput.comment,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date(),
     })
-    .eq("id", commentInput.id)
-    .select(`id, publicId, comment`)
-    .limit(1)
-    .order("id", { ascending: false })
-    .single();
+    .where(eq(comments.id, commentInput.id))
+    .returning({
+      id: comments.id,
+      publicId: comments.publicId,
+      comment: comments.comment,
+    });
 
-  return data;
+  return result;
 };
 
 export const softDelete = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   args: {
     commentId: number;
-    deletedAt: string;
+    deletedAt: Date;
     deletedBy: string;
   },
 ) => {
-  const { data } = await db
-    .from("card_comments")
-    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
-    .eq("id", args.commentId)
-    .select(`id`)
-    .order("id", { ascending: true })
-    .limit(1)
-    .single();
+  const [result] = await db
+    .update(comments)
+    .set({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
+    .where(eq(comments.id, args.commentId))
+    .returning({ id: comments.id });
 
-  return data;
+  return result;
 };

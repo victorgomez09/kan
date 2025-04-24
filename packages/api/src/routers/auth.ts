@@ -17,7 +17,7 @@ export const authRouter = createTRPCRouter({
     .input(z.object({ email: z.string() }))
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      const { data } = await ctx.db.auth.signInWithOtp({
+      const { data } = await ctx.supabaseClient.auth.signInWithOtp({
         email: input.email,
         options: {
           emailRedirectTo: `${process.env.WEBSITE_URL}`,
@@ -52,7 +52,7 @@ export const authRouter = createTRPCRouter({
           code: "BAD_REQUEST",
         });
 
-      const { data } = await ctx.db.auth.signInWithOAuth({
+      const { data } = await ctx.supabaseClient.auth.signInWithOAuth({
         provider: "google",
         options: {
           queryParams: {

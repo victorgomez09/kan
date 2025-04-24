@@ -333,7 +333,7 @@ export const cardRouter = createTRPCRouter({
 
       const deletedComment = await cardCommentRepo.softDelete(ctx.db, {
         commentId: existingComment.id,
-        deletedAt: new Date().toISOString(),
+        deletedAt: new Date(),
         deletedBy: userId,
       });
 

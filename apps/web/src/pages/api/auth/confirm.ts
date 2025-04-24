@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { Stripe } from "stripe";
 
+import { createDrizzleClient } from "@kan/db/client";
 import * as memberRepo from "@kan/db/repository/member.repo";
 import * as userRepo from "@kan/db/repository/user.repo";
 import { createNextClient } from "@kan/supabase/clients";
@@ -46,20 +47,22 @@ export default async function handler(req: NextRequest) {
   const response = NextResponse.next();
 
   if ((tokenHash && type) ?? code) {
-    const db = createNextClient(req, response);
+    const supabaseClient = createNextClient(req, response);
 
     if (tokenHash && type) {
-      authRes = await db.auth.verifyOtp({
+      authRes = await supabaseClient.auth.verifyOtp({
         type: type as EmailOtpType,
         token_hash: tokenHash,
       });
     }
 
     if (code) {
-      authRes = await db.auth.exchangeCodeForSession(code);
+      authRes = await supabaseClient.auth.exchangeCodeForSession(code);
     }
 
     const user = authRes?.data.user;
+
+    const db = createDrizzleClient();
 
     if (user?.id && user.email) {
       const existingUser = await userRepo.getById(db, user.id);
