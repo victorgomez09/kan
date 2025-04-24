@@ -56,12 +56,13 @@ export const softDelete = async (
   db: dbClient,
   args: {
     memberId: number;
+    deletedAt: Date;
     deletedBy: string;
   },
 ) => {
   const [result] = await db
     .update(workspaceMembers)
-    .set({ deletedAt: new Date(), deletedBy: args.deletedBy })
+    .set({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
     .where(
       and(
         eq(workspaceMembers.id, args.memberId),

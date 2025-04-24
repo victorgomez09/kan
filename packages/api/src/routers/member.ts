@@ -59,7 +59,7 @@ export const memberRouter = createTRPCRouter({
         });
 
       const isInvitedEmailAlreadyMember = workspace.members.some(
-        (member) => member.user?.email === input.email,
+        (member) => member.user.email === input.email,
       );
 
       if (isInvitedEmailAlreadyMember) {
@@ -78,7 +78,7 @@ export const memberRouter = createTRPCRouter({
       if (existingUser) {
         invitedUserId = existingUser.id;
 
-        const magicLink = await ctx.db.auth.admin.generateLink({
+        const magicLink = await ctx.supabaseClient.auth.admin.generateLink({
           type: "magiclink",
           email: input.email,
           options: {
@@ -89,7 +89,7 @@ export const memberRouter = createTRPCRouter({
         hashedToken = magicLink.data.properties?.hashed_token;
         verificationType = magicLink.data.properties?.verification_type;
       } else {
-        const invite = await ctx.db.auth.admin.generateLink({
+        const invite = await ctx.supabaseClient.auth.admin.generateLink({
           type: "invite",
           email: input.email,
           options: {
@@ -117,7 +117,13 @@ export const memberRouter = createTRPCRouter({
             stripeCustomerId: stripeCustomer.id,
           });
 
-          invitedUserId = newUser?.id;
+          if (!newUser)
+            throw new TRPCError({
+              message: `Failed to create a new user for email ${invitedUserEmail}`,
+              code: "INTERNAL_SERVER_ERROR",
+            });
+
+          invitedUserId = newUser.id;
         }
       }
 
@@ -211,7 +217,7 @@ export const memberRouter = createTRPCRouter({
 
       const deletedMember = await memberRepo.softDelete(ctx.db, {
         memberId: member.id,
-        deletedAt: new Date().toISOString(),
+        deletedAt: new Date(),
         deletedBy: userId,
       });
 

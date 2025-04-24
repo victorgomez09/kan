@@ -247,7 +247,7 @@ export const boardRouter = createTRPCRouter({
 
       const listIds = board.lists.map((list) => list.id);
 
-      const deletedAt = new Date().toISOString();
+      const deletedAt = new Date();
 
       await boardRepo.softDelete(ctx.db, {
         boardId: board.id,

@@ -93,7 +93,7 @@ export const listRouter = createTRPCRouter({
           code: "NOT_FOUND",
         });
 
-      const result = await listRepo.reorder(ctx.db, {
+      const result = await listRepo.reorder(ctx.supabaseClient, {
         boardPublicId: list.boardId,
         listPublicId: list.id,
         currentIndex: input.currentIndex,
@@ -142,7 +142,7 @@ export const listRouter = createTRPCRouter({
           code: "NOT_FOUND",
         });
 
-      const deletedAt = new Date().toISOString();
+      const deletedAt = new Date();
 
       const deletedList = await listRepo.softDeleteById(ctx.db, {
         listId: list.id,
@@ -176,7 +176,7 @@ export const listRouter = createTRPCRouter({
 
       await activityRepo.bulkCreate(ctx.db, activities);
 
-      await listRepo.shiftIndex(ctx.db, {
+      await listRepo.shiftIndex(ctx.supabaseClient, {
         boardId: list.boardId,
         listIndex: list.index,
       });
@@ -203,7 +203,7 @@ export const listRouter = createTRPCRouter({
     .output(z.custom<Awaited<ReturnType<typeof listRepo.update>>>())
     .mutation(async ({ ctx, input }) => {
       const result = await listRepo.update(
-        ctx.db,
+        ctx.supabaseClient,
         { name: input.name },
         { listPublicId: input.listPublicId },
       );

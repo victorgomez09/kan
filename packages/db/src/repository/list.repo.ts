@@ -124,12 +124,13 @@ export const softDeleteAllByBoardId = async (
   db: dbClient,
   args: {
     boardId: number;
+    deletedAt: Date;
     deletedBy: string;
   },
 ) => {
   const [result] = await db
     .update(lists)
-    .set({ deletedAt: new Date(), deletedBy: args.deletedBy })
+    .set({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
     .where(and(eq(lists.boardId, args.boardId), isNull(lists.deletedAt)))
     .returning({
       id: lists.id,
@@ -142,12 +143,13 @@ export const softDeleteById = async (
   db: dbClient,
   args: {
     listId: number;
+    deletedAt: Date;
     deletedBy: string;
   },
 ) => {
   const [updatedList] = await db
     .update(lists)
-    .set({ deletedAt: new Date(), deletedBy: args.deletedBy })
+    .set({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
     .where(and(eq(lists.id, args.listId), isNull(lists.deletedAt)))
     .returning({
       id: lists.id,

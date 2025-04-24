@@ -61,7 +61,7 @@ export const cardRouter = createTRPCRouter({
         index = lastCard.index + 1;
       }
 
-      const newCard = await cardRepo.create(ctx.drizzleDb, {
+      const newCard = await cardRepo.create(ctx.db, {
         title: input.title,
         description: input.description,
         createdBy: userId,
@@ -83,7 +83,7 @@ export const cardRouter = createTRPCRouter({
           input.labelPublicIds,
         );
 
-        if (!labels?.length)
+        if (!labels.length)
           throw new TRPCError({
             message: `Labels with public IDs (${input.labelPublicIds.join(", ")}) not found`,
             code: "NOT_FOUND",
@@ -99,7 +99,7 @@ export const cardRouter = createTRPCRouter({
           labelsInsert,
         );
 
-        if (!cardLabels?.length)
+        if (!cardLabels.length)
           throw new TRPCError({
             message: `Failed to create card label relationships`,
             code: "INTERNAL_SERVER_ERROR",
@@ -121,7 +121,7 @@ export const cardRouter = createTRPCRouter({
           input.memberPublicIds,
         );
 
-        if (!members?.length)
+        if (!members.length)
           throw new TRPCError({
             message: `Members with public IDs (${input.memberPublicIds.join(", ")}) not found`,
             code: "NOT_FOUND",
@@ -138,7 +138,7 @@ export const cardRouter = createTRPCRouter({
             membersInsert,
           );
 
-        if (!cardMembers?.length)
+        if (!cardMembers.length)
           throw new TRPCError({
             message: `Failed to create card member relationships`,
             code: "INTERNAL_SERVER_ERROR",
@@ -672,13 +672,13 @@ export const cardRouter = createTRPCRouter({
         input.cardPublicId,
       );
 
-      if (!card?.list?.id)
+      if (!card?.list.id)
         throw new TRPCError({
           message: `Card with public ID ${input.cardPublicId} not found`,
           code: "NOT_FOUND",
         });
 
-      const deletedAt = new Date().toISOString();
+      const deletedAt = new Date();
 
       const deletedCard = await cardRepo.softDelete(ctx.db, {
         cardId: card.id,
@@ -692,7 +692,7 @@ export const cardRouter = createTRPCRouter({
           code: "INTERNAL_SERVER_ERROR",
         });
 
-      await cardRepo.shiftIndex(ctx.db, {
+      await cardRepo.shiftIndex(ctx.supabaseClient, {
         listId: card.list.id,
         cardIndex: card.index,
       });
@@ -770,7 +770,7 @@ export const cardRouter = createTRPCRouter({
         newIndex = lastCardIndex !== undefined ? lastCardIndex + 1 : 0;
       }
 
-      const { success } = await cardRepo.reorder(ctx.db, {
+      const { success } = await cardRepo.reorder(ctx.supabaseClient, {
         currentListId: currentList.id,
         newListId: newList.id,
         currentIndex,

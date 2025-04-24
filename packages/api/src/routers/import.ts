@@ -209,7 +209,7 @@ export const importRouter = createTRPCRouter({
 
             const newLabels = await labelRepo.bulkCreate(ctx.db, labelsInsert);
 
-            if (newLabels?.length)
+            if (newLabels.length)
               createdLabels = newLabels
                 .map((label, index) => ({
                   id: label.id,

@@ -27,15 +27,20 @@ export const getByEmail = (db: dbClient, email: string) => {
   });
 };
 
-export const create = (
+export const create = async (
   db: dbClient,
   user: { id: string; email: string; stripeCustomerId: string },
 ) => {
-  return db.insert(users).values({
-    id: user.id,
-    email: user.email,
-    stripeCustomerId: user.stripeCustomerId,
-  });
+  const [result] = await db
+    .insert(users)
+    .values({
+      id: user.id,
+      email: user.email,
+      stripeCustomerId: user.stripeCustomerId,
+    })
+    .returning();
+
+  return result;
 };
 
 export const update = async (

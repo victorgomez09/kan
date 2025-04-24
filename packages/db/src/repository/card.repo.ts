@@ -82,7 +82,7 @@ export const bulkCreateCardLabelRelationships = async (
     labelId: number;
   }[],
 ) => {
-  const [result] = await db
+  const result = await db
     .insert(cardsToLabels)
     .values(cardLabelRelationshipInput)
     .returning();
@@ -97,7 +97,7 @@ export const bulkCreateCardWorkspaceMemberRelationships = async (
     workspaceMemberId: number;
   }[],
 ) => {
-  const [result] = await db
+  const result = await db
     .insert(cardToWorkspaceMembers)
     .values(cardWorkspaceMemberRelationshipInput)
     .returning();
@@ -189,7 +189,7 @@ export const bulkCreate = async (
     importId?: number;
   }[],
 ) => {
-  const [result] = await db.insert(cards).values(cardInput).returning({
+  const result = await db.insert(cards).values(cardInput).returning({
     id: cards.id,
   });
 
@@ -551,7 +551,7 @@ export const hardDeleteCardLabelRelationship = async (
     )
     .returning();
 
-  return { data: result };
+  return result;
 };
 
 export const hardDeleteAllCardLabelRelationships = async (
