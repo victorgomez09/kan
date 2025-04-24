@@ -77,6 +77,7 @@ export const cardsRelations = relations(cards, ({ one, many }) => ({
     references: [imports.id],
   }),
   comments: many(comments),
+  activities: many(cardActivities),
 }));
 
 export const cardActivities = pgTable("card_activity", {
@@ -132,9 +133,17 @@ export const cardActivitiesRelations = relations(cardActivities, ({ one }) => ({
     fields: [cardActivities.workspaceMemberId],
     references: [workspaceMembers.id],
   }),
-  createdBy: one(users, {
+  user: one(users, {
     fields: [cardActivities.createdBy],
     references: [users.id],
+  }),
+  member: one(workspaceMembers, {
+    fields: [cardActivities.workspaceMemberId],
+    references: [workspaceMembers.id],
+  }),
+  comment: one(comments, {
+    fields: [cardActivities.commentId],
+    references: [comments.id],
   }),
 }));
 

@@ -1,9 +1,16 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import type { dbClient } from "@kan/db/client";
 import type { Database } from "@kan/db/types/database.types";
-import * as schema from "@kan/db/schema";
+import {
+  cardActivities,
+  cards,
+  cardsToLabels,
+  cardToWorkspaceMembers,
+  lists,
+  workspaceMembers,
+} from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
 export const create = async (
@@ -23,9 +30,9 @@ export const create = async (
           id: true,
         },
         where: and(
-          eq(schema.cards.listId, cardInput.listId),
-          eq(schema.cards.index, cardInput.index),
-          isNull(schema.cards.deletedAt),
+          eq(cards.listId, cardInput.listId),
+          eq(cards.index, cardInput.index),
+          isNull(cards.deletedAt),
         ),
       });
 
@@ -44,7 +51,7 @@ export const create = async (
     }
 
     const result = await tx
-      .insert(schema.cards)
+      .insert(cards)
       .values({
         publicId: generateUID(),
         title: cardInput.title,
@@ -53,11 +60,11 @@ export const create = async (
         listId: cardInput.listId,
         index: cardInput.index,
       })
-      .returning({ id: schema.cards.id });
+      .returning({ id: cards.id });
 
     if (!result[0]) return tx.rollback();
 
-    await tx.insert(schema.cardActivities).values({
+    await tx.insert(cardActivities).values({
       publicId: generateUID(),
       cardId: result[0].id,
       type: "card.created",
@@ -69,37 +76,37 @@ export const create = async (
 };
 
 export const bulkCreateCardLabelRelationships = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   cardLabelRelationshipInput: {
     cardId: number;
     labelId: number;
   }[],
 ) => {
-  const { data } = await db
-    .from("_card_labels")
-    .insert(cardLabelRelationshipInput)
-    .select();
+  const [result] = await db
+    .insert(cardsToLabels)
+    .values(cardLabelRelationshipInput)
+    .returning();
 
-  return data;
+  return result;
 };
 
 export const bulkCreateCardWorkspaceMemberRelationships = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   cardWorkspaceMemberRelationshipInput: {
     cardId: number;
     workspaceMemberId: number;
   }[],
 ) => {
-  const { data } = await db
-    .from("_card_workspace_members")
-    .insert(cardWorkspaceMemberRelationshipInput)
-    .select();
+  const [result] = await db
+    .insert(cardToWorkspaceMembers)
+    .values(cardWorkspaceMemberRelationshipInput)
+    .returning();
 
-  return data;
+  return result;
 };
 
 export const update = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   cardInput: {
     title: string;
     description: string;
@@ -108,65 +115,70 @@ export const update = async (
     cardPublicId: string;
   },
 ) => {
-  const { data } = await db
-    .from("card")
-    .update({ title: cardInput.title, description: cardInput.description })
-    .eq("publicId", args.cardPublicId)
-    .is("deletedAt", null)
-    .select(`id, publicId, title, description`)
-    .order("id", { ascending: true })
-    .limit(1)
-    .single();
+  const [result] = await db
+    .update(cards)
+    .set({
+      title: cardInput.title,
+      description: cardInput.description,
+    })
+    .where(and(eq(cards.publicId, args.cardPublicId), isNull(cards.deletedAt)))
+    .returning({
+      id: cards.id,
+      publicId: cards.publicId,
+      title: cards.title,
+      description: cards.description,
+    });
 
-  return data;
+  return result;
 };
 
-export const getCardWithListByPublicId = async (
-  db: SupabaseClient<Database>,
+export const getCardWithListByPublicId = (
+  db: dbClient,
   cardPublicId: string,
 ) => {
-  const { data } = await db
-    .from("card")
-    .select(`id, index, list (id, boardId)`)
-    .eq("publicId", cardPublicId)
-    .is("deletedAt", null)
-    .limit(1)
-    .single();
-
-  return data;
+  return db.query.cards.findFirst({
+    columns: {
+      id: true,
+      index: true,
+    },
+    with: {
+      list: {
+        columns: {
+          id: true,
+          boardId: true,
+        },
+      },
+    },
+    where: and(eq(cards.publicId, cardPublicId), isNull(cards.deletedAt)),
+  });
 };
 
-export const getByPublicId = async (
-  db: SupabaseClient<Database>,
-  cardPublicId: string,
-) => {
-  const { data } = await db
-    .from("card")
-    .select(`id, publicId, title, description`)
-    .eq("publicId", cardPublicId)
-    .limit(1)
-    .single();
-
-  return data;
+export const getByPublicId = (db: dbClient, cardPublicId: string) => {
+  return db.query.cards.findFirst({
+    columns: {
+      id: true,
+      publicId: true,
+      title: true,
+      description: true,
+    },
+    where: eq(cards.publicId, cardPublicId),
+  });
 };
 
 export const getCardLabelRelationship = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   args: { cardId: number; labelId: number },
 ) => {
-  const { data } = await db
-    .from("_card_labels")
-    .select()
-    .eq("cardId", args.cardId)
-    .eq("labelId", args.labelId)
-    .limit(1)
-    .single();
-
-  return data;
+  return db.query.cardsToLabels.findFirst({
+    where: and(
+      eq(cardsToLabels.cardId, args.cardId),
+      eq(cardsToLabels.labelId, args.labelId),
+    ),
+  });
 };
 
 export const bulkCreate = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   cardInput: {
     publicId: string;
     title: string;
@@ -177,178 +189,246 @@ export const bulkCreate = async (
     importId?: number;
   }[],
 ) => {
-  const { data } = await db.from("card").insert(cardInput).select(`id`);
+  const [result] = await db.insert(cards).values(cardInput).returning({
+    id: cards.id,
+  });
 
-  return data;
+  return result;
 };
 
 export const createCardLabelRelationship = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   cardLabelRelationshipInput: { cardId: number; labelId: number },
 ) => {
-  const { data } = await db
-    .from("_card_labels")
-    .insert({
+  const [result] = await db
+    .insert(cardsToLabels)
+    .values({
       cardId: cardLabelRelationshipInput.cardId,
       labelId: cardLabelRelationshipInput.labelId,
     })
-    .select()
-    .limit(1)
-    .single();
+    .returning();
 
-  return data;
+  return result;
 };
 
 export const bulkCreateCardLabelRelationship = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   cardLabelRelationshipInput: { cardId: number; labelId: number }[],
 ) => {
-  const { data } = await db
-    .from("_card_labels")
-    .insert(cardLabelRelationshipInput)
-    .select();
+  const [result] = await db
+    .insert(cardsToLabels)
+    .values(cardLabelRelationshipInput)
+    .returning();
 
-  return data;
+  return result;
 };
 
-export const getCardMemberRelationship = async (
-  db: SupabaseClient<Database>,
+export const getCardMemberRelationship = (
+  db: dbClient,
   args: { cardId: number; memberId: number },
 ) => {
-  const { data } = await db
-    .from("_card_workspace_members")
-    .select()
-    .eq("cardId", args.cardId)
-    .eq("workspaceMemberId", args.memberId)
-    .limit(1)
-    .single();
-
-  return data;
+  return db.query.cardToWorkspaceMembers.findFirst({
+    where: and(
+      eq(cardToWorkspaceMembers.cardId, args.cardId),
+      eq(cardToWorkspaceMembers.workspaceMemberId, args.memberId),
+    ),
+  });
 };
 
 export const createCardMemberRelationship = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   cardMemberRelationshipInput: { cardId: number; memberId: number },
 ) => {
-  const { error } = await db.from("_card_workspace_members").insert({
-    cardId: cardMemberRelationshipInput.cardId,
-    workspaceMemberId: cardMemberRelationshipInput.memberId,
-  });
+  const [result] = await db
+    .insert(cardToWorkspaceMembers)
+    .values({
+      cardId: cardMemberRelationshipInput.cardId,
+      workspaceMemberId: cardMemberRelationshipInput.memberId,
+    })
+    .returning();
 
-  return { success: !error };
+  return { success: !!result };
 };
 
 export const getWithListAndMembersByPublicId = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   cardPublicId: string,
 ) => {
-  const { data } = await db
-    .from("card")
-    .select(
-      `
-        publicId,
-        title,
-        description,
-        labels:label (
-          publicId,
-          name,
-          colourCode
-        ),
-        list (
-          publicId,
-          name,
-          board (
-            publicId,
-            name,
-            labels:label (
-              publicId,
-              colourCode,
-              name
-            ),
-            lists:list (
-              publicId,
-              name
-            ),
-            workspace (
-              publicId,
-              members:workspace_members (
-                publicId,
-                user!workspace_members_userId_user_id_fk (
-                  id,
-                  name,
-                  email,
-                  image
-                )
-              )
-            )
-          )
-        ),
-        members:workspace_members (
-          publicId,
-          user!workspace_members_userId_user_id_fk (
-            id,
-            name
-          )
-        ),
-        activities:card_activity (
-          publicId,
-          type,
-          createdAt,
-          fromIndex,
-          toIndex,
-          fromTitle,
-          toTitle,
-          fromDescription,
-          toDescription,
-          fromList:list!card_activity_fromListId_list_id_fk (
-            publicId,
-            name,
-            index
-          ),
-          toList:list!card_activity_toListId_list_id_fk (
-            publicId,
-            name,
-            index
-          ),
-          label!card_activity_labelId_label_id_fk (
-            publicId,
-            name
-          ),
-          member:workspace_members!card_activity_workspaceMemberId_workspace_members_id_fk (
-            publicId,
-            user!workspace_members_userId_user_id_fk (
-              id,
-              name,
-              email
-            )
-          ),
-          user!card_activity_createdBy_user_id_fk (
-            id,
-            name,
-            email
-          ),
-          comment:card_comments!card_activity_commentId_card_comments_id_fk (
-            publicId,
-            comment,
-            createdBy,
-            updatedAt
-          )
-        )
-      `,
-    )
-    .eq("publicId", cardPublicId)
-    .is("deletedAt", null)
-    .is("list.board.lists.deletedAt", null)
-    .is("list.board.workspace.members.deletedAt", null)
-    .is("activities.comment.deletedAt", null)
-    .order("index", { referencedTable: "list.board.lists", ascending: true })
-    .is("members.deletedAt", null)
-    .limit(1)
-    .single();
+  const card = await db.query.cards.findFirst({
+    columns: {
+      publicId: true,
+      title: true,
+      description: true,
+    },
+    with: {
+      labels: {
+        with: {
+          label: {
+            columns: {
+              publicId: true,
+              name: true,
+              colourCode: true,
+            },
+          },
+        },
+      },
+      list: {
+        columns: {
+          publicId: true,
+          name: true,
+        },
+        with: {
+          board: {
+            columns: {
+              publicId: true,
+              name: true,
+            },
+            with: {
+              labels: {
+                columns: {
+                  publicId: true,
+                  colourCode: true,
+                  name: true,
+                },
+              },
+              lists: {
+                columns: {
+                  publicId: true,
+                  name: true,
+                },
+                where: isNull(lists.deletedAt),
+                orderBy: asc(lists.index),
+              },
+              workspace: {
+                columns: {
+                  publicId: true,
+                },
+                with: {
+                  members: {
+                    columns: {
+                      publicId: true,
+                    },
+                    with: {
+                      user: {
+                        columns: {
+                          id: true,
+                          name: true,
+                          email: true,
+                          image: true,
+                        },
+                      },
+                    },
+                    where: isNull(workspaceMembers.deletedAt),
+                  },
+                },
+              },
+            },
+          },
+        },
+        // https://github.com/drizzle-team/drizzle-orm/issues/2903
+        // where: isNull(lists.deletedAt),
+      },
+      members: {
+        with: {
+          member: {
+            columns: {
+              publicId: true,
+            },
+            with: {
+              user: {
+                columns: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+            // https://github.com/drizzle-team/drizzle-orm/issues/2903
+            // where: isNull(workspaceMembers.deletedAt),
+          },
+        },
+      },
+      activities: {
+        columns: {
+          publicId: true,
+          type: true,
+          createdAt: true,
+          fromIndex: true,
+          toIndex: true,
+          fromTitle: true,
+          toTitle: true,
+          fromDescription: true,
+          toDescription: true,
+        },
+        with: {
+          fromList: {
+            columns: {
+              publicId: true,
+              name: true,
+              index: true,
+            },
+          },
+          toList: {
+            columns: {
+              publicId: true,
+              name: true,
+              index: true,
+            },
+          },
+          label: {
+            columns: {
+              publicId: true,
+              name: true,
+            },
+          },
+          member: {
+            columns: {
+              publicId: true,
+            },
+            with: {
+              user: {
+                columns: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          user: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          comment: {
+            columns: {
+              publicId: true,
+              comment: true,
+              createdBy: true,
+              updatedAt: true,
+            },
+            // https://github.com/drizzle-team/drizzle-orm/issues/2903
+            // where: isNull(comments.deletedAt),
+          },
+        },
+      },
+    },
+    where: and(eq(cards.publicId, cardPublicId), isNull(cards.deletedAt)),
+  });
 
-  return data;
+  if (!card) return null;
+
+  const formattedResult = {
+    ...card,
+    labels: card.labels.map((label) => label.label),
+    members: card.members.map((member) => member.member),
+  };
+
+  return formattedResult;
 };
 
+// Move to update - should take two arguments cardId and index
 export const reorder = async (
   db: SupabaseClient<Database>,
   args: {
@@ -370,6 +450,7 @@ export const reorder = async (
   return { success: !error };
 };
 
+// Again should be handled in update transaction
 export const shiftIndex = async (
   db: SupabaseClient<Database>,
   args: {
@@ -385,6 +466,7 @@ export const shiftIndex = async (
   return data;
 };
 
+// Handled in update transaction
 export const pushIndex = async (
   db: SupabaseClient<Database>,
   args: {
@@ -401,77 +483,85 @@ export const pushIndex = async (
 };
 
 export const softDelete = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   args: {
     cardId: number;
-    deletedAt: string;
+    deletedAt: Date;
     deletedBy: string;
   },
 ) => {
-  const { data } = await db
-    .from("card")
-    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
-    .eq("id", args.cardId)
-    .select(`id`)
-    .order("id", { ascending: true })
-    .limit(1)
-    .single();
+  const [result] = await db
+    .update(cards)
+    .set({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
+    .where(eq(cards.id, args.cardId))
+    .returning({
+      id: cards.id,
+    });
 
-  return data;
+  return result;
 };
 
 export const softDeleteAllByListIds = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   args: {
     listIds: number[];
-    deletedAt: string;
+    deletedAt: Date;
     deletedBy: string;
   },
 ) => {
-  const { data } = await db
-    .from("card")
-    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
-    .in("listId", args.listIds)
-    .is("deletedAt", null)
-    .select(`id`);
+  const updatedCards = await db
+    .update(cards)
+    .set({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
+    .where(and(inArray(cards.listId, args.listIds), isNull(cards.deletedAt)))
+    .returning({
+      id: cards.id,
+    });
 
-  return data;
+  return updatedCards;
 };
 
 export const hardDeleteCardMemberRelationship = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   args: { cardId: number; memberId: number },
 ) => {
-  const { error } = await db
-    .from("_card_workspace_members")
-    .delete()
-    .eq("cardId", args.cardId)
-    .eq("workspaceMemberId", args.memberId)
-    .select();
+  const [result] = await db
+    .delete(cardToWorkspaceMembers)
+    .where(
+      and(
+        eq(cardToWorkspaceMembers.cardId, args.cardId),
+        eq(cardToWorkspaceMembers.workspaceMemberId, args.memberId),
+      ),
+    )
+    .returning();
 
-  return { success: !error };
+  return { success: !!result };
 };
 
 export const hardDeleteCardLabelRelationship = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   args: { cardId: number; labelId: number },
 ) => {
-  const { data } = await db
-    .from("_card_labels")
-    .delete()
-    .eq("cardId", args.cardId)
-    .eq("labelId", args.labelId)
-    .select()
-    .single();
+  const [result] = await db
+    .delete(cardsToLabels)
+    .where(
+      and(
+        eq(cardsToLabels.cardId, args.cardId),
+        eq(cardsToLabels.labelId, args.labelId),
+      ),
+    )
+    .returning();
 
-  return { data };
+  return { data: result };
 };
 
 export const hardDeleteAllCardLabelRelationships = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   labelId: number,
 ) => {
-  const result = await db.from("_card_labels").delete().eq("labelId", labelId);
+  const [result] = await db
+    .delete(cardsToLabels)
+    .where(eq(cardsToLabels.labelId, labelId))
+    .returning();
 
   return result;
 };
