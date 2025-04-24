@@ -1,8 +1,7 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 
 import type { dbClient } from "@kan/db/client";
-import type { Database } from "@kan/db/types/database.types";
+import type { BoardVisibilityStatus } from "@kan/db/schema";
 import { boards, cards, lists, workspaceMembers } from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
@@ -16,18 +15,15 @@ export const getAllByWorkspaceId = (db: dbClient, workspaceId: number) => {
   });
 };
 
-export const getIdByPublicId = async (
-  db: SupabaseClient<Database>,
-  boardPublicId: string,
-) => {
-  const { data } = await db
-    .from("board")
-    .select("id")
-    .eq("publicId", boardPublicId)
-    .limit(1)
-    .single();
+export const getIdByPublicId = async (db: dbClient, boardPublicId: string) => {
+  const board = await db.query.boards.findFirst({
+    columns: {
+      id: true,
+    },
+    where: eq(boards.publicId, boardPublicId),
+  });
 
-  return data;
+  return board;
 };
 
 export const getByPublicId = async (
@@ -161,104 +157,150 @@ export const getByPublicId = async (
 };
 
 export const getBySlug = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   boardSlug: string,
   filters: {
     members: string[];
     labels: string[];
   },
 ) => {
-  let query = db
-    .from("board")
-    .select(
-      `
-        publicId,
-        name,
-        slug,
-        workspace (
-          publicId,
-          name,
-          slug,
-          description
-        ),
-        labels:label (
-          publicId,
-          name,
-          colourCode
-        ),
-        lists:list (
-          publicId,
-          name,
-          boardId,
-          index,
-          cards:card (
-            publicId,
-            title,
-            description,
-            listId,
-            index,
-            labels:label(
-              publicId,
-              name,
-              colourCode
-            ),
-            _filteredLabels:label${filters.labels.length > 0 ? "!inner" : ""} (
-              publicId
-            )
-          )
-        )
-      `,
-    )
-    .eq("slug", boardSlug)
-    .is("deletedAt", null)
-    .is("lists.deletedAt", null)
-    .is("lists.cards.deletedAt", null);
+  const board = await db.query.boards.findFirst({
+    columns: {
+      publicId: true,
+      name: true,
+      slug: true,
+      visibility: true,
+    },
+    with: {
+      workspace: {
+        columns: {
+          publicId: true,
+        },
+        with: {
+          members: {
+            columns: {
+              publicId: true,
+            },
+            with: {
+              user: {
+                columns: {
+                  name: true,
+                  email: true,
+                  image: true,
+                },
+              },
+            },
+            where: isNull(workspaceMembers.deletedAt),
+          },
+        },
+      },
+      labels: {
+        columns: {
+          publicId: true,
+          name: true,
+          colourCode: true,
+        },
+      },
+      lists: {
+        columns: {
+          publicId: true,
+          name: true,
+          boardId: true,
+          index: true,
+        },
+        with: {
+          cards: {
+            columns: {
+              publicId: true,
+              title: true,
+              description: true,
+              listId: true,
+              index: true,
+            },
+            with: {
+              labels: {
+                with: {
+                  label: {
+                    columns: {
+                      publicId: true,
+                      name: true,
+                      colourCode: true,
+                    },
+                    // where: inArray(label.publicId, filters.labels),
+                  },
+                },
+              },
+            },
+            where: isNull(cards.deletedAt),
+            orderBy: [asc(cards.index)],
+          },
+        },
+        where: isNull(lists.deletedAt),
+        orderBy: [asc(lists.index)],
+      },
+    },
+    where: and(eq(boards.slug, boardSlug), isNull(boards.deletedAt)),
+  });
 
-  if (filters.labels.length > 0) {
-    query = query.in("lists.cards._filteredLabels.publicId", filters.labels);
-  }
+  if (!board) return null;
 
-  const { data } = await query
-    .order("index", { foreignTable: "list", ascending: true })
-    .order("index", { foreignTable: "list.card", ascending: true })
-    .limit(1)
-    .single();
+  const formattedResult = {
+    ...board,
+    lists: board.lists.map((list) => ({
+      ...list,
+      cards: list.cards.map((card) => ({
+        ...card,
+        labels: card.labels.map((label) => label.label),
+      })),
+    })),
+  };
 
-  return data;
+  return formattedResult;
 };
 
-export const getWithListIdsByPublicId = async (
-  db: SupabaseClient<Database>,
+export const getWithListIdsByPublicId = (
+  db: dbClient,
   boardPublicId: string,
 ) => {
-  const { data } = await db
-    .from("board")
-    .select(`id, lists:list (id)`)
-    .eq("publicId", boardPublicId)
-    .limit(1)
-    .single();
-
-  return data;
+  return db.query.boards.findFirst({
+    columns: {
+      id: true,
+    },
+    with: {
+      lists: {
+        columns: {
+          id: true,
+        },
+      },
+    },
+    where: eq(boards.publicId, boardPublicId),
+  });
 };
 
-export const getWithLatestListIndexByPublicId = async (
-  db: SupabaseClient<Database>,
+export const getWithLatestListIndexByPublicId = (
+  db: dbClient,
   boardPublicId: string,
 ) => {
-  const { data } = await db
-    .from("board")
-    .select(`id, lists:list (index)`)
-    .eq("publicId", boardPublicId)
-    .order("index", { foreignTable: "list", ascending: false })
-    .is("list.deletedAt", null)
-    .limit(1)
-    .single();
-
-  return data;
+  return db.query.boards.findFirst({
+    columns: {
+      id: true,
+    },
+    with: {
+      lists: {
+        columns: {
+          index: true,
+        },
+        where: isNull(lists.deletedAt),
+        orderBy: [desc(lists.index)],
+        limit: 1,
+      },
+    },
+    where: eq(boards.publicId, boardPublicId),
+  });
 };
 
 export const create = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   boardInput: {
     publicId?: string;
     name: string;
@@ -268,9 +310,9 @@ export const create = async (
     slug: string;
   },
 ) => {
-  const { data } = await db
-    .from("board")
-    .insert({
+  const [result] = await db
+    .insert(boards)
+    .values({
       publicId: boardInput.publicId ?? generateUID(),
       name: boardInput.name,
       createdBy: boardInput.createdBy,
@@ -278,76 +320,87 @@ export const create = async (
       importId: boardInput.importId,
       slug: boardInput.slug,
     })
-    .select(`id, publicId, name`)
-    .limit(1)
-    .single();
-
-  return data;
-};
-
-export const update = async (
-  db: SupabaseClient<Database>,
-  boardInput: {
-    name: string | undefined;
-    slug: string | undefined;
-    visibility: "public" | "private" | undefined;
-    boardPublicId: string;
-  },
-) => {
-  const { data } = await db
-    .from("board")
-    .update({
-      name: boardInput.name,
-      slug: boardInput.slug,
-      visibility: boardInput.visibility,
-      updatedAt: new Date().toISOString(),
-    })
-    .eq("publicId", boardInput.boardPublicId)
-    .select(`publicId, name`)
-    .limit(1)
-    .order("id", { ascending: false })
-    .single();
-
-  return data;
-};
-
-export const softDelete = async (
-  db: SupabaseClient<Database>,
-  args: {
-    boardId: number;
-    deletedAt: string;
-    deletedBy: string;
-  },
-) => {
-  const result = db
-    .from("board")
-    .update({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
-    .eq("id", args.boardId)
-    .is("deletedAt", null);
+    .returning({
+      id: boards.id,
+      publicId: boards.publicId,
+      name: boards.name,
+    });
 
   return result;
 };
 
-export const hardDelete = async (
-  db: SupabaseClient<Database>,
-  workspaceId: number,
+export const update = async (
+  db: dbClient,
+  boardInput: {
+    name: string | undefined;
+    slug: string | undefined;
+    visibility: BoardVisibilityStatus | undefined;
+    boardPublicId: string;
+  },
 ) => {
-  const result = db.from("board").delete().eq("workspaceId", workspaceId);
+  const [result] = await db
+    .update(boards)
+    .set({
+      name: boardInput.name,
+      slug: boardInput.slug,
+      visibility: boardInput.visibility,
+      updatedAt: new Date(),
+    })
+    .where(eq(boards.publicId, boardInput.boardPublicId))
+    .returning({
+      publicId: boards.publicId,
+      name: boards.name,
+    });
+
+  return result;
+};
+
+export const softDelete = async (
+  db: dbClient,
+  args: {
+    boardId: number;
+    deletedAt: Date;
+    deletedBy: string;
+  },
+) => {
+  const [result] = await db
+    .update(boards)
+    .set({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
+    .where(and(eq(boards.id, args.boardId), isNull(boards.deletedAt)))
+    .returning({
+      publicId: boards.publicId,
+      name: boards.name,
+    });
+
+  return result;
+};
+
+export const hardDelete = async (db: dbClient, workspaceId: number) => {
+  const [result] = await db
+    .delete(boards)
+    .where(eq(boards.workspaceId, workspaceId))
+    .returning({
+      publicId: boards.publicId,
+      name: boards.name,
+    });
 
   return result;
 };
 
 export const isSlugUnique = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   args: { slug: string; workspaceId: number },
 ) => {
-  const { data } = await db
-    .from("board")
-    .select("slug")
-    .eq("slug", args.slug)
-    .eq("workspaceId", args.workspaceId)
-    .is("deletedAt", null)
-    .limit(1);
+  const result = await db.query.boards.findFirst({
+    columns: {
+      slug: true,
+    },
+    where: and(
+      eq(boards.slug, args.slug),
+      eq(boards.workspaceId, args.workspaceId),
+      isNull(boards.deletedAt),
+    ),
+  });
 
-  return data?.length === 0;
+  return result === undefined;
 };

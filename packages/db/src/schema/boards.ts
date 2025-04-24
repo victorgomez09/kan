@@ -18,10 +18,12 @@ import { lists } from "./lists";
 import { users } from "./users";
 import { workspaces } from "./workspaces";
 
-export const boardVisibilityEnum = pgEnum("board_visibility", [
-  "private",
-  "public",
-]);
+export const boardVisibilityStatuses = ["private", "public"] as const;
+export type BoardVisibilityStatus = (typeof boardVisibilityStatuses)[number];
+export const boardVisibilityEnum = pgEnum(
+  "board_visibility",
+  boardVisibilityStatuses,
+);
 
 export const boards = pgTable(
   "board",
