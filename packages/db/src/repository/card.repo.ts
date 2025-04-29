@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, isNull, sql } from "drizzle-orm";
 
 import type { dbClient } from "@kan/db/client";
 import type { Database } from "@kan/db/types/database.types";
@@ -108,8 +108,8 @@ export const bulkCreateCardWorkspaceMemberRelationships = async (
 export const update = async (
   db: dbClient,
   cardInput: {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
   },
   args: {
     cardPublicId: string;
@@ -428,26 +428,143 @@ export const getWithListAndMembersByPublicId = async (
   return formattedResult;
 };
 
-// Move to update - should take two arguments cardId and index
 export const reorder = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   args: {
-    currentListId: number;
-    newListId: number;
-    currentIndex: number;
-    newIndex: number;
+    newListId: number | undefined;
+    newIndex: number | undefined;
     cardId: number;
   },
 ) => {
-  const { error } = await db.rpc("reorder_cards", {
-    current_list_id: args.currentListId,
-    new_list_id: args.newListId,
-    current_index: args.currentIndex,
-    new_index: args.newIndex,
-    card_id: args.cardId,
-  });
+  return db.transaction(async (tx) => {
+    const card = await tx.query.cards.findFirst({
+      columns: {
+        id: true,
+        index: true,
+      },
+      where: and(eq(cards.id, args.cardId), isNull(cards.deletedAt)),
+      with: {
+        list: {
+          columns: {
+            id: true,
+            index: true,
+          },
+        },
+      },
+    });
 
-  return { success: !error };
+    if (!card?.list)
+      throw new Error(`Card not found for public ID ${args.cardId}`);
+
+    const currentList = card.list;
+    const currentIndex = card.index;
+    let newList:
+      | { id: number; index: number; cards: { id: number; index: number }[] }
+      | undefined;
+
+    if (args.newListId) {
+      newList = await tx.query.lists.findFirst({
+        columns: {
+          id: true,
+          index: true,
+        },
+        with: {
+          cards: {
+            columns: {
+              id: true,
+              index: true,
+            },
+            orderBy: desc(cards.index),
+            limit: 1,
+          },
+        },
+        where: and(eq(lists.id, args.newListId), isNull(lists.deletedAt)),
+      });
+
+      if (!newList)
+        throw new Error(`List not found for public ID ${args.newListId}`);
+    }
+
+    let newIndex = args.newIndex;
+
+    if (newIndex === undefined) {
+      const lastCardIndex = newList?.cards.length
+        ? newList.cards[0]?.index
+        : undefined;
+
+      newIndex = lastCardIndex !== undefined ? lastCardIndex + 1 : 0;
+    }
+
+    if (currentList.id === newList?.id) {
+      await tx.execute(sql`
+        UPDATE card
+        SET index =
+          CASE
+            WHEN index = ${currentIndex} THEN ${newIndex}
+            WHEN ${currentIndex} < ${newIndex} AND index > ${currentIndex} AND index <= ${newIndex} THEN index - 1
+            WHEN ${currentIndex} > ${newIndex} AND index >= ${newIndex} AND index < ${currentIndex} THEN index + 1
+            ELSE index
+          END
+        WHERE "listId" = ${currentList.id} AND "deletedAt" IS NULL;
+      `);
+    } else {
+      await tx.execute(sql`
+        UPDATE card
+        SET index = index + 1
+        WHERE "listId" = ${newList?.id} AND index >= ${newIndex} AND "deletedAt" IS NULL;
+      `);
+
+      await tx.execute(sql`
+        UPDATE card
+        SET index = index - 1
+        WHERE "listId" = ${currentList.id} AND index >= ${currentIndex} AND "deletedAt" IS NULL;
+      `);
+
+      await tx.execute(sql`
+        UPDATE card
+        SET "listId" = ${newList?.id}, index = ${newIndex}
+        WHERE id = ${card.id} AND "deletedAt" IS NULL;
+      `);
+    }
+
+    const countExpr = sql<number>`COUNT(*)`.mapWith(Number);
+
+    const duplicateIndices = await db
+      .select({
+        index: cards.index,
+        count: countExpr,
+      })
+      .from(cards)
+      .where(
+        and(
+          inArray(
+            cards.listId,
+            [currentList.id, newList?.id].filter((id) => id !== undefined),
+          ),
+          isNull(cards.deletedAt),
+        ),
+      )
+      .groupBy(cards.listId, cards.index)
+      .having(gt(countExpr, 1));
+
+    if (duplicateIndices.length > 0) {
+      throw new Error(
+        `Duplicate indices found after reordering card ${card.id}`,
+      );
+    }
+
+    const updatedCard = await tx.query.cards.findFirst({
+      columns: {
+        id: true,
+        publicId: true,
+        title: true,
+        description: true,
+      },
+      where: eq(cards.id, card.id),
+    });
+
+    return updatedCard;
+  });
 };
 
 // Again should be handled in update transaction

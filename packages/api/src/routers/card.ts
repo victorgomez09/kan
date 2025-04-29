@@ -575,8 +575,10 @@ export const cardRouter = createTRPCRouter({
     .input(
       z.object({
         cardPublicId: z.string().min(12),
-        title: z.string().min(1),
-        description: z.string(),
+        title: z.string().min(1).optional(),
+        description: z.string().optional(),
+        index: z.number().optional(),
+        listPublicId: z.string().min(12).optional(),
       }),
     )
     .output(z.custom<Awaited<ReturnType<typeof cardRepo.update>>>())
@@ -594,6 +596,23 @@ export const cardRouter = createTRPCRouter({
         input.cardPublicId,
       );
 
+      let newListId: number | undefined;
+
+      if (input.listPublicId) {
+        const newList = await listRepo.getByPublicId(
+          ctx.db,
+          input.listPublicId,
+        );
+
+        if (!newList)
+          throw new TRPCError({
+            message: `List with public ID ${input.listPublicId} not found`,
+            code: "NOT_FOUND",
+          });
+
+        newListId = newList.id;
+      }
+
       if (!existingCard) {
         throw new TRPCError({
           message: `Card with public ID ${input.cardPublicId} not found`,
@@ -601,11 +620,33 @@ export const cardRouter = createTRPCRouter({
         });
       }
 
-      const result = await cardRepo.update(
-        ctx.db,
-        { title: input.title, description: input.description },
-        { cardPublicId: input.cardPublicId },
-      );
+      let result:
+        | {
+            id: number;
+            title: string;
+            description: string | null;
+            publicId: string;
+          }
+        | undefined;
+
+      if (input.title || input.description) {
+        result = await cardRepo.update(
+          ctx.db,
+          {
+            ...(input.title && { title: input.title }),
+            ...(input.description && { description: input.description }),
+          },
+          { cardPublicId: input.cardPublicId },
+        );
+      }
+
+      if (input.index !== undefined) {
+        result = await cardRepo.reorder(ctx.db, {
+          cardId: existingCard.id,
+          newIndex: input.index,
+          newListId: newListId,
+        });
+      }
 
       if (!result)
         throw new TRPCError({
@@ -704,112 +745,5 @@ export const cardRouter = createTRPCRouter({
       });
 
       return { success: true };
-    }),
-  reorder: protectedProcedure
-    .meta({
-      openapi: {
-        summary: "Reorder a card",
-        method: "PUT",
-        path: "/cards/{cardPublicId}/reorder",
-        description: "Reorders the position of a card in a given list",
-        tags: ["Cards"],
-        protect: true,
-      },
-    })
-    .input(
-      z.object({
-        cardPublicId: z.string().min(12),
-        currentListPublicId: z.string().min(12).optional(),
-        newListPublicId: z.string().min(12),
-        currentIndex: z.number().optional(),
-        newIndex: z.number().optional(),
-      }),
-    )
-    .output(z.object({ success: z.boolean() }))
-    .mutation(async ({ ctx, input }) => {
-      const userId = ctx.user?.id;
-
-      if (!userId)
-        throw new TRPCError({
-          message: `User not authenticated`,
-          code: "UNAUTHORIZED",
-        });
-
-      const card = await cardRepo.getCardWithListByPublicId(
-        ctx.db,
-        input.cardPublicId,
-      );
-
-      if (!card?.list)
-        throw new TRPCError({
-          message: `Card with public ID ${input.cardPublicId} not found`,
-          code: "NOT_FOUND",
-        });
-
-      const currentList = card.list;
-      const currentIndex = card.index;
-
-      let newIndex = input.newIndex;
-
-      const newList = await listRepo.getWithCardsByPublicId(
-        ctx.db,
-        input.newListPublicId,
-      );
-
-      if (!newList)
-        throw new TRPCError({
-          message: `List with public ID ${input.newListPublicId} not found`,
-          code: "NOT_FOUND",
-        });
-
-      if (newIndex === undefined) {
-        const lastCardIndex = newList.cards.length
-          ? newList.cards[0]?.index
-          : undefined;
-
-        newIndex = lastCardIndex !== undefined ? lastCardIndex + 1 : 0;
-      }
-
-      const { success } = await cardRepo.reorder(ctx.supabaseClient, {
-        currentListId: currentList.id,
-        newListId: newList.id,
-        currentIndex,
-        newIndex,
-        cardId: card.id,
-      });
-
-      if (!success)
-        throw new TRPCError({
-          message: `Failed to reorder card`,
-          code: "INTERNAL_SERVER_ERROR",
-        });
-
-      const activities = [];
-
-      if (currentIndex !== newIndex) {
-        activities.push({
-          type: "card.updated.index" as const,
-          cardId: card.id,
-          createdBy: userId,
-          fromIndex: currentIndex,
-          toIndex: newIndex,
-        });
-      }
-
-      if (currentList.id !== newList.id) {
-        activities.push({
-          type: "card.updated.list" as const,
-          cardId: card.id,
-          createdBy: userId,
-          fromListId: currentList.id,
-          toListId: newList.id,
-        });
-      }
-
-      if (activities.length > 0) {
-        await cardActivityRepo.bulkCreate(ctx.db, activities);
-      }
-
-      return { success };
     }),
 });

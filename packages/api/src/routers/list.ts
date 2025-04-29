@@ -167,8 +167,6 @@ export const listRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       let result: { name: string; publicId: string } | undefined;
 
-      console.log({ input });
-
       if (input.name) {
         result = await listRepo.update(
           ctx.db,

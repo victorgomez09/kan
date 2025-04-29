@@ -138,7 +138,7 @@ export default function BoardPage() {
     },
   });
 
-  const updateCardMutation = api.card.reorder.useMutation({
+  const updateCardMutation = api.card.update.useMutation({
     onMutate: async (args) => {
       await utils.board.byId.cancel();
 
@@ -148,21 +148,29 @@ export default function BoardPage() {
         if (!oldBoard) return oldBoard;
 
         const updatedLists = Array.from(oldBoard.lists);
-        const sourceList = updatedLists.find(
-          (list) => list.publicId === args.currentListPublicId,
+
+        const sourceList = updatedLists.find((list) =>
+          list.cards.some((card) => card.publicId === args.cardPublicId),
         );
         const destinationList = updatedLists.find(
-          (list) => list.publicId === args.newListPublicId,
+          (list) => list.publicId === args.listPublicId,
         );
-        const removedCard = sourceList?.cards.splice(args.currentIndex, 1)[0];
+
+        const cardToMove = sourceList?.cards.find(
+          (card) => card.publicId === args.cardPublicId,
+        );
+
+        if (!cardToMove) return oldBoard;
+
+        const removedCard = sourceList?.cards.splice(cardToMove.index, 1)[0];
 
         if (
           sourceList &&
           destinationList &&
           removedCard &&
-          args.newIndex !== undefined
+          args.index !== undefined
         ) {
-          destinationList.cards.splice(args.newIndex, 0, removedCard);
+          destinationList.cards.splice(args.index, 0, removedCard);
 
           return {
             ...oldBoard,
@@ -217,10 +225,9 @@ export default function BoardPage() {
     if (type === "CARD") {
       updateCardMutation.mutate({
         cardPublicId: draggableId,
-        currentListPublicId: source.droppableId,
-        newListPublicId: destination.droppableId,
-        currentIndex: source.index,
-        newIndex: destination.index,
+
+        listPublicId: destination.droppableId,
+        index: destination.index,
       });
     }
   };
