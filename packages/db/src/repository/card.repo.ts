@@ -583,22 +583,6 @@ export const shiftIndex = async (
   return data;
 };
 
-// Handled in update transaction
-export const pushIndex = async (
-  db: SupabaseClient<Database>,
-  args: {
-    listId: number;
-    cardIndex: number;
-  },
-) => {
-  const { data } = await db.rpc("push_card_index", {
-    list_id: args.listId,
-    card_index: args.cardIndex,
-  });
-
-  return data;
-};
-
 export const softDelete = async (
   db: dbClient,
   args: {
