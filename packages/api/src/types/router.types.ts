@@ -2,7 +2,6 @@ import type { RouterInputs, RouterOutputs } from "../index";
 
 export type GetBoardByIdOutput = RouterOutputs["board"]["byId"];
 export type GetCardByIdOutput = RouterOutputs["card"]["byId"];
-export type ReorderListInput = RouterInputs["list"]["reorder"];
 export type ReorderCardInput = RouterInputs["card"]["reorder"];
 export type UpdateBoardInput = RouterInputs["board"]["update"];
 export type NewLabelInput = RouterInputs["label"]["create"];

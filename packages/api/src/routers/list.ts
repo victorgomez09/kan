@@ -65,49 +65,6 @@ export const listRouter = createTRPCRouter({
 
       return result;
     }),
-  reorder: protectedProcedure
-    .meta({
-      openapi: {
-        summary: "Reorder a list",
-        method: "POST",
-        path: "/lists/{listPublicId}/reorder",
-        description: "Reorders the position of a list",
-        tags: ["Lists"],
-        protect: true,
-      },
-    })
-    .input(
-      z.object({
-        listPublicId: z.string().min(12),
-        currentIndex: z.number(),
-        newIndex: z.number(),
-      }),
-    )
-    .output(z.custom<Awaited<ReturnType<typeof listRepo.reorder>>>())
-    .mutation(async ({ ctx, input }) => {
-      const list = await listRepo.getByPublicId(ctx.db, input.listPublicId);
-
-      if (!list)
-        throw new TRPCError({
-          message: `List with public ID ${input.listPublicId} not found`,
-          code: "NOT_FOUND",
-        });
-
-      const result = await listRepo.reorder(ctx.supabaseClient, {
-        boardPublicId: list.boardId,
-        listPublicId: list.id,
-        currentIndex: input.currentIndex,
-        newIndex: input.newIndex,
-      });
-
-      if (!result)
-        throw new TRPCError({
-          message: `Failed to reorder list`,
-          code: "INTERNAL_SERVER_ERROR",
-        });
-
-      return result;
-    }),
   delete: protectedProcedure
     .meta({
       openapi: {
@@ -197,16 +154,35 @@ export const listRouter = createTRPCRouter({
     .input(
       z.object({
         listPublicId: z.string().min(12),
-        name: z.string().min(1),
+        name: z.string().min(1).optional(),
+        index: z.number().optional(),
       }),
     )
-    .output(z.custom<Awaited<ReturnType<typeof listRepo.update>>>())
+    .output(
+      z.custom<
+        | Awaited<ReturnType<typeof listRepo.update>>
+        | Awaited<ReturnType<typeof listRepo.reorder>>
+      >(),
+    )
     .mutation(async ({ ctx, input }) => {
-      const result = await listRepo.update(
-        ctx.supabaseClient,
-        { name: input.name },
-        { listPublicId: input.listPublicId },
-      );
+      let result: { name: string; publicId: string } | undefined;
+
+      console.log({ input });
+
+      if (input.name) {
+        result = await listRepo.update(
+          ctx.db,
+          { name: input.name },
+          { listPublicId: input.listPublicId },
+        );
+      }
+
+      if (input.index !== undefined) {
+        result = await listRepo.reorder(ctx.db, {
+          listPublicId: input.listPublicId,
+          newIndex: input.index,
+        });
+      }
 
       if (!result)
         throw new TRPCError({

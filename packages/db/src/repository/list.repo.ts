@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
 
 import type { dbClient } from "@kan/db/client";
 import type { Database } from "@kan/db/types/database.types";
@@ -68,7 +68,7 @@ export const getWithCardsByPublicId = async (
 };
 
 export const update = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   listInput: {
     name: string;
   },
@@ -76,33 +76,78 @@ export const update = async (
     listPublicId: string;
   },
 ) => {
-  const { data } = await db
-    .from("list")
-    .update({ name: listInput.name })
-    .eq("publicId", args.listPublicId)
-    .is("deletedAt", null)
-    .select(`publicId, name`);
+  const [result] = await db
+    .update(lists)
+    .set({ name: listInput.name })
+    .where(and(eq(lists.publicId, args.listPublicId), isNull(lists.deletedAt)))
+    .returning({
+      publicId: lists.publicId,
+      name: lists.name,
+    });
 
-  return data;
+  return result;
 };
 
 export const reorder = async (
-  db: SupabaseClient<Database>,
+  db: dbClient,
   args: {
-    boardPublicId: number;
-    listPublicId: number;
-    currentIndex: number;
+    listPublicId: string;
     newIndex: number;
   },
 ) => {
-  const { data } = await db.rpc("reorder_lists", {
-    board_id: args.boardPublicId,
-    list_id: args.listPublicId,
-    current_index: args.currentIndex,
-    new_index: args.newIndex,
-  });
+  return db.transaction(async (tx) => {
+    const list = await tx.query.lists.findFirst({
+      columns: {
+        id: true,
+        boardId: true,
+        index: true,
+      },
+      where: eq(lists.publicId, args.listPublicId),
+    });
 
-  return data;
+    if (!list)
+      throw new Error(`List not found for public ID ${args.listPublicId}`);
+
+    await tx.execute(sql`
+      UPDATE list
+      SET index =
+        CASE
+          WHEN index = ${list.index} AND id = ${list.id} THEN ${args.newIndex}
+          WHEN ${list.index} < ${args.newIndex} AND index > ${list.index} AND index <= ${args.newIndex} THEN index - 1
+          WHEN ${list.index} > ${args.newIndex} AND index >= ${args.newIndex} AND index < ${list.index} THEN index + 1
+          ELSE index
+        END
+      WHERE "boardId" = ${list.boardId};
+    `);
+
+    const countExpr = sql<number>`COUNT(*)`.mapWith(Number);
+
+    const duplicateIndices = await db
+      .select({
+        index: lists.index,
+        count: countExpr,
+      })
+      .from(lists)
+      .where(and(eq(lists.boardId, list.boardId), isNull(lists.deletedAt)))
+      .groupBy(lists.index)
+      .having(gt(countExpr, 1));
+
+    if (duplicateIndices.length > 0) {
+      throw new Error(
+        `Duplicate indices found after reordering in board ${list.boardId}`,
+      );
+    }
+
+    const updatedList = await tx.query.lists.findFirst({
+      columns: {
+        publicId: true,
+        name: true,
+      },
+      where: eq(lists.publicId, args.listPublicId),
+    });
+
+    return updatedList;
+  });
 };
 
 export const shiftIndex = async (

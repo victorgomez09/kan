@@ -92,7 +92,7 @@ export default function BoardPage() {
 
   const isLoading = isInitialLoading || isQueryLoading;
 
-  const updateListMutation = api.list.reorder.useMutation({
+  const updateListMutation = api.list.update.useMutation({
     onMutate: async (args) => {
       await utils.board.byId.cancel();
 
@@ -102,10 +102,19 @@ export default function BoardPage() {
         if (!oldBoard) return oldBoard;
 
         const updatedLists = Array.from(oldBoard.lists);
-        const removedList = updatedLists.splice(args.currentIndex, 1)[0];
 
-        if (removedList) {
-          updatedLists.splice(args.newIndex, 0, removedList);
+        const sourceList = updatedLists.find(
+          (list) => list.publicId === args.listPublicId,
+        );
+
+        const currentIndex = sourceList?.index;
+
+        if (currentIndex === undefined) return oldBoard;
+
+        const removedList = updatedLists.splice(currentIndex, 1)[0];
+
+        if (removedList && args.index !== undefined) {
+          updatedLists.splice(args.index, 0, removedList);
 
           return {
             ...oldBoard,
@@ -201,8 +210,7 @@ export default function BoardPage() {
     if (type === "LIST") {
       updateListMutation.mutate({
         listPublicId: draggableId,
-        currentIndex: source.index,
-        newIndex: destination.index,
+        index: destination.index,
       });
     }
 
@@ -254,7 +262,7 @@ export default function BoardPage() {
             />
             <Filters
               labels={boardData?.labels ?? []}
-              members={boardData?.workspace?.members ?? []}
+              members={boardData?.workspace.members ?? []}
               position="left"
               isLoading={isLoading}
             />

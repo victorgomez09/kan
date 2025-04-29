@@ -1,33 +1,4 @@
-CREATE OR REPLACE FUNCTION reorder_lists(board_id BIGINT, list_id BIGINT, current_index INT, new_index INT)
-RETURNS BOOLEAN
-LANGUAGE PLPGSQL
-AS $$
-BEGIN
-    UPDATE list
-      SET index =
-        CASE
-          WHEN index = current_index AND id = list_id THEN new_index
-          WHEN current_index < new_index AND index > current_index AND index <= new_index THEN index - 1
-          WHEN current_index > new_index AND index >= new_index AND index < current_index THEN index + 1
-          ELSE index
-        END
-      WHERE "boardId" = board_id;
 
-    -- Check for duplicate indices after the update
-    IF EXISTS (
-      SELECT index, COUNT(*)
-      FROM list 
-      WHERE "boardId" = board_id 
-      AND "deletedAt" IS NULL
-      GROUP BY index
-      HAVING COUNT(*) > 1
-    ) THEN
-      RAISE EXCEPTION 'Duplicate indices found after reordering in board %', board_id;
-    END IF;
-
-    RETURN TRUE;
-END;
-$$;
 
 CREATE OR REPLACE FUNCTION reorder_cards(card_id BIGINT, current_list_id BIGINT, new_list_id BIGINT, current_index INT, new_index INT)
 RETURNS BOOLEAN
