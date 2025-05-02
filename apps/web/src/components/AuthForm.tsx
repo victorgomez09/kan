@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import { FaGoogle } from "react-icons/fa";
 import { z } from "zod";
 
+import { authClient } from "@kan/auth";
+
 import Button from "~/components/Button";
 import Input from "~/components/Input";
 import { api } from "~/utils/api";
@@ -55,7 +57,12 @@ export function Auth({ setIsMagicLinkSent }: AuthProps) {
     <div className="space-y-6">
       <div>
         <Button
-          onClick={() => loginWithOAuth.mutate({ provider: "google" })}
+          onClick={() =>
+            authClient.signIn.social({
+              provider: "google",
+              callbackURL: "/boards",
+            })
+          }
           iconLeft={<FaGoogle />}
           fullWidth
           size="lg"

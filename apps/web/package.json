@@ -17,6 +17,7 @@
     "@headlessui/react": "^2.2.0",
     "@hookform/resolvers": "^3.3.4",
     "@kan/api": "workspace:*",
+    "@kan/auth": "workspace:*",
     "@kan/db": "workspace:^",
     "@kan/shared": "workspace:^",
     "@kan/supabase": "workspace:^",

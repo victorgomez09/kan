@@ -6,18 +6,22 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import type { dbClient } from "@kan/db/client";
-import type { Database } from "@kan/db/types/database.types";
-import type { SupabaseClient } from "@kan/supabase";
+import { auth } from "@kan/auth";
 import { createDrizzleClient } from "@kan/db/client";
-import { createNextApiClient, createTRPCClient } from "@kan/supabase";
 
 export interface User {
   id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  image?: string | null | undefined;
+  stripeCustomerId?: string | null | undefined;
 }
 
 interface CreateContextOptions {
-  user: User | null;
-  supabaseClient: SupabaseClient<Database>;
+  user: User | null | undefined;
   db: dbClient;
 }
 
@@ -25,28 +29,22 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     user: opts.user,
     db: opts.db,
-    supabaseClient: opts.supabaseClient,
   };
 };
 
 export const createTRPCContext = async ({
   req,
-  resHeaders,
 }: FetchCreateContextFnOptions) => {
-  const supabaseClient = createTRPCClient(req, resHeaders);
-
-  const {
-    data: { user },
-  } = await supabaseClient.auth.getUser();
+  const session = await auth.api.getSession({
+    headers: req.headers,
+  });
 
   const db = createDrizzleClient();
 
-  return createInnerTRPCContext({ db, user, supabaseClient: supabaseClient });
+  return createInnerTRPCContext({ db, user: session?.user });
 };
 
 export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
-  const supabaseClient = createNextApiClient(req);
-
   const authHeader = req.headers.authorization;
   const accessToken = authHeader?.startsWith("Bearer ")
     ? authHeader.substring(7)
@@ -55,14 +53,14 @@ export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
   const db = createDrizzleClient();
 
   if (!accessToken) {
-    return createInnerTRPCContext({ db, user: null, supabaseClient });
+    return createInnerTRPCContext({ db, user: null });
   }
 
-  const {
-    data: { user },
-  } = await supabaseClient.auth.getUser(accessToken);
+  const session = await auth.api.getSession({
+    headers: req.headers,
+  });
 
-  return createInnerTRPCContext({ db, user, supabaseClient });
+  return createInnerTRPCContext({ db, user: session?.user });
 };
 
 const t = initTRPC

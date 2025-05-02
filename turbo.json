@@ -48,6 +48,8 @@
   "globalEnv": [
     "POSTGRES_URL",
     "WEBSITE_URL",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
     "EMAIL_FROM",
     "EMAIL_URL",
     "EMAIL_TOKEN",

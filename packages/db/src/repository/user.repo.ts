@@ -37,6 +37,7 @@ export const create = async (
       id: user.id,
       email: user.email,
       stripeCustomerId: user.stripeCustomerId,
+      emailVerified: false,
     })
     .returning();
 
