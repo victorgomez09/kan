@@ -529,7 +529,7 @@ export const reorder = async (
 
     const countExpr = sql<number>`COUNT(*)`.mapWith(Number);
 
-    const duplicateIndices = await db
+    const duplicateIndices = await tx
       .select({
         index: cards.index,
         count: countExpr,
@@ -567,22 +567,6 @@ export const reorder = async (
   });
 };
 
-// Again should be handled in update transaction
-export const shiftIndex = async (
-  db: SupabaseClient<Database>,
-  args: {
-    listId: number;
-    cardIndex: number;
-  },
-) => {
-  const { data } = await db.rpc("shift_card_index", {
-    list_id: args.listId,
-    card_index: args.cardIndex,
-  });
-
-  return data;
-};
-
 export const softDelete = async (
   db: dbClient,
   args: {
@@ -591,15 +575,46 @@ export const softDelete = async (
     deletedBy: string;
   },
 ) => {
-  const [result] = await db
-    .update(cards)
-    .set({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
-    .where(eq(cards.id, args.cardId))
-    .returning({
-      id: cards.id,
-    });
+  return db.transaction(async (tx) => {
+    const [result] = await tx
+      .update(cards)
+      .set({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
+      .where(eq(cards.id, args.cardId))
+      .returning({
+        id: cards.id,
+        listId: cards.listId,
+        index: cards.index,
+      });
 
-  return result;
+    if (!result)
+      throw new Error(`Unable to soft delete card ID ${args.cardId}`);
+
+    await tx.execute(sql`
+      UPDATE card
+      SET index = index - 1
+      WHERE "listId" = ${result.listId} AND index > ${result.index} AND "deletedAt" IS NULL;
+    `);
+
+    const countExpr = sql<number>`COUNT(*)`.mapWith(Number);
+
+    const duplicateIndices = await tx
+      .select({
+        index: cards.index,
+        count: countExpr,
+      })
+      .from(cards)
+      .where(and(eq(cards.listId, result.listId), isNull(cards.deletedAt)))
+      .groupBy(cards.listId, cards.index)
+      .having(gt(countExpr, 1));
+
+    if (duplicateIndices.length > 0) {
+      throw new Error(
+        `Duplicate indices found after soft deleting ${result.id}`,
+      );
+    }
+
+    return result;
+  });
 };
 
 export const softDeleteAllByListIds = async (

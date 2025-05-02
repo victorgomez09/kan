@@ -133,11 +133,6 @@ export const listRouter = createTRPCRouter({
 
       await activityRepo.bulkCreate(ctx.db, activities);
 
-      await listRepo.shiftIndex(ctx.supabaseClient, {
-        boardId: list.boardId,
-        listIndex: list.index,
-      });
-
       return { success: true };
     }),
   update: protectedProcedure

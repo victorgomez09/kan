@@ -1,21 +1,3 @@
-CREATE OR REPLACE FUNCTION shift_list_index(board_id BIGINT, list_index INT)
-RETURNS VOID
-LANGUAGE SQL
-AS $$
-  UPDATE list
-    SET index = index - 1
-    WHERE "boardId" = board_id AND index > list_index AND "deletedAt" IS NULL;
-$$;
-
-CREATE OR REPLACE FUNCTION shift_card_index(list_id BIGINT, card_index INT)
-RETURNS VOID
-LANGUAGE SQL
-AS $$
-  UPDATE card
-    SET index = index - 1
-    WHERE "listId" = list_id AND index > card_index AND "deletedAt" IS NULL;
-$$;
-
 CREATE OR REPLACE FUNCTION is_workspace_admin(user_id UUID, workspace_id BIGINT)
 RETURNS BOOLEAN
 LANGUAGE SQL

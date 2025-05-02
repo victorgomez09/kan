@@ -122,7 +122,7 @@ export const reorder = async (
 
     const countExpr = sql<number>`COUNT(*)`.mapWith(Number);
 
-    const duplicateIndices = await db
+    const duplicateIndices = await tx
       .select({
         index: lists.index,
         count: countExpr,
@@ -148,21 +148,6 @@ export const reorder = async (
 
     return updatedList;
   });
-};
-
-export const shiftIndex = async (
-  db: SupabaseClient<Database>,
-  args: {
-    boardId: number;
-    listIndex: number;
-  },
-) => {
-  const { data } = await db.rpc("shift_list_index", {
-    board_id: args.boardId,
-    list_index: args.listIndex,
-  });
-
-  return data;
 };
 
 export const softDeleteAllByBoardId = async (
@@ -192,13 +177,44 @@ export const softDeleteById = async (
     deletedBy: string;
   },
 ) => {
-  const [updatedList] = await db
-    .update(lists)
-    .set({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
-    .where(and(eq(lists.id, args.listId), isNull(lists.deletedAt)))
-    .returning({
-      id: lists.id,
-    });
+  return db.transaction(async (tx) => {
+    const [result] = await tx
+      .update(lists)
+      .set({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
+      .where(and(eq(lists.id, args.listId), isNull(lists.deletedAt)))
+      .returning({
+        id: lists.id,
+        index: lists.index,
+        boardId: lists.boardId,
+      });
 
-  return updatedList;
+    if (!result)
+      throw new Error(`Unable to soft delete list ID ${args.listId}`);
+
+    await tx.execute(sql`
+      UPDATE list
+      SET index = index - 1
+      WHERE "boardId" = ${result.boardId} AND index > ${result.index} AND "deletedAt" IS NULL;
+    `);
+
+    const countExpr = sql<number>`COUNT(*)`.mapWith(Number);
+
+    const duplicateIndices = await tx
+      .select({
+        index: lists.index,
+        count: countExpr,
+      })
+      .from(lists)
+      .where(and(eq(lists.boardId, result.boardId), isNull(lists.deletedAt)))
+      .groupBy(lists.index)
+      .having(gt(countExpr, 1));
+
+    if (duplicateIndices.length > 0) {
+      throw new Error(
+        `Duplicate indices found after reordering in board ${result.boardId}`,
+      );
+    }
+
+    return result;
+  });
 };

@@ -733,11 +733,6 @@ export const cardRouter = createTRPCRouter({
           code: "INTERNAL_SERVER_ERROR",
         });
 
-      await cardRepo.shiftIndex(ctx.supabaseClient, {
-        listId: card.list.id,
-        cardIndex: card.index,
-      });
-
       await cardActivityRepo.create(ctx.db, {
         type: "card.archived",
         cardId: card.id,
