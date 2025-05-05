@@ -1,7 +1,6 @@
 import Cookies from "js-cookie";
 
 import PatternedBackground from "~/components/PatternedBackground";
-import { env } from "~/env";
 import { useTheme } from "~/providers/theme";
 import { api } from "~/utils/api";
 import Footer from "./Footer";
@@ -11,11 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const theme = useTheme();
 
   const token =
-    typeof window !== "undefined"
-      ? Cookies.get('kan.session_token')
-      : null;
-
-  const getSession = async () => {
+    typeof window !== "undefined" ? Cookies.get("kan.session_token") : null;
 
   const { data } = api.user.getUser.useQuery(undefined, {
     enabled: !!token,
