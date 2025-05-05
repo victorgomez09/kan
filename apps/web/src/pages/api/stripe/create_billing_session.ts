@@ -1,22 +1,11 @@
 import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { Stripe } from "stripe";
 
-import { createDrizzleClient } from "@kan/db/client";
-import * as userRepo from "@kan/db/repository/user.repo";
-import { createNextClient } from "@kan/supabase/clients";
-
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-
-if (!stripeSecretKey) {
-  throw new Error("STRIPE_SECRET_KEY is not defined");
-}
-
-const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: "2024-12-18.acacia",
-});
+import { createNextApiContext } from "@kan/api/trpc";
+import { createStripeClient } from "@kan/stripe";
 
 export default async function handler(req: NextRequest) {
+  const stripe = createStripeClient();
+
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
@@ -25,20 +14,7 @@ export default async function handler(req: NextRequest) {
   }
 
   try {
-    const response = NextResponse.next();
-    const supabaseClient = createNextClient(req, response);
-    const { data } = await supabaseClient.auth.getUser();
-
-    if (!data.user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 403,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    const db = createDrizzleClient();
-
-    const user = await userRepo.getById(db, data.user.id);
+    const { user } = await createNextApiContext(req);
 
     if (!user?.stripeCustomerId) {
       return new Response(

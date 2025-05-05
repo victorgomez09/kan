@@ -1,4 +1,3 @@
-import { authRouter } from "./routers/auth";
 import { boardRouter } from "./routers/board";
 import { cardRouter } from "./routers/card";
 import { feedbackRouter } from "./routers/feedback";
@@ -11,7 +10,6 @@ import { workspaceRouter } from "./routers/workspace";
 import { createTRPCRouter } from "./trpc";
 
 export const appRouter = createTRPCRouter({
-  auth: authRouter,
   board: boardRouter,
   card: cardRouter,
   feedback: feedbackRouter,

@@ -23,9 +23,7 @@
 
 - [Next.js](https://nextjs.org/?ref=kan.bn)
 - [tRPC](https://trpc.io/?ref=kan.bn)
-- [Supabase](https://supabase.com/?ref=kan.bn)
+- [Better Auth](https://better-auth.com/?ref=kan.bn)
 - [Tailwind CSS](https://tailwindcss.com/?ref=kan.bn)
 - [Drizzle ORM](https://orm.drizzle.team/?ref=kan.bn)
 - [React Email](https://react.email/?ref=kan.bn)
-
-

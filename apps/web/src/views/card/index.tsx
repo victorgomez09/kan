@@ -15,7 +15,6 @@ import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import { formatMemberDisplayName } from "~/utils/helpers";
-import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 import { DeleteLabelConfirmation } from "../../components/DeleteLabelConfirmation";
 import ActivityList from "./components/ActivityList";
 import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
@@ -51,11 +50,11 @@ export default function CardPage() {
     if (cardId) await utils.card.byId.refetch({ cardPublicId: cardId });
   };
 
-  const board = card?.list?.board;
+  const board = card?.list.board;
   const boardId = board?.publicId;
   const labels = board?.labels;
   const activities = card?.activities;
-  const workspaceMembers = board?.workspace?.members;
+  const workspaceMembers = board?.workspace.members;
   const selectedLabels = card?.labels;
   const selectedMembers = card?.members;
 
@@ -77,7 +76,7 @@ export default function CardPage() {
     board?.lists.map((list) => ({
       key: list.publicId,
       value: list.name,
-      selected: list.publicId === card?.list?.publicId,
+      selected: list.publicId === card?.list.publicId,
     })) ?? [];
 
   const formattedMembers =
@@ -89,21 +88,21 @@ export default function CardPage() {
       return {
         key: member.publicId,
         value: formatMemberDisplayName(
-          member.user?.name ?? null,
-          member.user?.email ?? null,
+          member.user.name ?? null,
+          member.user.email ?? null,
         ),
-        imageUrl: member.user?.image
+        imageUrl: member.user.image
           ? getPublicUrl(member.user.image)
           : undefined,
         selected: isSelected ?? false,
         leftIcon: (
           <Avatar
             size="xs"
-            name={member.user?.name ?? ""}
+            name={member.user.name ?? ""}
             imageUrl={
-              member.user?.image ? getPublicUrl(member.user.image) : undefined
+              member.user.image ? getPublicUrl(member.user.image) : undefined
             }
-            email={member.user?.email ?? ""}
+            email={member.user.email ?? ""}
           />
         ),
       };

@@ -1,11 +1,10 @@
 {
-  "name": "@kan/supabase",
+  "name": "@kan/stripe",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./clients": "./src/clients.ts"
+    ".": "./src/index.ts"
   },
   "license": "MIT",
   "scripts": {
@@ -21,15 +20,11 @@
     "@kan/prettier-config": "workspace:*",
     "@kan/tsconfig": "workspace:*",
     "eslint": "catalog:",
-    "next": "^14.2.15",
     "prettier": "catalog:",
     "typescript": "catalog:"
   },
   "prettier": "@kan/prettier-config",
   "dependencies": {
-    "@edge-runtime/cookies": "^6.0.0",
-    "@kan/db": "workspace:^",
-    "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.47.3"
+    "stripe": "^18.1.0"
   }
 }

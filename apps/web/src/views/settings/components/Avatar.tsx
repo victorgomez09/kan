@@ -3,8 +3,6 @@ import { useState } from "react";
 
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
-import createClient from "~/utils/supabase/client";
-import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 
 export default function Avatar({
   userId,
@@ -13,7 +11,6 @@ export default function Avatar({
   userId: string | undefined;
   userImage: string | null | undefined;
 }) {
-  const supabase = createClient();
   const utils = api.useUtils();
   const { showPopup } = usePopup();
   const [uploading, setUploading] = useState(false);
@@ -41,7 +38,7 @@ export default function Avatar({
     },
   });
 
-  const avatarUrl = userImage ? getPublicUrl(userImage) : undefined;
+  const avatarUrl = userImage ? "" : undefined;
 
   const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -65,13 +62,13 @@ export default function Avatar({
       const fileName = `${userId}/avatar.${fileExt}`;
       const filePath = `${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file, { upsert: true });
+      // const { error: uploadError } = await supabase.storage
+      //   .from("avatars")
+      //   .upload(filePath, file, { upsert: true });
 
-      if (uploadError) {
-        throw uploadError;
-      }
+      // if (uploadError) {
+      //   throw uploadError;
+      // }
 
       updateUser.mutate({ image: filePath });
     } catch (error) {

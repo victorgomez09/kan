@@ -11,7 +11,6 @@ import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import { getInitialsFromName, inferInitialsFromEmail } from "~/utils/helpers";
-import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 import { DeleteMemberConfirmation } from "./components/DeleteMemberConfirmation";
 import { InviteMemberForm } from "./components/InviteMemberForm";
 
@@ -58,7 +57,7 @@ export default function MembersPage() {
                 <Avatar
                   name={memberName ?? ""}
                   email={memberEmail ?? ""}
-                  imageUrl={memberImage ? getPublicUrl(memberImage) : undefined}
+                  imageUrl={memberImage ? "" : undefined}
                 />
               )}
             </div>
@@ -189,9 +188,9 @@ export default function MembersPage() {
                         <TableRow
                           key={member.publicId}
                           memberPublicId={member.publicId}
-                          memberName={member.user?.name}
-                          memberEmail={member.user?.email}
-                          memberImage={member.user?.image}
+                          memberName={member.user.name}
+                          memberEmail={member.user.email}
+                          memberImage={member.user.image}
                           memberRole={member.role}
                           memberStatus={member.status}
                           isLastRow={index === data.members.length - 1}

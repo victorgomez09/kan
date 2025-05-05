@@ -19,7 +19,6 @@ import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 import { formatMemberDisplayName } from "~/utils/helpers";
-import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 
 type NewCardFormInput = NewCardInput & {
   isCreateAnotherEnabled: boolean;
@@ -89,7 +88,7 @@ export function NewCardForm({
                 args.labelPublicIds.includes(label.publicId),
               ),
               members:
-                oldBoard.workspace?.members.filter((member) =>
+                oldBoard.workspace.members.filter((member) =>
                   args.memberPublicIds.includes(member.publicId),
                 ) ?? [],
               _filteredLabels: labelPublicIds.map((id) => ({ publicId: id })),
@@ -146,20 +145,18 @@ export function NewCardForm({
     })) ?? [];
 
   const formattedMembers =
-    boardData?.workspace?.members.map((member) => ({
+    boardData?.workspace.members.map((member) => ({
       key: member.publicId,
       value: formatMemberDisplayName(
-        member.user?.name ?? null,
-        member.user?.email ?? null,
+        member.user.name ?? null,
+        member.user.email ?? null,
       ),
       leftIcon: (
         <Avatar
           size="xs"
-          name={member.user?.name ?? ""}
-          imageUrl={
-            member.user?.image ? getPublicUrl(member.user.image) : undefined
-          }
-          email={member.user?.email ?? ""}
+          name={member.user.name ?? ""}
+          imageUrl={member.user.image ? "" : undefined}
+          email={member.user.email ?? ""}
         />
       ),
     })) ?? [];

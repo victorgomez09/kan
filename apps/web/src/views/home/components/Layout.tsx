@@ -12,8 +12,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const token =
     typeof window !== "undefined"
-      ? Cookies.get(env.NEXT_PUBLIC_SUPABASE_AUTH_COOKIE_NAME)
+      ? Cookies.get('kan.session_token')
       : null;
+
+  const getSession = async () => {
 
   const { data } = api.user.getUser.useQuery(undefined, {
     enabled: !!token,

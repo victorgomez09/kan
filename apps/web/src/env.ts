@@ -25,19 +25,15 @@ export const env = createEnv({
    * For them to be exposed to the client, prefix them with `NEXT_PUBLIC_`.
    */
   client: {
-    NEXT_PUBLIC_SUPABASE_AUTH_COOKIE_NAME: z.string(),
-    NEXT_PUBLIC_SUPABASE_STORAGE_URL: z.string(),
+    NEXT_PUBLIC_KAN_ENV: z.string(),
     NEXT_PUBLIC_UMAMI_ID: z.string().optional(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
    */
   experimental__runtimeEnv: {
+    NEXT_PUBLIC_KAN_ENV: process.env.NEXT_PUBLIC_KAN_ENV,
     NODE_ENV: process.env.NODE_ENV,
-    NEXT_PUBLIC_SUPABASE_AUTH_COOKIE_NAME:
-      process.env.NEXT_PUBLIC_SUPABASE_AUTH_COOKIE_NAME,
-    NEXT_PUBLIC_SUPABASE_STORAGE_URL:
-      process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL,
     NEXT_PUBLIC_UMAMI_ID: process.env.NEXT_PUBLIC_UMAMI_ID,
   },
   skipValidation:

@@ -1,8 +1,6 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
 
 import type { dbClient } from "@kan/db/client";
-import type { Database } from "@kan/db/types/database.types";
 import { lists } from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 

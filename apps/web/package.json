@@ -20,7 +20,6 @@
     "@kan/auth": "workspace:*",
     "@kan/db": "workspace:^",
     "@kan/shared": "workspace:^",
-    "@kan/supabase": "workspace:^",
     "@t3-oss/env-nextjs": "^0.11.1",
     "@tanstack/react-query": "catalog:",
     "@trpc/client": "catalog:",
@@ -39,7 +38,6 @@
     "react-hook-form": "^7.51.1",
     "react-icons": "^4.12.0",
     "react-lottie-player": "^1.5.5",
-    "stripe": "^17.5.0",
     "superjson": "2.2.1",
     "tailwind-merge": "^2.5.2",
     "zod": "catalog:"
@@ -47,6 +45,7 @@
   "devDependencies": {
     "@kan/eslint-config": "workspace:*",
     "@kan/prettier-config": "workspace:*",
+    "@kan/stripe": "workspace:*",
     "@kan/tailwind-config": "workspace:*",
     "@kan/tsconfig": "workspace:*",
     "@types/js-cookie": "^3.0.6",

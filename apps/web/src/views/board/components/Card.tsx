@@ -1,7 +1,6 @@
 import Avatar from "~/components/Avatar";
 import Badge from "~/components/Badge";
 import LabelIcon from "~/components/LabelIcon";
-import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 
 const Card = ({
   title,
@@ -32,9 +31,7 @@ const Card = ({
             {members.map(({ user }) => {
               if (!user) return null;
 
-              const avatarUrl = user.image
-                ? getPublicUrl(user.image)
-                : undefined;
+              const avatarUrl = user.image ? "" : undefined;
 
               return (
                 <Avatar

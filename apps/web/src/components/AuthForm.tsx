@@ -26,7 +26,7 @@ export function Auth({ setIsMagicLinkSent }: AuthProps) {
     watch,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(EmailSchema), // Apply the zodResolver
+    resolver: zodResolver(EmailSchema),
   });
 
   const email = watch("email");
@@ -37,20 +37,19 @@ export function Auth({ setIsMagicLinkSent }: AuthProps) {
     },
   });
 
-  const loginWithOAuth = api.auth.loginWithOAuth.useMutation({
-    onSuccess: (data) => {
-      if (data.url) window.open(data.url);
-    },
-  });
+  const handleLoginWithEmail = async (email: string) => {
+    const { data, error } = await authClient.signIn.magicLink({
+      email,
+      callbackURL: "/boards",
+    });
 
-  const onSubmit = (values: FormValues) => {
-    try {
-      loginWithEmail.mutate({
-        email: values.email,
-      });
-    } catch (error) {
-      console.error(error);
+    if (!error) {
+      setIsMagicLinkSent(true, email);
     }
+  };
+
+  const onSubmit = async (values: FormValues) => {
+    await handleLoginWithEmail(values.email);
   };
 
   return (
@@ -80,12 +79,12 @@ export function Auth({ setIsMagicLinkSent }: AuthProps) {
           {...register("email", { required: true })}
           placeholder="Enter your email address"
         />
-        {!loginWithEmail.error && !loginWithOAuth.error && errors.email && (
+        {!loginWithEmail.error && errors.email && (
           <p className="mt-2 text-xs text-red-400">
             Please enter a valid email address
           </p>
         )}
-        {(loginWithEmail.error ?? loginWithOAuth.error) ? (
+        {loginWithEmail.error ? (
           <p className="mt-2 text-xs text-red-400">
             Something went wrong, please try again later or contact customer
             support.

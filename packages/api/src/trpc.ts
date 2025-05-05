@@ -1,5 +1,6 @@
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import type { NextRequest } from "next/server";
 import type { OpenApiMeta } from "trpc-to-openapi";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
@@ -44,6 +45,16 @@ export const createTRPCContext = async ({
   return createInnerTRPCContext({ db, user: session?.user });
 };
 
+export const createNextApiContext = async (req: NextRequest) => {
+  const session = await auth.api.getSession({
+    headers: req.headers,
+  });
+
+  const db = createDrizzleClient();
+
+  return createInnerTRPCContext({ db, user: session?.user });
+};
+
 export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
   const authHeader = req.headers.authorization;
   const accessToken = authHeader?.startsWith("Bearer ")
@@ -57,7 +68,8 @@ export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
   }
 
   const session = await auth.api.getSession({
-    headers: req.headers,
+    // @ts-expect-error
+    headers: new Headers(req.headers),
   });
 
   return createInnerTRPCContext({ db, user: session?.user });

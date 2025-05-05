@@ -47,18 +47,20 @@ export const create = async (
 export const update = async (
   db: dbClient,
   userId: string,
-  updates: { image?: string; name?: string },
+  updates: { image?: string; name?: string; stripeCustomerId?: string },
 ) => {
   const [result] = await db
     .update(users)
     .set({
       name: updates.name,
       image: updates.image,
+      stripeCustomerId: updates.stripeCustomerId,
     })
     .where(eq(users.id, userId))
     .returning({
       name: users.name,
       image: users.image,
+      stripeCustomerId: users.stripeCustomerId,
     });
 
   return result;

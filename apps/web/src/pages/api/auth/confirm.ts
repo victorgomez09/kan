@@ -1,112 +1,102 @@
-import type { EmailOtpType } from "@supabase/supabase-js";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { Stripe } from "stripe";
+// import type { EmailOtpType } from "@supabase/supabase-js";
+// import type { NextRequest } from "next/server";
+// import { NextResponse } from "next/server";
 
-import { createDrizzleClient } from "@kan/db/client";
-import * as memberRepo from "@kan/db/repository/member.repo";
-import * as userRepo from "@kan/db/repository/user.repo";
-import { createNextClient } from "@kan/supabase/clients";
+// import { createDrizzleClient } from "@kan/db/client";
+// import * as memberRepo from "@kan/db/repository/member.repo";
+// import * as userRepo from "@kan/db/repository/user.repo";
+// import { stripe } from "@kan/stripe";
+// import { createNextApiClient } from "@kan/";
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+// export default async function handler(req: NextRequest) {
+//   if (req.method !== "GET") {
+//     return new NextResponse(null, {
+//       status: 405,
+//       headers: { Allow: "GET" },
+//     });
+//   }
 
-if (!stripeSecretKey) {
-  throw new Error("STRIPE_SECRET_KEY is not defined");
-}
+//   if (!req.url) {
+//     return new NextResponse(null, {
+//       status: 400,
+//     });
+//   }
 
-const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: "2024-12-18.acacia",
-});
+//   const url = new URL(req.url);
+//   const queryParams = Object.fromEntries(url.searchParams.entries());
 
-export default async function handler(req: NextRequest) {
-  if (req.method !== "GET") {
-    return new NextResponse(null, {
-      status: 405,
-      headers: { Allow: "GET" },
-    });
-  }
+//   const tokenHash = queryParams.token_hash;
+//   const type = queryParams.type;
+//   const code = queryParams.code;
+//   const memberPublicId = queryParams.memberPublicId;
 
-  if (!req.url) {
-    return new NextResponse(null, {
-      status: 400,
-    });
-  }
+//   let next = "/error";
 
-  const url = new URL(req.url);
-  const queryParams = Object.fromEntries(url.searchParams.entries());
+//   let authRes;
 
-  const tokenHash = queryParams.token_hash;
-  const type = queryParams.type;
-  const code = queryParams.code;
-  const memberPublicId = queryParams.memberPublicId;
+//   const response = NextResponse.next();
 
-  let next = "/error";
+//   if ((tokenHash && type) ?? code) {
+//     const supabaseClient = createNextClient(req, response);
 
-  let authRes;
+//     if (tokenHash && type) {
+//       authRes = await supabaseClient.auth.verifyOtp({
+//         type: type as EmailOtpType,
+//         token_hash: tokenHash,
+//       });
+//     }
 
-  const response = NextResponse.next();
+//     if (code) {
+//       authRes = await supabaseClient.auth.exchangeCodeForSession(code);
+//     }
 
-  if ((tokenHash && type) ?? code) {
-    const supabaseClient = createNextClient(req, response);
+//     const user = authRes?.data.user;
 
-    if (tokenHash && type) {
-      authRes = await supabaseClient.auth.verifyOtp({
-        type: type as EmailOtpType,
-        token_hash: tokenHash,
-      });
-    }
+//     const db = createDrizzleClient();
 
-    if (code) {
-      authRes = await supabaseClient.auth.exchangeCodeForSession(code);
-    }
+//     if (user?.id && user.email) {
+//       const existingUser = await userRepo.getById(db, user.id);
 
-    const user = authRes?.data.user;
+//       if (!existingUser) {
+//         const stripeCustomer = await stripe.customers.create({
+//           email: user.email,
+//           metadata: {
+//             userId: user.id,
+//           },
+//         });
 
-    const db = createDrizzleClient();
+//         await userRepo.create(db, {
+//           id: user.id,
+//           email: user.email,
+//           stripeCustomerId: stripeCustomer.id,
+//         });
+//       }
+//     }
 
-    if (user?.id && user.email) {
-      const existingUser = await userRepo.getById(db, user.id);
+//     if (memberPublicId) {
+//       const member = await memberRepo.getByPublicId(db, memberPublicId);
 
-      if (!existingUser) {
-        const stripeCustomer = await stripe.customers.create({
-          email: user.email,
-          metadata: {
-            userId: user.id,
-          },
-        });
+//       if (member?.id) {
+//         await memberRepo.acceptInvite(db, member.id);
+//       }
+//     }
 
-        await userRepo.create(db, {
-          id: user.id,
-          email: user.email,
-          stripeCustomerId: stripeCustomer.id,
-        });
-      }
-    }
+//     if (authRes?.error) {
+//       console.error(authRes.error);
+//     } else {
+//       next = queryParams.next ?? "/boards";
+//     }
+//   }
 
-    if (memberPublicId) {
-      const member = await memberRepo.getByPublicId(db, memberPublicId);
+//   const redirectResponse = NextResponse.redirect(new URL(next, req.url));
 
-      if (member?.id) {
-        await memberRepo.acceptInvite(db, member.id);
-      }
-    }
+//   response.headers.getSetCookie().forEach((cookie) => {
+//     redirectResponse.headers.append("Set-Cookie", cookie);
+//   });
 
-    if (authRes?.error) {
-      console.error(authRes.error);
-    } else {
-      next = queryParams.next ?? "/boards";
-    }
-  }
+//   return redirectResponse;
+// }
 
-  const redirectResponse = NextResponse.redirect(new URL(next, req.url));
-
-  response.headers.getSetCookie().forEach((cookie) => {
-    redirectResponse.headers.append("Set-Cookie", cookie);
-  });
-
-  return redirectResponse;
-}
-
-export const runtime = "edge";
-export const preferredRegion = "lhr1";
-export const dynamic = "force-dynamic";
+// export const runtime = "edge";
+// export const preferredRegion = "lhr1";
+// export const dynamic = "force-dynamic";

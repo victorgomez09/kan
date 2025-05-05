@@ -11,7 +11,6 @@ import Button from "~/components/Button";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
 import LabelIcon from "~/components/LabelIcon";
 import { formatMemberDisplayName, formatToArray } from "~/utils/helpers";
-import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 
 interface Member {
   publicId: string;
@@ -66,9 +65,7 @@ const Filters = ({
       <Avatar
         size="xs"
         name={member.user?.name ?? ""}
-        imageUrl={
-          member.user?.image ? getPublicUrl(member.user.image) : undefined
-        }
+        imageUrl={member.user?.image ? "" : undefined}
         email={member.user?.email ?? ""}
       />
     ),

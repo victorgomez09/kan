@@ -1,24 +1,15 @@
 import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
 import { Stripe } from "stripe";
 
+import { createNextApiContext } from "@kan/api/trpc";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
-import { createNextClient } from "@kan/supabase/clients";
-
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-
-if (!stripeSecretKey) {
-  throw new Error("STRIPE_SECRET_KEY is not defined");
-}
+import { createStripeClient } from "@kan/stripe";
 
 export const webCrypto = Stripe.createSubtleCryptoProvider();
 
-const stripe: Stripe = new Stripe(stripeSecretKey, {
-  apiVersion: "2024-12-18.acacia",
-  httpClient: Stripe.createFetchHttpClient(),
-});
-
 export default async function handler(req: NextRequest) {
+  const stripe = createStripeClient();
+
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ message: "Method not allowed" }), {
       status: 405,
@@ -44,9 +35,7 @@ export default async function handler(req: NextRequest) {
       webCrypto,
     );
 
-    const response = NextResponse.next();
-
-    const db = createNextClient(req, response);
+    const { db } = await createNextApiContext(req);
 
     switch (event.type) {
       case "checkout.session.completed": {

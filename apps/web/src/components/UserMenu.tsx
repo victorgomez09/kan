@@ -3,9 +3,9 @@ import { useRouter } from "next/navigation";
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 
+import { authClient } from "@kan/auth";
+
 import { useTheme } from "~/providers/theme";
-import createClient from "~/utils/supabase/client";
-import { getPublicUrl } from "~/utils/supabase/getPublicUrl";
 
 interface UserMenuProps {
   imageUrl: string | undefined;
@@ -22,17 +22,17 @@ export default function UserMenu({
   email,
   isLoading,
 }: UserMenuProps) {
-  const db = createClient();
   const router = useRouter();
   const { themePreference, switchTheme } = useTheme();
 
   const handleLogout = async () => {
-    await db.auth.signOut();
+    await authClient.signOut();
 
     router.push("/login");
   };
 
-  const avatarUrl = imageUrl ? getPublicUrl(imageUrl) : null;
+  // const avatarUrl = imageUrl ? getPublicUrl(imageUrl) : null;
+  const avatarUrl = "";
 
   return (
     <Menu as="div" className="relative inline-block w-full text-left">
