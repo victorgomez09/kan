@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaGoogle } from "react-icons/fa";
 import { z } from "zod";
@@ -7,7 +8,6 @@ import { authClient } from "@kan/auth";
 
 import Button from "~/components/Button";
 import Input from "~/components/Input";
-import { api } from "~/utils/api";
 
 interface FormValues {
   email: string;
@@ -20,31 +20,50 @@ interface AuthProps {
 const EmailSchema = z.object({ email: z.string().email() });
 
 export function Auth({ setIsMagicLinkSent }: AuthProps) {
+  const [isLoginWithGooglePending, setIsLoginWithGooglePending] =
+    useState(false);
+  const [isLoginWithEmailPending, setIsLoginWithEmailPending] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(EmailSchema),
   });
 
-  const email = watch("email");
-
-  const loginWithEmail = api.auth.loginWithEmail.useMutation({
-    onSuccess: () => {
-      setIsMagicLinkSent(true, email);
-    },
-  });
-
   const handleLoginWithEmail = async (email: string) => {
-    const { data, error } = await authClient.signIn.magicLink({
+    setIsLoginWithEmailPending(true);
+    setLoginError(null);
+    const { error } = await authClient.signIn.magicLink({
       email,
       callbackURL: "/boards",
     });
 
-    if (!error) {
+    setIsLoginWithEmailPending(false);
+
+    if (error) {
+      setLoginError(
+        "Something went wrong, please try again later or contact customer support.",
+      );
+    } else {
       setIsMagicLinkSent(true, email);
+    }
+  };
+
+  const handleLoginWithGoogle = async () => {
+    setIsLoginWithGooglePending(true);
+    setLoginError(null);
+    const { error } = await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/boards",
+    });
+
+    setIsLoginWithGooglePending(false);
+
+    if (error) {
+      setLoginError("Failed to login with Google. Please try again.");
     }
   };
 
@@ -56,12 +75,8 @@ export function Auth({ setIsMagicLinkSent }: AuthProps) {
     <div className="space-y-6">
       <div>
         <Button
-          onClick={() =>
-            authClient.signIn.social({
-              provider: "google",
-              callbackURL: "/boards",
-            })
-          }
+          onClick={handleLoginWithGoogle}
+          isLoading={isLoginWithGooglePending}
           iconLeft={<FaGoogle />}
           fullWidth
           size="lg"
@@ -79,21 +94,17 @@ export function Auth({ setIsMagicLinkSent }: AuthProps) {
           {...register("email", { required: true })}
           placeholder="Enter your email address"
         />
-        {!loginWithEmail.error && errors.email && (
+        {errors.email && (
           <p className="mt-2 text-xs text-red-400">
             Please enter a valid email address
           </p>
         )}
-        {loginWithEmail.error ? (
-          <p className="mt-2 text-xs text-red-400">
-            Something went wrong, please try again later or contact customer
-            support.
-          </p>
-        ) : null}
-
+        {loginError && (
+          <p className="mt-2 text-xs text-red-400">{loginError}</p>
+        )}
         <div className="mt-[1.5rem]">
           <Button
-            isLoading={loginWithEmail.isPending}
+            isLoading={isLoginWithEmailPending}
             fullWidth
             size="lg"
             variant="secondary"

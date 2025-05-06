@@ -62,7 +62,8 @@
     "S3_SECRET_ACCESS_KEY",
     "S3_ENDPOINT",
     "PORT",
-    "BETTER_AUTH_SECRET"
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",

@@ -13,6 +13,7 @@ import { createStripeClient } from "@kan/stripe";
 const db = createDrizzleClient();
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET!,
+  baseURL: process.env.BETTER_AUTH_BASE_URL!,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
