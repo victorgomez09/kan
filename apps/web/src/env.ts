@@ -34,6 +34,7 @@ export const env = createEnv({
     NEXT_PUBLIC_BASE_URL: z.string(),
     NEXT_PUBLIC_STORAGE_URL: z.string(),
     NEXT_PUBLIC_AVATAR_BUCKET_NAME: z.string(),
+    NEXT_PUBLIC_STORAGE_DOMAIN: z.string(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
@@ -45,6 +46,7 @@ export const env = createEnv({
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
     NEXT_PUBLIC_STORAGE_URL: process.env.NEXT_PUBLIC_STORAGE_URL,
     NEXT_PUBLIC_AVATAR_BUCKET_NAME: process.env.NEXT_PUBLIC_AVATAR_BUCKET_NAME,
+    NEXT_PUBLIC_STORAGE_DOMAIN: process.env.NEXT_PUBLIC_STORAGE_DOMAIN,
   },
   skipValidation:
     !!process.env.CI || process.env.npm_lifecycle_event === "lint",
