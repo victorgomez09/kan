@@ -14,7 +14,9 @@ const db = createDrizzleClient();
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET!,
   baseURL: process.env.BETTER_AUTH_BASE_URL!,
-  trustedOrigins: process.env.BETTER_AUTH_TRUSTED_ORIGINS!.split(","),
+  trustedOrigins: process.env.BETTER_AUTH_TRUSTED_ORIGINS
+    ? process.env.BETTER_AUTH_TRUSTED_ORIGINS.split(",")
+    : [],
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
@@ -39,14 +41,14 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    apiKey(),
-    magicLink({
-      sendMagicLink: async ({ email, url }) => {
-        await sendEmail(email, "Sign in to kan.bn", "MAGIC_LINK", {
-          magicLoginUrl: url,
-        });
-      },
-    }),
+    // apiKey(),
+    // magicLink({
+    //   sendMagicLink: async ({ email, url }) => {
+    //     await sendEmail(email, "Sign in to kan.bn", "MAGIC_LINK", {
+    //       magicLoginUrl: url,
+    //     });
+    //   },
+    // }),
   ],
   hooks: {
     // after: createAuthMiddleware(async (ctx) => {
