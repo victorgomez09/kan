@@ -11,11 +11,8 @@ import { sendEmail } from "@kan/email";
 import { createStripeClient } from "@kan/stripe";
 
 const db = createDrizzleClient();
-
-console.log("GOOGLE_CLIENT_ID", process.env.GOOGLE_CLIENT_ID);
-console.log("GOOGLE_CLIENT_SECRET", process.env.GOOGLE_CLIENT_SECRET);
-
 export const auth = betterAuth({
+  secret: process.env.BETTER_AUTH_SECRET!,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {

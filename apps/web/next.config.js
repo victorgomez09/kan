@@ -22,7 +22,7 @@ const config = {
   typescript: { ignoreBuildErrors: true },
 
   images: {
-    domains: [process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL ?? ""],
+    domains: [process.env.NEXT_PUBLIC_STORAGE_URL ?? ""],
   },
 };
 
