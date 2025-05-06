@@ -10,7 +10,11 @@ import { PageHead } from "~/components/PageHead";
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
-import { getInitialsFromName, inferInitialsFromEmail } from "~/utils/helpers";
+import {
+  getAvatarUrl,
+  getInitialsFromName,
+  inferInitialsFromEmail,
+} from "~/utils/helpers";
 import { DeleteMemberConfirmation } from "./components/DeleteMemberConfirmation";
 import { InviteMemberForm } from "./components/InviteMemberForm";
 
@@ -57,7 +61,7 @@ export default function MembersPage() {
                 <Avatar
                   name={memberName ?? ""}
                   email={memberEmail ?? ""}
-                  imageUrl={memberImage ? "" : undefined}
+                  imageUrl={memberImage ? getAvatarUrl(memberImage) : undefined}
                 />
               )}
             </div>

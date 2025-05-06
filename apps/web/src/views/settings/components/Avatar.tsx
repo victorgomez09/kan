@@ -1,8 +1,10 @@
 import Image from "next/image";
 import { useState } from "react";
 
+import { env } from "~/env";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
+import { getAvatarUrl } from "~/utils/helpers";
 
 export default function Avatar({
   userId,
@@ -38,41 +40,68 @@ export default function Avatar({
     },
   });
 
-  const avatarUrl = userImage ? "" : undefined;
+  const avatarUrl = userImage ? getAvatarUrl(userImage) : undefined;
 
   const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
-      setUploading(true);
+      event.preventDefault();
 
-      if (!event.target.files || event.target.files.length === 0) {
-        throw new Error("You must select an image to upload.");
-      }
+      const file = event.target.files?.[0];
 
-      if (!userId) {
-        throw new Error("User ID is required.");
-      }
-
-      const file = event.target.files[0];
-
-      if (!file) {
-        throw new Error("No file selected.");
+      if (!file || !userId) {
+        return showPopup({
+          header: "Error uploading profile image",
+          message: "Please select a file to upload.",
+          icon: "error",
+        });
       }
 
       const fileExt = file.name.split(".").pop();
       const fileName = `${userId}/avatar.${fileExt}`;
-      const filePath = `${fileName}`;
 
-      // const { error: uploadError } = await supabase.storage
-      //   .from("avatars")
-      //   .upload(filePath, file, { upsert: true });
+      setUploading(true);
 
-      // if (uploadError) {
-      //   throw uploadError;
-      // }
+      const response = await fetch(
+        env.NEXT_PUBLIC_BASE_URL + "/api/upload/image",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ filename: fileName, contentType: file.type }),
+        },
+      );
 
-      updateUser.mutate({ image: filePath });
+      if (!response.ok) throw new Error("Failed to get pre-signed URL");
+
+      const { url, fields } = (await response.json()) as {
+        url: string;
+        fields: Record<string, string>;
+      };
+
+      const formData = new FormData();
+      Object.entries(fields).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      formData.append("file", file);
+
+      const uploadResponse = await fetch(url, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) throw new Error("Failed to upload profile image");
+
+      updateUser.mutate({
+        image: fileName,
+      });
     } catch (error) {
       console.error(error);
+      showPopup({
+        header: "Error uploading profile image",
+        message: "Please try again later, or contact customer support.",
+        icon: "error",
+      });
     } finally {
       setUploading(false);
     }

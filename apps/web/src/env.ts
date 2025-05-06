@@ -18,6 +18,10 @@ export const env = createEnv({
     STRIPE_SECRET_KEY: z.string().optional(),
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
+    S3_ACCESS_KEY_ID: z.string(),
+    S3_SECRET_ACCESS_KEY: z.string(),
+    S3_REGION: z.string(),
+    S3_ENDPOINT: z.string(),
   },
 
   /**
@@ -27,6 +31,9 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_KAN_ENV: z.string(),
     NEXT_PUBLIC_UMAMI_ID: z.string().optional(),
+    NEXT_PUBLIC_BASE_URL: z.string(),
+    NEXT_PUBLIC_STORAGE_URL: z.string(),
+    NEXT_PUBLIC_AVATAR_BUCKET_NAME: z.string(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
@@ -35,6 +42,9 @@ export const env = createEnv({
     NEXT_PUBLIC_KAN_ENV: process.env.NEXT_PUBLIC_KAN_ENV,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_UMAMI_ID: process.env.NEXT_PUBLIC_UMAMI_ID,
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+    NEXT_PUBLIC_STORAGE_URL: process.env.NEXT_PUBLIC_STORAGE_URL,
+    NEXT_PUBLIC_AVATAR_BUCKET_NAME: process.env.NEXT_PUBLIC_AVATAR_BUCKET_NAME,
   },
   skipValidation:
     !!process.env.CI || process.env.npm_lifecycle_event === "lint",

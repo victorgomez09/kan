@@ -14,7 +14,7 @@ import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
-import { formatMemberDisplayName } from "~/utils/helpers";
+import { formatMemberDisplayName, getAvatarUrl } from "~/utils/helpers";
 import { DeleteLabelConfirmation } from "../../components/DeleteLabelConfirmation";
 import ActivityList from "./components/ActivityList";
 import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
@@ -92,7 +92,7 @@ export default function CardPage() {
           member.user.email ?? null,
         ),
         imageUrl: member.user.image
-          ? getPublicUrl(member.user.image)
+          ? getAvatarUrl(member.user.image)
           : undefined,
         selected: isSelected ?? false,
         leftIcon: (
@@ -100,7 +100,7 @@ export default function CardPage() {
             size="xs"
             name={member.user.name ?? ""}
             imageUrl={
-              member.user.image ? getPublicUrl(member.user.image) : undefined
+              member.user.image ? getAvatarUrl(member.user.image) : undefined
             }
             email={member.user.email ?? ""}
           />

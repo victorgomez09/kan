@@ -1,3 +1,5 @@
+import { env } from "~/env";
+
 export const formatToArray = (
   value: string | string[] | undefined,
 ): string[] => {
@@ -41,4 +43,8 @@ export const formatMemberDisplayName = (
   if (!localPart) return "";
 
   return localPart.replace(/[_-]/g, ".");
+};
+
+export const getAvatarUrl = (key: string) => {
+  return `${env.NEXT_PUBLIC_STORAGE_URL}/${env.NEXT_PUBLIC_AVATAR_BUCKET_NAME}/${key}`;
 };

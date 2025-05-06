@@ -18,7 +18,7 @@ import Toggle from "~/components/Toggle";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
-import { formatMemberDisplayName } from "~/utils/helpers";
+import { formatMemberDisplayName, getAvatarUrl } from "~/utils/helpers";
 
 type NewCardFormInput = NewCardInput & {
   isCreateAnotherEnabled: boolean;
@@ -155,7 +155,9 @@ export function NewCardForm({
         <Avatar
           size="xs"
           name={member.user.name ?? ""}
-          imageUrl={member.user.image ? "" : undefined}
+          imageUrl={
+            member.user.image ? getAvatarUrl(member.user.image) : undefined
+          }
           email={member.user.email ?? ""}
         />
       ),

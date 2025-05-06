@@ -10,7 +10,11 @@ import Avatar from "~/components/Avatar";
 import Button from "~/components/Button";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
 import LabelIcon from "~/components/LabelIcon";
-import { formatMemberDisplayName, formatToArray } from "~/utils/helpers";
+import {
+  formatMemberDisplayName,
+  formatToArray,
+  getAvatarUrl,
+} from "~/utils/helpers";
 
 interface Member {
   publicId: string;
@@ -65,7 +69,9 @@ const Filters = ({
       <Avatar
         size="xs"
         name={member.user?.name ?? ""}
-        imageUrl={member.user?.image ? "" : undefined}
+        imageUrl={
+          member.user?.image ? getAvatarUrl(member.user.image) : undefined
+        }
         email={member.user?.email ?? ""}
       />
     ),

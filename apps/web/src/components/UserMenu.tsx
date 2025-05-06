@@ -6,6 +6,7 @@ import { Fragment } from "react";
 import { authClient } from "@kan/auth";
 
 import { useTheme } from "~/providers/theme";
+import { getAvatarUrl } from "~/utils/helpers";
 
 interface UserMenuProps {
   imageUrl: string | undefined;
@@ -31,8 +32,7 @@ export default function UserMenu({
     router.push("/login");
   };
 
-  // const avatarUrl = imageUrl ? getPublicUrl(imageUrl) : null;
-  const avatarUrl = "";
+  const avatarUrl = imageUrl ? getAvatarUrl(imageUrl) : null;
 
   return (
     <Menu as="div" className="relative inline-block w-full text-left">
