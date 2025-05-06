@@ -41,14 +41,14 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    // apiKey(),
-    // magicLink({
-    //   sendMagicLink: async ({ email, url }) => {
-    //     await sendEmail(email, "Sign in to kan.bn", "MAGIC_LINK", {
-    //       magicLoginUrl: url,
-    //     });
-    //   },
-    // }),
+    apiKey(),
+    magicLink({
+      sendMagicLink: async ({ email, url }) => {
+        await sendEmail(email, "Sign in to kan.bn", "MAGIC_LINK", {
+          magicLoginUrl: url,
+        });
+      },
+    }),
   ],
   hooks: {
     // after: createAuthMiddleware(async (ctx) => {
