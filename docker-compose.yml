@@ -5,6 +5,7 @@ services:
     ports:
       - "3000:3000"
     build:
+      image: ghcr.io/${GITHUB_REPOSITORY}/kan-web:latest
       context: .
       dockerfile: ./apps/web/Dockerfile
       args:
