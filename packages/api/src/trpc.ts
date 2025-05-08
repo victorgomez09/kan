@@ -7,7 +7,7 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import type { dbClient } from "@kan/db/client";
-import { auth } from "@kan/auth";
+// import { auth } from "@kan/auth";
 import { createDrizzleClient } from "@kan/db/client";
 
 export interface User {
@@ -26,6 +26,16 @@ interface CreateContextOptions {
   db: dbClient;
 }
 
+// dummy user for testing edge speed
+const user = {
+  id: "2b97d1f4-82db-415c-8be8-b6b1c1c13cbf",
+  name: "John Doe",
+  email: "john.doe@example.com",
+  emailVerified: true,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
 export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     user: opts.user,
@@ -36,23 +46,23 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
 export const createTRPCContext = async ({
   req,
 }: FetchCreateContextFnOptions) => {
-  const session = await auth.api.getSession({
-    headers: req.headers,
-  });
+  // const session = await auth.api.getSession({
+  //   headers: req.headers,
+  // });
 
   const db = createDrizzleClient();
 
-  return createInnerTRPCContext({ db, user: session?.user });
+  return createInnerTRPCContext({ db, user });
 };
 
 export const createNextApiContext = async (req: NextRequest) => {
-  const session = await auth.api.getSession({
-    headers: req.headers,
-  });
+  // const session = await auth.api.getSession({
+  //   headers: req.headers,
+  // });
 
   const db = createDrizzleClient();
 
-  return createInnerTRPCContext({ db, user: session?.user });
+  return createInnerTRPCContext({ db, user: user });
 };
 
 export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
@@ -67,12 +77,12 @@ export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
     return createInnerTRPCContext({ db, user: null });
   }
 
-  const session = await auth.api.getSession({
-    // @ts-expect-error
-    headers: new Headers(req.headers),
-  });
+  // const session = await auth.api.getSession({
+  //   // @ts-expect-error
+  //   headers: new Headers(req.headers),
+  // });
 
-  return createInnerTRPCContext({ db, user: session?.user });
+  return createInnerTRPCContext({ db, user });
 };
 
 const t = initTRPC
