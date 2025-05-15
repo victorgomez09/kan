@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 
 import { createNextApiContext } from "@kan/api/trpc";
@@ -19,37 +19,28 @@ interface CheckoutSessionRequest {
   stripeCustomerId: string;
 }
 
-export default async function handler(req: NextRequest) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const stripe = createStripeClient();
 
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { "Content-Type": "application/json" },
-    });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
     const { user, db } = await createNextApiContext(req);
 
     if (!user) {
-      return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
+      return res.status(404).json({ error: "User not found" });
     }
 
-    const body = (await req.json()) as CheckoutSessionRequest;
+    const body = req.body as CheckoutSessionRequest;
     const { successUrl, cancelUrl, slug, workspacePublicId } = body;
 
     if (!successUrl || !cancelUrl || !slug || !workspacePublicId) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
     const slugResult = workspaceSlugSchema.safeParse(slug);
@@ -91,22 +82,9 @@ export default async function handler(req: NextRequest) {
       },
     });
 
-    return new Response(JSON.stringify({ url: session.url }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return res.status(200).json({ url: session.url });
   } catch (error) {
     console.error("Error:", error);
-    return new Response(
-      JSON.stringify({ error: "Error creating checkout session" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      },
-    );
+    return res.status(500).json({ error: "Error creating checkout session" });
   }
 }
-
-export const runtime = "edge";
-export const preferredRegion = "lhr1";
-export const dynamic = "force-dynamic";

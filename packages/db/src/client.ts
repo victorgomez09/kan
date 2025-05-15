@@ -1,20 +1,23 @@
-import type { NeonDatabase as DrizzleClient } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
 import * as schema from "./schema";
 
-export type dbClient = DrizzleClient<typeof schema> & {
+export type dbClient = NodePgDatabase<typeof schema> & {
   $client: Pool;
 };
 
-export const createDrizzleClient = () => {
+export const createDrizzleClient = (): dbClient => {
+  const connectionString = process.env.POSTGRES_URL;
+
+  if (!connectionString) {
+    throw new Error("POSTGRES_URL environment variable is not set");
+  }
+
   const pool = new Pool({
-    connectionString: process.env.POSTGRES_URL,
+    connectionString,
   });
 
-  return drizzle({
-    client: pool,
-    schema,
-  });
+  return drizzlePg(pool, { schema }) as dbClient;
 };

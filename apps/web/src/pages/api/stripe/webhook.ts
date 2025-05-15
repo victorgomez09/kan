@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { Stripe } from "stripe";
 
 import { createNextApiContext } from "@kan/api/trpc";
@@ -7,25 +7,24 @@ import { createStripeClient } from "@kan/stripe";
 
 export const webCrypto = Stripe.createSubtleCryptoProvider();
 
-export default async function handler(req: NextRequest) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const stripe = createStripeClient();
 
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ message: "Method not allowed" }), {
-      status: 405,
-    });
+    return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const sig = req.headers.get("stripe-signature");
+  const sig = req.headers["stripe-signature"];
 
   if (!sig) {
-    return new Response(JSON.stringify({ message: "No signature found" }), {
-      status: 400,
-    });
+    return res.status(400).json({ message: "No signature found" });
   }
 
   try {
-    const body = await req.text();
+    const body = req.body;
 
     const event = await stripe.webhooks.constructEventAsync(
       body,
@@ -55,15 +54,9 @@ export default async function handler(req: NextRequest) {
         console.log(`Unhandled event type: ${event.type}`);
     }
 
-    return new Response(JSON.stringify({ received: true }), { status: 200 });
+    return res.status(200).json({ received: true });
   } catch (err) {
     console.error("Webhook error:", err);
-    return new Response(JSON.stringify({ message: "Webhook handler failed" }), {
-      status: 400,
-    });
+    return res.status(400).json({ message: "Webhook handler failed" });
   }
 }
-
-export const runtime = "edge";
-export const preferredRegion = "lhr1";
-export const dynamic = "force-dynamic";

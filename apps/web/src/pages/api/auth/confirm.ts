@@ -1,5 +1,5 @@
 // import type { EmailOtpType } from "@supabase/supabase-js";
-// import type { NextRequest } from "next/server";
+// import type { NextApiRequest } from "next";
 // import { NextResponse } from "next/server";
 
 // import { createDrizzleClient } from "@kan/db/client";
@@ -8,7 +8,7 @@
 // import { stripe } from "@kan/stripe";
 // import { createNextApiClient } from "@kan/";
 
-// export default async function handler(req: NextRequest) {
+// export default async function handler(req: NextApiRequest) {
 //   if (req.method !== "GET") {
 //     return new NextResponse(null, {
 //       status: 405,
@@ -96,7 +96,3 @@
 
 //   return redirectResponse;
 // }
-
-// export const runtime = "edge";
-// export const preferredRegion = "lhr1";
-// export const dynamic = "force-dynamic";
