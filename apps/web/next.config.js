@@ -24,6 +24,9 @@ const config = {
   images: {
     domains: [process.env.NEXT_PUBLIC_STORAGE_DOMAIN ?? ""],
   },
+  experimental: {
+    instrumentationHook: true,
+  },
 };
 
 export default config;
