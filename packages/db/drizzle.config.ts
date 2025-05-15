@@ -14,5 +14,8 @@ export default {
     database: process.env.POSTGRES_DATABASE ?? "postgres",
     ssl: true,
   },
+  migrations: {
+    prefix: "timestamp",
+  },
   // tablesFilter: ["kan_*"],
 } satisfies Config;
