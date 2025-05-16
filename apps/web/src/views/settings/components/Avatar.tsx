@@ -74,20 +74,13 @@ export default function Avatar({
 
       if (!response.ok) throw new Error("Failed to get pre-signed URL");
 
-      const { url, fields } = (await response.json()) as {
+      const { url } = (await response.json()) as {
         url: string;
-        fields: Record<string, string>;
       };
 
-      const formData = new FormData();
-      Object.entries(fields).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
-      formData.append("file", file);
-
       const uploadResponse = await fetch(url, {
-        method: "POST",
-        body: formData,
+        method: "PUT",
+        body: file,
       });
 
       if (!uploadResponse.ok) throw new Error("Failed to upload profile image");

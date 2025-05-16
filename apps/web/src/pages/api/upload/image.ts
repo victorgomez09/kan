@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { S3Client } from "@aws-sdk/client-s3";
-import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { env } from "~/env";
 
@@ -16,7 +16,6 @@ export default async function handler(
     const { filename, contentType } = req.body;
 
     const client = new S3Client({
-      forcePathStyle: true,
       region: env.S3_REGION,
       endpoint: env.S3_ENDPOINT,
       credentials: {
@@ -24,24 +23,17 @@ export default async function handler(
         secretAccessKey: env.S3_SECRET_ACCESS_KEY,
       },
     });
-    const signedUrl = await createPresignedPost(client, {
-      Bucket: env.NEXT_PUBLIC_AVATAR_BUCKET_NAME ?? "",
-      Key: filename,
 
-      Conditions: [
-        ["content-length-range", 0, 10485760], // up to 10 MB
-        ["starts-with", "$Content-Type", contentType],
-      ],
-      Fields: {
-        acl: "public-read",
-        "Content-Type": contentType,
-      },
-      Expires: 600,
-    });
+    const signedUrl = await getSignedUrl(
+      // @ts-ignore
+      client,
+      new PutObjectCommand({
+        Bucket: process.env.NEXT_PUBLIC_AVATAR_BUCKET_NAME ?? "",
+        Key: filename,
+      }),
+    );
 
-    const { url, fields } = signedUrl;
-
-    return res.status(200).json({ url, fields });
+    return res.status(200).json({ url: signedUrl, key: filename });
   } catch (error) {
     return res.status(500).json({ error: (error as Error).message });
   }
