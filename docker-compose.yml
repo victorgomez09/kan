@@ -4,6 +4,8 @@ services:
   web:
     ports:
       - "3001:3000"
+    networks:
+      - dokploy-network
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile
@@ -39,3 +41,7 @@ services:
       - NEXT_PUBLIC_AVATAR_BUCKET_NAME=${NEXT_PUBLIC_AVATAR_BUCKET_NAME}
       - NEXT_PUBLIC_STORAGE_DOMAIN=${NEXT_PUBLIC_STORAGE_DOMAIN}
       - NEXT_PUBLIC_UMAMI_ID=${NEXT_PUBLIC_UMAMI_ID}
+
+networks:
+  dokploy-network:
+    external: true
