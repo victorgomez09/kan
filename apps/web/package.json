@@ -6,7 +6,7 @@
   "scripts": {
     "build": "pnpm next build",
     "clean": "git clean -xdf .cache .next .turbo node_modules",
-    "dev": "pnpm with-env next dev",
+    "dev": "pnpm with-env next dev | pino-pretty",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
     "start": "pnpm with-env next start",
@@ -62,6 +62,7 @@
     "dotenv-cli": "^7.4.4",
     "eslint": "catalog:",
     "jiti": "^1.21.6",
+    "pino-pretty": "^13.0.0",
     "prettier": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:"
