@@ -1,11 +1,17 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Stripe } from "stripe";
+import type { Readable } from "node:stream";
 
 import { createNextApiContext } from "@kan/api/trpc";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
 import { createStripeClient } from "@kan/stripe";
 
-export const webCrypto = Stripe.createSubtleCryptoProvider();
+async function buffer(readable: Readable) {
+  const chunks = [];
+  for await (const chunk of readable) {
+    chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,14 +30,13 @@ export default async function handler(
   }
 
   try {
-    const body = req.body;
+    const buf = await buffer(req);
+    const rawBody = buf.toString("utf8");
 
-    const event = await stripe.webhooks.constructEventAsync(
-      body,
+    const event = stripe.webhooks.constructEvent(
+      rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!,
-      undefined,
-      webCrypto,
     );
 
     const { db } = await createNextApiContext(req);
@@ -60,3 +65,9 @@ export default async function handler(
     return res.status(400).json({ message: "Webhook handler failed" });
   }
 }
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
