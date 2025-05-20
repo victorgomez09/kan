@@ -1,8 +1,16 @@
-import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
 
 import type { dbClient } from "@kan/db/client";
 import type { BoardVisibilityStatus } from "@kan/db/schema";
-import { boards, cards, lists, workspaceMembers } from "@kan/db/schema";
+import {
+  boards,
+  cards,
+  cardsToLabels,
+  cardToWorkspaceMembers,
+  labels,
+  lists,
+  workspaceMembers,
+} from "@kan/db/schema";
 import { generateUID } from "@kan/shared/utils";
 
 export const getAllByWorkspaceId = (db: dbClient, workspaceId: number) => {
@@ -34,6 +42,41 @@ export const getByPublicId = async (
     labels: string[];
   },
 ) => {
+  let cardIds: string[] = [];
+
+  if (filters.labels.length > 0 || filters.members.length > 0) {
+    const filteredCards = await db
+      .select({
+        publicId: cards.publicId,
+      })
+      .from(cards)
+      .leftJoin(cardsToLabels, eq(cards.id, cardsToLabels.cardId))
+      .leftJoin(labels, eq(cardsToLabels.labelId, labels.id))
+      .leftJoin(
+        cardToWorkspaceMembers,
+        eq(cards.id, cardToWorkspaceMembers.cardId),
+      )
+      .leftJoin(
+        workspaceMembers,
+        eq(cardToWorkspaceMembers.workspaceMemberId, workspaceMembers.id),
+      )
+      .where(
+        and(
+          isNull(cards.deletedAt),
+          or(
+            filters.labels.length > 0
+              ? inArray(labels.publicId, filters.labels)
+              : undefined,
+            filters.members.length > 0
+              ? inArray(workspaceMembers.publicId, filters.members)
+              : undefined,
+          ),
+        ),
+      );
+
+    cardIds = filteredCards.map((card) => card.publicId);
+  }
+
   const board = await db.query.boards.findFirst({
     columns: {
       publicId: true,
@@ -96,7 +139,6 @@ export const getByPublicId = async (
                       name: true,
                       colourCode: true,
                     },
-                    // where: inArray(label.publicId, filters.labels),
                   },
                 },
               },
@@ -116,17 +158,14 @@ export const getByPublicId = async (
                         },
                       },
                     },
-                    // https://github.com/drizzle-team/drizzle-orm/issues/2903
-                    // where: isNull(workspaceMembers.deletedAt),
                   },
                 },
-                where:
-                  filters.members.length > 0
-                    ? inArray(workspaceMembers, filters.members)
-                    : undefined,
               },
             },
-            where: isNull(cards.deletedAt),
+            where: and(
+              cardIds.length > 0 ? inArray(cards.publicId, cardIds) : undefined,
+              isNull(cards.deletedAt),
+            ),
             orderBy: [asc(cards.index)],
           },
         },
@@ -164,6 +203,28 @@ export const getBySlug = async (
     labels: string[];
   },
 ) => {
+  let cardIds: string[] = [];
+
+  if (filters.labels.length) {
+    const filteredCards = await db
+      .select({
+        publicId: cards.publicId,
+      })
+      .from(cards)
+      .leftJoin(cardsToLabels, eq(cards.id, cardsToLabels.cardId))
+      .leftJoin(labels, eq(cardsToLabels.labelId, labels.id))
+      .where(
+        and(
+          isNull(cards.deletedAt),
+          filters.labels.length > 0
+            ? inArray(labels.publicId, filters.labels)
+            : undefined,
+        ),
+      );
+
+    cardIds = filteredCards.map((card) => card.publicId);
+  }
+
   const board = await db.query.boards.findFirst({
     columns: {
       publicId: true,
@@ -175,23 +236,6 @@ export const getBySlug = async (
       workspace: {
         columns: {
           publicId: true,
-        },
-        with: {
-          members: {
-            columns: {
-              publicId: true,
-            },
-            with: {
-              user: {
-                columns: {
-                  name: true,
-                  email: true,
-                  image: true,
-                },
-              },
-            },
-            where: isNull(workspaceMembers.deletedAt),
-          },
         },
       },
       labels: {
@@ -226,12 +270,14 @@ export const getBySlug = async (
                       name: true,
                       colourCode: true,
                     },
-                    // where: inArray(label.publicId, filters.labels),
                   },
                 },
               },
             },
-            where: isNull(cards.deletedAt),
+            where: and(
+              cardIds.length > 0 ? inArray(cards.publicId, cardIds) : undefined,
+              isNull(cards.deletedAt),
+            ),
             orderBy: [asc(cards.index)],
           },
         },
