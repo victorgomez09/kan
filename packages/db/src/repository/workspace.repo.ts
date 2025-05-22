@@ -220,3 +220,23 @@ export const isWorkspaceSlugAvailable = async (
 
   return result === undefined;
 };
+
+export const isUserInWorkspace = async (
+  db: dbClient,
+  userId: string,
+  workspaceId: number,
+) => {
+  const result = await db.query.workspaceMembers.findFirst({
+    columns: {
+      id: true,
+    },
+    where: and(
+      eq(workspaceMembers.userId, userId),
+      eq(workspaceMembers.workspaceId, workspaceId),
+      eq(workspaceMembers.status, "active"),
+      isNull(workspaceMembers.deletedAt),
+    ),
+  });
+
+  return result?.id !== undefined;
+};

@@ -311,6 +311,7 @@ export const getWithListIdsByPublicId = (
   return db.query.boards.findFirst({
     columns: {
       id: true,
+      workspaceId: true,
     },
     with: {
       lists: {
@@ -330,6 +331,7 @@ export const getWithLatestListIndexByPublicId = (
   return db.query.boards.findFirst({
     columns: {
       id: true,
+      workspaceId: true,
     },
     with: {
       lists: {
@@ -449,4 +451,18 @@ export const isSlugUnique = async (
   });
 
   return result === undefined;
+};
+
+export const getWorkspaceIdByBoardPublicId = async (
+  db: dbClient,
+  boardPublicId: string,
+) => {
+  const result = await db.query.boards.findFirst({
+    columns: {
+      workspaceId: true,
+    },
+    where: eq(boards.publicId, boardPublicId),
+  });
+
+  return result?.workspaceId;
 };

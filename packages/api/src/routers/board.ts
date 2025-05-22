@@ -9,6 +9,7 @@ import * as workspaceRepo from "@kan/db/repository/workspace.repo";
 import { generateSlug, generateUID } from "@kan/shared/utils";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { assertUserInWorkspace } from "../utils/auth";
 
 export const boardRouter = createTRPCRouter({
   all: protectedProcedure
@@ -27,6 +28,14 @@ export const boardRouter = createTRPCRouter({
       z.custom<Awaited<ReturnType<typeof boardRepo.getAllByWorkspaceId>>>(),
     )
     .query(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
       const workspace = await workspaceRepo.getByPublicId(
         ctx.db,
         input.workspacePublicId,
@@ -37,6 +46,8 @@ export const boardRouter = createTRPCRouter({
           message: `Workspace with public ID ${input.workspacePublicId} not found`,
           code: "NOT_FOUND",
         });
+
+      await assertUserInWorkspace(ctx.db, userId, workspace.id);
 
       const result = boardRepo.getAllByWorkspaceId(ctx.db, workspace.id);
 
@@ -62,6 +73,27 @@ export const boardRouter = createTRPCRouter({
     )
     .output(z.custom<Awaited<ReturnType<typeof boardRepo.getByPublicId>>>())
     .query(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
+      const workspaceId = await boardRepo.getWorkspaceIdByBoardPublicId(
+        ctx.db,
+        input.boardPublicId,
+      );
+
+      if (!workspaceId)
+        throw new TRPCError({
+          message: `Board with public ID ${input.boardPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      await assertUserInWorkspace(ctx.db, userId, workspaceId);
+
       const result = await boardRepo.getByPublicId(
         ctx.db,
         input.boardPublicId,
@@ -142,6 +174,8 @@ export const boardRouter = createTRPCRouter({
           code: "NOT_FOUND",
         });
 
+      await assertUserInWorkspace(ctx.db, userId, workspace.id);
+
       let slug = generateSlug(input.name);
 
       const isSlugUnique = await boardRepo.isSlugUnique(ctx.db, {
@@ -193,6 +227,27 @@ export const boardRouter = createTRPCRouter({
     )
     .output(z.custom<Awaited<ReturnType<typeof boardRepo.update>>>())
     .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
+      const workspaceId = await boardRepo.getWorkspaceIdByBoardPublicId(
+        ctx.db,
+        input.boardPublicId,
+      );
+
+      if (!workspaceId)
+        throw new TRPCError({
+          message: `Board with public ID ${input.boardPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      await assertUserInWorkspace(ctx.db, userId, workspaceId);
+
       const result = await boardRepo.update(ctx.db, {
         name: input.name,
         slug: input.slug,
@@ -244,6 +299,8 @@ export const boardRouter = createTRPCRouter({
           message: `Board with public ID ${input.boardPublicId} not found`,
           code: "NOT_FOUND",
         });
+
+      await assertUserInWorkspace(ctx.db, userId, board.workspaceId);
 
       const listIds = board.lists.map((list) => list.id);
 
