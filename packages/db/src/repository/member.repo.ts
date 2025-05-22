@@ -8,7 +8,8 @@ import { generateUID } from "@kan/shared/utils";
 export const create = async (
   db: dbClient,
   memberInput: {
-    userId: string;
+    userId: string | null;
+    email: string;
     workspaceId: number;
     createdBy: string;
     role: MemberRole;
@@ -19,6 +20,7 @@ export const create = async (
     .insert(workspaceMembers)
     .values({
       publicId: generateUID(),
+      email: memberInput.email,
       userId: memberInput.userId,
       workspaceId: memberInput.workspaceId,
       createdBy: memberInput.createdBy,
@@ -39,11 +41,14 @@ export const getByPublicId = async (db: dbClient, publicId: string) => {
   });
 };
 
-export const acceptInvite = async (db: dbClient, id: number) => {
+export const acceptInvite = async (
+  db: dbClient,
+  args: { memberId: number; userId: string },
+) => {
   const [result] = await db
     .update(workspaceMembers)
-    .set({ status: "active" })
-    .where(eq(workspaceMembers.id, id))
+    .set({ status: "active", userId: args.userId })
+    .where(eq(workspaceMembers.id, args.memberId))
     .returning({
       id: workspaceMembers.id,
       publicId: workspaceMembers.publicId,

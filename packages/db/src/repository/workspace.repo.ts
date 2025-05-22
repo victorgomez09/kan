@@ -11,6 +11,7 @@ export const create = async (
     name: string;
     slug: string;
     createdBy: string;
+    createdByEmail: string;
   },
 ) => {
   const [workspace] = await db
@@ -34,6 +35,7 @@ export const create = async (
     await db.insert(workspaceMembers).values({
       publicId: generateUID(),
       userId: workspaceInput.createdBy,
+      email: workspaceInput.createdByEmail,
       workspaceId: workspace.id,
       createdBy: workspaceInput.createdBy,
       role: "admin",
@@ -103,6 +105,7 @@ export const getByPublicIdWithMembers = (
       members: {
         columns: {
           publicId: true,
+          email: true,
           role: true,
           status: true,
         },
@@ -171,6 +174,7 @@ export const getAllByUserId = (db: dbClient, userId: string) => {
     },
     where: and(
       eq(workspaceMembers.userId, userId),
+      eq(workspaceMembers.status, "active"),
       isNull(workspaceMembers.deletedAt),
     ),
   });

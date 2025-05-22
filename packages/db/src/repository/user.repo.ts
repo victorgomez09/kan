@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import { v4 as uuidv4 } from "uuid";
 
 import type { dbClient } from "@kan/db/client";
 import { users } from "@kan/db/schema";
@@ -29,12 +30,12 @@ export const getByEmail = (db: dbClient, email: string) => {
 
 export const create = async (
   db: dbClient,
-  user: { id: string; email: string; stripeCustomerId: string },
+  user: { id?: string; email: string; stripeCustomerId?: string },
 ) => {
   const [result] = await db
     .insert(users)
     .values({
-      id: user.id,
+      id: user.id ?? uuidv4(),
       email: user.email,
       stripeCustomerId: user.stripeCustomerId,
       emailVerified: false,

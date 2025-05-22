@@ -5,6 +5,7 @@ import { apiKey } from "better-auth/plugins";
 import { magicLink } from "better-auth/plugins/magic-link";
 
 import type { dbClient } from "@kan/db/client";
+import * as memberRepo from "@kan/db/repository/member.repo";
 import * as userRepo from "@kan/db/repository/user.repo";
 import * as schema from "@kan/db/schema";
 import { sendEmail } from "@kan/email";
@@ -43,35 +44,69 @@ export const initAuth = (db: dbClient) => {
     plugins: [
       apiKey(),
       magicLink({
+        expiresIn: 60 * 60 * 24 * 7, // 7 days
         sendMagicLink: async ({ email, url }) => {
-          await sendEmail(email, "Sign in to kan.bn", "MAGIC_LINK", {
-            magicLoginUrl: url,
-          });
+          if (url.includes("type=invite")) {
+            await sendEmail(
+              email,
+              "Invitation to join workspace",
+              "JOIN_WORKSPACE",
+              {
+                magicLoginUrl: url,
+              },
+            );
+          } else {
+            await sendEmail(email, "Sign in to kan.bn", "MAGIC_LINK", {
+              magicLoginUrl: url,
+            });
+          }
         },
       }),
     ],
     hooks: {
-      // after: createAuthMiddleware(async (ctx) => {
-      //   if (ctx.path.startsWith("/sign-up") || ctx.path.startsWith("/sign-in")) {
-      //     const session = ctx.context.session;
-      //     if (
-      //       session &&
-      //       process.env.NEXT_PUBLIC_KAN_ENV === "cloud" &&
-      //       !session.user.stripeCustomerId
-      //     ) {
-      //       const stripe = createStripeClient();
-      //       const stripeCustomer = await stripe.customers.create({
-      //         email: session.user.email,
-      //         metadata: {
-      //           userId: session.user.id,
-      //         },
-      //       });
-      //       await userRepo.update(db, session.user.id, {
-      //         stripeCustomerId: stripeCustomer.id,
-      //       });
-      //     }
-      //   }
-      // }),
+      after: createAuthMiddleware(async (ctx) => {
+        if (ctx.path.startsWith("/get-session")) {
+          const user = ctx.context.session?.user;
+
+          if (
+            process.env.NEXT_PUBLIC_KAN_ENV === "cloud" &&
+            user &&
+            !user.stripeCustomerId
+          ) {
+            const stripe = createStripeClient();
+            const stripeCustomer = await stripe.customers.create({
+              email: user.email,
+              metadata: {
+                userId: user.id,
+              },
+            });
+
+            await userRepo.update(db, user.id, {
+              stripeCustomerId: stripeCustomer.id,
+            });
+          }
+        } else if (
+          ctx.path === "/magic-link/verify" &&
+          (ctx.query?.callbackURL as string | undefined)?.includes(
+            "type=invite",
+          ) &&
+          ctx.query?.memberPublicId
+        ) {
+          const userId = ctx.context.newSession?.session.userId;
+          const memberPublicId = ctx.query.memberPublicId as string;
+
+          if (userId) {
+            const member = await memberRepo.getByPublicId(db, memberPublicId);
+
+            if (member?.id) {
+              await memberRepo.acceptInvite(db, {
+                memberId: member.id,
+                userId,
+              });
+            }
+          }
+        }
+      }),
     },
     advanced: {
       cookiePrefix: "kan",

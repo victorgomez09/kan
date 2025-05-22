@@ -117,8 +117,9 @@ export const workspaceRouter = createTRPCRouter({
     .output(z.custom<Awaited<ReturnType<typeof workspaceRepo.create>>>())
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user?.id;
+      const userEmail = ctx.user?.email;
 
-      if (!userId)
+      if (!userId || !userEmail)
         throw new TRPCError({
           message: `User not authenticated`,
           code: "UNAUTHORIZED",
@@ -131,6 +132,7 @@ export const workspaceRouter = createTRPCRouter({
         name: input.name,
         slug: workspacePublicId,
         createdBy: userId,
+        createdByEmail: userEmail,
       });
 
       if (!result.publicId)

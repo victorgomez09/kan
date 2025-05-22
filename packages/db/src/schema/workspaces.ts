@@ -54,9 +54,8 @@ export const workspaceRelations = relations(workspaces, ({ one, many }) => ({
 export const workspaceMembers = pgTable("workspace_members", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
   publicId: varchar("publicId", { length: 12 }).notNull().unique(),
-  userId: uuid("userId")
-    .notNull()
-    .references(() => users.id),
+  email: varchar("email", { length: 255 }).notNull(),
+  userId: uuid("userId").references(() => users.id),
   workspaceId: bigint("workspaceId", { mode: "number" })
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),

@@ -10,11 +10,7 @@ import { PageHead } from "~/components/PageHead";
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
-import {
-  getAvatarUrl,
-  getInitialsFromName,
-  inferInitialsFromEmail,
-} from "~/utils/helpers";
+import { getAvatarUrl } from "~/utils/helpers";
 import { DeleteMemberConfirmation } from "./components/DeleteMemberConfirmation";
 import { InviteMemberForm } from "./components/InviteMemberForm";
 
@@ -46,10 +42,6 @@ export default function MembersPage() {
     isLastRow?: boolean;
     showSkeleton?: boolean;
   }) => {
-    const initials = memberName
-      ? getInitialsFromName(memberName)
-      : inferInitialsFromEmail(memberEmail ?? "");
-
     return (
       <tr className="rounded-b-lg">
         <td className={twMerge("w-[65%]", isLastRow ? "rounded-bl-lg" : "")}>
@@ -192,9 +184,9 @@ export default function MembersPage() {
                         <TableRow
                           key={member.publicId}
                           memberPublicId={member.publicId}
-                          memberName={member.user.name}
-                          memberEmail={member.user.email}
-                          memberImage={member.user.image}
+                          memberName={member.user?.name}
+                          memberEmail={member.user?.email ?? member.email}
+                          memberImage={member.user?.image}
                           memberRole={member.role}
                           memberStatus={member.status}
                           isLastRow={index === data.members.length - 1}

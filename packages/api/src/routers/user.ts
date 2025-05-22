@@ -39,7 +39,7 @@ export const userRouter = createTRPCRouter({
 
       const result = await userRepo.getById(ctx.db, userId);
 
-      if (!result?.name) {
+      if (!result) {
         throw new TRPCError({
           message: `User not found`,
           code: "NOT_FOUND",

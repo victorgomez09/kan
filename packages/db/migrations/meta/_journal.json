@@ -8,6 +8,13 @@
       "when": 1746693478656,
       "tag": "20250508083758_SetupTables",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1747903068807,
+      "tag": "20250522083748_AddEmailToWorkspaceMembers",
+      "breakpoints": true
     }
   ]
 }
