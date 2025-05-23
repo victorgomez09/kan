@@ -7,6 +7,7 @@ import * as activityRepo from "@kan/db/repository/cardActivity.repo";
 import * as listRepo from "@kan/db/repository/list.repo";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { assertUserInWorkspace } from "../utils/auth";
 
 export const listRouter = createTRPCRouter({
   create: protectedProcedure
@@ -36,7 +37,7 @@ export const listRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const board = await boardRepo.getWithLatestListIndexByPublicId(
+      const board = await boardRepo.getWorkspaceAndBoardIdByBoardPublicId(
         ctx.db,
         input.boardPublicId,
       );
@@ -47,14 +48,12 @@ export const listRouter = createTRPCRouter({
           code: "NOT_FOUND",
         });
 
-      const latestListIndex = board.lists[0]?.index;
+      await assertUserInWorkspace(ctx.db, userId, board.workspaceId);
 
       const result = await listRepo.create(ctx.db, {
         name: input.name,
         createdBy: userId,
         boardId: board.id,
-        index:
-          (latestListIndex ?? latestListIndex === 0) ? latestListIndex + 1 : 0,
       });
 
       if (!result)
@@ -91,13 +90,18 @@ export const listRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const list = await listRepo.getByPublicId(ctx.db, input.listPublicId);
+      const list = await listRepo.getWorkspaceAndListIdByListPublicId(
+        ctx.db,
+        input.listPublicId,
+      );
 
       if (!list)
         throw new TRPCError({
           message: `List with public ID ${input.listPublicId} not found`,
           code: "NOT_FOUND",
         });
+
+      await assertUserInWorkspace(ctx.db, userId, list.workspaceId);
 
       const deletedAt = new Date();
 
@@ -131,7 +135,7 @@ export const listRouter = createTRPCRouter({
         cardId: card.id,
       }));
 
-      await activityRepo.bulkCreate(ctx.db, activities);
+      if (activities.length) await activityRepo.bulkCreate(ctx.db, activities);
 
       return { success: true };
     }),
@@ -160,6 +164,27 @@ export const listRouter = createTRPCRouter({
       >(),
     )
     .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
+      const list = await listRepo.getWorkspaceAndListIdByListPublicId(
+        ctx.db,
+        input.listPublicId,
+      );
+
+      if (!list)
+        throw new TRPCError({
+          message: `List with public ID ${input.listPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      await assertUserInWorkspace(ctx.db, userId, list.workspaceId);
+
       let result: { name: string; publicId: string } | undefined;
 
       if (input.name) {

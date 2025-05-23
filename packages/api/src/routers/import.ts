@@ -218,18 +218,15 @@ export const importRouter = createTRPCRouter({
                 .filter((label) => !!label.sourceId);
           }
 
-          let listIndex = 0;
-
           for (const list of formattedData.lists) {
             const newList = await listRepo.create(ctx.db, {
               name: list.name,
               createdBy: userId,
               boardId: newBoardId,
-              index: listIndex,
               importId: newImportId,
             });
 
-            const newListId = newList?.id;
+            const newListId = newList.id;
 
             if (list.cards.length && newListId) {
               const cardsInsert = list.cards.map((card, index) => ({
@@ -244,7 +241,7 @@ export const importRouter = createTRPCRouter({
 
               const newCards = await cardRepo.bulkCreate(ctx.db, cardsInsert);
 
-              if (!newCards?.length)
+              if (!newCards.length)
                 throw new TRPCError({
                   message: "Failed to create new cards",
                   code: "INTERNAL_SERVER_ERROR",
@@ -302,8 +299,6 @@ export const importRouter = createTRPCRouter({
                 }
               }
             }
-
-            listIndex++;
           }
 
           boardsCreated++;

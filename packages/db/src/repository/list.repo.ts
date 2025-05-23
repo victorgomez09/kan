@@ -10,27 +10,62 @@ export const create = async (
     name: string;
     createdBy: string;
     boardId: number;
-    index: number;
     importId?: number;
   },
 ) => {
-  const [result] = await db
-    .insert(lists)
-    .values({
-      publicId: generateUID(),
-      name: listInput.name,
-      createdBy: listInput.createdBy,
-      boardId: listInput.boardId,
-      index: listInput.index,
-      importId: listInput.importId,
-    })
-    .returning({
-      id: lists.id,
-      publicId: lists.publicId,
-      name: lists.name,
+  return db.transaction(async (tx) => {
+    const list = await tx.query.lists.findFirst({
+      columns: {
+        id: true,
+        boardId: true,
+        index: true,
+      },
+      where: and(eq(lists.boardId, listInput.boardId), isNull(lists.deletedAt)),
+      orderBy: [desc(lists.index)],
     });
 
-  return result;
+    const index = list?.index ? list.index + 1 : 0;
+
+    const [result] = await tx
+      .insert(lists)
+      .values({
+        publicId: generateUID(),
+        name: listInput.name,
+        createdBy: listInput.createdBy,
+        boardId: listInput.boardId,
+        index,
+        importId: listInput.importId,
+      })
+      .returning({
+        id: lists.id,
+        publicId: lists.publicId,
+        boardId: lists.boardId,
+        name: lists.name,
+      });
+
+    if (!result)
+      throw new Error(`Failed to create list for board ${listInput.boardId}`);
+
+    const countExpr = sql<number>`COUNT(*)`.mapWith(Number);
+
+    const duplicateIndices = await tx
+      .select({
+        index: lists.index,
+        count: countExpr,
+      })
+      .from(lists)
+      .where(and(eq(lists.boardId, result.boardId), isNull(lists.deletedAt)))
+      .groupBy(lists.index)
+      .having(gt(countExpr, 1));
+
+    if (duplicateIndices.length > 0) {
+      throw new Error(
+        `Duplicate indices found after reordering in board ${result.boardId}`,
+      );
+    }
+
+    return result;
+  });
 };
 
 export const getByPublicId = async (db: dbClient, listPublicId: string) => {
@@ -207,6 +242,8 @@ export const softDeleteById = async (
       .groupBy(lists.index)
       .having(gt(countExpr, 1));
 
+    console.log(duplicateIndices);
+
     if (duplicateIndices.length > 0) {
       throw new Error(
         `Duplicate indices found after reordering in board ${result.boardId}`,
@@ -215,4 +252,25 @@ export const softDeleteById = async (
 
     return result;
   });
+};
+
+export const getWorkspaceAndListIdByListPublicId = async (
+  db: dbClient,
+  listPublicId: string,
+) => {
+  const result = await db.query.lists.findFirst({
+    columns: { id: true },
+    where: and(eq(lists.publicId, listPublicId), isNull(lists.deletedAt)),
+    with: {
+      board: {
+        columns: {
+          workspaceId: true,
+        },
+      },
+    },
+  });
+
+  return result
+    ? { id: result.id, workspaceId: result.board.workspaceId }
+    : null;
 };

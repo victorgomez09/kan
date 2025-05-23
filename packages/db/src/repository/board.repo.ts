@@ -453,16 +453,17 @@ export const isSlugUnique = async (
   return result === undefined;
 };
 
-export const getWorkspaceIdByBoardPublicId = async (
+export const getWorkspaceAndBoardIdByBoardPublicId = async (
   db: dbClient,
   boardPublicId: string,
 ) => {
   const result = await db.query.boards.findFirst({
     columns: {
+      id: true,
       workspaceId: true,
     },
     where: eq(boards.publicId, boardPublicId),
   });
 
-  return result?.workspaceId;
+  return result;
 };

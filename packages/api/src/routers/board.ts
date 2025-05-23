@@ -81,18 +81,18 @@ export const boardRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const workspaceId = await boardRepo.getWorkspaceIdByBoardPublicId(
+      const board = await boardRepo.getWorkspaceAndBoardIdByBoardPublicId(
         ctx.db,
         input.boardPublicId,
       );
 
-      if (!workspaceId)
+      if (!board)
         throw new TRPCError({
           message: `Board with public ID ${input.boardPublicId} not found`,
           code: "NOT_FOUND",
         });
 
-      await assertUserInWorkspace(ctx.db, userId, workspaceId);
+      await assertUserInWorkspace(ctx.db, userId, board.workspaceId);
 
       const result = await boardRepo.getByPublicId(
         ctx.db,
@@ -235,18 +235,18 @@ export const boardRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const workspaceId = await boardRepo.getWorkspaceIdByBoardPublicId(
+      const board = await boardRepo.getWorkspaceAndBoardIdByBoardPublicId(
         ctx.db,
         input.boardPublicId,
       );
 
-      if (!workspaceId)
+      if (!board)
         throw new TRPCError({
           message: `Board with public ID ${input.boardPublicId} not found`,
           code: "NOT_FOUND",
         });
 
-      await assertUserInWorkspace(ctx.db, userId, workspaceId);
+      await assertUserInWorkspace(ctx.db, userId, board.workspaceId);
 
       const result = await boardRepo.update(ctx.db, {
         name: input.name,
