@@ -9,6 +9,7 @@ import * as listRepo from "@kan/db/repository/list.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { assertUserInWorkspace } from "../utils/auth";
 
 export const cardRouter = createTRPCRouter({
   create: protectedProcedure
@@ -42,31 +43,31 @@ export const cardRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const list = await listRepo.getWithCardsByPublicId(
+      const list = await listRepo.getWorkspaceAndListIdByListPublicId(
         ctx.db,
         input.listPublicId,
       );
 
-      if (!list?.id)
+      if (!list)
         throw new TRPCError({
           message: `List with public ID ${input.listPublicId} not found`,
           code: "NOT_FOUND",
         });
 
-      const lastCard = list.cards.length && list.cards[0];
+      await assertUserInWorkspace(ctx.db, userId, list.workspaceId);
 
-      let index = 0;
-
-      if (list.cards.length && input.position === "end" && lastCard) {
-        index = lastCard.index + 1;
-      }
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
 
       const newCard = await cardRepo.create(ctx.db, {
         title: input.title,
         description: input.description,
         createdBy: userId,
         listId: list.id,
-        index,
+        position: input.position,
       });
 
       const newCardId = newCard.id;
@@ -183,13 +184,18 @@ export const cardRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const card = await cardRepo.getByPublicId(ctx.db, input.cardPublicId);
+      const card = await cardRepo.getWorkspaceAndCardIdByCardPublicId(
+        ctx.db,
+        input.cardPublicId,
+      );
 
       if (!card)
         throw new TRPCError({
           message: `Card with public ID ${input.cardPublicId} not found`,
           code: "NOT_FOUND",
         });
+
+      await assertUserInWorkspace(ctx.db, userId, card.workspaceId);
 
       const newComment = await cardCommentRepo.create(ctx.db, {
         comment: input.comment,
@@ -241,10 +247,9 @@ export const cardRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const card = await cardRepo.getByPublicId(ctx.db, input.cardPublicId);
-      const existingComment = await cardCommentRepo.getByPublicId(
+      const card = await cardRepo.getWorkspaceAndCardIdByCardPublicId(
         ctx.db,
-        input.commentPublicId,
+        input.cardPublicId,
       );
 
       if (!card)
@@ -252,6 +257,13 @@ export const cardRouter = createTRPCRouter({
           message: `Card with public ID ${input.cardPublicId} not found`,
           code: "NOT_FOUND",
         });
+
+      await assertUserInWorkspace(ctx.db, userId, card.workspaceId);
+
+      const existingComment = await cardCommentRepo.getByPublicId(
+        ctx.db,
+        input.commentPublicId,
+      );
 
       if (!existingComment)
         throw new TRPCError({
@@ -313,10 +325,9 @@ export const cardRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const card = await cardRepo.getByPublicId(ctx.db, input.cardPublicId);
-      const existingComment = await cardCommentRepo.getByPublicId(
+      const card = await cardRepo.getWorkspaceAndCardIdByCardPublicId(
         ctx.db,
-        input.commentPublicId,
+        input.cardPublicId,
       );
 
       if (!card)
@@ -324,6 +335,13 @@ export const cardRouter = createTRPCRouter({
           message: `Card with public ID ${input.cardPublicId} not found`,
           code: "NOT_FOUND",
         });
+
+      await assertUserInWorkspace(ctx.db, userId, card.workspaceId);
+
+      const existingComment = await cardCommentRepo.getByPublicId(
+        ctx.db,
+        input.commentPublicId,
+      );
 
       if (!existingComment)
         throw new TRPCError({
@@ -379,14 +397,20 @@ export const cardRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const card = await cardRepo.getByPublicId(ctx.db, input.cardPublicId);
-      const label = await labelRepo.getByPublicId(ctx.db, input.labelPublicId);
+      const card = await cardRepo.getWorkspaceAndCardIdByCardPublicId(
+        ctx.db,
+        input.cardPublicId,
+      );
 
       if (!card)
         throw new TRPCError({
           message: `Card with public ID ${input.cardPublicId} not found`,
           code: "NOT_FOUND",
         });
+
+      await assertUserInWorkspace(ctx.db, userId, card.workspaceId);
+
+      const label = await labelRepo.getByPublicId(ctx.db, input.labelPublicId);
 
       if (!label)
         throw new TRPCError({
@@ -465,10 +489,9 @@ export const cardRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const card = await cardRepo.getByPublicId(ctx.db, input.cardPublicId);
-      const member = await workspaceRepo.getMemberByPublicId(
+      const card = await cardRepo.getWorkspaceAndCardIdByCardPublicId(
         ctx.db,
-        input.workspaceMemberPublicId,
+        input.cardPublicId,
       );
 
       if (!card)
@@ -476,6 +499,13 @@ export const cardRouter = createTRPCRouter({
           message: `Card with public ID ${input.cardPublicId} not found`,
           code: "NOT_FOUND",
         });
+
+      await assertUserInWorkspace(ctx.db, userId, card.workspaceId);
+
+      const member = await workspaceRepo.getMemberByPublicId(
+        ctx.db,
+        input.workspaceMemberPublicId,
+      );
 
       if (!member)
         throw new TRPCError({
@@ -548,6 +578,27 @@ export const cardRouter = createTRPCRouter({
       >(),
     )
     .query(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
+      const card = await cardRepo.getWorkspaceAndCardIdByCardPublicId(
+        ctx.db,
+        input.cardPublicId,
+      );
+
+      if (!card)
+        throw new TRPCError({
+          message: `Card with public ID ${input.cardPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      await assertUserInWorkspace(ctx.db, userId, card.workspaceId);
+
       const result = await cardRepo.getWithListAndMembersByPublicId(
         ctx.db,
         input.cardPublicId,
@@ -590,6 +641,19 @@ export const cardRouter = createTRPCRouter({
           message: `User not authenticated`,
           code: "UNAUTHORIZED",
         });
+
+      const card = await cardRepo.getWorkspaceAndCardIdByCardPublicId(
+        ctx.db,
+        input.cardPublicId,
+      );
+
+      if (!card)
+        throw new TRPCError({
+          message: `Card with public ID ${input.cardPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      await assertUserInWorkspace(ctx.db, userId, card.workspaceId);
 
       const existingCard = await cardRepo.getByPublicId(
         ctx.db,
@@ -708,30 +772,26 @@ export const cardRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const card = await cardRepo.getCardWithListByPublicId(
+      const card = await cardRepo.getWorkspaceAndCardIdByCardPublicId(
         ctx.db,
         input.cardPublicId,
       );
 
-      if (!card?.list.id)
+      if (!card)
         throw new TRPCError({
           message: `Card with public ID ${input.cardPublicId} not found`,
           code: "NOT_FOUND",
         });
 
+      await assertUserInWorkspace(ctx.db, userId, card.workspaceId);
+
       const deletedAt = new Date();
 
-      const deletedCard = await cardRepo.softDelete(ctx.db, {
+      await cardRepo.softDelete(ctx.db, {
         cardId: card.id,
         deletedAt,
         deletedBy: userId,
       });
-
-      if (!deletedCard)
-        throw new TRPCError({
-          message: `Failed to delete card`,
-          code: "INTERNAL_SERVER_ERROR",
-        });
 
       await cardActivityRepo.create(ctx.db, {
         type: "card.archived",

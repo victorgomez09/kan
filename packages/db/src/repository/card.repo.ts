@@ -18,10 +18,24 @@ export const create = async (
     description: string;
     createdBy: string;
     listId: number;
-    index: number;
+    position: "start" | "end";
   },
 ) => {
   return db.transaction(async (tx) => {
+    let index = 0;
+
+    if (cardInput.position === "end") {
+      const lastCard = await tx.query.cards.findFirst({
+        columns: {
+          index: true,
+        },
+        where: and(eq(cards.listId, cardInput.listId), isNull(cards.deletedAt)),
+        orderBy: desc(cards.index),
+      });
+
+      if (lastCard) index = lastCard.index + 1;
+    }
+
     const getExistingCardAtIndex = async () =>
       tx.query.cards.findFirst({
         columns: {
@@ -29,7 +43,7 @@ export const create = async (
         },
         where: and(
           eq(cards.listId, cardInput.listId),
-          eq(cards.index, cardInput.index),
+          eq(cards.index, index),
           isNull(cards.deletedAt),
         ),
       });
@@ -40,12 +54,8 @@ export const create = async (
       await tx.execute(sql`
         UPDATE card
         SET index = index + 1
-        WHERE "listId" = ${cardInput.listId} AND index >= ${cardInput.index} AND "deletedAt" IS NULL;
+        WHERE "listId" = ${cardInput.listId} AND index >= ${index} AND "deletedAt" IS NULL;
       `);
-
-      const refetchedExistingCardAtIndex = await getExistingCardAtIndex();
-
-      if (refetchedExistingCardAtIndex?.id) return tx.rollback();
     }
 
     const result = await tx
@@ -56,11 +66,11 @@ export const create = async (
         description: cardInput.description,
         createdBy: cardInput.createdBy,
         listId: cardInput.listId,
-        index: cardInput.index,
+        index: index,
       })
-      .returning({ id: cards.id });
+      .returning({ id: cards.id, listId: cards.listId });
 
-    if (!result[0]) return tx.rollback();
+    if (!result[0]) throw new Error("Unable to create card");
 
     await tx.insert(cardActivities).values({
       publicId: generateUID(),
@@ -68,6 +78,24 @@ export const create = async (
       type: "card.created",
       createdBy: cardInput.createdBy,
     });
+
+    const countExpr = sql<number>`COUNT(*)`.mapWith(Number);
+
+    const duplicateIndices = await tx
+      .select({
+        index: cards.index,
+        count: countExpr,
+      })
+      .from(cards)
+      .where(and(eq(cards.listId, result[0].listId), isNull(cards.deletedAt)))
+      .groupBy(cards.listId, cards.index)
+      .having(gt(countExpr, 1));
+
+    if (duplicateIndices.length > 0) {
+      throw new Error(
+        `Duplicate indices found after creating card ${result[0].id}`,
+      );
+    }
 
     return result[0];
   });
@@ -405,6 +433,7 @@ export const getWithListAndMembersByPublicId = async (
               comment: true,
               createdBy: true,
               updatedAt: true,
+              deletedAt: true,
             },
             // https://github.com/drizzle-team/drizzle-orm/issues/2903
             // where: isNull(comments.deletedAt),
@@ -421,6 +450,9 @@ export const getWithListAndMembersByPublicId = async (
     ...card,
     labels: card.labels.map((label) => label.label),
     members: card.members.map((member) => member.member),
+    activities: card.activities.filter(
+      (activity) => !activity.comment?.deletedAt,
+    ),
   };
 
   return formattedResult;
@@ -678,4 +710,33 @@ export const hardDeleteAllCardLabelRelationships = async (
     .returning();
 
   return result;
+};
+
+export const getWorkspaceAndCardIdByCardPublicId = async (
+  db: dbClient,
+  cardPublicId: string,
+) => {
+  const result = await db.query.cards.findFirst({
+    columns: { id: true },
+    where: and(eq(cards.publicId, cardPublicId), isNull(cards.deletedAt)),
+    with: {
+      list: {
+        columns: {},
+        with: {
+          board: {
+            columns: {
+              workspaceId: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return result
+    ? {
+        id: result.id,
+        workspaceId: result.list.board.workspaceId,
+      }
+    : null;
 };
