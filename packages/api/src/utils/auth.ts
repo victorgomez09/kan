@@ -7,11 +7,13 @@ export async function assertUserInWorkspace(
   db: dbClient,
   userId: string,
   workspaceId: number,
+  role?: "admin" | "member",
 ) {
   const isMember = await workspaceRepo.isUserInWorkspace(
     db,
     userId,
     workspaceId,
+    role,
   );
 
   if (!isMember)

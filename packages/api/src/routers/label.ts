@@ -6,6 +6,7 @@ import * as cardRepo from "@kan/db/repository/card.repo";
 import * as labelRepo from "@kan/db/repository/label.repo";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { assertUserInWorkspace } from "../utils/auth";
 
 export const labelRouter = createTRPCRouter({
   byPublicId: protectedProcedure
@@ -22,7 +23,18 @@ export const labelRouter = createTRPCRouter({
     .input(z.object({ labelPublicId: z.string().min(12) }))
     .output(z.custom<Awaited<ReturnType<typeof labelRepo.getByPublicId>>>())
     .query(async ({ ctx, input }) => {
-      const label = await labelRepo.getByPublicId(ctx.db, input.labelPublicId);
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
+      const label = await labelRepo.getWorkspaceAndLabelIdByLabelPublicId(
+        ctx.db,
+        input.labelPublicId,
+      );
 
       if (!label)
         throw new TRPCError({
@@ -30,7 +42,17 @@ export const labelRouter = createTRPCRouter({
           code: "NOT_FOUND",
         });
 
-      return label;
+      await assertUserInWorkspace(ctx.db, userId, label.workspaceId);
+
+      const result = await labelRepo.getByPublicId(ctx.db, input.labelPublicId);
+
+      if (!result)
+        throw new TRPCError({
+          message: `Label with public ID ${input.labelPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      return result;
     }),
   create: protectedProcedure
     .meta({
@@ -60,7 +82,7 @@ export const labelRouter = createTRPCRouter({
           code: "UNAUTHORIZED",
         });
 
-      const board = await boardRepo.getIdByPublicId(
+      const board = await boardRepo.getWorkspaceAndBoardIdByBoardPublicId(
         ctx.db,
         input.boardPublicId,
       );
@@ -70,6 +92,8 @@ export const labelRouter = createTRPCRouter({
           message: `Board with public ID ${input.boardPublicId} not found`,
           code: "NOT_FOUND",
         });
+
+      await assertUserInWorkspace(ctx.db, userId, board.workspaceId);
 
       const result = await labelRepo.create(ctx.db, {
         name: input.name,
@@ -106,6 +130,27 @@ export const labelRouter = createTRPCRouter({
     )
     .output(z.custom<Awaited<ReturnType<typeof labelRepo.update>>>())
     .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
+      const label = await labelRepo.getWorkspaceAndLabelIdByLabelPublicId(
+        ctx.db,
+        input.labelPublicId,
+      );
+
+      if (!label)
+        throw new TRPCError({
+          message: `Label with public ID ${input.labelPublicId} not found`,
+          code: "NOT_FOUND",
+        });
+
+      await assertUserInWorkspace(ctx.db, userId, label.workspaceId);
+
       const result = await labelRepo.update(ctx.db, input);
 
       return result;
@@ -124,13 +169,26 @@ export const labelRouter = createTRPCRouter({
     .input(z.object({ labelPublicId: z.string().min(12) }))
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      const label = await labelRepo.getByPublicId(ctx.db, input.labelPublicId);
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
+      const label = await labelRepo.getWorkspaceAndLabelIdByLabelPublicId(
+        ctx.db,
+        input.labelPublicId,
+      );
 
       if (!label)
         throw new TRPCError({
           message: `Label with public ID ${input.labelPublicId} not found`,
           code: "NOT_FOUND",
         });
+
+      await assertUserInWorkspace(ctx.db, userId, label.workspaceId);
 
       await cardRepo.hardDeleteAllCardLabelRelationships(ctx.db, label.id);
 

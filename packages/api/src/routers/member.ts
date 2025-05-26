@@ -7,6 +7,7 @@ import * as userRepo from "@kan/db/repository/user.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { assertUserInWorkspace } from "../utils/auth";
 
 export const memberRouter = createTRPCRouter({
   invite: protectedProcedure
@@ -46,6 +47,8 @@ export const memberRouter = createTRPCRouter({
           message: `Workspace with public ID ${input.workspacePublicId} not found`,
           code: "NOT_FOUND",
         });
+
+      await assertUserInWorkspace(ctx.db, userId, workspace.id, "admin");
 
       const isInvitedEmailAlreadyMember = workspace.members.some(
         (member) => member.email === input.email,
@@ -125,6 +128,8 @@ export const memberRouter = createTRPCRouter({
           message: `Workspace with public ID ${input.workspacePublicId} not found`,
           code: "NOT_FOUND",
         });
+
+      await assertUserInWorkspace(ctx.db, userId, workspace.id, "admin");
 
       const member = await memberRepo.getByPublicId(
         ctx.db,

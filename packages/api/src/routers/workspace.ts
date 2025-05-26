@@ -6,6 +6,7 @@ import * as workspaceSlugRepo from "@kan/db/repository/workspaceSlug.repo";
 import { generateUID } from "@kan/shared/utils";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { assertUserInWorkspace } from "../utils/auth";
 
 export const workspaceRouter = createTRPCRouter({
   all: protectedProcedure
@@ -54,6 +55,14 @@ export const workspaceRouter = createTRPCRouter({
       >(),
     )
     .query(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
       const result = await workspaceRepo.getByPublicIdWithMembers(
         ctx.db,
         input.workspacePublicId,
@@ -64,6 +73,8 @@ export const workspaceRouter = createTRPCRouter({
           message: `Workspace not found`,
           code: "NOT_FOUND",
         });
+
+      await assertUserInWorkspace(ctx.db, userId, result.id);
 
       return result;
     }),
@@ -91,10 +102,26 @@ export const workspaceRouter = createTRPCRouter({
       z.custom<Awaited<ReturnType<typeof workspaceRepo.getBySlugWithBoards>>>(),
     )
     .query(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
       const result = await workspaceRepo.getBySlugWithBoards(
         ctx.db,
         input.workspaceSlug,
       );
+
+      if (!result)
+        throw new TRPCError({
+          message: `Workspace not found`,
+          code: "NOT_FOUND",
+        });
+
+      await assertUserInWorkspace(ctx.db, userId, result.id);
 
       return result;
     }),
@@ -169,12 +196,28 @@ export const workspaceRouter = createTRPCRouter({
     )
     .output(z.custom<Awaited<ReturnType<typeof workspaceRepo.update>>>())
     .mutation(async ({ ctx, input }) => {
-      if (input.slug) {
-        const workspace = await workspaceRepo.getByPublicId(
-          ctx.db,
-          input.workspacePublicId,
-        );
+      const userId = ctx.user?.id;
 
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
+      const workspace = await workspaceRepo.getByPublicId(
+        ctx.db,
+        input.workspacePublicId,
+      );
+
+      if (!workspace)
+        throw new TRPCError({
+          message: `Workspace not found`,
+          code: "NOT_FOUND",
+        });
+
+      await assertUserInWorkspace(ctx.db, userId, workspace.id, "admin");
+
+      if (input.slug) {
         const reservedOrPremiumWorkspaceSlug =
           await workspaceSlugRepo.getWorkspaceSlug(ctx.db, input.slug);
 
@@ -183,7 +226,7 @@ export const workspaceRouter = createTRPCRouter({
 
         if (
           reservedOrPremiumWorkspaceSlug?.type === "reserved" ||
-          (workspace?.plan !== "pro" &&
+          (workspace.plan !== "pro" &&
             reservedOrPremiumWorkspaceSlug?.type === "premium") ||
           !isWorkspaceSlugAvailable
         ) {
@@ -220,6 +263,27 @@ export const workspaceRouter = createTRPCRouter({
     .input(z.object({ workspacePublicId: z.string().min(12) }))
     .output(z.custom<Awaited<ReturnType<typeof workspaceRepo.hardDelete>>>())
     .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user?.id;
+
+      if (!userId)
+        throw new TRPCError({
+          message: `User not authenticated`,
+          code: "UNAUTHORIZED",
+        });
+
+      const workspace = await workspaceRepo.getByPublicId(
+        ctx.db,
+        input.workspacePublicId,
+      );
+
+      if (!workspace)
+        throw new TRPCError({
+          message: `Workspace not found`,
+          code: "NOT_FOUND",
+        });
+
+      await assertUserInWorkspace(ctx.db, userId, workspace.id, "admin");
+
       const result = await workspaceRepo.hardDelete(
         ctx.db,
         input.workspacePublicId,

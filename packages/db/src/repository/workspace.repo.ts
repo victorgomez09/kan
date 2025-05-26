@@ -132,6 +132,7 @@ export const getByPublicIdWithMembers = (
 export const getBySlugWithBoards = (db: dbClient, workspaceSlug: string) => {
   return db.query.workspaces.findFirst({
     columns: {
+      id: true,
       publicId: true,
       name: true,
       description: true,
@@ -225,6 +226,7 @@ export const isUserInWorkspace = async (
   db: dbClient,
   userId: string,
   workspaceId: number,
+  role?: "admin" | "member",
 ) => {
   const result = await db.query.workspaceMembers.findFirst({
     columns: {
@@ -235,6 +237,7 @@ export const isUserInWorkspace = async (
       eq(workspaceMembers.workspaceId, workspaceId),
       eq(workspaceMembers.status, "active"),
       isNull(workspaceMembers.deletedAt),
+      role ? eq(workspaceMembers.role, role) : undefined,
     ),
   });
 

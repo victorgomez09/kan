@@ -12,6 +12,7 @@ import { colours } from "@kan/shared/constants";
 import { generateUID } from "@kan/shared/utils";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { assertUserInWorkspace } from "../utils/auth";
 
 const TRELLO_API_URL = "https://api.trello.com/1";
 
@@ -125,15 +126,6 @@ export const importRouter = createTRPCRouter({
             code: "UNAUTHORIZED",
           });
 
-        const newImport = await importRepo.create(ctx.db, {
-          source: "trello",
-          createdBy: userId,
-        });
-
-        const newImportId = newImport?.id;
-
-        let boardsCreated = 0;
-
         const workspace = await workspaceRepo.getByPublicId(
           ctx.db,
           input.workspacePublicId,
@@ -144,6 +136,17 @@ export const importRouter = createTRPCRouter({
             message: `Workspace with public ID ${input.workspacePublicId} not found`,
             code: "NOT_FOUND",
           });
+
+        await assertUserInWorkspace(ctx.db, userId, workspace.id);
+
+        const newImport = await importRepo.create(ctx.db, {
+          source: "trello",
+          createdBy: userId,
+        });
+
+        const newImportId = newImport?.id;
+
+        let boardsCreated = 0;
 
         for (const boardId of input.boardIds) {
           const response = await fetch(
