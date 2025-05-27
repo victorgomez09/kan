@@ -237,6 +237,7 @@ export const getBySlug = async (
       workspace: {
         columns: {
           publicId: true,
+          slug: true,
         },
       },
       labels: {
