@@ -287,7 +287,11 @@ export const getBySlug = async (
         orderBy: [asc(lists.index)],
       },
     },
-    where: and(eq(boards.slug, boardSlug), isNull(boards.deletedAt)),
+    where: and(
+      eq(boards.slug, boardSlug),
+      isNull(boards.deletedAt),
+      eq(boards.visibility, "public"),
+    ),
   });
 
   if (!board) return null;
