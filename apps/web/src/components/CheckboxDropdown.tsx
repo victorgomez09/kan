@@ -100,7 +100,7 @@ export default function CheckboxDropdown({
       ))}
       {handleCreate && (
         <button
-          className="flex w-full items-center rounded-[5px] p-2 px-2 text-[12px] hover:bg-light-200 dark:hover:bg-dark-300"
+          className="flex w-full items-center rounded-[5px] p-2 px-2 text-[12px] text-dark-900 hover:bg-light-200 dark:hover:bg-dark-300"
           onClick={() => handleCreate()}
         >
           <HiMiniPlus size={20} className="pr-1.5" />
@@ -118,7 +118,7 @@ export default function CheckboxDropdown({
       <>
         <Menu.Button
           as={asChild ? "div" : undefined}
-          className="h-full w-full focus-visible:outline-none"
+          className="h-full w-full cursor-pointer focus-visible:outline-none"
         >
           {children}
         </Menu.Button>
