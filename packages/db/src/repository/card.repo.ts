@@ -6,6 +6,7 @@ import {
   cards,
   cardsToLabels,
   cardToWorkspaceMembers,
+  labels,
   lists,
   workspaceMembers,
 } from "@kan/db/schema";
@@ -316,6 +317,7 @@ export const getWithListAndMembersByPublicId = async (
                   colourCode: true,
                   name: true,
                 },
+                where: isNull(labels.deletedAt),
               },
               lists: {
                 columns: {

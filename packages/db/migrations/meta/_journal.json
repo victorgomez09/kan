@@ -15,6 +15,13 @@
       "when": 1747903068807,
       "tag": "20250522083748_AddEmailToWorkspaceMembers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1748378293342,
+      "tag": "20250527203813_AddDeletedAtToLabel",
+      "breakpoints": true
     }
   ]
 }

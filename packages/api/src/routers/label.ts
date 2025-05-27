@@ -192,7 +192,11 @@ export const labelRouter = createTRPCRouter({
 
       await cardRepo.hardDeleteAllCardLabelRelationships(ctx.db, label.id);
 
-      await labelRepo.hardDelete(ctx.db, label.id);
+      await labelRepo.softDelete(ctx.db, {
+        labelId: label.id,
+        deletedAt: new Date(),
+        deletedBy: userId,
+      });
 
       return { success: true };
     }),

@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import type { dbClient } from "@kan/db/client";
 import { cardsToLabels, labels } from "@kan/db/schema";
@@ -98,10 +98,21 @@ export const update = async (
   return result;
 };
 
-export const hardDelete = async (db: dbClient, labelId: number) => {
+export const softDelete = async (
+  db: dbClient,
+  args: {
+    labelId: number;
+    deletedAt: Date;
+    deletedBy: string;
+  },
+) => {
   const [result] = await db
-    .delete(labels)
-    .where(eq(labels.id, labelId))
+    .update(labels)
+    .set({
+      deletedAt: args.deletedAt,
+      deletedBy: args.deletedBy,
+    })
+    .where(and(eq(labels.id, args.labelId), isNull(labels.deletedAt)))
     .returning({ id: labels.id });
 
   return result;

@@ -113,6 +113,7 @@ export const getByPublicId = async (
           name: true,
           colourCode: true,
         },
+        where: isNull(labels.deletedAt),
       },
       lists: {
         columns: {
@@ -244,6 +245,7 @@ export const getBySlug = async (
           name: true,
           colourCode: true,
         },
+        where: isNull(labels.deletedAt),
       },
       lists: {
         columns: {

@@ -27,11 +27,17 @@ export const labels = pgTable("label", {
     .notNull()
     .references(() => boards.id, { onDelete: "cascade" }),
   importId: bigint("importId", { mode: "number" }).references(() => imports.id),
+  deletedAt: timestamp("deletedAt"),
+  deletedBy: uuid("deletedBy").references(() => users.id),
 }).enableRLS();
 
 export const labelsRelations = relations(labels, ({ one, many }) => ({
   createdBy: one(users, {
     fields: [labels.createdBy],
+    references: [users.id],
+  }),
+  deletedBy: one(users, {
+    fields: [labels.deletedBy],
     references: [users.id],
   }),
   board: one(boards, {
