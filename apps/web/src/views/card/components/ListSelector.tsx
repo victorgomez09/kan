@@ -23,7 +23,7 @@ export default function ListSelector({
 
   const { showPopup } = usePopup();
 
-  const updateCardList = api.card.reorder.useMutation({
+  const updateCardList = api.card.update.useMutation({
     onMutate: async (newList) => {
       await utils.card.byId.cancel();
 
@@ -36,9 +36,9 @@ export default function ListSelector({
           ...oldCard,
           list: {
             ...oldCard.list,
-            publicId: newList.newListPublicId,
-            name: oldCard.list?.name ?? "",
-            board: oldCard.list?.board ?? null,
+            publicId: newList.listPublicId ?? "",
+            name: oldCard.list.name ?? "",
+            board: oldCard.list.board ?? null,
           },
         };
       });
@@ -72,7 +72,8 @@ export default function ListSelector({
           handleSelect={(_, member) => {
             updateCardList.mutate({
               cardPublicId,
-              newListPublicId: member.key,
+              listPublicId: member.key,
+              index: 0,
             });
           }}
           asChild
