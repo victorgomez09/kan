@@ -720,7 +720,7 @@ export const cardRouter = createTRPCRouter({
 
       const activities = [];
 
-      if (existingCard.title !== input.title) {
+      if (input.title && existingCard.title !== input.title) {
         activities.push({
           type: "card.updated.title" as const,
           cardId: result.id,
@@ -730,13 +730,23 @@ export const cardRouter = createTRPCRouter({
         });
       }
 
-      if (existingCard.description !== input.description) {
+      if (input.description && existingCard.description !== input.description) {
         activities.push({
           type: "card.updated.description" as const,
           cardId: result.id,
           createdBy: userId,
           fromDescription: existingCard.description ?? undefined,
           toDescription: input.description,
+        });
+      }
+
+      if (newListId && existingCard.listId !== newListId) {
+        activities.push({
+          type: "card.updated.list" as const,
+          cardId: result.id,
+          createdBy: userId,
+          fromListId: existingCard.listId,
+          toListId: newListId,
         });
       }
 
