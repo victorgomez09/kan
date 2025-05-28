@@ -1,6 +1,7 @@
 import Avatar from "~/components/Avatar";
 import Badge from "~/components/Badge";
 import LabelIcon from "~/components/LabelIcon";
+import { getAvatarUrl } from "~/utils/helpers";
 
 const Card = ({
   title,
@@ -31,7 +32,9 @@ const Card = ({
             {members.map(({ user }) => {
               if (!user) return null;
 
-              const avatarUrl = user.image ? "" : undefined;
+              const avatarUrl = user.image
+                ? getAvatarUrl(user.image)
+                : undefined;
 
               return (
                 <Avatar
