@@ -92,7 +92,7 @@ export default function CheckboxDropdown({
                   handleEdit(item.key);
                 }}
               >
-                <HiEllipsisHorizontal size={20} />
+                <HiEllipsisHorizontal size={20} className="text-dark-900" />
               </button>
             )}
           </div>
