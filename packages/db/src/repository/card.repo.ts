@@ -336,6 +336,7 @@ export const getWithListAndMembersByPublicId = async (
                   members: {
                     columns: {
                       publicId: true,
+                      email: true,
                     },
                     with: {
                       user: {
@@ -362,6 +363,7 @@ export const getWithListAndMembersByPublicId = async (
           member: {
             columns: {
               publicId: true,
+              email: true,
             },
             with: {
               user: {

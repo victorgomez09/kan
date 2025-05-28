@@ -149,7 +149,7 @@ export function NewCardForm({
       key: member.publicId,
       value: formatMemberDisplayName(
         member.user?.name ?? null,
-        member.user?.email ?? null,
+        member.user?.email ?? member.email,
       ),
       leftIcon: (
         <Avatar
@@ -158,7 +158,7 @@ export function NewCardForm({
           imageUrl={
             member.user?.image ? getAvatarUrl(member.user.image) : undefined
           }
-          email={member.user?.email ?? ""}
+          email={member.user?.email ?? member.email}
         />
       ),
     })) ?? [];

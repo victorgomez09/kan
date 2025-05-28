@@ -12,6 +12,7 @@ const Card = ({
   labels: { name: string; colourCode: string | null }[];
   members: {
     publicId: string;
+    email: string;
     user: { name: string | null; email: string; image: string | null } | null;
   }[];
 }) => {
@@ -29,17 +30,15 @@ const Card = ({
             ))}
           </div>
           <div className="isolate flex justify-end -space-x-1 overflow-hidden">
-            {members.map(({ user }) => {
-              if (!user) return null;
-
-              const avatarUrl = user.image
+            {members.map(({ user, email }) => {
+              const avatarUrl = user?.image
                 ? getAvatarUrl(user.image)
                 : undefined;
 
               return (
                 <Avatar
-                  name={user.name ?? ""}
-                  email={user.email}
+                  name={user?.name ?? ""}
+                  email={user?.email ?? email}
                   imageUrl={avatarUrl}
                   size="sm"
                 />

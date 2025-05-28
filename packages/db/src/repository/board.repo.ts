@@ -93,6 +93,7 @@ export const getByPublicId = async (
           members: {
             columns: {
               publicId: true,
+              email: true,
             },
             with: {
               user: {
@@ -148,6 +149,7 @@ export const getByPublicId = async (
                   member: {
                     columns: {
                       publicId: true,
+                      email: true,
                       deletedAt: true,
                     },
                     with: {

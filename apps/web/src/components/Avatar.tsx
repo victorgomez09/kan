@@ -27,7 +27,7 @@ const Avatar = ({
 }) => {
   const initials = name
     ? getInitialsFromName(name)
-    : inferInitialsFromEmail(email ?? "");
+    : inferInitialsFromEmail(email);
 
   return (
     <>
