@@ -91,21 +91,23 @@ export default function SettingsPage() {
               />
             </div>
 
-            <div className="mb-8 border-t border-light-300 dark:border-dark-300">
-              <h2 className="mb-4 mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">
-                Billing
-              </h2>
-              <p className="mb-8 text-sm text-neutral-500 dark:text-dark-900">
-                View and manage your billing and subscription.
-              </p>
-              <Button
-                variant="primary"
-                iconRight={<HiMiniArrowTopRightOnSquare />}
-                onClick={handleOpenBillingPortal}
-              >
-                Billing portal
-              </Button>
-            </div>
+            {process.env.NEXT_PUBLIC_KAN_ENV !== "cloud" && (
+              <div className="mb-8 border-t border-light-300 dark:border-dark-300">
+                <h2 className="mb-4 mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">
+                  Billing
+                </h2>
+                <p className="mb-8 text-sm text-neutral-500 dark:text-dark-900">
+                  View and manage your billing and subscription.
+                </p>
+                <Button
+                  variant="primary"
+                  iconRight={<HiMiniArrowTopRightOnSquare />}
+                  onClick={handleOpenBillingPortal}
+                >
+                  Billing portal
+                </Button>
+              </div>
+            )}
 
             <div className="border-t border-light-300 dark:border-dark-300">
               <h2 className="mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">
