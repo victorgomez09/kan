@@ -69,7 +69,7 @@ export default async function handler(
       mode: "subscription",
       line_items: [
         {
-          price: "price_1QcpmyDlDJBL8JHbeqhe1Ruq",
+          price: process.env.STRIPE_PRO_PLAN_PRICE_ID,
           quantity: 1,
         },
       ],
