@@ -19,7 +19,7 @@
   <a href="https://github.com/kanbn/kan/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-AGPLv3-purple"></a>
 </div>
 
-### Features 💫
+## Features 💫
 
 - 👁️ **Board Visibility**: Control who can view and edit your boards
 - 🤝 **Workspace Members**: Invite members and collaborate with your team
@@ -32,7 +32,7 @@
 
 See our [roadmap](https://kan.bn/kan/roadmap) for upcoming features.
 
-### Made With 🛠️
+## Made With 🛠️
 
 - [Next.js](https://nextjs.org/?ref=kan.bn)
 - [tRPC](https://trpc.io/?ref=kan.bn)
@@ -41,7 +41,7 @@ See our [roadmap](https://kan.bn/kan/roadmap) for upcoming features.
 - [Drizzle ORM](https://orm.drizzle.team/?ref=kan.bn)
 - [React Email](https://react.email/?ref=kan.bn)
 
-### Local Development 🛠️
+## Local Development 🛠️
 
 1. Clone the repository (or fork)
 
@@ -62,14 +62,14 @@ pnpm install
 pnpm dev
 ```
 
-### Contributing 🤝
+## Contributing 🤝
 
 We welcome contributions! Please read our [contribution guidelines](CONTRIBUTING.md) before submitting a pull request.
 
-### License 📝
+## License 📝
 
 Kan is licensed under the [AGPLv3 license](LICENSE).
 
-### Contact 📧
+## Contact 📧
 
 For support or to get in touch, please email [henry@kan.bn](mailto:henry@kan.bn) or join our [Discord server](https://discord.gg/e6ejRb6CmT).
