@@ -5,17 +5,10 @@ export default {
   out: "./migrations",
   dialect: "postgresql",
   dbCredentials: {
-    host: process.env.POSTGRES_HOST ?? "localhost",
-    port: process.env.POSTGRES_PORT
-      ? parseInt(process.env.POSTGRES_PORT)
-      : 5432,
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    database: process.env.POSTGRES_DATABASE ?? "postgres",
-    ssl: true,
+    url: process.env.POSTGRES_URL ?? "",
+    ssl: process.env.NODE_ENV === "production" ? true : false,
   },
   migrations: {
     prefix: "timestamp",
   },
-  // tablesFilter: ["kan_*"],
 } satisfies Config;

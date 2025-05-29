@@ -3,12 +3,11 @@ import { Button } from "@react-email/button";
 import { Container } from "@react-email/container";
 import { Head } from "@react-email/head";
 import { Heading } from "@react-email/heading";
-import { Html } from "@react-email/html";
 import { Hr } from "@react-email/hr";
+import { Html } from "@react-email/html";
 import { Link } from "@react-email/link";
 import { Preview } from "@react-email/preview";
 import { Text } from "@react-email/text";
-
 import * as React from "react";
 
 export const JoinWorkspaceTemplate = ({
@@ -91,7 +90,7 @@ export const JoinWorkspaceTemplate = ({
         />
         <Text style={{ color: "#7e7e7e" }}>
           <Link
-            href={process.env.WEBSITE_URL}
+            href={process.env.NEXT_PUBLIC_BASE_URL}
             target="_blank"
             style={{ color: "#7e7e7e", textDecoration: "underline" }}
           >

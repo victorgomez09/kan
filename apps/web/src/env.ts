@@ -14,14 +14,20 @@ export const env = createEnv({
    * This way you can ensure the app isn't built with invalid env vars.
    */
   server: {
+    BETTER_AUTH_SECRET: z.string(),
+    BETTER_AUTH_URL: z.string(),
+    BETTER_AUTH_TRUSTED_ORIGINS: z.string(),
     POSTGRES_URL: z.string().url(),
     STRIPE_SECRET_KEY: z.string().optional(),
-    GOOGLE_CLIENT_ID: z.string(),
-    GOOGLE_CLIENT_SECRET: z.string(),
-    S3_ACCESS_KEY_ID: z.string(),
-    S3_SECRET_ACCESS_KEY: z.string(),
-    S3_REGION: z.string(),
-    S3_ENDPOINT: z.string(),
+    GOOGLE_CLIENT_ID: z.string().optional(),
+    GOOGLE_CLIENT_SECRET: z.string().optional(),
+    S3_ACCESS_KEY_ID: z.string().optional(),
+    S3_SECRET_ACCESS_KEY: z.string().optional(),
+    S3_REGION: z.string().optional(),
+    S3_ENDPOINT: z.string().optional(),
+    EMAIL_FROM: z.string(),
+    EMAIL_URL: z.string(),
+    EMAIL_TOKEN: z.string(),
   },
 
   /**
@@ -29,12 +35,12 @@ export const env = createEnv({
    * For them to be exposed to the client, prefix them with `NEXT_PUBLIC_`.
    */
   client: {
-    NEXT_PUBLIC_KAN_ENV: z.string(),
+    NEXT_PUBLIC_KAN_ENV: z.string().optional(),
     NEXT_PUBLIC_UMAMI_ID: z.string().optional(),
     NEXT_PUBLIC_BASE_URL: z.string(),
-    NEXT_PUBLIC_STORAGE_URL: z.string(),
-    NEXT_PUBLIC_AVATAR_BUCKET_NAME: z.string(),
-    NEXT_PUBLIC_STORAGE_DOMAIN: z.string(),
+    NEXT_PUBLIC_STORAGE_URL: z.string().optional(),
+    NEXT_PUBLIC_AVATAR_BUCKET_NAME: z.string().optional(),
+    NEXT_PUBLIC_STORAGE_DOMAIN: z.string().optional(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.

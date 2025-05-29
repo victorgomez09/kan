@@ -22,7 +22,7 @@ export default async function handler(
 
     const session = await stripe.billingPortal.sessions.create({
       customer: user.stripeCustomerId,
-      return_url: `${process.env.WEBSITE_URL}/settings`,
+      return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/settings`,
     });
 
     return res.status(200).json({ url: session.url });

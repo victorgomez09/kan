@@ -19,7 +19,6 @@ services:
       - .env
     command: ["pnpm", "start"]
     environment:
-      - WEBSITE_URL=${WEBSITE_URL}
       - EMAIL_FROM=${EMAIL_FROM}
       - EMAIL_URL=${EMAIL_URL}
       - EMAIL_TOKEN=${EMAIL_TOKEN}

@@ -25,13 +25,14 @@
       "default": "./src/repository/*.ts"
     }
   },
-  "license": "MIT",
+  "license": "GPL-3.0",
   "scripts": {
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "dev": "tsc",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
+    "migrate": "pnpm with-env drizzle-kit migrate",
     "push": "pnpm with-env drizzle-kit push",
     "studio": "pnpm with-env drizzle-kit studio",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false",

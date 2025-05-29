@@ -73,8 +73,8 @@ export default async function handler(
           quantity: 1,
         },
       ],
-      success_url: `${process.env.WEBSITE_URL}${successUrl}`,
-      cancel_url: `${process.env.WEBSITE_URL}${cancelUrl}`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}${successUrl}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}${cancelUrl}`,
       customer: user.stripeCustomerId ?? undefined,
       metadata: {
         workspaceSlug: slug,
