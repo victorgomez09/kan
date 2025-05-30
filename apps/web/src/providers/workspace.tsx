@@ -7,6 +7,7 @@ import { api } from "~/utils/api";
 interface WorkspaceContextProps {
   workspace: Workspace;
   isLoading: boolean;
+  hasLoaded: boolean;
   switchWorkspace: (_workspace: Workspace) => void;
   availableWorkspaces: Workspace[];
 }
@@ -43,6 +44,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
   const [availableWorkspaces, setAvailableWorkspaces] = useState<Workspace[]>(
     initialAvailableWorkspaces,
   );
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const { data, isLoading } = api.workspace.all.useQuery();
 
@@ -55,7 +57,10 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   useEffect(() => {
-    if (!data) return;
+    if (!data?.length) {
+      if (!isLoading) setHasLoaded(true);
+      return;
+    }
 
     const storedWorkspaceId: string | null =
       localStorage.getItem("workspacePublicId");
@@ -72,6 +77,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
             slug: workspace.slug,
             description: workspace.description,
             plan: workspace.plan,
+            hasLoaded: true,
           };
         })
         .filter((workspace) => workspace !== null) as Workspace[];
@@ -82,7 +88,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
     if (storedWorkspaceId !== null) {
       const newData = data;
       const selectedWorkspace = newData.find(
-        ({ workspace }) => workspace?.publicId === storedWorkspaceId,
+        ({ workspace }) => workspace.publicId === storedWorkspaceId,
       );
 
       if (!selectedWorkspace?.workspace) return;
@@ -114,7 +120,13 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <WorkspaceContext.Provider
-      value={{ workspace, isLoading, availableWorkspaces, switchWorkspace }}
+      value={{
+        workspace,
+        isLoading,
+        hasLoaded,
+        availableWorkspaces,
+        switchWorkspace,
+      }}
     >
       {children}
     </WorkspaceContext.Provider>

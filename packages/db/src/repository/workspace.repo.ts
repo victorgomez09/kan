@@ -155,8 +155,8 @@ export const getBySlugWithBoards = (db: dbClient, workspaceSlug: string) => {
   });
 };
 
-export const getAllByUserId = (db: dbClient, userId: string) => {
-  return db.query.workspaceMembers.findMany({
+export const getAllByUserId = async (db: dbClient, userId: string) => {
+  const result = await db.query.workspaceMembers.findMany({
     columns: {
       role: true,
     },
@@ -168,6 +168,7 @@ export const getAllByUserId = (db: dbClient, userId: string) => {
           description: true,
           slug: true,
           plan: true,
+          deletedAt: true,
         },
         // https://github.com/drizzle-team/drizzle-orm/issues/2903
         // where: isNull(workspaces.deletedAt),
@@ -179,6 +180,8 @@ export const getAllByUserId = (db: dbClient, userId: string) => {
       isNull(workspaceMembers.deletedAt),
     ),
   });
+
+  return result.filter((member) => !member.workspace.deletedAt);
 };
 
 export const getMemberByPublicId = (db: dbClient, memberPublicId: string) => {
@@ -216,7 +219,10 @@ export const isWorkspaceSlugAvailable = async (
     columns: {
       id: true,
     },
-    where: eq(workspaces.slug, workspaceSlug),
+    where: and(
+      eq(workspaces.slug, workspaceSlug),
+      isNull(workspaces.deletedAt),
+    ),
   });
 
   return result === undefined;

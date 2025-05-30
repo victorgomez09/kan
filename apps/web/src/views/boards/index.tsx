@@ -11,7 +11,9 @@ import { NewBoardForm } from "./components/NewBoardForm";
 
 export default function BoardsPage() {
   const { openModal, modalContentType } = useModal();
-  const { workspace } = useWorkspace();
+  const { workspace, hasLoaded } = useWorkspace();
+
+  if (hasLoaded && !workspace.publicId) openModal("NEW_WORKSPACE");
 
   return (
     <>
