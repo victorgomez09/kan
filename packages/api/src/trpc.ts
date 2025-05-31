@@ -57,22 +57,19 @@ export const createNextApiContext = async (req: NextApiRequest) => {
 };
 
 export const createRESTContext = async ({ req }: CreateNextContextOptions) => {
-  const authHeader = req.headers.authorization;
-  const accessToken = authHeader?.startsWith("Bearer ")
-    ? authHeader.substring(7)
-    : null;
-
   const db = createDrizzleClient();
   const auth = initAuth(db);
 
-  if (!accessToken) {
-    return createInnerTRPCContext({ db, user: null });
+  let session;
+  try {
+    session = await auth.api.getSession({
+      // @ts-expect-error
+      headers: new Headers(req.headers),
+    });
+  } catch (error) {
+    console.error("Error getting session, ", error);
+    throw error;
   }
-
-  const session = await auth.api.getSession({
-    // @ts-expect-error
-    headers: new Headers(req.headers),
-  });
 
   return createInnerTRPCContext({ db, user: session?.user });
 };

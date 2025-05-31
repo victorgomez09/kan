@@ -1,8 +1,8 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 
 import type { dbClient } from "@kan/db/client";
-import { users } from "@kan/db/schema";
+import { apiKey, users } from "@kan/db/schema";
 
 export const getById = async (db: dbClient, userId: string) => {
   return await db.query.users.findFirst({
@@ -12,6 +12,17 @@ export const getById = async (db: dbClient, userId: string) => {
       email: true,
       image: true,
       stripeCustomerId: true,
+    },
+    with: {
+      apiKeys: {
+        columns: {
+          id: true,
+          prefix: true,
+          key: true,
+        },
+        orderBy: desc(apiKey.createdAt),
+        limit: 1,
+      },
     },
     where: eq(users.id, userId),
   });

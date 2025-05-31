@@ -26,6 +26,13 @@ export const userRouter = createTRPCRouter({
         name: z.string().nullable(),
         image: z.string().nullable(),
         stripeCustomerId: z.string().nullable(),
+        apiKey: z
+          .object({
+            id: z.number(),
+            prefix: z.string().nullable(),
+            key: z.string(),
+          })
+          .nullable(),
       }),
     )
     .query(async ({ ctx }) => {
@@ -46,7 +53,12 @@ export const userRouter = createTRPCRouter({
         });
       }
 
-      return result;
+      const apiKey = result.apiKeys[0];
+
+      return {
+        ...result,
+        apiKey: apiKey ?? null,
+      };
     }),
   update: protectedProcedure
     .meta({

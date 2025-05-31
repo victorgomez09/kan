@@ -8,6 +8,7 @@ import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import Avatar from "./components/Avatar";
+import CreateAPIKeyForm from "./components/CreateAPIKeyForm";
 import { CustomURLConfirmation } from "./components/CustomURLConfirmation";
 import { DeleteWorkspaceConfirmation } from "./components/DeleteWorkspaceConfirmation";
 import UpdateDisplayNameForm from "./components/UpdateDisplayNameForm";
@@ -18,8 +19,11 @@ import UpdateWorkspaceUrlForm from "./components/UpdateWorkspaceUrlForm";
 export default function SettingsPage() {
   const { modalContentType, openModal } = useModal();
   const { workspace } = useWorkspace();
+  const utils = api.useUtils();
 
   const { data } = api.user.getUser.useQuery();
+
+  const refetchUser = () => utils.user.getUser.refetch();
 
   const handleOpenBillingPortal = async () => {
     try {
@@ -91,7 +95,7 @@ export default function SettingsPage() {
               />
             </div>
 
-            {process.env.NEXT_PUBLIC_KAN_ENV !== "cloud" && (
+            {process.env.NEXT_PUBLIC_KAN_ENV === "cloud" && (
               <div className="mb-8 border-t border-light-300 dark:border-dark-300">
                 <h2 className="mb-4 mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">
                   Billing
@@ -108,6 +112,19 @@ export default function SettingsPage() {
                 </Button>
               </div>
             )}
+
+            <div className="mb-8 border-t border-light-300 dark:border-dark-300">
+              <h2 className="mb-4 mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">
+                API keys
+              </h2>
+              <p className="mb-8 text-sm text-neutral-500 dark:text-dark-900">
+                View and manage your API keys.
+              </p>
+              <CreateAPIKeyForm
+                apiKey={data?.apiKey}
+                refetchUser={refetchUser}
+              />
+            </div>
 
             <div className="border-t border-light-300 dark:border-dark-300">
               <h2 className="mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">

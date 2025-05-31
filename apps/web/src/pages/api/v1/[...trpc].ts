@@ -1,4 +1,4 @@
-import { type NextApiRequest, type NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 import cors from "nextjs-cors";
 import { createOpenApiNextHandler } from "trpc-to-openapi";
 
@@ -16,12 +16,11 @@ export default async function handler(
   const openApiHandler = createOpenApiNextHandler({
     router: appRouter,
     createContext: createRESTContext,
-    responseMeta: () => ({ headers: {} }),
     onError:
       env.NODE_ENV === "development"
         ? ({ path, error }) => {
             console.error(
-              `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
+              `❌ REST failed on ${path ?? "<no-path>"}: ${error.message}`,
             );
           }
         : undefined,

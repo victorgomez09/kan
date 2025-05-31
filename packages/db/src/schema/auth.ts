@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   bigserial,
   boolean,
@@ -50,7 +51,7 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updatedAt"),
 }).enableRLS();
 
-export const apiKey = pgTable("apiKey", {
+export const apiKey = pgTable("apikey", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
   name: text("name"),
   start: text("start"),
@@ -75,3 +76,10 @@ export const apiKey = pgTable("apiKey", {
   permissions: text("permissions"),
   metadata: text("metadata"),
 }).enableRLS();
+
+export const apiKeyRelations = relations(apiKey, ({ one }) => ({
+  user: one(users, {
+    fields: [apiKey.userId],
+    references: [users.id],
+  }),
+}));
