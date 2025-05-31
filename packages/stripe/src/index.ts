@@ -10,7 +10,7 @@ const createStripeClient = () => {
   }
 
   const stripe = new Stripe(stripeSecretKey, {
-    apiVersion: "2025-04-30.basil",
+    apiVersion: "2025-05-28.basil",
     httpClient: Stripe.createFetchHttpClient(),
   });
 
