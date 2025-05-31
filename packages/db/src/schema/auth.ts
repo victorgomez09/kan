@@ -51,7 +51,7 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updatedAt"),
 }).enableRLS();
 
-export const apiKey = pgTable("apikey", {
+export const apiKey = pgTable("apiKey", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
   name: text("name"),
   start: text("start"),
