@@ -17,9 +17,11 @@ const CreateAPIKeyForm = ({
     | undefined;
   refetchUser: () => void;
 }) => {
-  console.log({ apiKey });
   const handleCreateAPIKey = async () => {
-    await authClient.apiKey.create();
+    await authClient.apiKey.create({
+      name: "Kan API Key",
+      prefix: "kan_",
+    });
 
     refetchUser();
   };
