@@ -339,13 +339,15 @@ export const boardRouter = createTRPCRouter({
           });
         }
 
-        const activities = deletedCards.map((card) => ({
-          type: "card.archived" as const,
-          createdBy: userId,
-          cardId: card.id,
-        }));
+        if (deletedCards.length) {
+          const activities = deletedCards.map((card) => ({
+            type: "card.archived" as const,
+            createdBy: userId,
+            cardId: card.id,
+          }));
 
-        await activityRepo.bulkCreate(ctx.db, activities);
+          await activityRepo.bulkCreate(ctx.db, activities);
+        }
       }
 
       return { success: true };
