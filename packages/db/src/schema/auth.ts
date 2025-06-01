@@ -51,7 +51,7 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updatedAt"),
 }).enableRLS();
 
-export const apiKey = pgTable("apiKey", {
+export const apikey = pgTable("apiKey", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
   name: text("name"),
   start: text("start"),
@@ -77,9 +77,9 @@ export const apiKey = pgTable("apiKey", {
   metadata: text("metadata"),
 }).enableRLS();
 
-export const apiKeyRelations = relations(apiKey, ({ one }) => ({
+export const apiKeyRelations = relations(apikey, ({ one }) => ({
   user: one(users, {
-    fields: [apiKey.userId],
+    fields: [apikey.userId],
     references: [users.id],
   }),
 }));

@@ -8,5 +8,3 @@ export * from "./labels";
 export * from "./lists";
 export * from "./users";
 export * from "./workspaces";
-
-export { apiKey as apikey } from "./auth";

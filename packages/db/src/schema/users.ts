@@ -7,7 +7,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-import { apiKey } from "./auth";
+import { apikey } from "./auth";
 import { boards } from "./boards";
 import { cards } from "./cards";
 import { imports } from "./imports";
@@ -34,7 +34,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   imports: many(imports),
   lists: many(lists),
   workspaces: many(workspaces),
-  apiKeys: many(apiKey),
+  apiKeys: many(apikey),
 }));
 
 export const usersToWorkspacesRelations = relations(
