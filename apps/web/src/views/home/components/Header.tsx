@@ -12,7 +12,7 @@ const Header = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
     { label: "Roadmap", href: "/kan/roadmap", openInNewTab: true },
     { label: "Features", href: "#features" },
     { label: "Pricing", href: "#pricing" },
-    { label: "Docs", href: "https://docs.kanbn.com", openInNewTab: true },
+    { label: "Docs", href: "https://docs.kan.bn", openInNewTab: true },
   ];
 
   useEffect(() => {

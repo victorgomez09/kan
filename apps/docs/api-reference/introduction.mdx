@@ -6,15 +6,15 @@ description: "Learn how to integrate with Kan's REST API."
 ## Base URL
 
 ```
-https://kanbn.com/api/v1
+https://kan.bn/api/v1
 ```
 
 ## Authentication
 
-Most endpoints require authentication using Bearer tokens. You can get this from the `sb-kanbn-auth-token.0` cookie in your browser. Include this token in the Authorization header of each request.
+Most endpoints require authentication using your API key. You can create one in the [settings page](https://kan.bn/settings) of your account. Include this key in the `x-api-key` header of each request.
 
 ```
-Authorization: Bearer 123456789
+'x-api-key': kan_123456789
 ```
 
 ## Response codes

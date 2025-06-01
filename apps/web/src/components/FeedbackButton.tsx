@@ -110,14 +110,14 @@ const FeedbackButton: React.FC = () => {
                   <p className="ml-2 text-xs text-neutral-900 dark:text-dark-1000">
                     Need help?{" "}
                     <Link
-                      href="mailto:support@kanbn.com"
+                      href="mailto:support@kan.bn"
                       className="text-blue-600 underline dark:text-blue-300"
                     >
                       Contact us
                     </Link>
                     , or see our{" "}
                     <Link
-                      href="https://docs.kanbn.com"
+                      href="https://docs.kan.bn"
                       target="_blank"
                       rel="noreferrer"
                       className="text-blue-600 underline dark:text-blue-300"

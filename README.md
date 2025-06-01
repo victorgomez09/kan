@@ -10,7 +10,7 @@
   ·
   <a href="https://kan.bn">Website</a>
   ·
-  <a href="https://docs.kanbn.com">Docs</a>
+  <a href="https://docs.kan.bn">Docs</a>
   ·
   <a href="https://discord.gg/e6ejRb6CmT">Discord</a>
 </p>

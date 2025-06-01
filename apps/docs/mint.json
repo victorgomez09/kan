@@ -4,7 +4,7 @@
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg",
-    "href": "https://kanbn.com"
+    "href": "https://kan.bn"
   },
   "favicon": "./favicon.png",
   "colors": {
@@ -19,17 +19,17 @@
   "topbarLinks": [
     {
       "name": "Sign in",
-      "url": "https://kanbn.com/login"
+      "url": "https://kan.bn/login"
     }
   ],
   "topbarCtaButton": {
     "name": "Go to app",
-    "url": "https://kanbn.com/boards"
+    "url": "https://kan.bn/boards"
   },
   "anchors": [
     {
       "name": "API Reference",
-      "openapi": "https://www.kanbn.com/api/v1/openapi.json",
+      "openapi": "https://kan.bn/api/v1/openapi.json",
       "url": "api-reference",
       "icon": "square-terminal"
     },
