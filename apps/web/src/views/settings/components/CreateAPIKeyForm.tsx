@@ -40,11 +40,7 @@ const CreateAPIKeyForm = ({
       {apiKey ? (
         <div className="flex gap-2">
           <div className="mb-4 flex w-full max-w-[325px] items-center gap-2">
-            <Input
-              value={`${apiKey.prefix}${apiKey.key}`}
-              readOnly
-              type="password"
-            />
+            <Input value={apiKey.key} readOnly type="password" />
           </div>
           <div>
             <Button variant="danger" onClick={handleRevokeAPIKey}>
