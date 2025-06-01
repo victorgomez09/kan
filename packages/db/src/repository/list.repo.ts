@@ -24,7 +24,7 @@ export const create = async (
       orderBy: [desc(lists.index)],
     });
 
-    const index = list?.index ? list.index + 1 : 0;
+    const index = list ? list.index + 1 : 0;
 
     const [result] = await tx
       .insert(lists)
@@ -191,7 +191,7 @@ export const softDeleteAllByBoardId = async (
     deletedBy: string;
   },
 ) => {
-  const [result] = await db
+  const result = await db
     .update(lists)
     .set({ deletedAt: args.deletedAt, deletedBy: args.deletedBy })
     .where(and(eq(lists.boardId, args.boardId), isNull(lists.deletedAt)))
