@@ -1,16 +1,20 @@
-import { Fragment, useState } from "react";
-import { api } from "~/utils/api";
+import Link from "next/link";
 import { Listbox, Transition } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
-
+import { Fragment, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { FaTrello } from "react-icons/fa";
-import { HiChevronUpDown, HiXMark } from "react-icons/hi2";
-
-import { useModal } from "~/providers/modal";
-import { useWorkspace } from "~/providers/workspace";
+import {
+  HiChevronUpDown,
+  HiOutlineQuestionMarkCircle,
+  HiXMark,
+} from "react-icons/hi2";
 
 import Button from "~/components/Button";
 import Input from "~/components/Input";
+import { useModal } from "~/providers/modal";
+import { usePopup } from "~/providers/popup";
+import { useWorkspace } from "~/providers/workspace";
+import { api } from "~/utils/api";
 
 interface TrelloFormValues {
   apiKey: string;
@@ -103,6 +107,7 @@ const ImportTrello: React.FC = () => {
   const [token, setToken] = useState("");
   const { closeModal } = useModal();
   const { workspace } = useWorkspace();
+  const { showPopup } = usePopup();
 
   const refetchBoards = () => utils.board.all.refetch();
 
@@ -120,12 +125,24 @@ const ImportTrello: React.FC = () => {
 
   const importBoards = api.import.trello.importBoards.useMutation({
     onSuccess: async () => {
+      showPopup({
+        header: "Import complete",
+        message: "Your boards have been imported.",
+        icon: "success",
+      });
       try {
         await refetchBoards();
         closeModal();
       } catch (e) {
         console.log(e);
       }
+    },
+    onError: () => {
+      showPopup({
+        header: "Import failed",
+        message: "Please try again later, or contact customer support.",
+        icon: "error",
+      });
     },
   });
 
@@ -143,7 +160,7 @@ const ImportTrello: React.FC = () => {
   const { register: registerBoards, handleSubmit: handleSubmitBoards } =
     useForm({
       defaultValues: Object.fromEntries(
-        boards?.data?.map((board) => [board.id, true]) ?? [],
+        boards.data?.map((board) => [board.id, true]) ?? [],
       ),
     });
 
@@ -154,11 +171,11 @@ const ImportTrello: React.FC = () => {
       boardIds,
       apiKey,
       token,
-      workspacePublicId: workspace?.publicId,
+      workspacePublicId: workspace.publicId,
     });
   };
 
-  if (boards?.data?.length)
+  if (boards.data?.length)
     return (
       <form onSubmit={handleSubmitBoards(onSubmitBoards)}>
         <div className="h-[105px] overflow-scroll px-5">
@@ -220,9 +237,19 @@ export function ImportBoardsForm() {
   return (
     <div>
       <div className="flex w-full items-center justify-between px-5 pb-4 pt-5">
-        <h2 className="text-sm font-medium text-neutral-900 dark:text-dark-1000">
-          New import
-        </h2>
+        <div className="flex items-center">
+          <h2 className="text-sm font-medium text-neutral-900 dark:text-dark-1000">
+            New import
+          </h2>
+          <Link
+            href="https://docs.kan.bn/imports/trello"
+            target="_blank"
+            className="ml-2 text-neutral-500 hover:text-neutral-700 dark:text-dark-900 dark:hover:text-dark-700"
+          >
+            <HiOutlineQuestionMarkCircle className="h-4.5 w-4.5" />
+          </Link>
+        </div>
+
         <button
           className="rounded p-1 hover:bg-light-200 dark:hover:bg-dark-300"
           onClick={() => closeModal()}

@@ -45,6 +45,10 @@
       "pages": ["introduction"]
     },
     {
+      "group": "Import",
+      "pages": ["imports/trello"]
+    },
+    {
       "group": "API Documentation",
       "pages": ["api-reference/introduction"]
     }
