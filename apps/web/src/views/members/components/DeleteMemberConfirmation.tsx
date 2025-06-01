@@ -1,9 +1,8 @@
-import { api } from "~/utils/api";
+import Button from "~/components/Button";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
-
-import Button from "~/components/Button";
+import { api } from "~/utils/api";
 
 export function DeleteMemberConfirmation() {
   const utils = api.useUtils();
@@ -24,6 +23,7 @@ export function DeleteMemberConfirmation() {
       showPopup({
         header: "Unable to remove member",
         message: "Please try again later, or contact customer support.",
+        icon: "error",
       });
       closeModal();
     },
