@@ -32,6 +32,10 @@
 
 See our [roadmap](https://kan.bn/kan/roadmap) for upcoming features.
 
+## Screenshot 👁️
+
+<img width="1507" alt="hero-dark" src="https://github.com/user-attachments/assets/5f7b6ad3-f31d-4b45-93dc-0132b3f2afd4" />
+
 ## Made With 🛠️
 
 - [Next.js](https://nextjs.org/?ref=kan.bn)
@@ -41,7 +45,7 @@ See our [roadmap](https://kan.bn/kan/roadmap) for upcoming features.
 - [Drizzle ORM](https://orm.drizzle.team/?ref=kan.bn)
 - [React Email](https://react.email/?ref=kan.bn)
 
-## Local Development 🛠️
+## Local Development 🧑‍💻
 
 1. Clone the repository (or fork)
 
