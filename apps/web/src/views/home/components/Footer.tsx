@@ -23,7 +23,7 @@ const navigation = {
     { name: "Privacy policy", href: "/privacy" },
     {
       name: "License",
-      href: "https://github.com/kanbn/kan?tab=GPL-3.0-1-ov-file#readme",
+      href: "https://github.com/kanbn/kan?tab=AGPL-3.0-1-ov-file#readme",
     },
   ],
   resources: [
