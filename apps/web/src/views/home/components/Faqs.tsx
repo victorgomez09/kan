@@ -6,45 +6,130 @@ import {
 } from "@headlessui/react";
 import { HiMiniMinusSmall, HiMiniPlusSmall } from "react-icons/hi2";
 
-const LORUM_IPSUM =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
+const Text = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <p className="text-[15px] leading-[1.7rem] text-light-800 dark:text-dark-700">
+      {children}
+    </p>
+  );
+};
 
 const faqs = [
   {
     question: "Why make an open source Trello?",
-    answer: LORUM_IPSUM,
+    answer: (
+      <Text>
+        When Trello launched in 2011, it blew everyone away with its carefully
+        designed simplicity, but over time (and atlassification) it lost its
+        magic and grew into something closer to "Jira Lite". This project is our
+        attempt to recapture the original magic of Trello’s simplicity, in open
+        source.
+      </Text>
+    ),
   },
   {
     question: "What's the difference between Kan and Trello?",
-    answer: LORUM_IPSUM,
+    answer: (
+      <Text>
+        The main difference between Kan and Trello is that Kan is open source,
+        allowing anyone to view, modify, and contribute to our code. Our cloud
+        offering also offers no restrictions on features for individual use,
+        whereas Trello locks basic features such as the number of boards you can
+        create behind a paywall.
+      </Text>
+    ),
   },
   {
     question: "How is the project funded?",
-    answer: LORUM_IPSUM,
+    answer: (
+      <Text>
+        For long-term sustainability, we recognise all good open source projects
+        need a source of revenue. Ours comes from the paid cloud offering for
+        workspaces with multiple users (free during the beta) and for custom
+        workspace slugs. There's no obligation to use it, and you can self-host
+        the software on your own infrastructure free of charge.
+      </Text>
+    ),
   },
   {
     question: "How do I import my Trello boards?",
-    answer: LORUM_IPSUM,
+    answer: (
+      <Text>
+        Importing your Trello boards into Kan is easy. You can follow our
+        step-by-step guide{" "}
+        <Link href="https://docs.kan.bn/imports/trello" className="underline">
+          here
+        </Link>
+        .
+      </Text>
+    ),
   },
   {
     question: "How do I get a custom URL?",
-    answer: LORUM_IPSUM,
+    answer: (
+      <Text>
+        You can get a custom workspace URL, like{" "}
+        <Link href="https://kan.bn/kan" className="underline">
+          kan.bn/kan
+        </Link>
+        , by going into your{" "}
+        <Link href="https://kan.bn/settings" className="underline">
+          workspace settings
+        </Link>{" "}
+        and purchasing a pro workspace subscription. All subscriptions help fund
+        the development of the project!
+      </Text>
+    ),
   },
   {
     question: "Do you offer a free plan?",
-    answer: LORUM_IPSUM,
+    answer: (
+      <Text>
+        Yes, we offer an forever free plan for individual use. No restrictions,
+        no paywalls, no limits.
+      </Text>
+    ),
   },
   {
     question: "What license are you using?",
-    answer: LORUM_IPSUM,
+    answer: (
+      <Text>
+        We are using the{" "}
+        <Link
+          href="https://github.com/kan-bn/kan/blob/main/LICENSE"
+          className="underline"
+        >
+          AGPL-3.0 license
+        </Link>
+        .
+      </Text>
+    ),
   },
   {
     question: "How do I invite team members?",
-    answer: LORUM_IPSUM,
+    answer: (
+      <Text>
+        You can invite team members by clicking the "Invite" button in the top
+        right corner of the{" "}
+        <Link href="https://kan.bn/members" className="underline">
+          members page
+        </Link>{" "}
+        and entering their email address. They will receive an email with a link
+        to join the workspace.
+      </Text>
+    ),
   },
   {
     question: "How do I self-host?",
-    answer: LORUM_IPSUM,
+    answer: (
+      <Text>
+        You can self-host by following the instructions in our{" "}
+        <Link href="https://github.com/kanbn/kan" className="underline">
+          repo
+        </Link>
+        .
+      </Text>
+    ),
   },
 ];
 
@@ -96,9 +181,7 @@ const Faqs = () => {
                     </DisclosureButton>
                   </dt>
                   <DisclosurePanel as="dd" className="mt-2 pr-12">
-                    <p className="text-[15px] leading-[1.7rem] text-light-800 dark:text-dark-600">
-                      {faq.answer}
-                    </p>
+                    {faq.answer}
                   </DisclosurePanel>
                 </Disclosure>
               ))}
