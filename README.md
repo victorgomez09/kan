@@ -106,6 +106,12 @@ See `.env.example` for a complete list of supported environment variables.
 
 We welcome contributions! Please read our [contribution guidelines](CONTRIBUTING.md) before submitting a pull request.
 
+## Contributors 👥
+
+<a href="https://github.com/kanbn/kan/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=kanbn/kan" />
+</a>
+
 ## License 📝
 
 Kan is licensed under the [AGPLv3 license](LICENSE).
