@@ -1,8 +1,10 @@
 ---
 name: "✨ Feature Request"
-description: Suggest an idea for this project
-labels: ["✨ feature"]
-assignees: ""
+about: Suggest an idea for this project
+title: ''
+labels: ''
+assignees: ''
+
 ---
 
 ## ✨ Feature Request
