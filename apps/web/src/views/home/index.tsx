@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { FaHackerNews } from "react-icons/fa";
 import { IoLogoGithub } from "react-icons/io";
 
 import Button from "~/components/Button";
@@ -21,18 +22,35 @@ export default function HomeView() {
       <div className="flex h-full w-full flex-col lg:pt-[5rem]">
         <div className="w-full pb-10 pt-32 lg:py-32">
           <div className="my-10 flex h-full w-full animate-fade-down flex-col items-center justify-center px-4">
-            <div className="relative animate-fade-in overflow-hidden rounded-full bg-gradient-to-b from-light-300 to-light-400 p-[2px] dark:from-dark-300 dark:to-dark-400">
-              <div className="gradient-border absolute inset-0 animate-border-spin" />
-              <div className="relative z-10 rounded-full bg-light-50 dark:bg-dark-50">
-                <Link
-                  href="https://github.com/kanbn/kan"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  className="flex items-center gap-2 px-4 py-1 text-center text-xs text-light-1000 dark:text-dark-1000 lg:text-sm"
-                >
-                  Star on Github
-                  <IoLogoGithub size={20} />
-                </Link>
+            <div className="flex items-center gap-2">
+              <div className="relative animate-fade-in overflow-hidden rounded-full bg-gradient-to-b from-light-300 to-light-400 p-[2px] dark:from-dark-300 dark:to-dark-400">
+                <div className="gradient-border absolute inset-0 animate-border-spin" />
+
+                <div className="relative z-10 rounded-full bg-light-50 dark:bg-dark-50">
+                  <Link
+                    href="https://github.com/kanbn/kan"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    className="flex items-center gap-2 px-4 py-1 text-center text-xs text-light-1000 dark:text-dark-1000 lg:text-sm"
+                  >
+                    Star on Github
+                    <IoLogoGithub size={20} />
+                  </Link>
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-full bg-gradient-to-b from-light-300 to-light-400 p-[2px] dark:from-dark-300 dark:to-dark-400">
+                <div className="relative z-10 rounded-full bg-light-50 dark:bg-dark-50">
+                  <Link
+                    href="https://news.ycombinator.com/item?id=44157177"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    className="flex items-center gap-2 px-4 py-1 text-center text-xs text-light-1000 dark:text-dark-1000 lg:text-sm"
+                  >
+                    #1 Hacker News
+                    <FaHackerNews size={20} className="text-orange-500" />
+                  </Link>
+                </div>
               </div>
             </div>
 
