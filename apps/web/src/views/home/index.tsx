@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { FaHackerNews } from "react-icons/fa";
-import { IoLogoGithub } from "react-icons/io";
+import { IoLogoGithub, IoLogoHackernews } from "react-icons/io";
 
 import Button from "~/components/Button";
 import { PageHead } from "~/components/PageHead";
@@ -48,7 +47,13 @@ export default function HomeView() {
                     className="flex items-center gap-2 px-4 py-1 text-center text-xs text-light-1000 dark:text-dark-1000 lg:text-sm"
                   >
                     #1 Hacker News
-                    <FaHackerNews size={20} className="text-orange-500" />
+                    <div className="relative">
+                      <div className="absolute inset-1 bg-white" />
+                      <IoLogoHackernews
+                        size={20}
+                        className="relative text-orange-500"
+                      />
+                    </div>
                   </Link>
                 </div>
               </div>
