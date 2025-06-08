@@ -44,13 +44,15 @@ export const cards = pgTable("card", {
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   index: integer("index").notNull(),
-  createdBy: uuid("createdBy")
-    .notNull()
-    .references(() => users.id),
+  createdBy: uuid("createdBy").references(() => users.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt"),
   deletedAt: timestamp("deletedAt"),
-  deletedBy: uuid("deletedBy").references(() => users.id),
+  deletedBy: uuid("deletedBy").references(() => users.id, {
+    onDelete: "set null",
+  }),
   listId: bigint("listId", { mode: "number" })
     .notNull()
     .references(() => lists.id, { onDelete: "cascade" }),
@@ -105,14 +107,14 @@ export const cardActivities = pgTable("card_activity", {
   }),
   workspaceMemberId: bigint("workspaceMemberId", {
     mode: "number",
-  }).references(() => workspaceMembers.id, { onDelete: "cascade" }),
+  }).references(() => workspaceMembers.id, { onDelete: "set null" }),
   fromTitle: varchar("fromTitle", { length: 255 }),
   toTitle: varchar("toTitle", { length: 255 }),
   fromDescription: text("fromDescription"),
   toDescription: text("toDescription"),
-  createdBy: uuid("createdBy")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  createdBy: uuid("createdBy").references(() => users.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   commentId: bigint("commentId", { mode: "number" }).references(
     () => comments.id,
@@ -227,14 +229,14 @@ export const comments = pgTable("card_comments", {
   cardId: bigint("cardId", { mode: "number" })
     .notNull()
     .references(() => cards.id, { onDelete: "cascade" }),
-  createdBy: uuid("createdBy")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  createdBy: uuid("createdBy").references(() => users.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt"),
   deletedAt: timestamp("deletedAt"),
   deletedBy: uuid("deletedBy").references(() => users.id, {
-    onDelete: "cascade",
+    onDelete: "set null",
   }),
 }).enableRLS();
 

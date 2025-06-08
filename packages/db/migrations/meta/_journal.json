@@ -29,6 +29,13 @@
       "when": 1749118315675,
       "tag": "20250605101155_AddCascadeDeleteToCardRelations",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1749405288761,
+      "tag": "20250608175448_AddOnDeleteActionToUserDeletion",
+      "breakpoints": true
     }
   ]
 }
