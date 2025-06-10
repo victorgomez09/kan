@@ -13,6 +13,7 @@ import { cards } from "./cards";
 import { imports } from "./imports";
 import { lists } from "./lists";
 import { workspaceMembers, workspaces } from "./workspaces";
+import { integrations } from "./integrations";
 
 export const users = pgTable("user", {
   id: uuid("id")
@@ -55,6 +56,7 @@ export const usersRelations = relations(users, ({ many }) => ({
     relationName: "workspaceCreatedByUser",
   }),
   apiKeys: many(apikey),
+  integrations: many(integrations),
 }));
 
 export const usersToWorkspacesRelations = relations(

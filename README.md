@@ -122,6 +122,8 @@ pnpm dev
 | `DISCORD_CLIENT_SECRET`          | Discord OAuth client secret   | For Discord login  | `xxx`                                         |
 | `GITHUB_CLIENT_ID`               | GitHub OAuth client ID        | For GitHub login   | `xxx`                                         |
 | `GITHUB_CLIENT_SECRET`           | GitHub OAuth client secret    | For GitHub login   | `xxx`                                         |
+| `TRELLO_APP_API_KEY`             | Trello app API key            | For Trello import  | `xxx`                                         |
+| `TRELLO_APP_API_SECRET`          | Trello app API secret         | For Trello import  | `xxx`                                         |
 | `S3_REGION`                      | S3 storage region             | For file uploads   | `WEUR`                                        |
 | `S3_ENDPOINT`                    | S3 endpoint URL               | For file uploads   | `https://xxx.r2.cloudflarestorage.com`        |
 | `S3_ACCESS_KEY_ID`               | S3 access key                 | For file uploads   | `xxx`                                         |

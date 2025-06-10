@@ -1,4 +1,5 @@
 import { env } from "next-runtime-env";
+import { useEffect } from "react";
 import { HiMiniArrowTopRightOnSquare } from "react-icons/hi2";
 
 import Button from "~/components/Button";
@@ -6,6 +7,7 @@ import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
 import { useModal } from "~/providers/modal";
+import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import Avatar from "./components/Avatar";
@@ -22,8 +24,53 @@ export default function SettingsPage() {
   const { modalContentType, openModal } = useModal();
   const { workspace } = useWorkspace();
   const utils = api.useUtils();
+  const { showPopup } = usePopup();
 
   const { data } = api.user.getUser.useQuery();
+
+  const {
+    data: integrations,
+    refetch: refetchIntegrations,
+    isLoading: integrationsLoading,
+  } = api.integration.providers.useQuery();
+
+  const { data: trelloUrl, refetch: refetchTrelloUrl } =
+    api.integration.getAuthorizationUrl.useQuery({ provider: "trello" }, {
+      enabled:
+        !integrationsLoading &&
+        !integrations?.some((integration) => integration.provider === "trello"),
+      refetchOnWindowFocus: true,
+    });
+
+  useEffect(() => {
+    const handleFocus = () => {
+      refetchIntegrations();
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [refetchIntegrations]);
+
+  const { mutateAsync: disconnectTrello } = api.integration.disconnect.useMutation({
+    onSuccess: () => {
+      refetchUser();
+      refetchIntegrations();
+      refetchTrelloUrl();
+      showPopup({
+        header: "Trello disconnected",
+        message: "Your Trello account has been disconnected.",
+        icon: "success",
+      });
+    },
+    onError: () => {
+      showPopup({
+        header: "Error disconnecting Trello",
+        message: "An error occurred while disconnecting your Trello account.",
+        icon: "error",
+      });
+    },
+  });
 
   const refetchUser = () => utils.user.getUser.refetch();
 
@@ -114,6 +161,48 @@ export default function SettingsPage() {
                 </Button>
               </div>
             )}
+
+            <div className="mb-8 border-t border-light-300 dark:border-dark-300">
+              <h2 className="mb-4 mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">
+                Trello
+              </h2>
+              {!integrations?.some(
+                (integration) => integration.provider === "trello",
+              ) && trelloUrl ? (
+                <>
+                  <p className="mb-8 text-sm text-neutral-500 dark:text-dark-900">
+                    Connect your Trello account to import boards.
+                  </p>
+                  <Button
+                    variant="primary"
+                    iconRight={<HiMiniArrowTopRightOnSquare />}
+                    onClick={() =>
+                      window.open(
+                        trelloUrl.url,
+                        "trello_auth",
+                        "height=800,width=600",
+                      )
+                    }
+                  >
+                    Connect Trello
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p className="mb-8 text-sm text-neutral-500 dark:text-dark-900">
+                    You are already connected to Trello.
+                  </p>
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      disconnectTrello({ provider: "trello" });
+                    }}
+                  >
+                    Disconnect Trello
+                  </Button>
+                </>
+              )}
+            </div>
 
             <div className="mb-8 border-t border-light-300 dark:border-dark-300">
               <h2 className="mb-4 mt-8 text-[14px] text-neutral-900 dark:text-dark-1000">

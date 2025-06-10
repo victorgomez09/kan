@@ -5,6 +5,7 @@ import * as boardRepo from "@kan/db/repository/board.repo";
 import * as cardRepo from "@kan/db/repository/card.repo";
 import * as cardActivityRepo from "@kan/db/repository/cardActivity.repo";
 import * as importRepo from "@kan/db/repository/import.repo";
+import * as integrationsRepo from "@kan/db/repository/integration.repo";
 import * as labelRepo from "@kan/db/repository/label.repo";
 import * as listRepo from "@kan/db/repository/list.repo";
 import * as workspaceRepo from "@kan/db/repository/workspace.repo";
@@ -13,10 +14,9 @@ import { generateUID } from "@kan/shared/utils";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { assertUserInWorkspace } from "../utils/auth";
+import { apiKeys, urls } from "./integration";
 
-const TRELLO_API_URL = "https://api.trello.com/1";
-
-interface TrelloBoard {
+export interface TrelloBoard {
   id: string;
   name: string;
   labels: TrelloLabel[];
@@ -42,10 +42,6 @@ interface TrelloCard {
   labels: TrelloLabel[];
 }
 
-interface MemberData {
-  idBoards: string[];
-}
-
 export const importRouter = createTRPCRouter({
   trello: createTRPCRouter({
     getBoards: protectedProcedure
@@ -53,46 +49,51 @@ export const importRouter = createTRPCRouter({
         openapi: {
           summary: "Get boards from Trello",
           method: "GET",
-          path: "/imports/trello/boards",
+          path: "/integrations/trello/boards",
           description: "Retrieves all boards from Trello",
-          tags: ["Imports"],
+          tags: ["Integrations"],
           protect: true,
         },
       })
-      .input(
-        z.object({
-          apiKey: z.string().length(32),
-          token: z.string().length(76),
-        }),
-      )
       .output(z.array(z.object({ id: z.string(), name: z.string() })))
-      .query(async ({ input }) => {
-        const fetchMemberRes = await fetch(
-          `${TRELLO_API_URL}/tokens/${input.token}/member?key=${input.apiKey}`,
+      .query(async ({ ctx }) => {
+        const apiKey = apiKeys.trello;
+
+        if (!apiKey)
+          throw new TRPCError({
+            message: "Trello API key not found",
+            code: "INTERNAL_SERVER_ERROR",
+          });
+
+        const user = ctx.user;
+
+        if (!user)
+          throw new TRPCError({
+            message: "User not authenticated",
+            code: "UNAUTHORIZED",
+          });
+
+        const integration = await integrationsRepo.getProviderForUser(
+          ctx.db,
+          user.id,
+          "trello",
         );
 
-        const member = (await fetchMemberRes.json()) as MemberData;
+        const token = integration?.accessToken;
 
-        const boardIds = member.idBoards;
+        if (!token)
+          throw new TRPCError({
+            message: "Trello token not found",
+            code: "UNAUTHORIZED",
+          });
 
-        const fetchBoard = async (boardId: string) => {
-          const response = await fetch(
-            `${TRELLO_API_URL}/boards/${boardId}?key=${input.apiKey}&token=${input.token}`,
-          );
-          const data = (await response.json()) as TrelloBoard;
+        const response = await fetch(
+          `${urls.trello}/members/me/boards?key=${apiKey}&token=${token}`,
+        );
 
-          return data;
-        };
+        const data = (await response.json()) as TrelloBoard[];
 
-        const boards = [];
-
-        for (const boardId of boardIds) {
-          boards.push(Promise.resolve(fetchBoard(boardId)));
-        }
-
-        const boardDataArray = await Promise.all(boards);
-
-        return boardDataArray.map((board) => ({
+        return data.map((board) => ({
           id: board.id,
           name: board.name,
         }));
@@ -102,7 +103,7 @@ export const importRouter = createTRPCRouter({
         openapi: {
           summary: "Import boards from Trello",
           method: "POST",
-          path: "/imports/trello/import",
+          path: "/imports/trello/boards",
           description: "Imports boards from Trello",
           tags: ["Imports"],
           protect: true,
@@ -111,8 +112,6 @@ export const importRouter = createTRPCRouter({
       .input(
         z.object({
           boardIds: z.array(z.string()),
-          apiKey: z.string().length(32),
-          token: z.string().length(76),
           workspacePublicId: z.string().min(12),
         }),
       )
@@ -120,9 +119,29 @@ export const importRouter = createTRPCRouter({
       .mutation(async ({ ctx, input }) => {
         const userId = ctx.user?.id;
 
+        const apiKey = apiKeys.trello;
+
+        if (!apiKey)
+          throw new TRPCError({
+            message: "Trello API key not found",
+            code: "INTERNAL_SERVER_ERROR",
+          });
+
         if (!userId)
           throw new TRPCError({
             message: `User not authenticated`,
+            code: "UNAUTHORIZED",
+          });
+
+        const integration = await integrationsRepo.getProviderForUser(
+          ctx.db,
+          userId,
+          "trello",
+        );
+
+        if (!integration)
+          throw new TRPCError({
+            message: "Trello token not found",
             code: "UNAUTHORIZED",
           });
 
@@ -150,7 +169,7 @@ export const importRouter = createTRPCRouter({
 
         for (const boardId of input.boardIds) {
           const response = await fetch(
-            `${TRELLO_API_URL}/boards/${boardId}?key=${input.apiKey}&token=${input.token}&lists=open&cards=open&labels=all`,
+            `${urls.trello}/boards/${boardId}?key=${apiKey}&token=${integration.accessToken}&lists=open&cards=open&labels=all`,
           );
           const data = (await response.json()) as TrelloBoard;
 
