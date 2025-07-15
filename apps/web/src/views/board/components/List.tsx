@@ -1,4 +1,6 @@
 import { t } from "@lingui/core/macro";
+import { useParams } from "next/navigation";
+import { useRouter } from "next/router";
 import { useState, type ReactNode } from "react";
 import { Draggable } from "react-beautiful-dnd";
 import { useForm } from "react-hook-form";
@@ -10,11 +12,14 @@ import {
 } from "react-icons/hi2";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { useModal } from "~/providers/modal";
 import { api } from "~/utils/api";
+import { formatToArray } from "~/utils/helpers";
+import { NewCardForm } from "./NewCardForm";
 
 interface ListProps {
   children: ReactNode;
@@ -42,7 +47,17 @@ export default function List({
   setSelectedPublicListId,
 }: ListProps) {
   const { openModal } = useModal();
-  const [editable, setEditable] = useState(false)
+  const [editable, setEditable] = useState(false);
+  const params = useParams() as { boardId: string[] } | null;
+  const router = useRouter();
+
+  const boardId = params?.boardId.length ? params.boardId[0] : null;
+  const queryParams = {
+    boardPublicId: boardId ?? "",
+    members: formatToArray(router.query.members),
+    labels: formatToArray(router.query.labels),
+  };
+
 
   const openNewCardForm = (publicListId: PublicListId) => {
     openModal("NEW_CARD");
@@ -115,7 +130,6 @@ export default function List({
                   <Button
                     onClick={() => openNewCardForm(list.publicId)}
                     variant="secondary"
-                    size="sm"
                   >
                     <HiOutlinePlusSmall
                       className="h-5 w-5 text-dark-900"
@@ -124,14 +138,27 @@ export default function List({
                   </Button>
                   <div className="relative mr-1 inline-block">
                     <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <Button variant="secondary" size="sm">
-                          <HiEllipsisHorizontal className="h-5 w-5 text-dark-900" />
-                        </Button>
-                      </DropdownMenuTrigger>
+                      <DropdownMenuTrigger><HiEllipsisHorizontal className="h-5 w-5 text-dark-900" /></DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem className="flex items-center gap-1" onClick={() => openNewCardForm(list.publicId)}>
-                          <HiOutlineSquaresPlus className="h-[18px] w-[18px] text-dark-900" /> {t`Add a card`}
+                        {/* onClick={() => openNewCardForm(list.publicId)} */}
+                        <DropdownMenuItem className="flex items-center gap-1" onSelect={(e) => e.preventDefault()}>
+                          <Dialog>
+                            <DialogTrigger>
+                              <Button variant="outline">
+                                <HiOutlineSquaresPlus className="h-[18px] w-[18px] text-dark-900" /> {t`Add a card`}
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>{t`New card`}</DialogTitle>
+                              </DialogHeader>
+
+                              <NewCardForm boardPublicId={boardId ?? ""}
+                                listPublicId={list.publicId}
+                                queryParams={queryParams} />
+                            </DialogContent>
+                          </Dialog>
+
                         </DropdownMenuItem>
                         <DropdownMenuItem className="flex items-center gap-1" onClick={() => handleOpenDeleteListConfirmation}>
                           <HiOutlineTrash className="h-[18px] w-[18px] text-dark-900" /> {t`Delete list`}

@@ -3,11 +3,12 @@ import { Menu } from "@headlessui/react";
 import { t } from "@lingui/core/macro";
 import { HiMiniPlus } from "react-icons/hi2";
 
-import Avatar from "~/components/Avatar";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { getInitialsFromName, inferInitialsFromEmail } from "~/utils/helpers";
 
 interface MemberSelectorProps {
   cardPublicId: string;
@@ -50,20 +51,20 @@ export default function MemberSelector({
 
         const updatedMembers = hasMember
           ? oldCard.members.filter(
-              (member) => member.publicId !== update.workspaceMemberPublicId,
-            )
+            (member) => member.publicId !== update.workspaceMemberPublicId,
+          )
           : [
-              ...oldCard.members,
-              {
-                publicId: update.workspaceMemberPublicId,
-                email: memberToAdd?.email ?? "",
-                deletedAt: null,
-                user: {
-                  id: memberToAdd?.user?.id ?? "",
-                  name: memberToAdd?.user?.name ?? "",
-                },
+            ...oldCard.members,
+            {
+              publicId: update.workspaceMemberPublicId,
+              email: memberToAdd?.email ?? "",
+              deletedAt: null,
+              user: {
+                id: memberToAdd?.user?.id ?? "",
+                name: memberToAdd?.user?.name ?? "",
               },
-            ];
+            },
+          ];
 
         return {
           ...oldCard,
@@ -93,6 +94,12 @@ export default function MemberSelector({
     openModal("INVITE_MEMBER");
   };
 
+  const getInitials = (name: string, email: string) => {
+    return name
+      ? getInitialsFromName(name)
+      : inferInitialsFromEmail(email);
+  }
+
   return (
     <>
       {isLoading ? (
@@ -116,12 +123,10 @@ export default function MemberSelector({
             {selectedMembers.length ? (
               <div className="isolate flex justify-end -space-x-1 overflow-hidden">
                 {selectedMembers.map(({ value, imageUrl }) => (
-                  <Avatar
-                    size="sm"
-                    name={value}
-                    imageUrl={imageUrl}
-                    email={value}
-                  />
+                  <Avatar>
+                    <AvatarImage src={imageUrl} alt={value} />
+                    <AvatarFallback>{getInitials(value, value)}</AvatarFallback>
+                  </Avatar>
                 ))}
               </div>
             ) : (

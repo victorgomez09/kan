@@ -237,8 +237,7 @@ export default function BoardPage() {
       <PageHead
         title={`${boardData?.name ?? t`Board`} | ${workspace.name ?? t`Workspace`}`}
       />
-      <div className="relative flex h-full flex-col">
-        {/* <PatternedBackground /> */}
+      <div className="relative flex flex-col h-[calc(100vh-3em)]">
         <div className="z-10 flex w-full flex-col justify-between p-6 md:flex-row md:p-8">
           {isLoading && !boardData && (
             <div className="flex space-x-2">
@@ -302,7 +301,8 @@ export default function BoardPage() {
           </div>
         </div>
 
-        <div className="scrollbar-w-none scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] z-0 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300">
+        {/* className="scrollbar-w-none scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] z-0 flex-1 overflow-y-hidden overflow-x-auto overscroll-contain scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300" */}
+        <div className="h-full">
           {isLoading ? (
             <div className="ml-[2rem] flex">
               <div className="0 mr-5 h-[500px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-100" />

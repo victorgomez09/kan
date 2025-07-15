@@ -43,7 +43,7 @@ const ListCard = ({
               ))}
             </div>
             <div className="isolate flex justify-end -space-x-1 overflow-hidden">
-              {members.map(({ user, email }) => {
+              {members.map(({ user }) => {
                 const avatarUrl = user?.image
                   ? getAvatarUrl(user.image)
                   : undefined;
@@ -53,12 +53,6 @@ const ListCard = ({
                     <AvatarImage src={avatarUrl} alt={user?.name ?? ""} />
                     <AvatarFallback>{getInitials(user?.name ?? "", user?.email ?? "")}</AvatarFallback>
                   </Avatar>
-                  // <Avatar
-                  //   name={user?.name ?? ""}
-                  //   email={user?.email ?? email}
-                  //   imageUrl={avatarUrl}
-                  //   size="sm"
-                  // />
                 );
               })}
             </div>
