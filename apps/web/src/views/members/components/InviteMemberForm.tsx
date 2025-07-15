@@ -5,7 +5,7 @@ import { HiXMark } from "react-icons/hi2";
 
 import type { InviteMemberInput } from "@kan/api/types";
 
-import Button from "~/components/Button";
+import {Button} from "~/components/ui/button";
 import Input from "~/components/Input";
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";

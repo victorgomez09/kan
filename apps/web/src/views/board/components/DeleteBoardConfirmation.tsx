@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
 
-import Button from "~/components/Button";
+import {Button} from "~/components/ui/button";
 import { useModal } from "~/providers/modal";
 import { api } from "~/utils/api";
 

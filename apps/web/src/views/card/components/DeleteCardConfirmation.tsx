@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { t } from "@lingui/core/macro";
 
-import Button from "~/components/Button";
+import {Button} from "~/components/ui/button";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";

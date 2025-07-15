@@ -2,7 +2,7 @@ import Link from "next/link";
 import { t } from "@lingui/core/macro";
 import { useEffect, useState } from "react";
 
-import Button from "~/components/Button";
+import {Button} from "~/components/ui/button";
 
 const Cta = ({ theme }: { theme: string }) => {
   const [currentWorkspaceSlug, setCurrentWorkspaceSlug] = useState("acme");

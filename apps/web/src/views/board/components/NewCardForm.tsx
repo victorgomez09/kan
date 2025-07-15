@@ -11,8 +11,7 @@ import {
 import type { NewCardInput } from "@kan/api/types";
 import { generateUID } from "@kan/shared/utils";
 
-import Avatar from "~/components/Avatar";
-import Button from "~/components/Button";
+import { Button } from "~/components/ui/button";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
 import Editor from "~/components/Editor";
 import Input from "~/components/Input";
@@ -174,16 +173,16 @@ export function NewCardForm({
         member.user?.email ?? member.email,
       ),
       selected: memberPublicIds.includes(member.publicId),
-      leftIcon: (
-        <Avatar
-          size="xs"
-          name={member.user?.name ?? ""}
-          imageUrl={
-            member.user?.image ? getAvatarUrl(member.user.image) : undefined
-          }
-          email={member.user?.email ?? member.email}
-        />
-      ),
+      // leftIcon: (
+      //   <Avatar
+      //     size="xs"
+      //     name={member.user?.name ?? ""}
+      //     imageUrl={
+      //       member.user?.image ? getAvatarUrl(member.user.image) : undefined
+      //     }
+      //     email={member.user?.email ?? member.email}
+      //   />
+      // ),
     })) ?? [];
 
   const onSubmit = (data: NewCardInput) => {

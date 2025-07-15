@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { authClient } from "@kan/auth/client";
 
-import Button from "~/components/Button";
+import {Button} from "~/components/ui/button";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";

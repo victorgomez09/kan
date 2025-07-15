@@ -12,7 +12,7 @@ import {
   HiXMark,
 } from "react-icons/hi2";
 
-import Button from "~/components/Button";
+import {Button} from "~/components/ui/button";
 import Toggle from "~/components/Toggle";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";

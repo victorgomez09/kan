@@ -14,7 +14,7 @@ import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 import { formatToArray } from "~/utils/helpers";
-import Card from "~/views/board/components/Card";
+import ListCard from "~/views/board/components/ListCard";
 import Filters from "~/views/board/components/Filters";
 import { CardModal } from "./CardModal";
 
@@ -147,7 +147,7 @@ export default function PublicBoardView() {
                             openModal("CARD");
                           }}
                         >
-                          <Card
+                          <ListCard
                             title={card.title}
                             labels={card.labels}
                             members={[]}

@@ -73,13 +73,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
           <ThemeProvider>
             <ModalProvider>
               <PopupProvider>
-                {posthogKey ? (
-                  <PostHogProvider client={posthog}>
-                    <Component {...pageProps} />
-                  </PostHogProvider>
-                ) : (
-                  <Component {...pageProps} />
-                )}
+                <Component {...pageProps} />
               </PopupProvider>
             </ModalProvider>
           </ThemeProvider>

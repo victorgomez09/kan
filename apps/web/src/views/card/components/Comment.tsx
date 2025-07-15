@@ -5,8 +5,7 @@ import ContentEditable from "react-contenteditable";
 import { useForm } from "react-hook-form";
 import { HiEllipsisHorizontal, HiPencil, HiTrash } from "react-icons/hi2";
 
-import Avatar from "~/components/Avatar";
-import Button from "~/components/Button";
+import { Button } from "~/components/ui/button";
 import Dropdown from "~/components/Dropdown";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
@@ -76,21 +75,21 @@ const Comment = ({
   const dropdownItems = [
     ...(isAuthor
       ? [
-          {
-            label: t`Edit comment`,
-            action: () => setIsEditing(true),
-            icon: <HiPencil className="h-[16px] w-[16px] text-dark-900" />,
-          },
-        ]
+        {
+          label: t`Edit comment`,
+          action: () => setIsEditing(true),
+          icon: <HiPencil className="h-[16px] w-[16px] text-dark-900" />,
+        },
+      ]
       : []),
     ...(isAuthor || isAdmin
       ? [
-          {
-            label: t`Delete comment`,
-            action: () => openModal("DELETE_COMMENT", publicId),
-            icon: <HiTrash className="h-[16px] w-[16px] text-dark-900" />,
-          },
-        ]
+        {
+          label: t`Delete comment`,
+          action: () => openModal("DELETE_COMMENT", publicId),
+          icon: <HiTrash className="h-[16px] w-[16px] text-dark-900" />,
+        },
+      ]
       : []),
   ];
 
@@ -101,12 +100,12 @@ const Comment = ({
     >
       <div className="flex justify-between">
         <div className="flex items-center space-x-2">
-          <Avatar
+          {/* <Avatar
             size="sm"
             name={name ?? ""}
             email={email ?? ""}
             isLoading={isLoading}
-          />
+          /> */}
 
           <p className="text-sm">
             <span className="font-medium dark:text-dark-1000">{`${name} `}</span>

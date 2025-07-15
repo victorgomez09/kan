@@ -29,8 +29,9 @@ import { z } from "zod";
 
 import { authClient } from "@kan/auth/client";
 
-import Button from "~/components/Button";
-import Input from "~/components/Input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import { usePopup } from "~/providers/popup";
 
 interface FormValues {
@@ -152,12 +153,7 @@ export function Auth({ setIsMagicLinkSent, isSignUp }: AuthProps) {
   const [loginError, setLoginError] = useState<string | null>(null);
   const { showPopup } = usePopup();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<FormValues>({
+  const authForm = useForm<FormValues>({
     resolver: zodResolver(EmailSchema),
   });
 
@@ -247,7 +243,7 @@ export function Auth({ setIsMagicLinkSent, isSignUp }: AuthProps) {
     await handleLoginWithEmail(values.email, values.password, values.name);
   };
 
-  const password = watch("password");
+  const password = authForm.watch("password");
 
   return (
     <div className="space-y-6">
@@ -262,65 +258,83 @@ export function Auth({ setIsMagicLinkSent, isSignUp }: AuthProps) {
                 key={key}
                 onClick={() => handleLoginWithProvider(key as SocialProvider)}
                 isLoading={isLoginWithProviderPending === key}
-                iconLeft={<provider.icon />}
-                fullWidth
                 size="lg"
+                className="w-full"
               >
+                <provider.icon />
                 <Trans>Continue with {provider.name}</Trans>
               </Button>
             );
           })}
         </div>
       )}
-      <form onSubmit={handleSubmit(onSubmit)}>
-        {socialProviders?.length !== 0 && (
-          <div className="mb-[1.5rem] flex w-full items-center gap-4">
-            <div className="h-[1px] w-full bg-light-600 dark:bg-dark-600" />
-            <span className="text-sm text-light-900 dark:text-dark-900">
-              {t`or`}
-            </span>
-            <div className="h-[1px] w-full bg-light-600 dark:bg-dark-600" />
-          </div>
-        )}
-        <div className="space-y-2">
+      <Form {...authForm}>
+        <form
+          onSubmit={authForm.handleSubmit(onSubmit)}
+          className="space-y-4"
+          id="login-form"
+        >
           {isSignUp && isCredentialsEnabled && (
-            <div>
-              <Input
-                {...register("name", { required: true })}
-                placeholder={t`Enter your name`}
-              />
-              {errors.name && (
-                <p className="mt-2 text-xs text-red-400">
-                  {t`Please enter a valid name`}
-                </p>
+            <FormField
+              control={authForm.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder={t`Enter your name`} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
-          )}
-          <div>
-            <Input
-              {...register("email", { required: true })}
-              placeholder={t`Enter your email address`}
             />
-            {errors.email && (
-              <p className="mt-2 text-xs text-red-400">
-                {t`Please enter a valid email address`}
-              </p>
-            )}
-          </div>
-          {isCredentialsEnabled && (
-            <div>
-              <Input
-                type="password"
-                {...register("password", { required: true })}
-                placeholder={t`Enter your password`}
-              />
-              {errors.password && (
-                <p className="mt-2 text-xs text-red-400">
-                  {t`Please enter a valid password`}
-                </p>
-              )}
-            </div>
           )}
+          <FormField
+            control={authForm.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input placeholder={t`Enter your email adress`} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {isCredentialsEnabled && (
+            <FormField
+              control={authForm.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder={t`Enter your password`} type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {loginError && (
+            <p className="mt-2 text-xs text-red-400">{loginError}</p>
+          )}
+
+          <Button
+            className="w-full"
+            type="submit"
+            isLoading={isLoginWithEmailPending}
+          >
+            {isSignUp ? t`Sign up with ` : t`Continue with `}
+            {!isCredentialsEnabled || (password && password.length !== 0)
+              ? t`email`
+              : t`magic link`}
+          </Button>
+        </form>
+      </Form>
+
+      {/* <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="space-y-2">
           {loginError && (
             <p className="mt-2 text-xs text-red-400">{loginError}</p>
           )}
@@ -328,9 +342,9 @@ export function Auth({ setIsMagicLinkSent, isSignUp }: AuthProps) {
         <div className="mt-[1.5rem] flex items-center gap-4">
           <Button
             isLoading={isLoginWithEmailPending}
-            fullWidth
             size="lg"
             variant="secondary"
+            className="w-full"
           >
             {isSignUp ? t`Sign up with ` : t`Continue with `}
             {!isCredentialsEnabled || (password && password.length !== 0)
@@ -338,7 +352,7 @@ export function Auth({ setIsMagicLinkSent, isSignUp }: AuthProps) {
               : t`magic link`}
           </Button>
         </div>
-      </form>
+      </form> */}
     </div>
   );
 }

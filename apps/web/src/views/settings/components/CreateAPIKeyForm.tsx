@@ -2,7 +2,7 @@ import { t } from "@lingui/core/macro";
 
 import { authClient } from "@kan/auth/client";
 
-import Button from "~/components/Button";
+import {Button} from "~/components/ui/button";
 import Input from "~/components/Input";
 
 const CreateAPIKeyForm = ({

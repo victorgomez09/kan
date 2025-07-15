@@ -6,7 +6,7 @@ import { HiChevronUpDown, HiXMark } from "react-icons/hi2";
 
 import { colours } from "@kan/shared/constants";
 
-import Button from "~/components/Button";
+import {Button} from "~/components/ui/button";
 import Input from "~/components/Input";
 import Toggle from "~/components/Toggle";
 import { useModal } from "~/providers/modal";

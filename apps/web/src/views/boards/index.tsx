@@ -1,7 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { HiArrowDownTray, HiOutlinePlusSmall } from "react-icons/hi2";
 
-import Button from "~/components/Button";
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
@@ -10,6 +9,7 @@ import { useWorkspace } from "~/providers/workspace";
 import { BoardsList } from "./components/BoardsList";
 import { ImportBoardsForm } from "./components/ImportBoardsForm";
 import { NewBoardForm } from "./components/NewBoardForm";
+import { Button } from "~/components/ui/button";
 
 export default function BoardsPage() {
   const { openModal, modalContentType } = useModal();
@@ -20,9 +20,9 @@ export default function BoardsPage() {
   return (
     <>
       <PageHead title={t`Boards | ${workspace.name ?? "Workspace"}`} />
-      <div className="m-auto h-full max-w-[1600px] px-5 py-6 md:px-8 md:py-8">
+      <div className="m-auto max-w-[1600px] px-5 py-6 md:px-8 md:py-8">
         <div className="mb-8 flex w-full items-center justify-between">
-          <h1 className="font-bold tracking-tight text-neutral-900 dark:text-dark-1000 sm:text-[1.2rem]">
+          <h1 className="font-bold tracking-tight sm:text-[1.2rem]">
             {t`Boards`}
           </h1>
           <div className="flex gap-2">
@@ -30,20 +30,15 @@ export default function BoardsPage() {
               type="button"
               variant="secondary"
               onClick={() => openModal("IMPORT_BOARDS")}
-              iconLeft={
-                <HiArrowDownTray aria-hidden="true" className="h-4 w-4" />
-              }
             >
+              <HiArrowDownTray aria-hidden="true" className="h-4 w-4" />
               {t`Import`}
             </Button>
             <Button
               type="button"
-              variant="primary"
               onClick={() => openModal("NEW_BOARD")}
-              iconLeft={
-                <HiOutlinePlusSmall aria-hidden="true" className="h-4 w-4" />
-              }
             >
+              <HiOutlinePlusSmall aria-hidden="true" className="h-4 w-4" />
               {t`New`}
             </Button>
           </div>

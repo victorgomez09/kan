@@ -4,7 +4,7 @@ import { env } from "next-runtime-env";
 import { useEffect, useRef } from "react";
 import { HiMiniArrowTopRightOnSquare } from "react-icons/hi2";
 
-import Button from "~/components/Button";
+import { Button } from "~/components/ui/button";
 import { LanguageSelector } from "~/components/LanguageSelector";
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
@@ -198,11 +198,10 @@ export default function SettingsPage() {
                   {t`View and manage your billing and subscription.`}
                 </p>
                 <Button
-                  variant="primary"
-                  iconRight={<HiMiniArrowTopRightOnSquare />}
                   onClick={handleOpenBillingPortal}
                 >
                   {t`Billing portal`}
+                  <HiMiniArrowTopRightOnSquare />
                 </Button>
               </div>
             )}
@@ -219,8 +218,6 @@ export default function SettingsPage() {
                     {t`Connect your Trello account to import boards.`}
                   </p>
                   <Button
-                    variant="primary"
-                    iconRight={<HiMiniArrowTopRightOnSquare />}
                     onClick={() =>
                       window.open(
                         trelloUrl.url,
@@ -230,6 +227,7 @@ export default function SettingsPage() {
                     }
                   >
                     {t`Connect Trello`}
+                    <HiMiniArrowTopRightOnSquare />
                   </Button>
                 </>
               ) : (

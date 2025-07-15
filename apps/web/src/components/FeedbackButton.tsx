@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 
 import chatIconDark from "~/assets/chat-dark.json";
 import chatIconLight from "~/assets/chat-light.json";
-import Button from "~/components/Button";
+import {Button} from "~/components/ui/button";
 import Input from "~/components/Input";
 import LottieIcon from "~/components/LottieIcon";
 import { usePopup } from "~/providers/popup";

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { HiCheck, HiXMark } from "react-icons/hi2";
 import { z } from "zod";
 
-import Button from "~/components/Button";
+import {Button} from "~/components/ui/button";
 import Input from "~/components/Input";
 import { useDebounce } from "~/hooks/useDebounce";
 import { useModal } from "~/providers/modal";
