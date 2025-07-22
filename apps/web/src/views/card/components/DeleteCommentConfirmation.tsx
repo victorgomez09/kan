@@ -1,6 +1,6 @@
 import { t } from "@lingui/core/macro";
 
-import {Button} from "~/components/ui/button";
+import Button from "~/components/Button";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";

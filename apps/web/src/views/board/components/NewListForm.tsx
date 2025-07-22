@@ -6,7 +6,7 @@ import { HiXMark } from "react-icons/hi2";
 import type { NewListInput } from "@kan/api/types";
 import { generateUID } from "@kan/shared/utils";
 
-import {Button} from "~/components/ui/button";
+import Button from "~/components/Button";
 import Input from "~/components/Input";
 import Toggle from "~/components/Toggle";
 import { useModal } from "~/providers/modal";

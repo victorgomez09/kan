@@ -4,6 +4,7 @@ import { t } from "@lingui/core/macro";
 import { useForm } from "react-hook-form";
 import { IoChevronForwardSharp } from "react-icons/io5";
 
+import Avatar from "~/components/Avatar";
 import Editor from "~/components/Editor";
 import { LabelForm } from "~/components/LabelForm";
 import LabelIcon from "~/components/LabelIcon";
@@ -14,7 +15,7 @@ import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
-import { formatMemberDisplayName, getAvatarUrl, getInitialsFromName, inferInitialsFromEmail } from "~/utils/helpers";
+import { formatMemberDisplayName, getAvatarUrl } from "~/utils/helpers";
 import { DeleteLabelConfirmation } from "../../components/DeleteLabelConfirmation";
 import ActivityList from "./components/ActivityList";
 import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
@@ -24,7 +25,6 @@ import LabelSelector from "./components/LabelSelector";
 import ListSelector from "./components/ListSelector";
 import MemberSelector from "./components/MemberSelector";
 import NewCommentForm from "./components/NewCommentForm";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 
 interface FormValues {
   cardId: string;
@@ -69,12 +69,6 @@ export function CardRightPanel() {
       selected: list.publicId === card?.list.publicId,
     })) ?? [];
 
-  const getInitials = (name: string, email: string) => {
-    return name
-      ? getInitialsFromName(name)
-      : inferInitialsFromEmail(email);
-  }
-
   const formattedMembers =
     workspaceMembers?.map((member) => {
       const isSelected = selectedMembers?.some(
@@ -92,10 +86,14 @@ export function CardRightPanel() {
           : undefined,
         selected: isSelected ?? false,
         leftIcon: (
-          <Avatar>
-            <AvatarImage src={member.user?.image ? getAvatarUrl(member.user.image) : undefined} alt={member.user?.name ?? ""} />
-            <AvatarFallback>{getInitials(member.user?.name ?? "", member.user?.email ?? member.email)}</AvatarFallback>
-          </Avatar>
+          <Avatar
+            size="xs"
+            name={member.user?.name ?? ""}
+            imageUrl={
+              member.user?.image ? getAvatarUrl(member.user.image) : undefined
+            }
+            email={member.user?.email ?? member.email}
+          />
         ),
       };
     }) ?? [];

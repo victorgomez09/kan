@@ -15,6 +15,7 @@ import {
 import type { GetCardByIdOutput } from "@kan/api/types";
 import { authClient } from "@kan/auth/client";
 
+import Avatar from "~/components/Avatar";
 import { useLocalisation } from "~/hooks/useLocalisation";
 import Comment from "./Comment";
 
@@ -203,7 +204,7 @@ const ActivityList = ({
             className="relative flex items-center space-x-2"
           >
             <div className="relative">
-              {/* <Avatar
+              <Avatar
                 size="sm"
                 name={activity.user?.name ?? ""}
                 email={activity.user?.email ?? ""}
@@ -213,10 +214,10 @@ const ActivityList = ({
                   activity.toList?.index,
                 )}
                 isLoading={isLoading}
-              /> */}
+              />
               {index !== activities.length - 1 &&
                 activities[index + 1]?.type !==
-                "card.updated.comment.added" && (
+                  "card.updated.comment.added" && (
                   <div className="absolute bottom-[-14px] left-1/2 top-[30px] w-0.5 -translate-x-1/2 bg-light-600 dark:bg-dark-600" />
                 )}
             </div>

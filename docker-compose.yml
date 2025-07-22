@@ -90,9 +90,9 @@ services:
     image: postgres:15
     container_name: kan-db
     environment:
-      - POSTGRES_DB=kan_db
-      - POSTGRES_USER=kan
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=kan
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
       - 5432:5432
     volumes:

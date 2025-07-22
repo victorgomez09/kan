@@ -1,6 +1,6 @@
 import { t } from "@lingui/core/macro";
 
-import {Button} from "~/components/ui/button";
+import Button from "~/components/Button";
 import { useModal } from "~/providers/modal";
 
 export function CustomURLConfirmation({

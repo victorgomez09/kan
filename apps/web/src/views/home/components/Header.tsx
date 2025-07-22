@@ -3,7 +3,7 @@ import { t } from "@lingui/core/macro";
 import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
-import {Button} from "~/components/ui/button";
+import Button from "~/components/Button";
 
 const Header = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
   const [isScrolled, setIsScrolled] = useState(false);

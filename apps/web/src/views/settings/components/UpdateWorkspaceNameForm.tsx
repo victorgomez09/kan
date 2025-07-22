@@ -3,7 +3,7 @@ import { t } from "@lingui/core/macro";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import {Button} from "~/components/ui/button";
+import Button from "~/components/Button";
 import Input from "~/components/Input";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";

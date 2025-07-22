@@ -4,7 +4,7 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { IoLogoGithub, IoLogoHackernews } from "react-icons/io";
 
-import {Button} from "~/components/ui/button";
+import Button from "~/components/Button";
 import { PageHead } from "~/components/PageHead";
 import { useTheme } from "~/providers/theme";
 import Cta from "./components/Cta";

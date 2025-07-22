@@ -2,26 +2,26 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import {
+  HiOutlineBarsArrowDown,
+  HiOutlineBarsArrowUp,
+  HiXMark,
+} from "react-icons/hi2";
 
 import type { NewCardInput } from "@kan/api/types";
 import { generateUID } from "@kan/shared/utils";
 
-import { Pencil } from "lucide-react";
-import { HiMiniPlus } from "react-icons/hi2";
+import Avatar from "~/components/Avatar";
+import Button from "~/components/Button";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
-import { LabelForm } from "~/components/LabelForm";
+import Editor from "~/components/Editor";
+import Input from "~/components/Input";
 import LabelIcon from "~/components/LabelIcon";
-import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
+import Toggle from "~/components/Toggle";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
-import { formatMemberDisplayName } from "~/utils/helpers";
+import { formatMemberDisplayName, getAvatarUrl } from "~/utils/helpers";
 
 type NewCardFormInput = NewCardInput & {
   isCreateAnotherEnabled: boolean;
@@ -49,7 +49,7 @@ export function NewCardForm({
 
   const utils = api.useUtils();
 
-  const form =
+  const { register, handleSubmit, reset, setValue, watch } =
     useForm<NewCardFormInput>({
       defaultValues: {
         title: "",
@@ -62,11 +62,11 @@ export function NewCardForm({
       },
     });
 
-  const labelPublicIds = form.watch("labelPublicIds") || [];
-  const memberPublicIds = form.watch("memberPublicIds") || [];
-  const isCreateAnotherEnabled = form.watch("isCreateAnotherEnabled");
-  const position = form.watch("position");
-  const title = form.watch("title");
+  const labelPublicIds = watch("labelPublicIds") || [];
+  const memberPublicIds = watch("memberPublicIds") || [];
+  const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
+  const position = watch("position");
+  const title = watch("title");
 
   const { data: boardData } = api.board.byId.useQuery(queryParams, {
     enabled: !!boardPublicId,
@@ -130,13 +130,13 @@ export function NewCardForm({
       });
     },
     onSuccess: async () => {
-      const isCreateAnotherEnabled = form.watch("isCreateAnotherEnabled");
+      const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
       if (!isCreateAnotherEnabled) closeModal();
       await utils.board.byId.invalidate(queryParams);
-      form.reset({
+      reset({
         title: "",
         description: "",
-        listPublicId: form.watch("listPublicId"),
+        listPublicId: watch("listPublicId"),
         labelPublicIds: [],
         memberPublicIds: [],
         isCreateAnotherEnabled,
@@ -157,14 +157,13 @@ export function NewCardForm({
       value: label.name,
       leftIcon: <LabelIcon colourCode={label.colourCode} />,
       selected: labelPublicIds.includes(label.publicId),
-      publicId: label.publicId
     })) ?? [];
 
   const formattedLists =
     boardData?.lists.map((list) => ({
       key: list.publicId,
       value: list.name,
-      selected: list.publicId === form.watch("listPublicId"),
+      selected: list.publicId === watch("listPublicId"),
     })) ?? [];
 
   const formattedMembers =
@@ -175,16 +174,16 @@ export function NewCardForm({
         member.user?.email ?? member.email,
       ),
       selected: memberPublicIds.includes(member.publicId),
-      // leftIcon: (
-      //   <Avatar
-      //     size="xs"
-      //     name={member.user?.name ?? ""}
-      //     imageUrl={
-      //       member.user?.image ? getAvatarUrl(member.user.image) : undefined
-      //     }
-      //     email={member.user?.email ?? member.email}
-      //   />
-      // ),
+      leftIcon: (
+        <Avatar
+          size="xs"
+          name={member.user?.name ?? ""}
+          imageUrl={
+            member.user?.image ? getAvatarUrl(member.user.image) : undefined
+          }
+          email={member.user?.email ?? member.email}
+        />
+      ),
     })) ?? [];
 
   const onSubmit = (data: NewCardInput) => {
@@ -199,130 +198,135 @@ export function NewCardForm({
   };
 
   const handleToggleCreateAnother = (): void => {
-    form.setValue("isCreateAnotherEnabled", !isCreateAnotherEnabled);
+    setValue("isCreateAnotherEnabled", !isCreateAnotherEnabled);
   };
 
   const handleSelectList = (listPublicId: string): void => {
-    form.setValue("listPublicId", listPublicId);
+    setValue("listPublicId", listPublicId);
   };
 
   const handleSelectMembers = (memberPublicId: string): void => {
     const currentIndex = memberPublicIds.indexOf(memberPublicId);
     if (currentIndex === -1) {
-      form.setValue("memberPublicIds", [...memberPublicIds, memberPublicId]);
+      setValue("memberPublicIds", [...memberPublicIds, memberPublicId]);
     } else {
       const newMemberPublicIds = [...memberPublicIds];
       newMemberPublicIds.splice(currentIndex, 1);
-      form.setValue("memberPublicIds", newMemberPublicIds);
+      setValue("memberPublicIds", newMemberPublicIds);
     }
   };
 
   const handleSelectLabels = (labelPublicId: string): void => {
     const currentIndex = labelPublicIds.indexOf(labelPublicId);
     if (currentIndex === -1) {
-      form.setValue("labelPublicIds", [...labelPublicIds, labelPublicId]);
+      setValue("labelPublicIds", [...labelPublicIds, labelPublicId]);
     } else {
       const newLabelPublicIds = [...labelPublicIds];
       newLabelPublicIds.splice(currentIndex, 1);
-      form.setValue("labelPublicIds", newLabelPublicIds);
+      setValue("labelPublicIds", newLabelPublicIds);
     }
   };
 
   const selectedList = formattedLists.find((item) => item.selected);
 
-  const refetchBoard = async () => {
-    if (boardPublicId) await utils.board.byId.refetch({ boardPublicId: boardPublicId });
-  };
-
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
-        id="login-form"
-      >
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input placeholder={t`Enter your email adress`} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="flex items-center gap-2">
-          <CheckboxDropdown
-            items={formattedLists}
-            handleSelect={(_groupKey, item) => handleSelectList(item.key)}
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="px-5 pt-5">
+        <div className="flex w-full items-center justify-between pb-5">
+          <h2 className="text-sm font-bold text-neutral-900 dark:text-dark-1000">
+            {t`New card`}
+          </h2>
+          <button
+            type="button"
+            className="rounded p-1 hover:bg-light-200 focus:outline-none dark:hover:bg-dark-300"
+            onClick={(e) => {
+              closeModal();
+              e.preventDefault();
+            }}
           >
-            <Button variant="secondary" className="flex h-full w-full items-center">
-              {selectedList?.value}
-            </Button>
-          </CheckboxDropdown>
+            <HiXMark size={18} className="text-light-900 dark:text-dark-900" />
+          </button>
+        </div>
 
-          <CheckboxDropdown
-            items={formattedMembers}
-            handleSelect={(_groupKey, item) => handleSelectMembers(item.key)}
-          >
-            <Button variant="secondary" className="flex h-full w-full items-center">
-              {!memberPublicIds.length ? (
-                t`Members`
-              ) : (
-                <div className="flex -space-x-1 overflow-hidden">
-                  {memberPublicIds.map((memberPublicId) => {
-                    const member = formattedMembers.find(
-                      (member) => member.key === memberPublicId,
-                    );
+        <div>
+          <Input
+            id="title"
+            placeholder={t`Card title`}
+            {...register("title")}
+            onKeyDown={async (e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                await handleSubmit(onSubmit)();
+              }
+            }}
+          />
+        </div>
+        <div className="mt-2">
+          <div className="block max-h-48 min-h-24 w-full overflow-y-auto rounded-md border-0 bg-dark-300 bg-white/5 px-3 py-2 text-sm shadow-sm ring-1 ring-inset ring-light-600 focus-within:ring-2 focus-within:ring-inset focus-within:ring-light-700 dark:ring-dark-700 dark:focus-within:ring-dark-700 sm:leading-6">
+            <Editor
+              content=""
+              onChange={(value) => setValue("description", value)}
+            />
+          </div>
+        </div>
+        <div className="mt-2 flex space-x-1">
+          <div className="w-fit">
+            <CheckboxDropdown
+              items={formattedLists}
+              handleSelect={(_groupKey, item) => handleSelectList(item.key)}
+            >
+              <div className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-2 py-1 text-left text-xs text-light-800 hover:bg-light-300 dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500">
+                {selectedList?.value}
+              </div>
+            </CheckboxDropdown>
+          </div>
+          <div className="w-fit">
+            <CheckboxDropdown
+              items={formattedMembers}
+              handleSelect={(_groupKey, item) => handleSelectMembers(item.key)}
+            >
+              <div className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-2 py-1 text-left text-xs text-light-800 hover:bg-light-300 dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500">
+                {!memberPublicIds.length ? (
+                  t`Members`
+                ) : (
+                  <div className="flex -space-x-1 overflow-hidden">
+                    {memberPublicIds.map((memberPublicId) => {
+                      const member = formattedMembers.find(
+                        (member) => member.key === memberPublicId,
+                      );
 
-                    return (
-                      // <Avatar key={member?.key}>
-                      //   <AvatarFallback>{member?.value
-                      //     .split(" ")
-                      //     .map((namePart) =>
-                      //       namePart.charAt(0).toUpperCase(),
-                      //     )
-                      //     .join("")}</AvatarFallback>
-                      // </Avatar>
-                      <span
-                        key={member?.key}
-                        className="inline-flex size-5 items-center justify-center p-2 rounded-full bg-background"
-                      >
-                        <span className="text-base font-medium leading-none">
-                          {member?.value
-                            .split(" ")
-                            .map((namePart) =>
-                              namePart.charAt(0).toUpperCase(),
-                            )
-                            .join("")}
+                      return (
+                        <span
+                          key={member?.key}
+                          className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-gray-400 ring-1 ring-light-200 dark:ring-dark-500"
+                        >
+                          <span className="text-[8px] font-medium leading-none text-white">
+                            {member?.value
+                              .split(" ")
+                              .map((namePart) =>
+                                namePart.charAt(0).toUpperCase(),
+                              )
+                              .join("")}
+                          </span>
                         </span>
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
-            </Button>
-          </CheckboxDropdown>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button className="flex h-full w-full items-center" variant="secondary">
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </CheckboxDropdown>
+          </div>
+          <div className="w-fit">
+            <CheckboxDropdown
+              items={formattedLabels}
+              handleSelect={(_groupKey, item) => handleSelectLabels(item.key)}
+              handleEdit={(labelPublicId) =>
+                openModal("EDIT_LABEL", labelPublicId)
+              }
+              handleCreate={() => openModal("NEW_LABEL")}
+              createNewItemLabel={t`Create new label`}
+            >
+              <div className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-2 py-1 text-left text-xs text-light-800 hover:bg-light-300 dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500">
                 {!labelPublicIds.length ? (
                   t`Labels`
                 ) : (
@@ -363,146 +367,41 @@ export function NewCardForm({
                     )}
                   </>
                 )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {formattedLabels?.map((item, key) => {
-                return (
-                  <DropdownMenuItem key={key}>
-                    <div
-                      className="group flex items-center justify-between w-full"
-                    >
-                      <Checkbox
-                        id={item.key}
-                        name={item.key}
-                        onClick={(event) => { handleSelectLabels(item.key); event.stopPropagation(); }}
-                        checked={item.selected} />
-                      <label
-                        htmlFor={item.key}
-                        className="ml-3 text-[12px] text-dark-900"
-                      >
-                        {item.value}
-                      </label>
-                      <Dialog>
-                        <DialogTrigger onClick={(event) => {
-                          event.stopPropagation();
-                        }}>
-                          <Button variant="secondary" size="sm"><Pencil className="size-3" /></Button>
-                        </DialogTrigger>
-                        <DialogContent onClick={e => e.stopPropagation()}>
-                          <DialogHeader>
-                            <DialogTitle>{t`Edit label`}</DialogTitle>
-                          </DialogHeader>
-
-                          <LabelForm
-                            boardPublicId={boardPublicId || ""}
-                            refetch={refetchBoard}
-                            isEdit={true}
-                            entityId={item.publicId}
-                          />
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  </DropdownMenuItem>
-                )
-              })}
-              <DropdownMenuItem>
-                <Dialog>
-                  <DialogTrigger onClick={(event) => {
-                    event.stopPropagation();
-                  }}>
-                    <Button
-                      className="flex w-full items-center rounded-[5px] p-2 px-2 text-[12px] text-dark-900 hover:bg-light-200 dark:hover:bg-dark-300"
-                    >
-                      <HiMiniPlus size={20} className="pr-1.5" />
-                      {!labelPublicIds.length ? (
-                        t`Labels`
-                      ) : (
-                        <>
-                          <div
-                            className={
-                              labelPublicIds.length > 1
-                                ? "flex -space-x-[2px] overflow-hidden"
-                                : "flex items-center"
-                            }
-                          >
-                            {labelPublicIds.map((labelPublicId) => {
-                              const label = boardData?.labels.find(
-                                (label) => label.publicId === labelPublicId,
-                              );
-
-                              return (
-                                <>
-                                  <svg
-                                    fill={label?.colourCode ?? "#3730a3"}
-                                    className="h-2 w-2"
-                                    viewBox="0 0 6 6"
-                                    aria-hidden="true"
-                                  >
-                                    <circle cx={3} cy={3} r={3} />
-                                  </svg>
-                                  {labelPublicIds.length === 1 && (
-                                    <div className="ml-1">{label?.name}</div>
-                                  )}
-                                </>
-                              );
-                            })}
-                          </div>
-                          {labelPublicIds.length > 1 && (
-                            <div className="ml-1">
-                              <Trans>{`${labelPublicIds.length} labels`}</Trans>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent onClick={e => e.stopPropagation()}>
-                    <DialogHeader>
-                      <DialogTitle>{t`Create label`}</DialogTitle>
-                    </DialogHeader>
-
-                    <LabelForm boardPublicId={boardPublicId ?? ""} refetch={refetchBoard} />
-                  </DialogContent>
-                </Dialog>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </div>
+            </CheckboxDropdown>
+          </div>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              setValue("position", position === "start" ? "end" : "start");
+            }}
+            className="flex h-auto items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-1.5 py-1 text-left text-xs text-light-800 hover:bg-light-300 focus-visible:outline-none dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500"
+          >
+            {position === "start" ? (
+              <HiOutlineBarsArrowUp size={14} />
+            ) : (
+              <HiOutlineBarsArrowDown size={14} />
+            )}
+          </button>
         </div>
-      </form>
-    </Form >
-    //       <button
-    //         onClick={(e) => {
-    //           e.preventDefault();
-    //           setValue("position", position === "start" ? "end" : "start");
-    //         }}
-    //         className="flex h-auto items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-1.5 py-1 text-left text-xs text-light-800 hover:bg-light-300 focus-visible:outline-none dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500"
-    //       >
-    //         {position === "start" ? (
-    //           <HiOutlineBarsArrowUp size={14} />
-    //         ) : (
-    //           <HiOutlineBarsArrowDown size={14} />
-    //         )}
-    //       </button>
-    //     </div>
-    //   </div>
+      </div>
 
-    //   <div className="mt-5 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
-    //     <Toggle
-    //       label={t`Create another`}
-    //       isChecked={isCreateAnotherEnabled}
-    //       onChange={handleToggleCreateAnother}
-    //     />
+      <div className="mt-5 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
+        <Toggle
+          label={t`Create another`}
+          isChecked={isCreateAnotherEnabled}
+          onChange={handleToggleCreateAnother}
+        />
 
-    //     <div>
-    //       <Button
-    //         type="submit"
-    //         disabled={title.length === 0 || createCard.isPending}
-    //       >
-    //         {t`Create card`}
-    //       </Button>
-    //     </div>
-    //   </div>
-    // </form>
+        <div>
+          <Button
+            type="submit"
+            disabled={title.length === 0 || createCard.isPending}
+          >
+            {t`Create card`}
+          </Button>
+        </div>
+      </div>
+    </form>
   );
 }

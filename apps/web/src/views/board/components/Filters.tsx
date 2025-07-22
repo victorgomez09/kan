@@ -7,7 +7,8 @@ import {
 } from "react-icons/hi2";
 import { IoFilterOutline } from "react-icons/io5";
 
-import { Button } from "~/components/ui/button";
+import Avatar from "~/components/Avatar";
+import Button from "~/components/Button";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
 import LabelIcon from "~/components/LabelIcon";
 import {
@@ -65,16 +66,16 @@ const Filters = ({
       member.user?.email ?? null,
     ),
     selected: !!router.query.members?.includes(member.publicId),
-    // leftIcon: (
-    // <Avatar
-    //   size="xs"
-    //   name={member.user?.name ?? ""}
-    //   imageUrl={
-    //     member.user?.image ? getAvatarUrl(member.user.image) : undefined
-    //   }
-    //   email={member.user?.email ?? ""}
-    // />
-    // ),
+    leftIcon: (
+      <Avatar
+        size="xs"
+        name={member.user?.name ?? ""}
+        imageUrl={
+          member.user?.image ? getAvatarUrl(member.user.image) : undefined
+        }
+        email={member.user?.email ?? ""}
+      />
+    ),
   }));
 
   const formattedLabels = labels.map((label) => ({
@@ -87,13 +88,13 @@ const Filters = ({
   const groups = [
     ...(formattedMembers.length
       ? [
-        {
-          key: "members",
-          label: t`Members`,
-          icon: <HiOutlineUserCircle size={16} />,
-          items: formattedMembers,
-        },
-      ]
+          {
+            key: "members",
+            label: t`Members`,
+            icon: <HiOutlineUserCircle size={16} />,
+            items: formattedMembers,
+          },
+        ]
       : []),
     {
       key: "labels",
@@ -143,7 +144,7 @@ const Filters = ({
         <Button
           variant="secondary"
           disabled={isLoading}
-        // iconLeft={<IoFilterOutline />}
+          iconLeft={<IoFilterOutline />}
         >
           {t`Filter`}
         </Button>

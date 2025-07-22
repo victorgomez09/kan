@@ -1,14 +1,17 @@
-import type { UpdateBoardInput } from "@kan/api/types";
-import { t } from "@lingui/core/macro";
-import { keepPreviousData } from "@tanstack/react-query";
+import type { DropResult } from "react-beautiful-dnd";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/router";
+import { t } from "@lingui/core/macro";
+import { keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import type { DropResult } from "react-beautiful-dnd";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { useForm } from "react-hook-form";
 import { HiOutlinePlusSmall, HiOutlineSquare3Stack3D } from "react-icons/hi2";
+
+import type { UpdateBoardInput } from "@kan/api/types";
+
+import Button from "~/components/Button";
 import { DeleteLabelConfirmation } from "~/components/DeleteLabelConfirmation";
 import { LabelForm } from "~/components/LabelForm";
 import Modal from "~/components/modal";
@@ -16,14 +19,13 @@ import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
 import PatternedBackground from "~/components/PatternedBackground";
 import { StrictModeDroppable as Droppable } from "~/components/StrictModeDroppable";
-import { Button } from "~/components/ui/button";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import { formatToArray } from "~/utils/helpers";
 import BoardDropdown from "./components/BoardDropdown";
-import ListCard from "./components/ListCard";
+import Card from "./components/Card";
 import { DeleteBoardConfirmation } from "./components/DeleteBoardConfirmation";
 import { DeleteListConfirmation } from "./components/DeleteListConfirmation";
 import Filters from "./components/Filters";
@@ -237,7 +239,8 @@ export default function BoardPage() {
       <PageHead
         title={`${boardData?.name ?? t`Board`} | ${workspace.name ?? t`Workspace`}`}
       />
-      <div className="relative flex flex-col h-[calc(100vh-3em)]">
+      <div className="relative flex h-full flex-col">
+        <PatternedBackground />
         <div className="z-10 flex w-full flex-col justify-between p-6 md:flex-row md:p-8">
           {isLoading && !boardData && (
             <div className="flex space-x-2">
@@ -254,12 +257,12 @@ export default function BoardPage() {
                 type="text"
                 {...register("name")}
                 onBlur={handleSubmit(onSubmit)}
-                className="block border-0 bg-transparent p-0 py-0 font-bold leading-[2.3rem] tracking-tight focus:ring-0 focus-visible:outline-none sm:text-[1.2rem]"
+                className="block border-0 bg-transparent p-0 py-0 font-bold leading-[2.3rem] tracking-tight text-neutral-900 focus:ring-0 focus-visible:outline-none dark:text-dark-1000 sm:text-[1.2rem]"
               />
             </form>
           )}
           {!boardData && !isLoading && (
-            <p className="order-2 block p-0 py-0 font-bold leading-[2.3rem] tracking-tight sm:text-[1.2rem] md:order-1">
+            <p className="order-2 block p-0 py-0 font-bold leading-[2.3rem] tracking-tight text-neutral-900 dark:text-dark-1000 sm:text-[1.2rem] md:order-1">
               {t`Board not found`}
             </p>
           )}
@@ -286,23 +289,24 @@ export default function BoardPage() {
               isLoading={!boardData}
             />
             <Button
+              iconLeft={
+                <HiOutlinePlusSmall
+                  className="-mr-0.5 h-5 w-5"
+                  aria-hidden="true"
+                />
+              }
               onClick={() => {
                 if (boardId) openNewListForm(boardId);
               }}
               disabled={!boardData}
             >
-              <HiOutlinePlusSmall
-                className="-mr-0.5 h-5 w-5"
-                aria-hidden="true"
-              />
               {t`New list`}
             </Button>
             <BoardDropdown isLoading={!boardData} />
           </div>
         </div>
 
-        {/* className="scrollbar-w-none scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] z-0 flex-1 overflow-y-hidden overflow-x-auto overscroll-contain scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300" */}
-        <div className="h-full">
+        <div className="scrollbar-w-none scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] z-0 flex-1 overflow-y-hidden overflow-x-scroll overscroll-contain scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300">
           {isLoading ? (
             <div className="ml-[2rem] flex">
               <div className="0 mr-5 h-[500px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-100" />
@@ -314,8 +318,8 @@ export default function BoardPage() {
               {boardData.lists.length === 0 ? (
                 <div className="z-10 flex h-full w-full flex-col items-center justify-center space-y-8 pb-[150px]">
                   <div className="flex flex-col items-center">
-                    <HiOutlineSquare3Stack3D className="h-10 w-10 dark:text-dark-800" />
-                    <p className="mb-2 mt-4 text-[14px] font-bold dark:text-dark-950">
+                    <HiOutlineSquare3Stack3D className="h-10 w-10 text-light-800 dark:text-dark-800" />
+                    <p className="mb-2 mt-4 text-[14px] font-bold text-light-1000 dark:text-dark-950">
                       {t`No lists`}
                     </p>
                     <p className="text-[14px] text-light-900 dark:text-dark-900">
@@ -381,17 +385,18 @@ export default function BoardPage() {
                                           }}
                                           key={card.publicId}
                                           href={`/cards/${card.publicId}`}
-                                          className={`mb-2 flex !cursor-pointer flex-col ${card.publicId.startsWith(
-                                            "PLACEHOLDER",
-                                          )
-                                            ? "pointer-events-none"
-                                            : ""
-                                            }`}
+                                          className={`mb-2 flex !cursor-pointer flex-col ${
+                                            card.publicId.startsWith(
+                                              "PLACEHOLDER",
+                                            )
+                                              ? "pointer-events-none"
+                                              : ""
+                                          }`}
                                           ref={provided.innerRef}
                                           {...provided.draggableProps}
                                           {...provided.dragHandleProps}
                                         >
-                                          <ListCard
+                                          <Card
                                             title={card.title}
                                             labels={card.labels}
                                             members={card.members}

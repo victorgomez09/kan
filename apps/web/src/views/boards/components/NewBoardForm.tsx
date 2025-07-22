@@ -6,7 +6,7 @@ import { HiXMark } from "react-icons/hi2";
 import { z } from "zod";
 
 import type { Template } from "./TemplateBoards";
-import {Button} from "~/components/ui/button";
+import Button from "~/components/Button";
 import Input from "~/components/Input";
 import Toggle from "~/components/Toggle";
 import { useModal } from "~/providers/modal";

@@ -2,7 +2,7 @@ import { t } from "@lingui/core/macro";
 import { useEffect, useState } from "react";
 import { HiOutlineEye, HiOutlineEyeSlash } from "react-icons/hi2";
 
-import {Button} from "~/components/ui/button";
+import Button from "~/components/Button";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";

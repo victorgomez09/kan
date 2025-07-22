@@ -5,7 +5,7 @@ import { twMerge } from "tailwind-merge";
 import { authClient } from "@kan/auth/client";
 
 import Avatar from "~/components/Avatar";
-import {Button} from "~/components/ui/button";
+import Button from "~/components/Button";
 import Dropdown from "~/components/Dropdown";
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
