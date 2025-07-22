@@ -2,10 +2,8 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-
 import type { NewCardInput } from "@kan/api/types";
 import { generateUID } from "@kan/shared/utils";
-
 import { Pencil } from "lucide-react";
 import { HiMiniPlus } from "react-icons/hi2";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
@@ -45,8 +43,7 @@ export function NewCardForm({
   queryParams,
 }: NewCardFormProps) {
   const { showPopup } = usePopup();
-  const { closeModal, openModal } = useModal();
-
+  const { closeModal } = useModal();
   const utils = api.useUtils();
 
   const form =
@@ -389,7 +386,7 @@ export function NewCardForm({
                         }}>
                           <Button variant="secondary" size="sm"><Pencil className="size-3" /></Button>
                         </DialogTrigger>
-                        <DialogContent onClick={e => e.stopPropagation()}>
+                        <DialogContent onClick={e => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
                           <DialogHeader>
                             <DialogTitle>{t`Edit label`}</DialogTitle>
                           </DialogHeader>
@@ -468,9 +465,30 @@ export function NewCardForm({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <Button
+            type="submit"
+            disabled={title.length === 0 || createCard.isPending}
+          >
+            {t`Create card`}
+          </Button>
         </div>
+
+        {/* <Button
+          onClick={(e) => {
+            e.preventDefault();
+            setValue("position", position === "start" ? "end" : "start");
+          }}
+          className="flex h-auto items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-1.5 py-1 text-left text-xs text-light-800 hover:bg-light-300 focus-visible:outline-none dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500"
+        >
+          {position === "start" ? (
+            <HiOutlineBarsArrowUp size={14} />
+          ) : (
+            <HiOutlineBarsArrowDown size={14} />
+          )}
+        </Button> */}
       </form>
-    </Form >
+    </Form>
     //       <button
     //         onClick={(e) => {
     //           e.preventDefault();
@@ -493,16 +511,5 @@ export function NewCardForm({
     //       isChecked={isCreateAnotherEnabled}
     //       onChange={handleToggleCreateAnother}
     //     />
-
-    //     <div>
-    //       <Button
-    //         type="submit"
-    //         disabled={title.length === 0 || createCard.isPending}
-    //       >
-    //         {t`Create card`}
-    //       </Button>
-    //     </div>
-    //   </div>
-    // </form>
   );
 }

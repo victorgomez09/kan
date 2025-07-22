@@ -21,6 +21,8 @@ import { useModal } from "~/providers/modal";
 import { api } from "~/utils/api";
 import { formatToArray } from "~/utils/helpers";
 import { NewCardForm } from "./NewCardForm";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "~/components/ui/alert-dialog";
+import { DeleteListConfirmation } from "./DeleteListConfirmation";
 
 interface ListProps {
   children: ReactNode;
@@ -127,27 +129,47 @@ export default function List({
                   </CardTitle>
                 )}
 
-                <div className="flex items-center">
-                  <Button
-                    onClick={() => openNewCardForm(list.publicId)}
-                    variant="secondary"
-                  >
-                    <HiOutlinePlusSmall
-                      className="h-5 w-5 text-dark-900"
-                      aria-hidden="true"
-                    />
-                  </Button>
+                <div className="flex items-center gap-1">
+                  <Dialog>
+                    <DialogTrigger className="flex items-center gap-1 cursor-pointer">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="cursor-pointer"
+                      >
+                        <HiOutlinePlusSmall
+                          className="h-5 w-5 text-dark-900"
+                          aria-hidden="true"
+                        />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t`New card`}</DialogTitle>
+                      </DialogHeader>
+
+                      <NewCardForm boardPublicId={boardId ?? ""}
+                        listPublicId={list.publicId}
+                        queryParams={queryParams} />
+                    </DialogContent>
+                  </Dialog>
+
                   <div className="relative mr-1 inline-block">
                     <DropdownMenu>
-                      <DropdownMenuTrigger><HiEllipsisHorizontal className="h-5 w-5 text-dark-900" /></DropdownMenuTrigger>
+                      <DropdownMenuTrigger>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="cursor-pointer"
+                        >
+                          <HiEllipsisHorizontal className="h-5 w-5 text-dark-900" />
+                        </Button>
+                      </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        {/* onClick={() => openNewCardForm(list.publicId)} */}
                         <DropdownMenuItem className="flex items-center gap-1" onSelect={(e) => e.preventDefault()}>
                           <Dialog>
-                            <DialogTrigger>
-                              <Button variant="outline">
-                                <HiOutlineSquaresPlus className="h-[18px] w-[18px] text-dark-900" /> {t`Add a card`}
-                              </Button>
+                            <DialogTrigger className="flex items-center gap-1 cursor-pointer">
+                              <HiOutlineSquaresPlus className="h-[18px] w-[18px] text-dark-900" /> {t`Add a card`}
                             </DialogTrigger>
                             <DialogContent>
                               <DialogHeader>
@@ -159,13 +181,28 @@ export default function List({
                                 queryParams={queryParams} />
                             </DialogContent>
                           </Dialog>
-
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="flex items-center gap-1" onClick={() => handleOpenDeleteListConfirmation}>
-                          <HiOutlineTrash className="h-[18px] w-[18px] text-dark-900" /> {t`Delete list`}
+                        <DropdownMenuItem className="flex items-center gap-1" onSelect={(e) => e.preventDefault()}>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <div className="flex items-center gap-1 cursor-pointer">
+                                <HiOutlineTrash className="h-[18px] w-[18px] text-dark-900" />{t`Delete list`}
+                              </div>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure you want to delete this list?</AlertDialogTitle>
+                                <AlertDialogDescription>This action can't be undone.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <DeleteListConfirmation
+                                listPublicId={list.publicId}
+                                queryParams={queryParams}
+                              />
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </DropdownMenuItem>
-                        <DropdownMenuItem>Team</DropdownMenuItem>
-                        <DropdownMenuItem>Subscription</DropdownMenuItem>
+                        {/* <DropdownMenuItem>Team</DropdownMenuItem>
+                        <DropdownMenuItem>Subscription</DropdownMenuItem> */}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

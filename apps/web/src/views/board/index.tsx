@@ -420,19 +420,6 @@ export default function BoardPage() {
           {modalContentType === "DELETE_BOARD" && (
             <DeleteBoardConfirmation boardPublicId={boardId ?? ""} />
           )}
-          {modalContentType === "DELETE_LIST" && (
-            <DeleteListConfirmation
-              listPublicId={selectedPublicListId}
-              queryParams={queryParams}
-            />
-          )}
-          {modalContentType === "NEW_CARD" && (
-            <NewCardForm
-              boardPublicId={boardId ?? ""}
-              listPublicId={selectedPublicListId}
-              queryParams={queryParams}
-            />
-          )}
           {modalContentType === "NEW_LIST" && (
             <NewListForm
               boardPublicId={boardId ?? ""}
@@ -448,12 +435,6 @@ export default function BoardPage() {
               boardPublicId={boardId ?? ""}
               refetch={refetchBoard}
               isEdit
-            />
-          )}
-          {modalContentType === "DELETE_LABEL" && (
-            <DeleteLabelConfirmation
-              refetch={refetchBoard}
-              labelPublicId={entityId}
             />
           )}
           {modalContentType === "UPDATE_BOARD_SLUG" && (

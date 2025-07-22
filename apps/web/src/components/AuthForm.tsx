@@ -1,8 +1,9 @@
-import type { SocialProvider } from "better-auth/social-providers";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { authClient } from "@kan/auth/client";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
+import type { SocialProvider } from "better-auth/social-providers";
 import { env } from "next-runtime-env";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -26,11 +27,8 @@ import {
 import { SiRoblox, SiZoom } from "react-icons/si";
 import { TbBrandKick } from "react-icons/tb";
 import { z } from "zod";
-
-import { authClient } from "@kan/auth/client";
-
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
 import { Button } from "~/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { usePopup } from "~/providers/popup";
 

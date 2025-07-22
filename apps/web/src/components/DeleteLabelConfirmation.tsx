@@ -1,7 +1,10 @@
-import {Button} from "~/components/ui/button";
+import { Button } from "~/components/ui/button";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { t } from "@lingui/core/macro";
 
 export function DeleteLabelConfirmation({
   labelPublicId,
@@ -24,28 +27,31 @@ export function DeleteLabelConfirmation({
   });
 
   const handleDeleteLabel = () => {
-    closeModal();
     deleteLabelMutation.mutate({
       labelPublicId,
     });
   };
 
   return (
-    <div className="p-5">
-      <div className="flex w-full flex-col justify-between pb-4">
-        <h2 className="text-md pb-4 font-medium text-neutral-900 dark:text-dark-1000">
-          Are you sure you want to delete this label?
-        </h2>
-        <p className="text-sm font-medium text-light-900 dark:text-dark-900">
-          {"This action can't be undone."}
-        </p>
-      </div>
-      <div className="mt-5 flex justify-end space-x-2 sm:mt-6">
-        <Button variant="secondary" onClick={() => closeModal()}>
-          Cancel
+    <AlertDialog>
+      <AlertDialogTrigger onClick={(event) => {
+        event.stopPropagation();
+      }}>
+        <Button
+          variant="secondary"
+        >
+          {t`Delete`}
         </Button>
-        <Button onClick={handleDeleteLabel}>Delete</Button>
-      </div>
-    </div>
+      </AlertDialogTrigger>
+      <AlertDialogContent onClick={e => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure you want to delete this label?</AlertDialogTitle>
+          <AlertDialogDescription>This action can't be undone.</AlertDialogDescription>
+        </AlertDialogHeader>
+
+        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogAction onClick={() => handleDeleteLabel()}>Delete</AlertDialogAction>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

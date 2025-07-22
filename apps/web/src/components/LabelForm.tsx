@@ -1,3 +1,4 @@
+import { t } from "@lingui/core/macro";
 import { colours } from "@kan/shared/constants";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -5,6 +6,9 @@ import { Input } from "~/components/ui/input";
 import { api } from "~/utils/api";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import { DeleteLabelConfirmation } from "./DeleteLabelConfirmation";
 
 interface LabelFormInput {
   name: string;
@@ -36,6 +40,11 @@ export function LabelForm({
       enabled: isEdit && !!entityId,
     },
   );
+  const utils = api.useUtils();
+
+  const refetchBoard = async () => {
+    if (boardPublicId) await utils.board.byId.refetch({ boardPublicId: boardPublicId });
+  };
 
   const form =
     useForm<LabelFormInput>({
@@ -164,6 +173,21 @@ export function LabelForm({
             }
           />
         )} */}
+
+        <div className="space-x-2">
+          {isEdit && (
+            <DeleteLabelConfirmation
+              refetch={refetchBoard}
+              labelPublicId={entityId || ""}
+            />
+          )}
+          <Button
+            type="submit"
+            isLoading={updateLabel.isPending || createLabel.isPending}
+          >
+            {isEdit ? t`Update label` : t`Create label`}
+          </Button>
+        </div>
       </form>
     </Form>
 
