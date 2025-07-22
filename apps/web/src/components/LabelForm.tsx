@@ -2,8 +2,6 @@ import { colours } from "@kan/shared/constants";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "~/components/ui/input";
-// import { Toggle } from "~/components/ui/toggle";
-import { useModal } from "~/providers/modal";
 import { api } from "~/utils/api";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -23,16 +21,16 @@ export function LabelForm({
   boardPublicId,
   refetch,
   isEdit,
+  entityId
 }: {
   boardPublicId: string;
   refetch: () => void;
   isEdit?: boolean;
+  entityId?: string;
 }) {
-  const { closeModal, entityId, openModal } = useModal();
-
   const label = api.label.byPublicId.useQuery(
     {
-      labelPublicId: entityId,
+      labelPublicId: entityId || "",
     },
     {
       enabled: isEdit && !!entityId,
@@ -44,7 +42,7 @@ export function LabelForm({
       values: {
         name: isEdit && label.data?.name ? label.data.name : "",
         colour: (isEdit && label.data?.colourCode
-          ? colours.find((c) => c.code === label.data?.colourCode)
+          ? colours.find((c) => c.code === label.data.colourCode)
           : colours[0]) as Colour,
         isCreateAnotherEnabled: false,
       },
@@ -59,7 +57,7 @@ export function LabelForm({
       );
       try {
         refetch();
-        if (!isCreateAnotherEnabled) closeModal();
+        // if (!isCreateAnotherEnabled) closeModal();
         form.reset({
           name: "",
           colour: colours[(currentColourIndex + 1) % colours.length],
@@ -74,7 +72,7 @@ export function LabelForm({
   const updateLabel = api.label.update.useMutation({
     onSuccess: () => {
       refetch();
-      closeModal();
+      // closeModal();
       form.reset({
         name: "",
         colour: colours[0],
@@ -132,10 +130,9 @@ export function LabelForm({
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                {JSON.stringify(field.value)}
-                <Select onValueChange={field.onChange} defaultValue={field.value.code}>
+                <Select onValueChange={field.onChange} value={field.value.code}>
                   <SelectTrigger>
-                    <SelectValue placeholder={field.value.name} />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>

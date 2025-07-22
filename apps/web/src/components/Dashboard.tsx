@@ -1,17 +1,6 @@
-import Link from "next/link";
 import { useRef, useState } from "react";
-import {
-  TbLayoutSidebarLeftCollapse,
-  TbLayoutSidebarLeftExpand,
-  TbLayoutSidebarRightCollapse,
-  TbLayoutSidebarRightExpand,
-} from "react-icons/tb";
-
 import { authClient } from "@kan/auth/client";
-
 import { useClickOutside } from "~/hooks/useClickOutside";
-import { useTheme } from "~/providers/theme";
-import FeedbackButton from "./FeedbackButton";
 import SideNavigation from "./SideNavigation";
 import { SidebarProvider, SidebarTrigger } from "./ui/sidebar";
 
@@ -59,7 +48,7 @@ export default function Dashboard({
         isLoading={sessionLoading}
       />
 
-      <main className="p-2">
+      <main className="p-2 w-full h-full">
         <SidebarTrigger />
         {children}
       </main>

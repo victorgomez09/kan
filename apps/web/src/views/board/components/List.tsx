@@ -1,7 +1,8 @@
 import { t } from "@lingui/core/macro";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/router";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
+import type { ReactNode } from "react";
 import { Draggable } from "react-beautiful-dnd";
 import { useForm } from "react-hook-form";
 import {
@@ -78,7 +79,7 @@ export default function List({
   });
 
   const onSubmit = async (values: FormValues) => {
-    await updateList.mutate({
+    updateList.mutate({
       listPublicId: values.listPublicId,
       name: values.name,
     });
@@ -100,7 +101,7 @@ export default function List({
           {...provided.draggableProps}
           {...provided.dragHandleProps}
         >
-          <Card className="mr-5 h-fit min-w-[18rem] max-w-[18rem]">
+          <Card className="mr-5 !p-2 h-fit min-w-[18rem] max-w-[18rem]">
             <CardHeader>
               <div className="flex justify-between items-center">
                 {editable ? (
@@ -172,7 +173,7 @@ export default function List({
               </div>
             </CardHeader>
 
-            <CardContent>
+            <CardContent className="p-2">
               {children}
             </CardContent>
           </Card>

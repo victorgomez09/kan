@@ -2,31 +2,26 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import {
-  HiOutlineBarsArrowDown,
-  HiOutlineBarsArrowUp,
-  HiXMark,
-} from "react-icons/hi2";
 
 import type { NewCardInput } from "@kan/api/types";
 import { generateUID } from "@kan/shared/utils";
 
-import { Button } from "~/components/ui/button";
+import { Pencil } from "lucide-react";
+import { HiMiniPlus } from "react-icons/hi2";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
-import Editor from "~/components/Editor";
+import { LabelForm } from "~/components/LabelForm";
 import LabelIcon from "~/components/LabelIcon";
-import Toggle from "~/components/Toggle";
-import { useModal } from "~/providers/modal";
-import { usePopup } from "~/providers/popup";
-import { api } from "~/utils/api";
-import { formatMemberDisplayName, getAvatarUrl } from "~/utils/helpers";
+import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
-import { Pencil } from "lucide-react";
-import { LabelForm } from "~/components/LabelForm";
+import { useModal } from "~/providers/modal";
+import { usePopup } from "~/providers/popup";
+import { api } from "~/utils/api";
+import { formatMemberDisplayName } from "~/utils/helpers";
 
 type NewCardFormInput = NewCardInput & {
   isCreateAnotherEnabled: boolean;
@@ -162,6 +157,7 @@ export function NewCardForm({
       value: label.name,
       leftIcon: <LabelIcon colourCode={label.colourCode} />,
       selected: labelPublicIds.includes(label.publicId),
+      publicId: label.publicId
     })) ?? [];
 
   const formattedLists =
@@ -324,79 +320,157 @@ export function NewCardForm({
             </Button>
           </CheckboxDropdown>
 
-          <CheckboxDropdown
-            items={formattedLabels}
-            handleSelect={(_groupKey, item) => handleSelectLabels(item.key)}
-            handleEdit={
-              <Dialog>
-                <DialogTrigger onClick={(event) => {
-                  // event.preventDefault();
-                  event.stopPropagation();
-                }}>
-                  <Button variant="secondary" size="sm"><Pencil className="size-3" /></Button>
-                </DialogTrigger>
-                <DialogContent onClick={e => e.stopPropagation()}>
-                  <DialogHeader>
-                    <DialogTitle>{t`Edit label`}</DialogTitle>
-                  </DialogHeader>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Button className="flex h-full w-full items-center" variant="secondary">
+                {!labelPublicIds.length ? (
+                  t`Labels`
+                ) : (
+                  <>
+                    <div
+                      className={
+                        labelPublicIds.length > 1
+                          ? "flex -space-x-[2px] overflow-hidden"
+                          : "flex items-center"
+                      }
+                    >
+                      {labelPublicIds.map((labelPublicId) => {
+                        const label = boardData?.labels.find(
+                          (label) => label.publicId === labelPublicId,
+                        );
 
-                  <LabelForm
-                    boardPublicId={boardPublicId ?? ""}
-                    refetch={refetchBoard}
-                    isEdit={true}
-                  />
-                </DialogContent>
-              </Dialog>
-            }
-            handleCreate={() => openModal("NEW_LABEL")}
-            createNewItemLabel={t`Create new label`}
-          >
-            <Button className="flex h-full w-full items-center" variant="secondary">
-              {!labelPublicIds.length ? (
-                t`Labels`
-              ) : (
-                <>
-                  <div
-                    className={
-                      labelPublicIds.length > 1
-                        ? "flex -space-x-[2px] overflow-hidden"
-                        : "flex items-center"
-                    }
-                  >
-                    {labelPublicIds.map((labelPublicId) => {
-                      const label = boardData?.labels.find(
-                        (label) => label.publicId === labelPublicId,
-                      );
+                        return (
+                          <>
+                            <svg
+                              fill={label?.colourCode ?? "#3730a3"}
+                              className="h-2 w-2"
+                              viewBox="0 0 6 6"
+                              aria-hidden="true"
+                            >
+                              <circle cx={3} cy={3} r={3} />
+                            </svg>
+                            {labelPublicIds.length === 1 && (
+                              <div className="ml-1">{label?.name}</div>
+                            )}
+                          </>
+                        );
+                      })}
+                    </div>
+                    {labelPublicIds.length > 1 && (
+                      <div className="ml-1">
+                        <Trans>{`${labelPublicIds.length} labels`}</Trans>
+                      </div>
+                    )}
+                  </>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {formattedLabels?.map((item, key) => {
+                return (
+                  <DropdownMenuItem key={key}>
+                    <div
+                      className="group flex items-center justify-between w-full"
+                    >
+                      <Checkbox
+                        id={item.key}
+                        name={item.key}
+                        onClick={(event) => { handleSelectLabels(item.key); event.stopPropagation(); }}
+                        checked={item.selected} />
+                      <label
+                        htmlFor={item.key}
+                        className="ml-3 text-[12px] text-dark-900"
+                      >
+                        {item.value}
+                      </label>
+                      <Dialog>
+                        <DialogTrigger onClick={(event) => {
+                          event.stopPropagation();
+                        }}>
+                          <Button variant="secondary" size="sm"><Pencil className="size-3" /></Button>
+                        </DialogTrigger>
+                        <DialogContent onClick={e => e.stopPropagation()}>
+                          <DialogHeader>
+                            <DialogTitle>{t`Edit label`}</DialogTitle>
+                          </DialogHeader>
 
-                      return (
+                          <LabelForm
+                            boardPublicId={boardPublicId || ""}
+                            refetch={refetchBoard}
+                            isEdit={true}
+                            entityId={item.publicId}
+                          />
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </DropdownMenuItem>
+                )
+              })}
+              <DropdownMenuItem>
+                <Dialog>
+                  <DialogTrigger onClick={(event) => {
+                    event.stopPropagation();
+                  }}>
+                    <Button
+                      className="flex w-full items-center rounded-[5px] p-2 px-2 text-[12px] text-dark-900 hover:bg-light-200 dark:hover:bg-dark-300"
+                    >
+                      <HiMiniPlus size={20} className="pr-1.5" />
+                      {!labelPublicIds.length ? (
+                        t`Labels`
+                      ) : (
                         <>
-                          <svg
-                            fill={label?.colourCode ?? "#3730a3"}
-                            className="h-2 w-2"
-                            viewBox="0 0 6 6"
-                            aria-hidden="true"
+                          <div
+                            className={
+                              labelPublicIds.length > 1
+                                ? "flex -space-x-[2px] overflow-hidden"
+                                : "flex items-center"
+                            }
                           >
-                            <circle cx={3} cy={3} r={3} />
-                          </svg>
-                          {labelPublicIds.length === 1 && (
-                            <div className="ml-1">{label?.name}</div>
+                            {labelPublicIds.map((labelPublicId) => {
+                              const label = boardData?.labels.find(
+                                (label) => label.publicId === labelPublicId,
+                              );
+
+                              return (
+                                <>
+                                  <svg
+                                    fill={label?.colourCode ?? "#3730a3"}
+                                    className="h-2 w-2"
+                                    viewBox="0 0 6 6"
+                                    aria-hidden="true"
+                                  >
+                                    <circle cx={3} cy={3} r={3} />
+                                  </svg>
+                                  {labelPublicIds.length === 1 && (
+                                    <div className="ml-1">{label?.name}</div>
+                                  )}
+                                </>
+                              );
+                            })}
+                          </div>
+                          {labelPublicIds.length > 1 && (
+                            <div className="ml-1">
+                              <Trans>{`${labelPublicIds.length} labels`}</Trans>
+                            </div>
                           )}
                         </>
-                      );
-                    })}
-                  </div>
-                  {labelPublicIds.length > 1 && (
-                    <div className="ml-1">
-                      <Trans>{`${labelPublicIds.length} labels`}</Trans>
-                    </div>
-                  )}
-                </>
-              )}
-            </Button>
-          </CheckboxDropdown>
+                      )}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent onClick={e => e.stopPropagation()}>
+                    <DialogHeader>
+                      <DialogTitle>{t`Create label`}</DialogTitle>
+                    </DialogHeader>
+
+                    <LabelForm boardPublicId={boardPublicId ?? ""} refetch={refetchBoard} />
+                  </DialogContent>
+                </Dialog>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </form>
-    </Form>
+    </Form >
     //       <button
     //         onClick={(e) => {
     //           e.preventDefault();
