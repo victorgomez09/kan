@@ -143,7 +143,7 @@ export default function List({
                         />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="min-w-6/12">
                       <DialogHeader>
                         <DialogTitle>{t`New card`}</DialogTitle>
                       </DialogHeader>

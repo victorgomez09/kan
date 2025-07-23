@@ -9,26 +9,23 @@ import type { DropResult } from "react-beautiful-dnd";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { useForm } from "react-hook-form";
 import { HiOutlinePlusSmall, HiOutlineSquare3Stack3D } from "react-icons/hi2";
-import { DeleteLabelConfirmation } from "~/components/DeleteLabelConfirmation";
 import { LabelForm } from "~/components/LabelForm";
 import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
-import PatternedBackground from "~/components/PatternedBackground";
 import { StrictModeDroppable as Droppable } from "~/components/StrictModeDroppable";
 import { Button } from "~/components/ui/button";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import { formatToArray } from "~/utils/helpers";
 import BoardDropdown from "./components/BoardDropdown";
-import ListCard from "./components/ListCard";
 import { DeleteBoardConfirmation } from "./components/DeleteBoardConfirmation";
-import { DeleteListConfirmation } from "./components/DeleteListConfirmation";
 import Filters from "./components/Filters";
 import List from "./components/List";
-import { NewCardForm } from "./components/NewCardForm";
+import ListCard from "./components/ListCard";
 import { NewListForm } from "./components/NewListForm";
 import UpdateBoardSlugButton from "./components/UpdateBoardSlugButton";
 import { UpdateBoardSlugForm } from "./components/UpdateBoardSlugForm";
@@ -42,7 +39,7 @@ export default function BoardPage() {
   const utils = api.useUtils();
   const { showPopup } = usePopup();
   const { workspace } = useWorkspace();
-  const { openModal, modalContentType, entityId } = useModal();
+  const { openModal, modalContentType } = useModal();
   const [selectedPublicListId, setSelectedPublicListId] =
     useState<PublicListId>("");
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -200,11 +197,6 @@ export default function BoardPage() {
     }
   }, [isSuccess, boardData, setValue]);
 
-  const openNewListForm = (publicBoardId: string) => {
-    openModal("NEW_LIST");
-    setSelectedPublicListId(publicBoardId);
-  };
-
   const onDragEnd = ({
     source,
     destination,
@@ -237,7 +229,7 @@ export default function BoardPage() {
       <PageHead
         title={`${boardData?.name ?? t`Board`} | ${workspace.name ?? t`Workspace`}`}
       />
-      <div className="relative flex flex-col h-[calc(100vh-3em)]">
+      <div className="relative flex flex-col h-[calc(100vh-3em)] max-w-[calc(100%-16em)]">
         <div className="z-10 flex w-full flex-col justify-between p-6 md:flex-row md:p-8">
           {isLoading && !boardData && (
             <div className="flex space-x-2">
@@ -285,24 +277,34 @@ export default function BoardPage() {
               position="left"
               isLoading={!boardData}
             />
-            <Button
-              onClick={() => {
-                if (boardId) openNewListForm(boardId);
-              }}
-              disabled={!boardData}
-            >
-              <HiOutlinePlusSmall
-                className="-mr-0.5 h-5 w-5"
-                aria-hidden="true"
-              />
-              {t`New list`}
-            </Button>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  <HiOutlinePlusSmall
+                    className="-mr-0.5 h-5 w-5"
+                    aria-hidden="true"
+                  />
+                  {t`New list`}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t`New list`}</DialogTitle>
+                </DialogHeader>
+
+                <NewListForm
+                  boardPublicId={boardId ?? ""}
+                  queryParams={queryParams}
+                />
+              </DialogContent>
+            </Dialog>
             <BoardDropdown isLoading={!boardData} />
           </div>
         </div>
 
         {/* className="scrollbar-w-none scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] z-0 flex-1 overflow-y-hidden overflow-x-auto overscroll-contain scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300" */}
-        <div className="h-full">
+        <div className="h-full w-full overflow-x-auto">
           {isLoading ? (
             <div className="ml-[2rem] flex">
               <div className="0 mr-5 h-[500px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-100" />
@@ -322,13 +324,23 @@ export default function BoardPage() {
                       {t`Get started by creating a new list`}
                     </p>
                   </div>
-                  <Button
-                    onClick={() => {
-                      if (boardId) openNewListForm(boardId);
-                    }}
-                  >
-                    {t`Create new list`}
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="cursor-pointer">
+                        {t`Create new list`}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t`New list`}</DialogTitle>
+                      </DialogHeader>
+
+                      <NewListForm
+                        boardPublicId={boardId ?? ""}
+                        queryParams={queryParams}
+                      />
+                    </DialogContent>
+                  </Dialog>
                 </div>
               ) : (
                 <DragDropContext onDragEnd={onDragEnd}>
@@ -419,12 +431,6 @@ export default function BoardPage() {
         <Modal modalSize={modalContentType === "NEW_CARD" ? "md" : "sm"}>
           {modalContentType === "DELETE_BOARD" && (
             <DeleteBoardConfirmation boardPublicId={boardId ?? ""} />
-          )}
-          {modalContentType === "NEW_LIST" && (
-            <NewListForm
-              boardPublicId={boardId ?? ""}
-              queryParams={queryParams}
-            />
           )}
           {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
           {modalContentType === "NEW_LABEL" && (

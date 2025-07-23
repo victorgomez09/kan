@@ -41,18 +41,17 @@ export default function Dashboard({
   });
 
   return (
-    // <div className="flex h-screen flex-col items-center md:min-w-[800px]">
     <SidebarProvider>
       <SideNavigation
         user={{ email: session?.user.email, image: session?.user.image }}
         isLoading={sessionLoading}
       />
 
-      <main className="p-2 w-full h-full">
+      <main className="p-2 w-full h-full overflow-none">
         <SidebarTrigger />
+
         {children}
       </main>
     </SidebarProvider>
-    // </div>
   );
 }

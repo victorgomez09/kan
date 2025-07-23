@@ -1,15 +1,14 @@
+import type { NewListInput } from "@kan/api/types";
+import { generateUID } from "@kan/shared/utils";
 import { t } from "@lingui/core/macro";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { HiXMark } from "react-icons/hi2";
-
-import type { NewListInput } from "@kan/api/types";
-import { generateUID } from "@kan/shared/utils";
-
-import {Button} from "~/components/ui/button";
-import Input from "~/components/Input";
 import Toggle from "~/components/Toggle";
-import { useModal } from "~/providers/modal";
+import { Button } from "~/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 
@@ -30,12 +29,11 @@ export function NewListForm({
   boardPublicId: string;
   queryParams: QueryParams;
 }) {
-  const { closeModal } = useModal();
   const { showPopup } = usePopup();
 
   const utils = api.useUtils();
 
-  const { register, handleSubmit, reset, setValue, watch } =
+  const form =
     useForm<NewListFormInput>({
       defaultValues: {
         name: "",
@@ -44,7 +42,7 @@ export function NewListForm({
       },
     });
 
-  const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
+  const isCreateAnotherEnabled = form.watch("isCreateAnotherEnabled");
 
   const createList = api.list.create.useMutation({
     onMutate: async (args) => {
@@ -91,9 +89,8 @@ export function NewListForm({
   }, []);
 
   const onSubmit = (data: NewListInput) => {
-    const isCreateAnotherEnabled = watch("isCreateAnotherEnabled");
-    if (!isCreateAnotherEnabled) closeModal();
-    reset({
+    const isCreateAnotherEnabled = form.watch("isCreateAnotherEnabled");
+    form.reset({
       name: "",
       isCreateAnotherEnabled,
     });
@@ -105,49 +102,86 @@ export function NewListForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="px-5 pt-5">
-        <div className="flex w-full items-center justify-between pb-4">
-          <h2 className="text-sm font-bold text-neutral-900 dark:text-dark-1000">
-            {t`New list`}
-          </h2>
-          <button
-            type="button"
-            className="rounded p-1 hover:bg-light-200 focus:outline-none dark:hover:bg-dark-300"
-            onClick={(e) => {
-              e.preventDefault();
-              closeModal();
-            }}
-          >
-            <HiXMark size={18} className="text-light-900 dark:text-dark-900" />
-          </button>
-        </div>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4"
+        id="login-form"
+      >
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input placeholder={t`Enter your email adress`} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-        <Input
-          id="list-name"
-          placeholder={t`List name`}
-          {...register("name")}
-          onKeyDown={async (e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              await handleSubmit(onSubmit)();
+        <div className="mt-12 flex items-center justify-end gap-2 border-t border-light-600 px-5 pb-5 pt-5">
+          {/* <Toggle
+            label={t`Create another`}
+            isChecked={isCreateAnotherEnabled}
+            onChange={() =>
+              form.setValue("isCreateAnotherEnabled", !isCreateAnotherEnabled)
             }
-          }}
-        />
-      </div>
-      <div className="mt-12 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
-        <Toggle
-          label={t`Create another`}
-          isChecked={isCreateAnotherEnabled}
-          onChange={() =>
-            setValue("isCreateAnotherEnabled", !isCreateAnotherEnabled)
-          }
-        />
+          /> */}
+          <div className="flex items-center gap-2 me-4">
+            <Label htmlFor="create-other">{t`Create another`}</Label>
+            <Switch
+              id="create-other"
+              checked={isCreateAnotherEnabled}
+              onCheckedChange={() => form.setValue("isCreateAnotherEnabled", !isCreateAnotherEnabled)}
+              aria-readonly
+            />
+          </div>
 
-        <div>
-          <Button type="submit">{t`Create list`}</Button>
+          <Button type="submit">{t`Create card`}</Button>
         </div>
-      </div>
-    </form>
+      </form>
+    </Form>
+    // <form onSubmit={handleSubmit(onSubmit)}>
+    //   <div className="px-5 pt-5">
+    //     <div className="flex w-full items-center justify-between pb-4">
+    //       <button
+    //         type="button"
+    //         className="rounded p-1 hover:bg-light-200 focus:outline-none dark:hover:bg-dark-300"
+    //         onClick={(e) => {
+    //           e.preventDefault();
+    //         }}
+    //       >
+    //         <HiXMark size={18} className="text-light-900 dark:text-dark-900" />
+    //       </button>
+    //     </div>
+
+    //     <Input
+    //       id="list-name"
+    //       placeholder={t`List name`}
+    //       {...register("name")}
+    //       onKeyDown={async (e) => {
+    //         if (e.key === "Enter") {
+    //           e.preventDefault();
+    //           await handleSubmit(onSubmit)();
+    //         }
+    //       }}
+    //     />
+    //   </div>
+    //   <div className="mt-12 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
+    //     <Toggle
+    //       label={t`Create another`}
+    //       isChecked={isCreateAnotherEnabled}
+    //       onChange={() => 
+    //         setValue("isCreateAnotherEnabled", !isCreateAnotherEnabled)
+    //       }
+    //     />
+
+    //     <div>
+    //       <Button type="submit">{t`Create list`}</Button>
+    //     </div>
+    //   </div>
+    // </form>
   );
 }

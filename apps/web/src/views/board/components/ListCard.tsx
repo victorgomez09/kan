@@ -26,7 +26,7 @@ const ListCard = ({
   return (
     <Card className="px-2 py-4 gap-2 bg-background">
       <CardHeader className="px-2">
-        <CardTitle>
+        <CardTitle className="truncate">
           {title}
         </CardTitle>
       </CardHeader>

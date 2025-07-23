@@ -367,7 +367,7 @@ export function NewCardForm({
                 return (
                   <DropdownMenuItem key={key}>
                     <div
-                      className="group flex items-center justify-between w-full"
+                      className="group flex items-center justify-between gap-2 w-full"
                     >
                       <Checkbox
                         id={item.key}
@@ -408,8 +408,8 @@ export function NewCardForm({
                   <DialogTrigger onClick={(event) => {
                     event.stopPropagation();
                   }}>
-                    <Button
-                      className="flex w-full items-center rounded-[5px] p-2 px-2 text-[12px] text-dark-900 hover:bg-light-200 dark:hover:bg-dark-300"
+                    <div
+                      className="flex w-full items-center"
                     >
                       <HiMiniPlus size={20} className="pr-1.5" />
                       {!labelPublicIds.length ? (
@@ -452,7 +452,7 @@ export function NewCardForm({
                           )}
                         </>
                       )}
-                    </Button>
+                    </div>
                   </DialogTrigger>
                   <DialogContent onClick={e => e.stopPropagation()}>
                     <DialogHeader>
