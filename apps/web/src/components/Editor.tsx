@@ -33,6 +33,7 @@ import {
 } from "react-icons/hi2";
 import { twMerge } from "tailwind-merge";
 import tippy from "tippy.js";
+import { Card, CardContent } from "./ui/card";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -347,8 +348,9 @@ export default function Editor({
   );
 
   return (
-    <div ref={containerRef}>
-      <style jsx global>{`
+    <Card ref={containerRef} className="w-full">
+      <CardContent>
+        <style jsx global>{`
         .tiptap p.is-empty::before {
           color: #adb5bd;
           content: attr(data-placeholder);
@@ -360,12 +362,13 @@ export default function Editor({
           margin: 0 0 1rem 0 !important;
         }
       `}</style>
-      {!readOnly && editor && <EditorBubbleMenu editor={editor} />}
-      <EditorContent
-        editor={editor}
-        className="prose dark:prose-invert prose-sm max-w-none overflow-y-auto [&_blockquote]:!text-xs [&_h1]:!text-lg [&_h2]:!text-base [&_h3]:!text-sm [&_ol]:!text-xs [&_p.is-empty::before]:text-dark-800 [&_p.is-empty::before]:dark:text-dark-800 [&_p]:!text-sm [&_p]:text-black [&_p]:dark:text-white [&_ul]:!text-xs"
-      />
-    </div>
+        {!readOnly && editor && <EditorBubbleMenu editor={editor} />}
+        <EditorContent
+          editor={editor}
+          className="prose dark:prose-invert prose-sm max-w-none overflow-y-auto [&_blockquote]:!text-xs [&_h1]:!text-lg [&_h2]:!text-base [&_h3]:!text-sm [&_ol]:!text-xs [&_p.is-empty::before]:text-dark-800 [&_p.is-empty::before]:dark:text-dark-800 [&_p]:!text-sm [&_p]:text-black [&_p]:dark:text-white [&_ul]:!text-xs"
+        />
+      </CardContent>
+    </Card>
   );
 }
 
@@ -402,6 +405,7 @@ function EditorBubbleMenu({ editor }: { editor: TiptapEditor | null }) {
       active: editor?.isActive("code"),
     },
   ];
+
   return (
     <BubbleMenu editor={editor}>
       <div className="flex items-center gap-2 rounded-md border border-light-600 bg-light-50 p-1 dark:border-dark-600 dark:bg-dark-50">

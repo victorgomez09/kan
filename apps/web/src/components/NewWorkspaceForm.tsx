@@ -2,20 +2,18 @@ import { t } from "@lingui/core/macro";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { HiXMark } from "react-icons/hi2";
-
-import {Button} from "~/components/ui/button";
-import Input from "~/components/Input";
-import { useModal } from "~/providers/modal";
+import { Button } from "~/components/ui/button";
 import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
+import { Form } from "./ui/form";
+import { Input } from "./ui/input";
 
 interface FormValues {
   name: string;
 }
 
 export function NewWorkspaceForm() {
-  const { closeModal } = useModal();
   const { showPopup } = usePopup();
   const { switchWorkspace } = useWorkspace();
   const { register, handleSubmit } = useForm<FormValues>();
@@ -32,7 +30,6 @@ export function NewWorkspaceForm() {
           slug: values.slug,
           plan: values.plan,
         });
-        closeModal();
       }
     },
     onError: () => {
@@ -68,7 +65,6 @@ export function NewWorkspaceForm() {
             className="rounded p-1 hover:bg-light-200 focus:outline-none dark:hover:bg-dark-300"
             onClick={(e) => {
               e.preventDefault();
-              closeModal();
             }}
           >
             <HiXMark size={18} className="text-light-900 dark:text-dark-900" />

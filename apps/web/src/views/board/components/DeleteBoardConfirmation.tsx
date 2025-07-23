@@ -14,7 +14,6 @@ export function DeleteBoardConfirmation({
 
   const deleteBoard = api.board.delete.useMutation({
     onSuccess: () => {
-      closeModal();
       router.push(`/boards`);
     },
   });

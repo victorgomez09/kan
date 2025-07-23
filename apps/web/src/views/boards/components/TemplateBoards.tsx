@@ -1,6 +1,7 @@
 import { t } from "@lingui/core/macro";
 import { useEffect, useRef, useState } from "react";
 import { HiCheckCircle } from "react-icons/hi2";
+import { Card } from "~/components/ui/card";
 
 export interface Template {
   id: string;
@@ -93,8 +94,6 @@ export default function TemplateBoards({
   setCurrentBoard: (board: Template | null) => void;
   showTemplates: boolean;
 }) {
-  const [showFade, setShowFade] = useState(false);
-  const [showTopFade, setShowTopFade] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const templates = getTemplates();
@@ -103,11 +102,6 @@ export default function TemplateBoards({
     if (!scrollRef.current) return;
 
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 5;
-    const isAtTop = scrollTop <= 5;
-
-    setShowFade(!isAtBottom);
-    setShowTopFade(!isAtTop);
   };
 
   useEffect(() => {
@@ -146,22 +140,21 @@ export default function TemplateBoards({
   }
 
   return (
-    <div className="px-5 pt-4">
+    <div className="mt-4 w-full">
       <div className="relative">
         <div
           ref={scrollRef}
           className="scroll-container -mr-2 flex max-h-[200px] flex-col gap-3 overflow-y-auto pr-2 pt-0.5"
         >
           {templates.map((template) => (
-            <label
+            <Card
               key={template.id}
               data-template-id={template.id}
               onClick={() => handleBoardSelect(template.id)}
-              className={`scroll-container relative flex cursor-pointer rounded-lg border p-3 transition-all hover:bg-light-100 dark:hover:bg-dark-200 ${
-                currentBoard?.id === template.id
-                  ? "border-light-700 bg-light-100 ring-1 ring-inset ring-light-700 dark:border-dark-700 dark:bg-dark-200 dark:ring-dark-700"
-                  : "border-light-600 dark:border-dark-600"
-              }`}
+              className={`scroll-container relative flex cursor-pointer rounded-lg border p-3 transition-all hover:border-primary ${currentBoard?.id === template.id
+                ? "border-primary"
+                : ""
+                }`}
             >
               <div className="flex-1">
                 <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -176,15 +169,9 @@ export default function TemplateBoards({
                   <HiCheckCircle className="h-5 w-5" />
                 </div>
               )}
-            </label>
+            </Card>
           ))}
         </div>
-        {showTopFade && (
-          <div className="pointer-events-none absolute left-0 right-0 top-0 h-6 bg-gradient-to-b from-white/80 to-transparent dark:from-dark-100/80" />
-        )}
-        {showFade && (
-          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white/80 to-transparent dark:from-dark-100/80" />
-        )}
       </div>
     </div>
   );

@@ -1,7 +1,5 @@
 import { t } from "@lingui/core/macro";
 import { HiArrowDownTray, HiOutlinePlusSmall } from "react-icons/hi2";
-
-import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
 import { useModal } from "~/providers/modal";
@@ -10,12 +8,10 @@ import { BoardsList } from "./components/BoardsList";
 import { ImportBoardsForm } from "./components/ImportBoardsForm";
 import { NewBoardForm } from "./components/NewBoardForm";
 import { Button } from "~/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 
 export default function BoardsPage() {
-  const { openModal, modalContentType } = useModal();
   const { workspace, hasLoaded } = useWorkspace();
-
-  if (hasLoaded && !workspace.publicId) openModal("NEW_WORKSPACE");
 
   return (
     <>
@@ -29,26 +25,37 @@ export default function BoardsPage() {
             <Button
               type="button"
               variant="secondary"
-              onClick={() => openModal("IMPORT_BOARDS")}
+            // onClick={() => openModal("IMPORT_BOARDS")}
             >
               <HiArrowDownTray aria-hidden="true" className="h-4 w-4" />
               {t`Import`}
             </Button>
-            <Button
-              type="button"
-              onClick={() => openModal("NEW_BOARD")}
-            >
-              <HiOutlinePlusSmall aria-hidden="true" className="h-4 w-4" />
-              {t`New`}
-            </Button>
+            <Dialog>
+              <DialogTrigger>
+                <Button
+                  type="button"
+                >
+                  <HiOutlinePlusSmall aria-hidden="true" className="h-4 w-4" />
+                  {t`New`}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t`New board`}</DialogTitle>
+                </DialogHeader>
+
+                <NewBoardForm />
+              </DialogContent>
+            </Dialog>
+
           </div>
         </div>
 
-        <Modal>
+        {/* <Modal>
           {modalContentType === "NEW_BOARD" && <NewBoardForm />}
           {modalContentType === "IMPORT_BOARDS" && <ImportBoardsForm />}
           {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
-        </Modal>
+        </Modal> */}
 
         <div className="flex h-full flex-row">
           <BoardsList />

@@ -4,8 +4,6 @@ import { t } from "@lingui/core/macro";
 import { keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { HiLink } from "react-icons/hi2";
-
-import Modal from "~/components/modal";
 import { PageHead } from "~/components/PageHead";
 import PatternedBackground from "~/components/PatternedBackground";
 import Popup from "~/components/Popup";
@@ -177,13 +175,13 @@ export default function PublicBoardView() {
         </div>
       </div>
       <Popup />
-      <Modal modalSize={"md"} positionFromTop={"sm"}>
+      {/* <Modal modalSize={"md"} positionFromTop={"sm"}>
         <CardModal
           cardPublicId={cardPublicId}
           workspaceSlug={data?.workspace.slug}
           boardSlug={data?.slug}
         />
-      </Modal>
+      </Modal> */}
     </>
   );
 }

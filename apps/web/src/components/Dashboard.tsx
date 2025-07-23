@@ -1,6 +1,4 @@
-import { useRef, useState } from "react";
 import { authClient } from "@kan/auth/client";
-import { useClickOutside } from "~/hooks/useClickOutside";
 import SideNavigation from "./SideNavigation";
 import { SidebarProvider, SidebarTrigger } from "./ui/sidebar";
 

@@ -326,7 +326,8 @@ export default function CardPage() {
                             user={activity.user!}
                             createdAt={activity.createdAt.toISOString()}
                             comment={activity.comment?.comment}
-                            isEdited={!!activity.comment?.updatedAt}
+                            isEdited={!!activity.comment?.updatedAt
+                            }
                             isAuthor={activity.comment?.createdBy === data?.user.id}
                             isAdmin={workspace.role === "admin"}
                           />

@@ -1,19 +1,15 @@
-import { useRouter } from "next/router";
 import { t } from "@lingui/core/macro";
+import { useRouter } from "next/router";
 import {
   HiMiniXMark,
   HiOutlineTag,
   HiOutlineUserCircle,
 } from "react-icons/hi2";
-import { IoFilterOutline } from "react-icons/io5";
-
-import { Button } from "~/components/ui/button";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
-import LabelIcon from "~/components/LabelIcon";
+import { Button } from "~/components/ui/button";
 import {
   formatMemberDisplayName,
-  formatToArray,
-  getAvatarUrl,
+  formatToArray
 } from "~/utils/helpers";
 
 interface Member {
@@ -81,7 +77,7 @@ const Filters = ({
     key: label.publicId,
     value: label.name,
     selected: !!router.query.labels?.includes(label.publicId),
-    leftIcon: <LabelIcon colourCode={label.colourCode} />,
+    // leftIcon: <LabelIcon colourCode={label.colourCode} />,
   }));
 
   const groups = [

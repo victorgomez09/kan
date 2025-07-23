@@ -1,11 +1,12 @@
 import { t } from "@lingui/core/macro";
 import { useEffect, useState } from "react";
 import { HiOutlineEye, HiOutlineEyeSlash } from "react-icons/hi2";
-
-import {Button} from "~/components/ui/button";
-import CheckboxDropdown from "~/components/CheckboxDropdown";
+import { Button } from "~/components/ui/button";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import { Label } from "~/components/ui/label";
+import { Checkbox } from "~/components/ui/checkbox";
 
 interface QueryParams {
   boardPublicId: string;
@@ -60,38 +61,55 @@ const VisibilityButton = ({
   });
 
   return (
-    <div className="relative">
-      <CheckboxDropdown
-        items={[
-          {
-            key: "public",
-            value: t`Public`,
-            selected: isPublic,
-          },
-          {
-            key: "private",
-            value: t`Private`,
-            selected: !isPublic,
-          },
-        ]}
-        handleSelect={(_g, i) => {
-          setStateVisibility(isPublic ? "private" : "public");
-          updateBoardVisibility.mutate({
-            visibility: i.key as "public" | "private",
-            boardPublicId,
-          });
-        }}
-        menuSpacing="md"
-      >
+    <DropdownMenu>
+      <DropdownMenuTrigger>
         <Button
           variant="secondary"
-          iconLeft={isPublic ? <HiOutlineEye /> : <HiOutlineEyeSlash />}
           disabled={isLoading || !isAdmin}
+          className="flex items-center gap-2"
         >
+          {isPublic ? <HiOutlineEye /> : <HiOutlineEyeSlash />}
           {t`Visibility`}
         </Button>
-      </CheckboxDropdown>
-    </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem className="flex items-center gap-2">
+          <Checkbox
+            id="public"
+            onClick={() => {
+              setStateVisibility(isPublic ? "private" : "public");
+              updateBoardVisibility.mutate({
+                visibility: "public",
+                boardPublicId,
+              });
+            }}
+            checked={isPublic} />
+          <Label
+            htmlFor="public"
+          >
+            {t`Public`}
+          </Label>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem className="flex items-center gap-2">
+          <Checkbox
+            id="private"
+            onClick={() => {
+              setStateVisibility(isPublic ? "private" : "public");
+              updateBoardVisibility.mutate({
+                visibility: "private",
+                boardPublicId,
+              });
+            }}
+            checked={!isPublic} />
+          <Label
+            htmlFor="private"
+          >
+            {t`Public`}
+          </Label>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

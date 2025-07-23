@@ -9,21 +9,16 @@ import { useEffect, useState } from "react";
 import type { DropResult } from "react-beautiful-dnd";
 import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { useForm } from "react-hook-form";
-import { HiOutlinePlusSmall, HiOutlineSquare3Stack3D } from "react-icons/hi2";
-import { LabelForm } from "~/components/LabelForm";
-import Modal from "~/components/modal";
+import { HiEllipsisHorizontal, HiLink, HiOutlinePlusSmall, HiOutlineSquare3Stack3D, HiOutlineTrash } from "react-icons/hi2";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
 import { StrictModeDroppable as Droppable } from "~/components/StrictModeDroppable";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
-import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import { formatToArray } from "~/utils/helpers";
-import BoardDropdown from "./components/BoardDropdown";
-import { DeleteBoardConfirmation } from "./components/DeleteBoardConfirmation";
 import Filters from "./components/Filters";
 import List from "./components/List";
 import ListCard from "./components/ListCard";
@@ -31,6 +26,9 @@ import { NewListForm } from "./components/NewListForm";
 import { UpdateBoardSlugForm } from "./components/UpdateBoardSlugForm";
 import VisibilityButton from "./components/VisibilityButton";
 import { LinkIcon } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from "~/components/ui/alert-dialog";
+import { AlertDialogHeader, AlertDialogFooter } from "~/components/ui/alert-dialog";
 
 type PublicListId = string;
 
@@ -40,14 +38,18 @@ export default function BoardPage() {
   const utils = api.useUtils();
   const { showPopup } = usePopup();
   const { workspace } = useWorkspace();
-  const { openModal, modalContentType } = useModal();
-  const [selectedPublicListId, setSelectedPublicListId] =
+  const [_selectedPublicListId, setSelectedPublicListId] =
     useState<PublicListId>("");
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   const boardId = params?.boardId.length ? params.boardId[0] : null;
 
   const updateBoard = api.board.update.useMutation();
+  const deleteBoard = api.board.delete.useMutation({
+    onSuccess: () => {
+      router.push(`/boards`);
+    },
+  });
 
   const { register, handleSubmit, setValue } = useForm<UpdateBoardInput>({
     values: {
@@ -258,6 +260,7 @@ export default function BoardPage() {
           )}
 
           <div className="order-1 mb-4 flex items-center justify-end space-x-2 md:order-2 md:mb-0">
+            {/* BOARD LINK */}
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="secondary">
@@ -291,6 +294,8 @@ export default function BoardPage() {
                 />
               </DialogContent>
             </Dialog>
+
+            {/* VISIBILITY */}
             <VisibilityButton
               visibility={boardData?.visibility ?? "private"}
               boardPublicId={boardId ?? ""}
@@ -299,6 +304,7 @@ export default function BoardPage() {
               isLoading={!boardData}
               isAdmin={workspace.role === "admin"}
             />
+
             <Filters
               labels={boardData?.labels ?? []}
               members={boardData?.workspace.members ?? []}
@@ -327,11 +333,63 @@ export default function BoardPage() {
                 />
               </DialogContent>
             </Dialog>
-            <BoardDropdown isLoading={!boardData} />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant="secondary">
+                  <HiEllipsisHorizontal className="size-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={(event) => event.preventDefault()}>
+                  <Dialog>
+                    <DialogTrigger className="flex items-center gap-2">
+                      <HiLink className="h-[16px] w-[16px]" />
+                      {t`Edit board URL`}
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t`Edit board URL`}</DialogTitle>
+                      </DialogHeader>
+
+                      <UpdateBoardSlugForm
+                        boardPublicId={boardId ?? ""}
+                        workspaceSlug={workspace.slug ?? ""}
+                        boardSlug={boardData?.slug ?? ""}
+                        queryParams={queryParams}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(event) => event.preventDefault()}>
+                  <AlertDialog>
+                    <AlertDialogTrigger className="flex items-center gap-1">
+                      <HiOutlineTrash className="h-[16px] w-[16px]" />
+                      {t`Delete board`}
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure you want to delete this board?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {"This action can't be undone."}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{t`Cancel`}</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => {
+                          deleteBoard.mutate({
+                            boardPublicId: boardId!
+                          })
+                        }}>{t`Delete`}</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
-        {/* className="scrollbar-w-none scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] z-0 flex-1 overflow-y-hidden overflow-x-auto overscroll-contain scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300" */}
         <div className="h-full flex-1 w-full overflow-x-auto">
           {isLoading ? (
             <div className="ml-[2rem] flex">
@@ -458,10 +516,7 @@ export default function BoardPage() {
           ) : null}
         </div>
       </div>
-      <Modal modalSize={modalContentType === "NEW_CARD" ? "md" : "sm"}>
-        {modalContentType === "DELETE_BOARD" && (
-          <DeleteBoardConfirmation boardPublicId={boardId ?? ""} />
-        )}
+      {/* <Modal modalSize={modalContentType === "NEW_CARD" ? "md" : "sm"}>
         {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
         {modalContentType === "NEW_LABEL" && (
           <LabelForm boardPublicId={boardId ?? ""} refetch={refetchBoard} />
@@ -473,15 +528,7 @@ export default function BoardPage() {
             isEdit
           />
         )}
-        {modalContentType === "UPDATE_BOARD_SLUG" && (
-          <UpdateBoardSlugForm
-            boardPublicId={boardId ?? ""}
-            workspaceSlug={workspace.slug ?? ""}
-            boardSlug={boardData?.slug ?? ""}
-            queryParams={queryParams}
-          />
-        )}
-      </Modal>
+      </Modal> */}
     </>
   );
 }

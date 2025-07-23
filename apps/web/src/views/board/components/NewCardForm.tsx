@@ -7,8 +7,6 @@ import { generateUID } from "@kan/shared/utils";
 import { Pencil } from "lucide-react";
 import { HiMiniPlus } from "react-icons/hi2";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
-import { LabelForm } from "~/components/LabelForm";
-import LabelIcon from "~/components/LabelIcon";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
@@ -20,6 +18,7 @@ import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 import { formatMemberDisplayName } from "~/utils/helpers";
+import { LabelForm } from "~/components/LabelForm";
 
 type NewCardFormInput = NewCardInput & {
   isCreateAnotherEnabled: boolean;
@@ -152,7 +151,7 @@ export function NewCardForm({
     boardData?.labels.map((label) => ({
       key: label.publicId,
       value: label.name,
-      leftIcon: <LabelIcon colourCode={label.colourCode} />,
+      // leftIcon: <LabelIcon colourCode={label.colourCode} />,
       selected: labelPublicIds.includes(label.publicId),
       publicId: label.publicId
     })) ?? [];
