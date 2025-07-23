@@ -41,17 +41,19 @@ export default function Dashboard({
   });
 
   return (
-    <SidebarProvider>
-      <SideNavigation
-        user={{ email: session?.user.email, image: session?.user.image }}
-        isLoading={sessionLoading}
-      />
+    <div className="flex">
+      <SidebarProvider>
+        <SideNavigation
+          user={{ email: session?.user.email, image: session?.user.image }}
+          isLoading={sessionLoading}
+        />
 
-      <main className="p-2 w-full h-full overflow-none">
-        <SidebarTrigger />
+        <main className="flex-grow p-2 w-full h-full max-w-[calc(100%-16em)] overflow-none">
+          <SidebarTrigger />
 
-        {children}
-      </main>
-    </SidebarProvider>
+          {children}
+        </main>
+      </SidebarProvider>
+    </div>
   );
 }

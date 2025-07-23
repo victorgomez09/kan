@@ -229,8 +229,8 @@ export default function BoardPage() {
       <PageHead
         title={`${boardData?.name ?? t`Board`} | ${workspace.name ?? t`Workspace`}`}
       />
-      <div className="relative flex flex-col h-[calc(100vh-3em)] max-w-[calc(100%-16em)]">
-        <div className="z-10 flex w-full flex-col justify-between p-6 md:flex-row md:p-8">
+      <div className="flex flex-col h-[calc(100vh-3em)] w-full">
+        <div className="flex w-full flex-col justify-between p-6 md:flex-row md:p-8">
           {isLoading && !boardData && (
             <div className="flex space-x-2">
               <div className="h-[2.3rem] w-[150px] animate-pulse rounded-[5px] bg-light-200 dark:bg-dark-100" />
@@ -304,7 +304,7 @@ export default function BoardPage() {
         </div>
 
         {/* className="scrollbar-w-none scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-h-[8px] z-0 flex-1 overflow-y-hidden overflow-x-auto overscroll-contain scrollbar scrollbar-track-light-200 scrollbar-thumb-light-400 dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-300" */}
-        <div className="h-full w-full overflow-x-auto">
+        <div className="h-full flex-1 w-full overflow-x-auto">
           {isLoading ? (
             <div className="ml-[2rem] flex">
               <div className="0 mr-5 h-[500px] w-[18rem] animate-pulse rounded-md bg-light-200 dark:bg-dark-100" />
@@ -373,7 +373,7 @@ export default function BoardPage() {
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.droppableProps}
-                                  className="scrollbar-track-rounded-[4px] scrollbar-thumb-rounded-[4px] scrollbar-w-[8px] z-10 h-full max-h-[calc(100vh-265px)] min-h-[2rem] overflow-y-auto pr-1 scrollbar dark:scrollbar-track-dark-100 dark:scrollbar-thumb-dark-600"
+                                  className="sz-10 h-full max-h-[calc(100vh-265px)] min-h-[2rem] overflow-y-auto pr-1"
                                 >
                                   {list.cards.map((card, index) => (
                                     <Draggable
@@ -404,6 +404,7 @@ export default function BoardPage() {
                                           {...provided.dragHandleProps}
                                         >
                                           <ListCard
+                                            key={card.publicId}
                                             title={card.title}
                                             labels={card.labels}
                                             members={card.members}
@@ -428,31 +429,31 @@ export default function BoardPage() {
             </>
           ) : null}
         </div>
-        <Modal modalSize={modalContentType === "NEW_CARD" ? "md" : "sm"}>
-          {modalContentType === "DELETE_BOARD" && (
-            <DeleteBoardConfirmation boardPublicId={boardId ?? ""} />
-          )}
-          {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
-          {modalContentType === "NEW_LABEL" && (
-            <LabelForm boardPublicId={boardId ?? ""} refetch={refetchBoard} />
-          )}
-          {modalContentType === "EDIT_LABEL" && (
-            <LabelForm
-              boardPublicId={boardId ?? ""}
-              refetch={refetchBoard}
-              isEdit
-            />
-          )}
-          {modalContentType === "UPDATE_BOARD_SLUG" && (
-            <UpdateBoardSlugForm
-              boardPublicId={boardId ?? ""}
-              workspaceSlug={workspace.slug ?? ""}
-              boardSlug={boardData?.slug ?? ""}
-              queryParams={queryParams}
-            />
-          )}
-        </Modal>
       </div>
+      <Modal modalSize={modalContentType === "NEW_CARD" ? "md" : "sm"}>
+        {modalContentType === "DELETE_BOARD" && (
+          <DeleteBoardConfirmation boardPublicId={boardId ?? ""} />
+        )}
+        {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
+        {modalContentType === "NEW_LABEL" && (
+          <LabelForm boardPublicId={boardId ?? ""} refetch={refetchBoard} />
+        )}
+        {modalContentType === "EDIT_LABEL" && (
+          <LabelForm
+            boardPublicId={boardId ?? ""}
+            refetch={refetchBoard}
+            isEdit
+          />
+        )}
+        {modalContentType === "UPDATE_BOARD_SLUG" && (
+          <UpdateBoardSlugForm
+            boardPublicId={boardId ?? ""}
+            workspaceSlug={workspace.slug ?? ""}
+            boardSlug={boardData?.slug ?? ""}
+            queryParams={queryParams}
+          />
+        )}
+      </Modal>
     </>
   );
 }
