@@ -305,6 +305,7 @@ export default function BoardPage() {
               isAdmin={workspace.role === "admin"}
             />
 
+            {/* FILTERS */}
             <Filters
               labels={boardData?.labels ?? []}
               members={boardData?.workspace.members ?? []}

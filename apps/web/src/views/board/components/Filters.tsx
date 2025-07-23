@@ -5,8 +5,10 @@ import {
   HiOutlineTag,
   HiOutlineUserCircle,
 } from "react-icons/hi2";
+import { IoFilterOutline } from "react-icons/io5";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
 import { Button } from "~/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import {
   formatMemberDisplayName,
   formatToArray
@@ -84,9 +86,6 @@ const Filters = ({
     ...(formattedMembers.length
       ? [
         {
-          key: "members",
-          label: t`Members`,
-          icon: <HiOutlineUserCircle size={16} />,
           items: formattedMembers,
         },
       ]
@@ -129,35 +128,60 @@ const Filters = ({
   ].length;
 
   return (
-    <div className="relative">
-      <CheckboxDropdown
-        groups={groups}
-        handleSelect={handleSelect}
-        menuSpacing="md"
-        position={position}
-      >
+    <DropdownMenu>
+      <DropdownMenuTrigger>
         <Button
           variant="secondary"
           disabled={isLoading}
-        // iconLeft={<IoFilterOutline />}
+          className="flex items-center gap-2"
         >
+          <IoFilterOutline />
           {t`Filter`}
         </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={(event) => event.preventDefault()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-2">
+              <HiOutlineUserCircle size={16} />
+              {t`Members`}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {formattedMembers.map((user, index) => (
+                <DropdownMenuItem key={index} onClick={() => handleSelect("users", user)}>
+                  {user.value}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem className="flex items-center gap-2">
+        </DropdownMenuItem>
+
         {numOfFilters > 0 && (
-          <button
-            type="button"
-            onClick={clearFilters}
-            aria-label={t`Clear filters`}
-            className="group absolute -right-[8px] -top-[8px] flex h-5 w-5 items-center justify-center rounded-full border-2 border-light-100 bg-light-1000 text-[8px] font-[700] text-light-600 dark:border-dark-50 dark:bg-dark-1000 dark:text-dark-600"
-          >
-            <span className="group-hover:hidden">{numOfFilters}</span>
-            <span className="hidden text-light-50 group-hover:inline dark:text-dark-50">
-              <HiMiniXMark size={12} />
-            </span>
-          </button>
+          <DropdownMenuItem className="flex items-center gap-2">
+            <Button
+              onClick={(event) => clearFilters(event)}
+              aria-label={t`Clear filters`}
+              variant="secondary"
+            >
+              <span className="group-hover:hidden">{numOfFilters}</span>
+              <span className="hidden group-hover:inline">
+                <HiMiniXMark size={12} />
+              </span>
+            </Button>
+          </DropdownMenuItem>
         )}
-      </CheckboxDropdown>
-    </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+    // <CheckboxDropdown
+    //   groups={groups}
+    //   handleSelect={handleSelect}
+    //   menuSpacing="md"
+    //   position={position}
+    // >
+    // </CheckboxDropdown>
   );
 };
 
