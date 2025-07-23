@@ -12,33 +12,10 @@ interface DashboardProps {
 
 export default function Dashboard({
   children,
+  hasRightPanel,
+  rightPanel
 }: DashboardProps) {
   const { data: session, isPending: sessionLoading } = authClient.useSession();
-  const [isSideNavOpen, setIsSideNavOpen] = useState(false);
-  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
-
-  const sideNavRef = useRef<HTMLDivElement>(null);
-  const rightPanelRef = useRef<HTMLDivElement>(null);
-  const sideNavButtonRef = useRef<HTMLButtonElement>(null);
-  const rightPanelButtonRef = useRef<HTMLButtonElement>(null);
-
-  useClickOutside(sideNavRef, (event) => {
-    if (sideNavButtonRef.current?.contains(event.target as Node)) {
-      return;
-    }
-    if (isSideNavOpen) {
-      setIsSideNavOpen(false);
-    }
-  });
-
-  useClickOutside(rightPanelRef, (event) => {
-    if (rightPanelButtonRef.current?.contains(event.target as Node)) {
-      return;
-    }
-    if (isRightPanelOpen) {
-      setIsRightPanelOpen(false);
-    }
-  });
 
   return (
     <div className="flex">
@@ -53,6 +30,8 @@ export default function Dashboard({
 
           {children}
         </main>
+
+        {hasRightPanel && rightPanel}
       </SidebarProvider>
     </div>
   );

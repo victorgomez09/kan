@@ -1,7 +1,9 @@
 import { Menu } from "@headlessui/react";
 import { t } from "@lingui/core/macro";
-
 import CheckboxDropdown from "~/components/CheckboxDropdown";
+import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 
@@ -68,21 +70,42 @@ export default function ListSelector({
           <div className="h-full w-[150px] animate-pulse rounded-[5px] bg-light-300 dark:bg-dark-300" />
         </div>
       ) : (
-        <CheckboxDropdown
-          items={lists}
-          handleSelect={(_, member) => {
-            updateCardList.mutate({
-              cardPublicId,
-              listPublicId: member.key,
-              index: 0,
-            });
-          }}
-          asChild
-        >
-          <Menu.Button className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-200 py-1 pl-2 text-left text-sm text-neutral-900 hover:border-light-300 hover:bg-light-300 dark:border-dark-100 dark:text-dark-1000 dark:hover:border-dark-300 dark:hover:bg-dark-200">
-            {selectedList?.value}
-          </Menu.Button>
-        </CheckboxDropdown>
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Button className="flex h-full w-full items-center" variant="secondary">
+              {t`List`}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {lists?.map((item, key) => {
+              return (
+                <DropdownMenuItem key={key}>
+                  <div
+                    className="group flex items-center justify-between gap-2 w-full"
+                  >
+                    <Checkbox
+                      id={item.key}
+                      name={item.key}
+                      onClick={() => {
+                        updateCardList.mutate({
+                          cardPublicId,
+                          listPublicId: item.key,
+                          index: 0,
+                        });
+                      }}
+                      checked={selectedList?.key === item.key} />
+                    <label
+                      htmlFor={item.key}
+                      className="ml-3"
+                    >
+                      {item.value}
+                    </label>
+                  </div>
+                </DropdownMenuItem>
+              )
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </>
   );

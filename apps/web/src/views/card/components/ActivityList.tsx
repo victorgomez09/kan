@@ -16,7 +16,6 @@ import type { GetCardByIdOutput } from "@kan/api/types";
 import { authClient } from "@kan/auth/client";
 
 import { useLocalisation } from "~/hooks/useLocalisation";
-import Comment from "./Comment";
 
 type ActivityType =
   NonNullable<GetCardByIdOutput>["activities"][number]["type"];
@@ -62,7 +61,7 @@ const getActivityText = ({
   const baseText = ACTIVITY_TYPE_MAP[type as keyof typeof ACTIVITY_TYPE_MAP];
 
   const TextHighlight = ({ children }: { children: React.ReactNode }) => (
-    <span className="font-medium text-light-1000 dark:text-dark-1000">
+    <span className="font-semibold">
       {children}
     </span>
   );
@@ -78,7 +77,7 @@ const getActivityText = ({
   if (type === "card.updated.list" && fromList && toList) {
     return (
       <Trans>
-        moved the card from <TextHighlight>{fromList}</TextHighlight> to
+        moved the card from <TextHighlight>{fromList}</TextHighlight>{' '}to{' '}
         <TextHighlight>{toList}</TextHighlight>
       </Trans>
     );
@@ -151,14 +150,8 @@ const getActivityIcon = (
 
 const ActivityList = ({
   activities,
-  cardPublicId,
-  isLoading,
-  isAdmin,
 }: {
   activities: NonNullable<GetCardByIdOutput>["activities"];
-  cardPublicId: string;
-  isLoading: boolean;
-  isAdmin?: boolean;
 }) => {
   const { data } = authClient.useSession();
   const { locale } = useLocalisation();
@@ -178,23 +171,6 @@ const ActivityList = ({
           label: activity.label?.name ?? null,
         });
 
-        if (activity.type === "card.updated.comment.added")
-          return (
-            <Comment
-              key={activity.publicId}
-              publicId={activity.comment?.publicId}
-              cardPublicId={cardPublicId}
-              name={activity.user?.name ?? ""}
-              email={activity.user?.email ?? ""}
-              isLoading={isLoading}
-              createdAt={activity.createdAt.toISOString()}
-              comment={activity.comment?.comment}
-              isEdited={!!activity.comment?.updatedAt}
-              isAuthor={activity.comment?.createdBy === data?.user.id}
-              isAdmin={isAdmin ?? false}
-            />
-          );
-
         if (!activityText) return null;
 
         return (
@@ -213,7 +189,7 @@ const ActivityList = ({
                   activity.toList?.index,
                 )}
                 isLoading={isLoading}
-              /> */}
+              />  */}
               {index !== activities.length - 1 &&
                 activities[index + 1]?.type !==
                 "card.updated.comment.added" && (
@@ -221,12 +197,12 @@ const ActivityList = ({
                 )}
             </div>
             <p className="text-sm">
-              <span className="font-medium dark:text-dark-1000">{`${activity.user?.name} `}</span>
-              <span className="space-x-1 text-light-900 dark:text-dark-800">
+              <span className="font-semibold">{`${activity.user?.name} `}</span>
+              <span className="font-semibold">
                 {activityText}
               </span>
-              <span className="mx-1 text-light-900 dark:text-dark-800">·</span>
-              <span className="space-x-1 text-light-900 dark:text-dark-800">
+              <span className="mx-1">·</span>
+              <span className="space-x-1">
                 {formatDistanceToNow(new Date(activity.createdAt), {
                   addSuffix: true,
                   locale: currentDateLocale,

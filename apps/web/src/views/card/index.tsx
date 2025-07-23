@@ -1,30 +1,26 @@
+import { t } from "@lingui/core/macro";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { t } from "@lingui/core/macro";
 import { useForm } from "react-hook-form";
 import { IoChevronForwardSharp } from "react-icons/io5";
-
 import Editor from "~/components/Editor";
-import { LabelForm } from "~/components/LabelForm";
 import LabelIcon from "~/components/LabelIcon";
-import Modal from "~/components/modal";
-import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
-import { useModal } from "~/providers/modal";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "~/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
 import { formatMemberDisplayName, getAvatarUrl, getInitialsFromName, inferInitialsFromEmail } from "~/utils/helpers";
-import { DeleteLabelConfirmation } from "../../components/DeleteLabelConfirmation";
 import ActivityList from "./components/ActivityList";
-import { DeleteCardConfirmation } from "./components/DeleteCardConfirmation";
-import { DeleteCommentConfirmation } from "./components/DeleteCommentConfirmation";
-import Dropdown from "./components/Dropdown";
 import LabelSelector from "./components/LabelSelector";
 import ListSelector from "./components/ListSelector";
 import MemberSelector from "./components/MemberSelector";
 import NewCommentForm from "./components/NewCommentForm";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Trash } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import Comment from './components/Comment'
+import { authClient } from "@kan/auth/client";
 
 interface FormValues {
   cardId: string;
@@ -37,9 +33,51 @@ export function CardRightPanel() {
   const cardId = Array.isArray(router.query.cardId)
     ? router.query.cardId[0]
     : router.query.cardId;
+  const utils = api.useUtils();
+  const { showPopup } = usePopup();
 
   const { data: card } = api.card.byId.useQuery({
     cardPublicId: cardId ?? "",
+  });
+
+  const queryParams = {
+    boardPublicId: card?.list.board.publicId ?? "",
+  };
+  const deleteCardMutation = api.card.delete.useMutation({
+    onMutate: async (args) => {
+      await utils.board.byId.cancel();
+
+      const currentState = utils.board.byId.getData(queryParams);
+
+      utils.board.byId.setData(queryParams, (oldBoard) => {
+        if (!oldBoard) return oldBoard;
+
+        const updatedLists = oldBoard.lists.map((list) => {
+          const updatedCards = list.cards.filter(
+            (card) => card.publicId !== args.cardPublicId,
+          );
+          return { ...list, cards: updatedCards };
+        });
+
+        return { ...oldBoard, lists: updatedLists };
+      });
+
+      return { previousState: currentState };
+    },
+    onError: (_error, _newList, context) => {
+      utils.board.byId.setData(queryParams, context?.previousState);
+      showPopup({
+        header: t`Unable to delete card`,
+        message: t`Please try again later, or contact customer support.`,
+        icon: "error",
+      });
+    },
+    onSuccess: () => {
+      router.push(`/boards/${card?.list.board.publicId}`);
+    },
+    onSettled: async () => {
+      await utils.board.byId.invalidate(queryParams);
+    },
   });
 
   const board = card?.list.board;
@@ -101,30 +139,55 @@ export function CardRightPanel() {
     }) ?? [];
 
   return (
-    <div className="h-full w-[360px] border-l-[1px] border-light-600 bg-light-200 p-8 text-light-900 dark:border-dark-400 dark:bg-dark-100 dark:text-dark-900">
-      <div className="mb-4 flex w-full flex-row">
-        <p className="my-2 mb-2 w-[100px] text-sm font-medium">{t`List`}</p>
+    <div className="flex flex-col gap-2 h-full w-[60em] bg-sidebar p-8">
+      <div className="flex flex-col gap-2">
         <ListSelector
           cardPublicId={cardId ?? ""}
           lists={formattedLists}
           isLoading={!card}
         />
-      </div>
-      <div className="mb-4 flex w-full flex-row">
-        <p className="my-2 mb-2 w-[100px] text-sm font-medium">{t`Labels`}</p>
         <LabelSelector
           cardPublicId={cardId ?? ""}
           labels={formattedLabels}
           isLoading={!card}
         />
-      </div>
-      <div className="flex w-full flex-row">
-        <p className="my-2 mb-2 w-[100px] text-sm font-medium">{t`Members`}</p>
         <MemberSelector
           cardPublicId={cardId ?? ""}
           members={formattedMembers}
           isLoading={!card}
         />
+
+        <div className="mt-4">
+          <h2 className="text-md font-medium">
+            {t`Activity`}
+          </h2>
+          <ActivityList
+            activities={card?.activities ?? []}
+          />
+        </div>
+      </div>
+
+      <div className="justify-self-end mt-auto">
+        <AlertDialog>
+          <AlertDialogTrigger>
+            <Button variant="destructive">
+              <Trash className="size-4" />
+              {t`Delete`}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t`Are you sure you want to delete this card?`}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t`This action can't be undone.`}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t`Cancel`}</AlertDialogCancel>
+              <AlertDialogAction onClick={() => deleteCardMutation.mutate({ cardPublicId: card?.publicId ?? "" })}>{t`Delete`}</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
@@ -133,9 +196,9 @@ export function CardRightPanel() {
 export default function CardPage() {
   const router = useRouter();
   const utils = api.useUtils();
-  const { modalContentType, entityId } = useModal();
   const { showPopup } = usePopup();
   const { workspace } = useWorkspace();
+  const { data } = authClient.useSession();
 
   const cardId = Array.isArray(router.query.cardId)
     ? router.query.cardId[0]
@@ -150,7 +213,6 @@ export default function CardPage() {
   };
 
   const board = card?.list.board;
-  const boardId = board?.publicId;
   const activities = card?.activities;
 
   const updateCard = api.card.update.useMutation({
@@ -225,9 +287,6 @@ export default function CardPage() {
                       />
                     </div>
                   </form>
-                  <div className="flex">
-                    <Dropdown />
-                  </div>
                 </>
               )}
               {!card && !isLoading && (
@@ -254,15 +313,26 @@ export default function CardPage() {
                 </div>
                 <div className="border-t-[1px] border-light-600 pt-12 dark:border-dark-400">
                   <h2 className="text-md pb-4 font-medium text-light-900 dark:text-dark-1000">
-                    {t`Activity`}
+                    {t`Comments`}
                   </h2>
-                  <div>
-                    <ActivityList
-                      cardPublicId={cardId}
-                      activities={activities ?? []}
-                      isLoading={!card}
-                      isAdmin={workspace.role === "admin"}
-                    />
+                  <div className="flex flex-col gap-2">
+                    {activities?.map((activity, index) => {
+                      if (activity.type === "card.updated.comment.added") {
+                        return (
+                          <Comment
+                            key={index}
+                            publicId={activity.comment?.publicId}
+                            cardPublicId={card.publicId}
+                            user={activity.user!}
+                            createdAt={activity.createdAt.toISOString()}
+                            comment={activity.comment?.comment}
+                            isEdited={!!activity.comment?.updatedAt}
+                            isAuthor={activity.comment?.createdBy === data?.user.id}
+                            isAdmin={workspace.role === "admin"}
+                          />
+                        );
+                      }
+                    })}
                   </div>
                   <div className="mt-6">
                     <NewCommentForm cardPublicId={cardId} />
@@ -273,7 +343,7 @@ export default function CardPage() {
           </div>
         </div>
 
-        <Modal>
+        {/* <Modal>
           {modalContentType === "NEW_LABEL" && (
             <LabelForm boardPublicId={boardId ?? ""} refetch={refetchCard} />
           )}
@@ -290,12 +360,6 @@ export default function CardPage() {
               labelPublicId={entityId}
             />
           )}
-          {modalContentType === "DELETE_CARD" && (
-            <DeleteCardConfirmation
-              boardPublicId={boardId ?? ""}
-              cardPublicId={cardId}
-            />
-          )}
           {modalContentType === "DELETE_COMMENT" && (
             <DeleteCommentConfirmation
               cardPublicId={cardId}
@@ -303,7 +367,7 @@ export default function CardPage() {
             />
           )}
           {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
-        </Modal>
+        </Modal> */}
       </div>
     </>
   );

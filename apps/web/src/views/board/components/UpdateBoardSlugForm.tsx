@@ -1,15 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { t } from "@lingui/core/macro";
 import { env } from "next-runtime-env";
-import { useEffect } from "react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { HiCheck, HiXMark } from "react-icons/hi2";
 import { z } from "zod";
-
-import {Button} from "~/components/ui/button";
-import Input from "~/components/Input";
+import { Button } from "~/components/ui/button";
+import { ControlGroup, ControlGroupItem } from "~/components/ui/control-group";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
+import { InputBase, InputBaseAdornment, InputBaseControl, InputBaseInput } from "~/components/ui/input-base";
 import { useDebounce } from "~/hooks/useDebounce";
-import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 
@@ -30,7 +30,6 @@ export function UpdateBoardSlugForm({
   boardSlug: string;
   queryParams: QueryParams;
 }) {
-  const { closeModal } = useModal();
   const { showPopup } = usePopup();
   const utils = api.useUtils();
 
@@ -45,15 +44,9 @@ export function UpdateBoardSlugForm({
         message: t`Board URL can only contain letters, numbers, and hyphens`,
       }),
   });
-
   type FormValues = z.infer<typeof schema>;
 
-  const {
-    register,
-    handleSubmit,
-    formState: { isDirty, errors },
-    watch,
-  } = useForm<FormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     values: {
       slug: boardSlug,
@@ -61,8 +54,7 @@ export function UpdateBoardSlugForm({
     mode: "onChange",
   });
 
-  const slug = watch("slug");
-
+  const slug = form.watch("slug");
   const [debouncedSlug] = useDebounce(slug, 500);
 
   const updateBoardSlug = api.board.update.useMutation({
@@ -74,28 +66,19 @@ export function UpdateBoardSlugForm({
       });
     },
     onSettled: async () => {
-      closeModal();
       await utils.board.byId.invalidate(queryParams);
     },
   });
-
   const checkBoardSlugAvailability = api.board.checkSlugAvailability.useQuery(
     {
       boardSlug: debouncedSlug,
       boardPublicId,
     },
     {
-      enabled: !!debouncedSlug && debouncedSlug !== boardSlug && !errors.slug,
+      enabled: !!debouncedSlug && debouncedSlug !== boardSlug && !form.formState.errors.slug,
     },
   );
-
   const isBoardSlugAvailable = checkBoardSlugAvailability.data;
-
-  useEffect(() => {
-    const nameElement: HTMLElement | null =
-      document.querySelector<HTMLElement>("#board-slug");
-    if (nameElement) nameElement.focus();
-  }, []);
 
   const onSubmit = (data: FormValues) => {
     if (!isBoardSlugAvailable) return;
@@ -108,72 +91,62 @@ export function UpdateBoardSlugForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="px-5 pt-5">
-        <div className="flex w-full items-center justify-between pb-4">
-          <h2 className="text-sm font-bold text-neutral-900 dark:text-dark-1000">
-            {t`Edit board URL`}
-          </h2>
-          <button
-            type="button"
-            className="rounded p-1 hover:bg-light-200 focus:outline-none dark:hover:bg-dark-300"
-            onClick={(e) => {
-              e.preventDefault();
-              closeModal();
-            }}
-          >
-            <HiXMark size={18} className="text-light-900 dark:text-dark-900" />
-          </button>
-        </div>
-
-        <Input
-          id="board-slug"
-          {...register("slug")}
-          errorMessage={
-            errors.slug?.message ||
-            (isBoardSlugAvailable?.isReserved
-              ? t`This board URL has already been taken`
-              : undefined)
-          }
-          prefix={`${env("NEXT_PUBLIC_KAN_ENV") === "cloud" ? "kan.bn" : env("NEXT_PUBLIC_BASE_URL")}/${workspaceSlug}/`}
-          onKeyDown={async (e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              await handleSubmit(onSubmit)();
-            }
-          }}
-          iconRight={
-            !!errors.slug?.message || isBoardSlugAvailable?.isReserved ? (
-              <HiXMark className="h-4 w-4 text-red-500" />
-            ) : (
-              <HiCheck className="h-4 w-4 dark:text-dark-1000" />
-            )
-          }
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4"
+      >
+        <FormField
+          control={form.control}
+          name="slug"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <ControlGroup>
+                  <ControlGroupItem>
+                    <InputBase>
+                      <InputBaseAdornment>{`${env("NEXT_PUBLIC_KAN_ENV") === "cloud" ? "kan.bn" : env("NEXT_PUBLIC_BASE_URL")}/${workspaceSlug}/`}</InputBaseAdornment>
+                    </InputBase>
+                  </ControlGroupItem>
+                  <ControlGroupItem>
+                    <InputBase>
+                      <InputBaseControl>
+                        <InputBaseInput {...field} />
+                      </InputBaseControl>
+                    </InputBase>
+                  </ControlGroupItem>
+                </ControlGroup>
+                {/* <Input prefix={`${env("NEXT_PUBLIC_KAN_ENV") === "cloud" ? "kan.bn" : env("NEXT_PUBLIC_BASE_URL")}/${workspaceSlug}/`}  /> */}
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <div className="mt-12 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            href="/settings?edit=workspace_url"
-            onClick={closeModal}
-          >
-            {t`Edit workspace URL`}
-          </Button>
-          <Button
-            type="submit"
-            isLoading={updateBoardSlug.isPending}
-            disabled={
-              !isDirty ||
-              updateBoardSlug.isPending ||
-              errors.slug?.message !== undefined ||
-              isBoardSlugAvailable?.isReserved
-            }
-          >
-            {t`Update`}
-          </Button>
+
+        <div className="flex items-center justify-end">
+          <div className="flex items-center gap-2">
+            <Link
+              href="/settings?edit=workspace_url"
+            >
+              <Button variant="secondary">
+                {t`Edit workspace URL`}
+              </Button>
+            </Link>
+            <Button
+              type="submit"
+              isLoading={updateBoardSlug.isPending}
+              disabled={
+                !form.formState.isDirty ||
+                updateBoardSlug.isPending ||
+                form.formState.errors.slug?.message !== undefined ||
+                isBoardSlugAvailable?.isReserved
+              }
+            >
+              {t`Update`}
+            </Button>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 }

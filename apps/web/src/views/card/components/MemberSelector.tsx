@@ -1,14 +1,13 @@
 import { useRouter } from "next/router";
-import { Menu } from "@headlessui/react";
 import { t } from "@lingui/core/macro";
-import { HiMiniPlus } from "react-icons/hi2";
-
-import CheckboxDropdown from "~/components/CheckboxDropdown";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { getInitialsFromName, inferInitialsFromEmail } from "~/utils/helpers";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 
 interface MemberSelectorProps {
   cardPublicId: string;
@@ -107,36 +106,40 @@ export default function MemberSelector({
           <div className="h-full w-[125px] animate-pulse rounded-[5px] bg-light-300 dark:bg-dark-300" />
         </div>
       ) : (
-        <CheckboxDropdown
-          items={members}
-          handleSelect={(_, member) => {
-            addOrRemoveMember.mutate({
-              cardPublicId,
-              workspaceMemberPublicId: member.key,
-            });
-          }}
-          handleCreate={handleInviteMember}
-          createNewItemLabel={t`Invite member`}
-          asChild
-        >
-          <Menu.Button className="flex h-full w-full items-center rounded-[5px] border-[1px] border-light-200 py-1 pl-2 text-left text-sm text-neutral-900 hover:bg-light-300 dark:border-dark-100 dark:text-dark-1000 dark:hover:border-dark-300 dark:hover:bg-dark-200">
-            {selectedMembers.length ? (
-              <div className="isolate flex justify-end -space-x-1 overflow-hidden">
-                {selectedMembers.map(({ value, imageUrl }) => (
-                  <Avatar>
-                    <AvatarImage src={imageUrl} alt={value} />
-                    <AvatarFallback>{getInitials(value, value)}</AvatarFallback>
-                  </Avatar>
-                ))}
-              </div>
-            ) : (
-              <>
-                <HiMiniPlus size={22} className="pr-2" />
-                {t`Add member`}
-              </>
-            )}
-          </Menu.Button>
-        </CheckboxDropdown>
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Button className="flex h-full w-full items-center" variant="secondary">
+              {t`Members`}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {members?.map((item, key) => {
+              return (
+                <DropdownMenuItem key={key}>
+                  <div
+                    className="group flex items-center justify-between gap-2 w-full"
+                  >
+                    <Checkbox
+                      id={item.key}
+                      name={item.key}
+                      onClick={() => {
+                        addOrRemoveMember.mutate({
+                          cardPublicId,
+                          workspaceMemberPublicId: item.key,
+                        })
+                      }}
+                      checked={selectedMembers[key]?.key === item.key} />
+                    <Avatar>
+                      <AvatarImage src={item.imageUrl} alt={item.value} />
+                      <AvatarFallback>{getInitials(item.value, item.value)}</AvatarFallback>
+                    </Avatar>
+                    {item.value}
+                  </div>
+                </DropdownMenuItem>
+              )
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </>
   );

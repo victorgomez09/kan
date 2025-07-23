@@ -489,27 +489,5 @@ export function NewCardForm({
         </Button> */}
       </form>
     </Form>
-    //       <button
-    //         onClick={(e) => {
-    //           e.preventDefault();
-    //           setValue("position", position === "start" ? "end" : "start");
-    //         }}
-    //         className="flex h-auto items-center rounded-[5px] border-[1px] border-light-600 bg-light-200 px-1.5 py-1 text-left text-xs text-light-800 hover:bg-light-300 focus-visible:outline-none dark:border-dark-600 dark:bg-dark-400 dark:text-dark-1000 dark:hover:bg-dark-500"
-    //       >
-    //         {position === "start" ? (
-    //           <HiOutlineBarsArrowUp size={14} />
-    //         ) : (
-    //           <HiOutlineBarsArrowDown size={14} />
-    //         )}
-    //       </button>
-    //     </div>
-    //   </div>
-
-    //   <div className="mt-5 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
-    //     <Toggle
-    //       label={t`Create another`}
-    //       isChecked={isCreateAnotherEnabled}
-    //       onChange={handleToggleCreateAnother}
-    //     />
   );
 }

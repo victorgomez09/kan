@@ -1,6 +1,7 @@
 import type { UpdateBoardInput } from "@kan/api/types";
 import { t } from "@lingui/core/macro";
 import { keepPreviousData } from "@tanstack/react-query";
+import { env } from "next-runtime-env";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/router";
@@ -15,7 +16,7 @@ import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
 import { StrictModeDroppable as Droppable } from "~/components/StrictModeDroppable";
 import { Button } from "~/components/ui/button";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
@@ -27,9 +28,9 @@ import Filters from "./components/Filters";
 import List from "./components/List";
 import ListCard from "./components/ListCard";
 import { NewListForm } from "./components/NewListForm";
-import UpdateBoardSlugButton from "./components/UpdateBoardSlugButton";
 import { UpdateBoardSlugForm } from "./components/UpdateBoardSlugForm";
 import VisibilityButton from "./components/VisibilityButton";
+import { LinkIcon } from "lucide-react";
 
 type PublicListId = string;
 
@@ -257,12 +258,39 @@ export default function BoardPage() {
           )}
 
           <div className="order-1 mb-4 flex items-center justify-end space-x-2 md:order-2 md:mb-0">
-            <UpdateBoardSlugButton
-              handleOnClick={() => openModal("UPDATE_BOARD_SLUG")}
-              isLoading={isLoading}
-              workspaceSlug={workspace.slug ?? ""}
-              boardSlug={boardData?.slug ?? ""}
-            />
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="secondary">
+                  <LinkIcon
+                    className="-mr-0.5 h-5 w-5"
+                    aria-hidden="true"
+                  />
+                  <div className="flex items-center">
+                    <span>
+                      {env("NEXT_PUBLIC_KAN_ENV") === "cloud"
+                        ? "kan.bn"
+                        : env("NEXT_PUBLIC_BASE_URL")}
+                    </span>
+                    <div className="mx-1.5 h-4 w-px rotate-[20deg] bg-gray-300 dark:bg-dark-600"></div>
+                    <span>{workspace.slug ?? ""}</span>
+                    <div className="mx-1.5 h-4 w-px rotate-[20deg] bg-gray-300 dark:bg-dark-600"></div>
+                    <span>{boardData?.slug ?? ""}</span>
+                  </div>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t`Edit board URL`}</DialogTitle>
+                </DialogHeader>
+
+                <UpdateBoardSlugForm
+                  boardPublicId={boardId ?? ""}
+                  workspaceSlug={workspace.slug ?? ""}
+                  boardSlug={boardData?.slug ?? ""}
+                  queryParams={queryParams}
+                />
+              </DialogContent>
+            </Dialog>
             <VisibilityButton
               visibility={boardData?.visibility ?? "private"}
               boardPublicId={boardId ?? ""}
