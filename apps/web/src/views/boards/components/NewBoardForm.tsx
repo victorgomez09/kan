@@ -114,43 +114,5 @@ export function NewBoardForm() {
         </div>
       </form>
     </Form>
-    // <form onSubmit={form.handleSubmit(onSubmit)}>
-    //   <div className="px-5 pt-5">
-    //     <Input
-    //       id="name"
-    //       placeholder={t`Name`}
-    //       {...register("name", { required: true })}
-    //       // errorMessage={errors.name?.message}
-    //       onKeyDown={async (e) => {
-    //         if (e.key === "Enter") {
-    //           e.preventDefault();
-    //           await handleSubmit(onSubmit)();
-    //         }
-    //       }}
-    //     />
-    //   </div>
-    //   <TemplateBoards
-    //     currentBoard={currentTemplate}
-    //     setCurrentBoard={(t) => setValue("template", t)}
-    //     showTemplates={showTemplates}
-    //   />
-    //   <div className="mt-12 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
-    //     <Toggle
-    //       label={t`Use template`}
-    //       isChecked={showTemplates}
-    //       onChange={() => {
-    //         setShowTemplates(!showTemplates);
-    //         if (!showTemplates && !currentTemplate) {
-    //           setValue("template", templates[0] ?? null);
-    //         }
-    //       }}
-    //     />
-    //     <div>
-    //       <Button type="submit" isLoading={createBoard.isPending}>
-    //         {t`Create board`}
-    //       </Button>
-    //     </div>
-    //   </div>
-    // </form> */}
   );
 }

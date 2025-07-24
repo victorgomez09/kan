@@ -1,12 +1,11 @@
 import { t } from "@lingui/core/macro";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { HiXMark } from "react-icons/hi2";
 import { Button } from "~/components/ui/button";
 import { usePopup } from "~/providers/popup";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
-import { Form } from "./ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 
 interface FormValues {
@@ -16,7 +15,7 @@ interface FormValues {
 export function NewWorkspaceForm() {
   const { showPopup } = usePopup();
   const { switchWorkspace } = useWorkspace();
-  const { register, handleSubmit } = useForm<FormValues>();
+  const form = useForm<FormValues>();
   const utils = api.useUtils();
 
   const createWorkspace = api.workspace.create.useMutation({
@@ -29,6 +28,7 @@ export function NewWorkspaceForm() {
           description: values.description,
           slug: values.slug,
           plan: values.plan,
+          role: "member"
         });
       }
     },
@@ -54,42 +54,29 @@ export function NewWorkspaceForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="px-5 pt-5">
-        <div className="flex w-full items-center justify-between pb-4">
-          <h2 className="text-sm font-bold text-neutral-900 dark:text-dark-1000">
-            {t`New workspace`}
-          </h2>
-          <button
-            type="button"
-            className="rounded p-1 hover:bg-light-200 focus:outline-none dark:hover:bg-dark-300"
-            onClick={(e) => {
-              e.preventDefault();
-            }}
-          >
-            <HiXMark size={18} className="text-light-900 dark:text-dark-900" />
-          </button>
-        </div>
-
-        <Input
-          id="workspace-name"
-          placeholder={t`Workspace name`}
-          {...register("name")}
-          onKeyDown={async (e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              await handleSubmit(onSubmit)();
-            }
-          }}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  placeholder={t`Workspace name`}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <div className="mt-12 flex items-center justify-end border-t border-light-600 px-5 pb-5 pt-5 dark:border-dark-600">
-        <div>
+        <div className="flex items-center justify-end mt-4">
           <Button type="submit" isLoading={createWorkspace.isPending}>
             {t`Create workspace`}
           </Button>
         </div>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 }

@@ -4,7 +4,6 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { IoChevronForwardSharp } from "react-icons/io5";
 import Editor from "~/components/Editor";
-import LabelIcon from "~/components/LabelIcon";
 import { PageHead } from "~/components/PageHead";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "~/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -96,7 +95,8 @@ export function CardRightPanel() {
         key: label.publicId,
         value: label.name,
         selected: isSelected ?? false,
-        leftIcon: <LabelIcon colourCode={label.colourCode} />,
+        // leftIcon: <LabelIcon colourCode={label.colourCode} />,
+        leftIcon: null,
       };
     }) ?? [];
 

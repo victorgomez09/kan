@@ -11,6 +11,8 @@ import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 import { Separator } from "./ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { NewWorkspaceForm } from "./NewWorkspaceForm";
 
 interface SideNavigationProps {
   user: UserType;
@@ -97,13 +99,23 @@ export default function SideNavigation({
                 ))}
 
                 <Separator className="my-2" />
-                <DropdownMenuItem>
-                  <span
-                    onClick={() => openModal("NEW_WORKSPACE")}
-                    className="cursor-pointer"
-                  >
-                    {t`Create workspace`}
-                  </span>
+                <DropdownMenuItem onClick={(event) => event.preventDefault()}>
+                  <Dialog>
+                    <DialogTrigger>
+                      <span
+                        className="cursor-pointer"
+                      >
+                        {t`Create workspace`}
+                      </span>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t`Create workspace`}</DialogTitle>
+                      </DialogHeader>
+
+                      <NewWorkspaceForm />
+                    </DialogContent>
+                  </Dialog>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

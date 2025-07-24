@@ -3,9 +3,11 @@ import Link from "next/link";
 import { HiOutlineRectangleStack } from "react-icons/hi2";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
+import { NewBoardForm } from "./NewBoardForm";
 
 export function BoardsList() {
   const { workspace } = useWorkspace();
@@ -37,9 +39,20 @@ export function BoardsList() {
             {t`Get started by creating a new board`}
           </p>
         </div>
-        <Button onClick={() => openModal("NEW_BOARD")}>
-          {t`Create new board`}
-        </Button>
+        <Dialog>
+          <DialogTrigger>
+            <Button>
+              {t`Create new board`}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t`New board`}</DialogTitle>
+            </DialogHeader>
+
+            <NewBoardForm />
+          </DialogContent>
+        </Dialog>
       </div>
     );
 
