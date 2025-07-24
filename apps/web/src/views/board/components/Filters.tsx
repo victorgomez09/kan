@@ -1,5 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import {
   HiMiniXMark,
   HiOutlineTag,
@@ -8,7 +9,8 @@ import {
 import { IoFilterOutline } from "react-icons/io5";
 import CheckboxDropdown from "~/components/CheckboxDropdown";
 import { Button } from "~/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import { Checkbox } from "~/components/ui/checkbox";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuPortal, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
 import {
   formatMemberDisplayName,
   formatToArray
@@ -82,22 +84,6 @@ const Filters = ({
     // leftIcon: <LabelIcon colourCode={label.colourCode} />,
   }));
 
-  const groups = [
-    ...(formattedMembers.length
-      ? [
-        {
-          items: formattedMembers,
-        },
-      ]
-      : []),
-    {
-      key: "labels",
-      label: t`Labels`,
-      icon: <HiOutlineTag size={16} />,
-      items: formattedLabels,
-    },
-  ];
-
   const handleSelect = async (
     groupKey: string | null,
     item: { key: string },
@@ -140,48 +126,67 @@ const Filters = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={(event) => event.preventDefault()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-2">
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="flex items-center gap-2">
               <HiOutlineUserCircle size={16} />
               {t`Members`}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {formattedMembers.map((user, index) => (
-                <DropdownMenuItem key={index} onClick={() => handleSelect("users", user)}>
-                  {user.value}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </DropdownMenuItem>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                {formattedMembers.map((user, index) => (
+                  <DropdownMenuItem key={index} onClick={(event) => { handleSelect("users", user); event.preventDefault() }}>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id={user.key}
+                        name={user.key}
+                        checked={router.query.users?.includes(user.key) ?? false} />
+                      {user.value}
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
 
-        <DropdownMenuItem className="flex items-center gap-2">
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="flex items-center gap-2">
+              <HiOutlineTag size={16} />
+              {t`Labels`}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                {formattedLabels.map((label, index) => (
+                  <DropdownMenuItem key={index} onClick={(event) => { handleSelect("labels", label); event.preventDefault() }}>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id={label.key}
+                        name={label.key}
+                        checked={router.query.labels?.includes(label.key) ?? false} />
+                      {label.value}
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
 
         {numOfFilters > 0 && (
           <DropdownMenuItem className="flex items-center gap-2">
             <Button
               onClick={(event) => clearFilters(event)}
-              aria-label={t`Clear filters`}
-              variant="secondary"
+              variant="ghost"
+              size="sm"
             >
-              <span className="group-hover:hidden">{numOfFilters}</span>
-              <span className="hidden group-hover:inline">
-                <HiMiniXMark size={12} />
-              </span>
+              {t`Clear filters`}
             </Button>
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
-    // <CheckboxDropdown
-    //   groups={groups}
-    //   handleSelect={handleSelect}
-    //   menuSpacing="md"
-    //   position={position}
-    // >
-    // </CheckboxDropdown>
   );
 };
 

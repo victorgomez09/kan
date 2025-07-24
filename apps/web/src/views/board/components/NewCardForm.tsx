@@ -1,12 +1,12 @@
-import { t } from "@lingui/core/macro";
-import { Trans } from "@lingui/react/macro";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
 import type { NewCardInput } from "@kan/api/types";
 import { generateUID } from "@kan/shared/utils";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { Pencil } from "lucide-react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { HiMiniPlus } from "react-icons/hi2";
-import CheckboxDropdown from "~/components/CheckboxDropdown";
+import { LabelForm } from "~/components/LabelForm";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
@@ -18,7 +18,6 @@ import { useModal } from "~/providers/modal";
 import { usePopup } from "~/providers/popup";
 import { api } from "~/utils/api";
 import { formatMemberDisplayName } from "~/utils/helpers";
-import { LabelForm } from "~/components/LabelForm";
 
 type NewCardFormInput = NewCardInput & {
   isCreateAnotherEnabled: boolean;
@@ -264,57 +263,87 @@ export function NewCardForm({
         />
 
         <div className="flex items-center gap-2">
-          <CheckboxDropdown
-            items={formattedLists}
-            handleSelect={(_groupKey, item) => handleSelectList(item.key)}
-          >
-            <Button variant="secondary" className="flex h-full w-full items-center">
-              {selectedList?.value}
-            </Button>
-          </CheckboxDropdown>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Button variant="secondary" className="flex h-full w-full items-center">
+                {selectedList?.value}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {formattedLists.map((list, index) => (
+                <DropdownMenuItem key={index}>
+                  <Checkbox
+                    id={list.key}
+                    name={list.key}
+                    onClick={(event) => { handleSelectList(list.key); event.stopPropagation(); }}
+                    checked={list.selected} />
+                  <label
+                    htmlFor={list.key}
+                  >
+                    {list.value}
+                  </label>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          <CheckboxDropdown
-            items={formattedMembers}
-            handleSelect={(_groupKey, item) => handleSelectMembers(item.key)}
-          >
-            <Button variant="secondary" className="flex h-full w-full items-center">
-              {!memberPublicIds.length ? (
-                t`Members`
-              ) : (
-                <div className="flex -space-x-1 overflow-hidden">
-                  {memberPublicIds.map((memberPublicId) => {
-                    const member = formattedMembers.find(
-                      (member) => member.key === memberPublicId,
-                    );
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Button variant="secondary" className="flex h-full w-full items-center">
+                {!memberPublicIds.length ? (
+                  t`Members`
+                ) : (
+                  <div className="flex -space-x-1 overflow-hidden">
+                    {memberPublicIds.map((memberPublicId) => {
+                      const member = formattedMembers.find(
+                        (member) => member.key === memberPublicId,
+                      );
 
-                    return (
-                      // <Avatar key={member?.key}>
-                      //   <AvatarFallback>{member?.value
-                      //     .split(" ")
-                      //     .map((namePart) =>
-                      //       namePart.charAt(0).toUpperCase(),
-                      //     )
-                      //     .join("")}</AvatarFallback>
-                      // </Avatar>
-                      <span
-                        key={member?.key}
-                        className="inline-flex size-5 items-center justify-center p-2 rounded-full bg-background"
-                      >
-                        <span className="text-base font-medium leading-none">
-                          {member?.value
-                            .split(" ")
-                            .map((namePart) =>
-                              namePart.charAt(0).toUpperCase(),
-                            )
-                            .join("")}
+                      return (
+                        // <Avatar key={member?.key}>
+                        //   <AvatarFallback>{member?.value
+                        //     .split(" ")
+                        //     .map((namePart) =>
+                        //       namePart.charAt(0).toUpperCase(),
+                        //     )
+                        //     .join("")}</AvatarFallback>
+                        // </Avatar>
+                        <span
+                          key={member?.key}
+                          className="inline-flex size-5 items-center justify-center p-2 rounded-full bg-background"
+                        >
+                          <span className="text-sm font-medium leading-none">
+                            {member?.value
+                              .split(" ")
+                              .map((namePart) =>
+                                namePart.charAt(0).toUpperCase(),
+                              )
+                              .join("")}
+                          </span>
                         </span>
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
-            </Button>
-          </CheckboxDropdown>
+                      );
+                    })}
+                  </div>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {formattedMembers.map((user, index) => (
+                <DropdownMenuItem key={index}>
+                  <Checkbox
+                    id={user.key}
+                    name={user.key}
+                    onClick={(event) => { handleSelectMembers(user.key); event.stopPropagation(); }}
+                    checked={user.selected} />
+                  <label
+                    htmlFor={user.key}
+                  >
+                    {user.value}
+                  </label>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <DropdownMenu>
             <DropdownMenuTrigger>

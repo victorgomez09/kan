@@ -1,21 +1,19 @@
 import { t } from "@lingui/core/macro";
 import { HiEllipsisHorizontal, HiOutlinePlusSmall } from "react-icons/hi2";
 import { twMerge } from "tailwind-merge";
-
 import { authClient } from "@kan/auth/client";
-
-import Avatar from "~/components/Avatar";
-import {Button} from "~/components/ui/button";
-import Dropdown from "~/components/Dropdown";
-import Modal from "~/components/modal";
 import { NewWorkspaceForm } from "~/components/NewWorkspaceForm";
 import { PageHead } from "~/components/PageHead";
 import { useModal } from "~/providers/modal";
 import { useWorkspace } from "~/providers/workspace";
 import { api } from "~/utils/api";
-import { getAvatarUrl } from "~/utils/helpers";
+import { getAvatarUrl, getInitialsFromName, inferInitialsFromEmail } from "~/utils/helpers";
 import { DeleteMemberConfirmation } from "./components/DeleteMemberConfirmation";
 import { InviteMemberForm } from "./components/InviteMemberForm";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import { Button } from "@headlessui/react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "~/components/ui/alert-dialog";
 
 export default function MembersPage() {
   const { modalContentType, openModal } = useModal();
@@ -48,6 +46,13 @@ export default function MembersPage() {
     showSkeleton?: boolean;
   }) => {
     const { data: session } = authClient.useSession();
+
+    const getInitials = (name: string, email: string) => {
+      return name
+        ? getInitialsFromName(name)
+        : inferInitialsFromEmail(email);
+    }
+
     return (
       <tr className="rounded-b-lg">
         <td
@@ -61,11 +66,10 @@ export default function MembersPage() {
               {showSkeleton ? (
                 <div className="h-8 w-8 animate-pulse rounded-full bg-light-200 dark:bg-dark-200 sm:h-9 sm:w-9" />
               ) : (
-                <Avatar
-                  name={memberName ?? ""}
-                  email={memberEmail ?? ""}
-                  imageUrl={memberImage ? getAvatarUrl(memberImage) : undefined}
-                />
+                <Avatar>
+                  <AvatarImage src={memberImage ? getAvatarUrl(memberImage) : undefined} />
+                  <AvatarFallback>{getInitials(memberName ?? "", memberEmail ?? "")}</AvatarFallback>
+                </Avatar>
               )}
             </div>
             <div className="ml-2 min-w-0 flex-1">
@@ -75,7 +79,7 @@ export default function MembersPage() {
                     className={twMerge(
                       "mr-2 truncate text-xs font-medium text-neutral-900 dark:text-dark-1000 sm:text-sm",
                       showSkeleton &&
-                        "md mb-2 h-3 w-[125px] animate-pulse rounded-sm bg-light-200 dark:bg-dark-200",
+                      "md mb-2 h-3 w-[125px] animate-pulse rounded-sm bg-light-200 dark:bg-dark-200",
                     )}
                   >
                     {memberName}
@@ -85,7 +89,7 @@ export default function MembersPage() {
                   className={twMerge(
                     "truncate text-xs text-dark-900 sm:text-sm",
                     showSkeleton &&
-                      "h-3 w-[175px] animate-pulse rounded-sm bg-light-200 dark:bg-dark-200",
+                    "h-3 w-[175px] animate-pulse rounded-sm bg-light-200 dark:bg-dark-200",
                   )}
                 >
                   {memberEmail}
@@ -106,7 +110,7 @@ export default function MembersPage() {
                 className={twMerge(
                   "inline-flex items-center rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400 ring-1 ring-inset ring-emerald-500/20 sm:text-[11px]",
                   showSkeleton &&
-                    "h-5 w-[50px] animate-pulse bg-light-200 ring-0 dark:bg-dark-200",
+                  "h-5 w-[50px] animate-pulse bg-light-200 ring-0 dark:bg-dark-200",
                 )}
               >
                 {memberRole &&
@@ -125,24 +129,52 @@ export default function MembersPage() {
               )}
             >
               {session?.user.id !== memberId && (
-                <Dropdown
-                  items={[
-                    {
-                      label: t`Remove member`,
-                      action: () =>
-                        openModal(
-                          "REMOVE_MEMBER",
-                          memberPublicId,
-                          memberEmail ?? "",
-                        ),
-                    },
-                  ]}
-                >
-                  <HiEllipsisHorizontal
-                    size={20}
-                    className="text-light-900 dark:text-dark-900 sm:size-[25px]"
-                  />
-                </Dropdown>
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <HiEllipsisHorizontal
+                      size={20}
+                      className="text-light-900 dark:text-dark-900 sm:size-[25px]"
+                    />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={(event) => event.preventDefault()}>
+                      <AlertDialog>
+                        <AlertDialogTrigger>{t`Remove member`}</AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete your account
+                              and remove your data from our servers.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction>Continue</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                // <Dropdown
+                //   items={[
+                //     {
+                //       label: t`Remove member`,
+                //       action: () =>
+                //         openModal(
+                //           "REMOVE_MEMBER",
+                //           memberPublicId,
+                //           memberEmail ?? "",
+                //         ),
+                //     },
+                //   ]}
+                // >
+                //   <HiEllipsisHorizontal
+                //     size={20}
+                //     className="text-light-900 dark:text-dark-900 sm:size-[25px]"
+                //   />
+                // </Dropdown>
               )}
             </div>
           </div>
@@ -162,9 +194,10 @@ export default function MembersPage() {
           <div className="flex">
             <Button
               onClick={() => openModal("INVITE_MEMBER")}
-              iconLeft={<HiOutlinePlusSmall className="h-4 w-4" />}
               disabled={workspace.role !== "admin"}
+              className="flex items-center gap-2"
             >
+              <HiOutlinePlusSmall className="h-4 w-4" />
               {t`Invite`}
             </Button>
           </div>
@@ -221,11 +254,11 @@ export default function MembersPage() {
           </div>
         </div>
 
-        <Modal>
+        {/* <Modal>
           {modalContentType === "NEW_WORKSPACE" && <NewWorkspaceForm />}
           {modalContentType === "INVITE_MEMBER" && <InviteMemberForm />}
           {modalContentType === "REMOVE_MEMBER" && <DeleteMemberConfirmation />}
-        </Modal>
+        </Modal> */}
       </div>
     </>
   );

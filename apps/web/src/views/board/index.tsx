@@ -313,6 +313,7 @@ export default function BoardPage() {
               isLoading={!boardData}
             />
 
+            {/* NEW LIST */}
             <Dialog>
               <DialogTrigger asChild>
                 <Button>
@@ -335,6 +336,7 @@ export default function BoardPage() {
               </DialogContent>
             </Dialog>
 
+            {/* OPTIONS */}
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <Button variant="secondary">
